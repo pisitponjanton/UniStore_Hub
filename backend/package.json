@@ -1,0 +1,33 @@
+{
+  "name": "unistore-hub-backend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "UniStore Hub Express.js backend for AWS Lambda and local development",
+  "main": "src/lambda.js",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node src/local.js",
+    "dev": "node --watch src/local.js",
+    "test": "node --test",
+    "check": "node scripts/check-syntax.js",
+    "seed:platform-admin": "node scripts/seed-platform-admin.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.0.0",
+    "@aws-sdk/client-s3": "^3.0.0",
+    "@aws-sdk/client-sqs": "^3.0.0",
+    "@aws-sdk/lib-dynamodb": "^3.0.0",
+    "@aws-sdk/s3-request-presigner": "^3.0.0",
+    "@codegenie/serverless-express": "^4.17.0",
+    "bcryptjs": "^3.0.0",
+    "dotenv": "^17.0.0",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.0"
+  },
+  "devDependencies": {
+    "supertest": "^7.1.0"
+  }
+}

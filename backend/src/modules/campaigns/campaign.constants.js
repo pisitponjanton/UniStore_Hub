@@ -1,0 +1,15 @@
+'use strict';
+
+const CAMPAIGN_STATUS = Object.freeze({
+  DRAFT: 'DRAFT',
+  OPEN: 'OPEN',
+  CLOSED: 'CLOSED',
+  PRODUCING: 'PRODUCING',
+  READY_FOR_PICKUP: 'READY_FOR_PICKUP',
+  COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED',
+});
+
+module.exports = {
+  CAMPAIGN_STATUS,
+};

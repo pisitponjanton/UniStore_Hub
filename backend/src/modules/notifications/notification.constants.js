@@ -1,0 +1,21 @@
+'use strict';
+
+const NOTIFICATION_TYPE = Object.freeze({
+  PAYMENT_APPROVED: 'PAYMENT_APPROVED',
+  PAYMENT_REJECTED: 'PAYMENT_REJECTED',
+  READY_FOR_PICKUP: 'READY_FOR_PICKUP',
+});
+
+const NOTIFICATION_LABEL = Object.freeze({
+  [NOTIFICATION_TYPE.PAYMENT_APPROVED]:
+    'Payment Approved',
+  [NOTIFICATION_TYPE.PAYMENT_REJECTED]:
+    'Payment Rejected',
+  [NOTIFICATION_TYPE.READY_FOR_PICKUP]:
+    'Ready for Pickup',
+});
+
+module.exports = {
+  NOTIFICATION_TYPE,
+  NOTIFICATION_LABEL,
+};
