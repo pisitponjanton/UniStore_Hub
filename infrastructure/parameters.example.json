@@ -1,0 +1,10 @@
+[
+  {
+    "ParameterKey": "StageName",
+    "ParameterValue": "dev"
+  },
+  {
+    "ParameterKey": "JWTExpiresIn",
+    "ParameterValue": "1d"
+  }
+]

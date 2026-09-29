@@ -1,0 +1,343 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  UniStore Hub AWS Academy Learner Lab infrastructure.
+  Region baseline: us-east-1. Runtime Lambda role: existing LabRole.
+
+Metadata:
+  UniStoreHub:
+    Architecture: "Learner Lab serverless baseline"
+    Region: "us-east-1"
+    RuntimeRoleName: "LabRole"
+    RuntimeRoleArnPattern: "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/LabRole"
+    LambdaArtifactPath: "../backend/.build/lambda/"
+    BackendHandler: "src/lambda.handler"
+    WorkerHandler: "src/worker.handler"
+    Notes:
+      - "Runtime resources must use the existing LabRole; this stack must not create a custom IAM role."
+      - "aws cloudformation package rewrites the local Lambda artifact path to an S3 artifact reference."
+      - "Do not set AWS_REGION in Lambda Environment.Variables; Lambda provides it automatically."
+
+Parameters:
+  StageName:
+    Type: String
+    Default: "dev"
+    Description: "API Gateway stage name for the Learner Lab deployment."
+    AllowedPattern: "^[A-Za-z0-9_-]+$"
+
+  JWTSecret:
+    Type: String
+    NoEcho: true
+    MinLength: 1
+    Description: "JWT signing secret supplied by the deployment workflow. No default is committed."
+
+  JWTExpiresIn:
+    Type: String
+    Default: "1d"
+    Description: "JWT expiration duration consumed by the Backend Lambda."
+
+Resources:
+  FrontendBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        IgnorePublicAcls: true
+        BlockPublicPolicy: false
+        RestrictPublicBuckets: false
+      WebsiteConfiguration:
+        IndexDocument: index.html
+
+  FrontendBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref FrontendBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: PublicReadGetObject
+            Effect: Allow
+            Principal: "*"
+            Action:
+              - s3:GetObject
+            Resource: !Sub "${FrontendBucket.Arn}/*"
+  FilesBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        IgnorePublicAcls: true
+        BlockPublicPolicy: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      CorsConfiguration:
+        CorsRules:
+          - AllowedOrigins:
+              - !GetAtt FrontendBucket.WebsiteURL
+            AllowedMethods:
+              - GET
+              - PUT
+              - HEAD
+            AllowedHeaders:
+              - "*"
+            ExposedHeaders:
+              - ETag
+            MaxAge: 3000
+
+  AppTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+        - AttributeName: SK
+          AttributeType: S
+        - AttributeName: GSI1PK
+          AttributeType: S
+        - AttributeName: GSI1SK
+          AttributeType: S
+      KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+        - AttributeName: SK
+          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: GSI1
+          KeySchema:
+            - AttributeName: GSI1PK
+              KeyType: HASH
+            - AttributeName: GSI1SK
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+
+  NotificationQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      VisibilityTimeout: 120
+
+  BackendFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Runtime: nodejs22.x
+      Handler: src/lambda.handler
+      Role: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/LabRole"
+      Code: ../backend/.build/lambda/
+      MemorySize: 512
+      Timeout: 28
+      Environment:
+        Variables:
+          NODE_ENV: production
+          APP_TABLE_NAME: !Ref AppTable
+          FILES_BUCKET_NAME: !Ref FilesBucket
+          NOTIFICATION_QUEUE_URL: !Ref NotificationQueue
+          JWT_SECRET: !Ref JWTSecret
+          JWT_EXPIRES_IN: !Ref JWTExpiresIn
+          CORS_ALLOWED_ORIGINS: !GetAtt FrontendBucket.WebsiteURL
+
+  WorkerFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Runtime: nodejs22.x
+      Handler: src/worker.handler
+      Role: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/LabRole"
+      Code: ../backend/.build/lambda/
+      MemorySize: 256
+      Timeout: 30
+      Environment:
+        Variables:
+          NODE_ENV: production
+          APP_TABLE_NAME: !Ref AppTable
+
+  BackendLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${BackendFunction}"
+      RetentionInDays: 7
+
+  WorkerLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${WorkerFunction}"
+      RetentionInDays: 7
+
+  NotificationEventSourceMapping:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      EventSourceArn: !GetAtt NotificationQueue.Arn
+      FunctionName: !Ref WorkerFunction
+      Enabled: true
+      BatchSize: 10
+      FunctionResponseTypes:
+        - ReportBatchItemFailures
+
+  ApiGatewayRestApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Sub "unistore-hub-${StageName}"
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+
+  ApiGatewayProxyResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ParentId: !GetAtt ApiGatewayRestApi.RootResourceId
+      PathPart: "{proxy+}"
+
+  ApiGatewayRootAnyMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !GetAtt ApiGatewayRestApi.RootResourceId
+      HttpMethod: ANY
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub >-
+          arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${BackendFunction.Arn}/invocations
+
+  ApiGatewayProxyAnyMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiGatewayProxyResource
+      HttpMethod: ANY
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub >-
+          arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${BackendFunction.Arn}/invocations
+
+  BackendInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref BackendFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub >-
+        arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/*/*/*
+
+  ApiGatewayRootOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !GetAtt ApiGatewayRestApi.RootResourceId
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 204}'
+        IntegrationResponses:
+          - StatusCode: "204"
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: !Sub "'${FrontendBucket.WebsiteURL}'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,PATCH,DELETE,OPTIONS'"
+              method.response.header.Access-Control-Allow-Headers: "'Authorization,Content-Type'"
+      MethodResponses:
+        - StatusCode: "204"
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Headers: true
+
+  ApiGatewayProxyOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiGatewayProxyResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 204}'
+        IntegrationResponses:
+          - StatusCode: "204"
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: !Sub "'${FrontendBucket.WebsiteURL}'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,PATCH,DELETE,OPTIONS'"
+              method.response.header.Access-Control-Allow-Headers: "'Authorization,Content-Type'"
+      MethodResponses:
+        - StatusCode: "204"
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Headers: true
+
+  ApiAccessLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/apigateway/unistore-hub-${StageName}"
+      RetentionInDays: 7
+
+  ApiGatewayDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn:
+      - ApiGatewayRootAnyMethod
+      - ApiGatewayProxyAnyMethod
+      - ApiGatewayRootOptionsMethod
+      - ApiGatewayProxyOptionsMethod
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+
+  ApiGatewayStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      DeploymentId: !Ref ApiGatewayDeployment
+      StageName: !Ref StageName
+      AccessLogSetting:
+        DestinationArn: !GetAtt ApiAccessLogGroup.Arn
+        Format: >-
+          {"requestId":"$context.requestId","httpMethod":"$context.httpMethod","resourcePath":"$context.resourcePath","status":"$context.status","integrationErrorMessage":"$context.integrationErrorMessage"}
+      MethodSettings:
+        - ResourcePath: "/*"
+          HttpMethod: "*"
+          MetricsEnabled: true
+
+Outputs:
+  FrontendBucketName:
+    Description: Physical S3 bucket name used for frontend static asset deployment.
+    Value: !Ref FrontendBucket
+
+  FrontendWebsiteURL:
+    Description: HTTP S3 static website URL for the Learner Lab frontend.
+    Value: !GetAtt FrontendBucket.WebsiteURL
+
+  FilesBucketName:
+    Description: Private S3 bucket used for product images and payment slips.
+    Value: !Ref FilesBucket
+
+  AppTableName:
+    Description: Physical DynamoDB application table name.
+    Value: !Ref AppTable
+
+  NotificationQueueURL:
+    Description: SQS notification queue URL consumed by the Backend Lambda.
+    Value: !Ref NotificationQueue
+
+  BackendFunctionName:
+    Description: Physical Backend Lambda function name.
+    Value: !Ref BackendFunction
+
+  WorkerFunctionName:
+    Description: Physical Notification Worker Lambda function name.
+    Value: !Ref WorkerFunction
+
+  ApiBaseURL:
+    Description: HTTPS API Gateway base URL without the /api/v1 application prefix.
+    Value: !Sub "https://${ApiGatewayRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/${StageName}"
