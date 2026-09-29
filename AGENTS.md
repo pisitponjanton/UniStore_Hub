@@ -127,20 +127,49 @@ docs/specs/testing/SPEC.md
 
 Testing Agent may inspect all implementation directories but should not redesign them.
 
-#### Integration Agent
+#### Root / Integration Agent
 
-Read all specification documents.
+The agent operating from the repository root is the **global checker and integration coordinator**.
 
-Integration Agent is responsible for:
+It must read all specification documents and may inspect **every project directory**:
 
+```text
+frontend/**
+backend/**
+infrastructure/**
+scripts/**
+tests/**
+docs/**
+root shared files
+```
+
+Its default job is to **check, compare, verify, and report** across all owned areas rather than implement subsystem work itself.
+
+Root / Integration Agent is responsible for:
+
+- checking every subsystem against `SPEC.md` and the canonical shared contracts
+- checking that each directory follows its local `AGENT.md`
+- checking code ownership boundaries and detecting cross-directory edits
 - contract reconciliation
 - root shared files
 - cross-subsystem integration
+- API ↔ Frontend ↔ Backend compatibility
+- Backend ↔ Data ↔ Infrastructure compatibility
+- Deployment ↔ Infrastructure ↔ application output compatibility
+- Testing coverage and FR-01..FR-15 traceability
 - final compatibility checks
 - merge conflict resolution
+- detecting security, tenant-isolation, architecture, and scope drift
 - ensuring no subsystem silently changed shared behavior
 
----
+### Root Checker Write Boundary
+
+By default, the Root / Integration Agent may write only root/shared Integration-owned files.
+
+Subsystem directories are **read/inspect/check by default**, not general-purpose write targets.
+
+If the root checker finds a problem inside a subsystem, it should report the finding to the owning agent. It may edit that subsystem only when the user explicitly requests the root agent to perform the fix, or when an explicit Integration handoff authorizes a minimal cross-system compatibility fix.
+
 
 ## 3. Source of Truth Hierarchy
 
@@ -862,9 +891,66 @@ Owns cross-system suites defined by `docs/specs/testing/SPEC.md`.
 
 ---
 
-## 23. Integration Ownership
+## 23. Root Integration / Global Checker Ownership
 
-Integration Agent owns final reconciliation of:
+The Root / Integration Agent is the project-wide verification layer and the default checker for every directory.
+
+It may inspect/read every project area:
+
+```text
+frontend/**
+backend/**
+infrastructure/**
+scripts/**
+tests/**
+docs/**
+root shared files
+```
+
+The root checker must verify:
+
+- each subsystem follows `SPEC.md` and its subsystem spec
+- each subsystem follows its local `AGENT.md`
+- ownership boundaries are respected
+- Frontend ↔ API ↔ Backend contracts match
+- Backend ↔ Data ↔ Infrastructure contracts match
+- Deployment ↔ Infrastructure ↔ application outputs match
+- environment variables and CloudFormation outputs match
+- tenant isolation and security invariants remain intact
+- cross-system tests and E2E behavior match the reviewed contracts
+- FR-01 through FR-15 remain traceable
+- no subsystem silently introduces architecture or scope drift
+
+### 23.1 Checker-First Rule
+
+The normal root workflow is:
+
+```text
+inspect
+→ compare against canonical contracts
+→ run checks/tests
+→ record findings
+→ hand findings to the owning directory/agent
+```
+
+The root agent should not opportunistically implement subsystem work just because it can see every directory.
+
+### 23.2 Root Write Boundary
+
+By default, the Root / Integration Agent may write only root/shared Integration-owned files.
+
+Child subsystem directories are **read-only to the root checker by default**.
+
+The Root / Integration Agent may edit a child subsystem only when:
+
+1. the user explicitly asks the root agent to perform that fix, or
+2. an explicit Integration handoff authorizes a verified cross-system compatibility fix.
+
+Any cross-directory fix must be minimal, documented, and must still obey that directory's local `AGENT.md` plus all shared contracts.
+
+### 23.3 Final Reconciliation Ownership
+
+Root / Integration owns final reconciliation of:
 
 - shared contracts
 - root files
@@ -873,12 +959,10 @@ Integration Agent owns final reconciliation of:
 - Backend/Infrastructure resource naming
 - environment variables
 - CloudFormation outputs
-- deployment scripts
+- deployment command compatibility
+- cross-system tests
 - E2E flow
-
-Integration Agent may edit multiple subsystem areas only when necessary to resolve a verified cross-system compatibility issue.
-
-Such changes must remain minimal and documented.
+- final architecture compliance
 
 ---
 
