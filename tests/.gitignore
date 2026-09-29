@@ -1,0 +1,7 @@
+reports/*.json
+!reports/fr-traceability.json
+reports/*.log
+!reports/phase-29-full-regression.log
+reports/*.xml
+coverage/
+.tmp/

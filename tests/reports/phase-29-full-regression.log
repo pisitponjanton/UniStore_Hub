@@ -1,0 +1,2043 @@
+TAP version 13
+# Subtest: testing harness runtime exposes required Node primitives
+ok 1 - testing harness runtime exposes required Node primitives
+  ---
+  duration_ms: 3.107125
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.444Z","requestId":"3e4f4e57-c439-4824-ab3e-395eedd09d22","method":"GET","path":"/api/v1/organizations/99ad641c-095b-4e5e-967f-2599cbc6b090/campaigns?storeId=41cd92d8-67ce-41b8-afd8-8d783f848d01&status=DRAFT","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.448Z","requestId":"3e4f4e57-c439-4824-ab3e-395eedd09d22","method":"GET","path":"/api/v1/organizations/99ad641c-095b-4e5e-967f-2599cbc6b090/campaigns?storeId=41cd92d8-67ce-41b8-afd8-8d783f848d01&status=DRAFT","statusCode":401,"durationMs":6.38}
+# Subtest: CT-CAMPAIGN-001 GET campaign list requires bearer authentication
+ok 2 - CT-CAMPAIGN-001 GET campaign list requires bearer authentication
+  ---
+  duration_ms: 341.813708
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.531Z","requestId":"6cd1c96b-b4fb-4551-a787-80c415f4dfe5","method":"POST","path":"/api/v1/organizations/99ad641c-095b-4e5e-967f-2599cbc6b090/campaigns","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.532Z","requestId":"6cd1c96b-b4fb-4551-a787-80c415f4dfe5","method":"POST","path":"/api/v1/organizations/99ad641c-095b-4e5e-967f-2599cbc6b090/campaigns","statusCode":401,"durationMs":7.25}
+# Subtest: CT-CAMPAIGN-002 POST campaign requires bearer authentication
+ok 3 - CT-CAMPAIGN-002 POST campaign requires bearer authentication
+  ---
+  duration_ms: 78.653583
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.536Z","requestId":"58c717ae-2061-4a28-9a47-f86bf171c444","method":"GET","path":"/api/v1/organizations/99ad641c-095b-4e5e-967f-2599cbc6b090/campaigns/3d38d554-b406-4c12-97d9-e5d72af35f12","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.537Z","requestId":"58c717ae-2061-4a28-9a47-f86bf171c444","method":"GET","path":"/api/v1/organizations/99ad641c-095b-4e5e-967f-2599cbc6b090/campaigns/3d38d554-b406-4c12-97d9-e5d72af35f12","statusCode":401,"durationMs":1.14}
+# Subtest: CT-CAMPAIGN-003 GET campaign detail requires bearer authentication
+ok 4 - CT-CAMPAIGN-003 GET campaign detail requires bearer authentication
+  ---
+  duration_ms: 5.689584
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.552Z","requestId":"a6b67622-fc22-4a5a-8dd4-ebfd0334aca5","method":"PATCH","path":"/api/v1/organizations/99ad641c-095b-4e5e-967f-2599cbc6b090/campaigns/3d38d554-b406-4c12-97d9-e5d72af35f12","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.553Z","requestId":"a6b67622-fc22-4a5a-8dd4-ebfd0334aca5","method":"PATCH","path":"/api/v1/organizations/99ad641c-095b-4e5e-967f-2599cbc6b090/campaigns/3d38d554-b406-4c12-97d9-e5d72af35f12","statusCode":401,"durationMs":0.72}
+# Subtest: CT-CAMPAIGN-004 PATCH draft campaign requires bearer authentication
+ok 5 - CT-CAMPAIGN-004 PATCH draft campaign requires bearer authentication
+  ---
+  duration_ms: 14.937875
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.565Z","requestId":"a58c871f-0d54-4f0c-a09e-9aef066df611","method":"POST","path":"/api/v1/organizations/99ad641c-095b-4e5e-967f-2599cbc6b090/campaigns/3d38d554-b406-4c12-97d9-e5d72af35f12/open","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.566Z","requestId":"a58c871f-0d54-4f0c-a09e-9aef066df611","method":"POST","path":"/api/v1/organizations/99ad641c-095b-4e5e-967f-2599cbc6b090/campaigns/3d38d554-b406-4c12-97d9-e5d72af35f12/open","statusCode":401,"durationMs":0.94}
+# Subtest: CT-CAMPAIGN-005 POST campaign action open requires bearer authentication
+ok 6 - CT-CAMPAIGN-005 POST campaign action open requires bearer authentication
+  ---
+  duration_ms: 13.539417
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.570Z","requestId":"8ea3e0c7-a1ef-426b-ad1b-b0793972217f","method":"POST","path":"/api/v1/organizations/99ad641c-095b-4e5e-967f-2599cbc6b090/campaigns/3d38d554-b406-4c12-97d9-e5d72af35f12/close","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.571Z","requestId":"8ea3e0c7-a1ef-426b-ad1b-b0793972217f","method":"POST","path":"/api/v1/organizations/99ad641c-095b-4e5e-967f-2599cbc6b090/campaigns/3d38d554-b406-4c12-97d9-e5d72af35f12/close","statusCode":401,"durationMs":1}
+# Subtest: CT-CAMPAIGN-006 POST campaign action close requires bearer authentication
+ok 7 - CT-CAMPAIGN-006 POST campaign action close requires bearer authentication
+  ---
+  duration_ms: 6.812917
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.579Z","requestId":"b0afb3ba-5792-4fda-a331-1417a55ec5c6","method":"POST","path":"/api/v1/organizations/99ad641c-095b-4e5e-967f-2599cbc6b090/campaigns/3d38d554-b406-4c12-97d9-e5d72af35f12/start-production","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.579Z","requestId":"b0afb3ba-5792-4fda-a331-1417a55ec5c6","method":"POST","path":"/api/v1/organizations/99ad641c-095b-4e5e-967f-2599cbc6b090/campaigns/3d38d554-b406-4c12-97d9-e5d72af35f12/start-production","statusCode":401,"durationMs":0.54}
+# Subtest: CT-CAMPAIGN-007 POST campaign action start-production requires bearer authentication
+ok 8 - CT-CAMPAIGN-007 POST campaign action start-production requires bearer authentication
+  ---
+  duration_ms: 6.132917
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.583Z","requestId":"fe32d76a-cc7a-4d3c-8b23-34b939d7832b","method":"POST","path":"/api/v1/organizations/99ad641c-095b-4e5e-967f-2599cbc6b090/campaigns/3d38d554-b406-4c12-97d9-e5d72af35f12/ready-for-pickup","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.586Z","requestId":"fe32d76a-cc7a-4d3c-8b23-34b939d7832b","method":"POST","path":"/api/v1/organizations/99ad641c-095b-4e5e-967f-2599cbc6b090/campaigns/3d38d554-b406-4c12-97d9-e5d72af35f12/ready-for-pickup","statusCode":401,"durationMs":3.02}
+# Subtest: CT-CAMPAIGN-008 POST campaign action ready-for-pickup requires bearer authentication
+ok 9 - CT-CAMPAIGN-008 POST campaign action ready-for-pickup requires bearer authentication
+  ---
+  duration_ms: 7.996584
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.594Z","requestId":"5444452b-79d3-4c25-8b38-ae699bf5382f","method":"POST","path":"/api/v1/organizations/99ad641c-095b-4e5e-967f-2599cbc6b090/campaigns/3d38d554-b406-4c12-97d9-e5d72af35f12/complete","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.595Z","requestId":"5444452b-79d3-4c25-8b38-ae699bf5382f","method":"POST","path":"/api/v1/organizations/99ad641c-095b-4e5e-967f-2599cbc6b090/campaigns/3d38d554-b406-4c12-97d9-e5d72af35f12/complete","statusCode":401,"durationMs":1.44}
+# Subtest: CT-CAMPAIGN-009 POST campaign action complete requires bearer authentication
+ok 10 - CT-CAMPAIGN-009 POST campaign action complete requires bearer authentication
+  ---
+  duration_ms: 8.913625
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.601Z","requestId":"72f37eeb-5f24-4125-9a41-73cba32647a1","method":"POST","path":"/api/v1/organizations/99ad641c-095b-4e5e-967f-2599cbc6b090/campaigns/3d38d554-b406-4c12-97d9-e5d72af35f12/cancel","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.602Z","requestId":"72f37eeb-5f24-4125-9a41-73cba32647a1","method":"POST","path":"/api/v1/organizations/99ad641c-095b-4e5e-967f-2599cbc6b090/campaigns/3d38d554-b406-4c12-97d9-e5d72af35f12/cancel","statusCode":401,"durationMs":1.58}
+# Subtest: CT-CAMPAIGN-010 POST campaign action cancel requires bearer authentication
+ok 11 - CT-CAMPAIGN-010 POST campaign action cancel requires bearer authentication
+  ---
+  duration_ms: 7.589833
+  ...
+# Subtest: CT-CAMPAIGN-011 create Campaign starts in DRAFT and timestamps do not auto-advance status
+ok 12 - CT-CAMPAIGN-011 create Campaign starts in DRAFT and timestamps do not auto-advance status # TODO Requires authenticated Organization Admin plus persisted Store/Campaign fixture and controllable time
+  ---
+  duration_ms: 0.338208
+  ...
+# Subtest: CT-CAMPAIGN-012 canonical happy path is DRAFT -> OPEN -> CLOSED -> PRODUCING -> READY_FOR_PICKUP -> COMPLETED
+ok 13 - CT-CAMPAIGN-012 canonical happy path is DRAFT -> OPEN -> CLOSED -> PRODUCING -> READY_FOR_PICKUP -> COMPLETED # TODO Requires persisted Campaign fixture and implemented lifecycle actions
+  ---
+  duration_ms: 0.17
+  ...
+# Subtest: CT-CAMPAIGN-013 OPEN -> PRODUCING is rejected with INVALID_STATUS_TRANSITION
+ok 14 - CT-CAMPAIGN-013 OPEN -> PRODUCING is rejected with INVALID_STATUS_TRANSITION # TODO Requires persisted OPEN Campaign fixture and implemented lifecycle validation
+  ---
+  duration_ms: 0.13125
+  ...
+# Subtest: CT-CAMPAIGN-014 start-production while any Order is PAYMENT_REVIEW returns PAYMENT_NOT_REVIEWABLE
+ok 15 - CT-CAMPAIGN-014 start-production while any Order is PAYMENT_REVIEW returns PAYMENT_NOT_REVIEWABLE # TODO Requires Campaign plus Order/Payment review fixtures
+  ---
+  duration_ms: 0.339875
+  ...
+# Subtest: CT-CAMPAIGN-015 DRAFT -> CANCELLED succeeds
+ok 16 - CT-CAMPAIGN-015 DRAFT -> CANCELLED succeeds # TODO Requires persisted DRAFT Campaign fixture
+  ---
+  duration_ms: 0.130334
+  ...
+# Subtest: CT-CAMPAIGN-016 OPEN/CLOSED cancellation succeeds only with no PAYMENT_REVIEW or paid-or-later Orders
+ok 17 - CT-CAMPAIGN-016 OPEN/CLOSED cancellation succeeds only with no PAYMENT_REVIEW or paid-or-later Orders # TODO Requires Campaign and mixed Order lifecycle fixtures
+  ---
+  duration_ms: 0.184917
+  ...
+# Subtest: CT-CAMPAIGN-017 PRODUCING and later Campaigns cannot cancel
+ok 18 - CT-CAMPAIGN-017 PRODUCING and later Campaigns cannot cancel # TODO Requires persisted PRODUCING/READY_FOR_PICKUP/COMPLETED fixtures
+  ---
+  duration_ms: 0.266791
+  ...
+# Subtest: CT-CAMPAIGN-018 successful cancellation converts PENDING_PAYMENT and PAYMENT_REJECTED Orders to CANCELLED
+ok 19 - CT-CAMPAIGN-018 successful cancellation converts PENDING_PAYMENT and PAYMENT_REJECTED Orders to CANCELLED # TODO Requires Campaign plus unpaid/rejected Order fixtures and transactional cancellation implementation
+  ---
+  duration_ms: 0.230208
+  ...
+# Subtest: CT-CAMPAIGN-019 CLOSED can finish payment review, but PRODUCING and later reject payment submission/resubmission/approval
+ok 20 - CT-CAMPAIGN-019 CLOSED can finish payment review, but PRODUCING and later reject payment submission/resubmission/approval # TODO Requires Campaign/Order/Payment fixtures across CLOSED and PRODUCING states
+  ---
+  duration_ms: 0.079208
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.479Z","requestId":"528c1b70-c5fb-442b-b603-c0a0dd45f4b1","method":"POST","path":"/api/v1/organizations/3bbbe440-823e-40f1-849d-31fa80417e98/products/8a965c7a-471a-493d-8ae9-9792c5a7fd7a/image-upload-url","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.493Z","requestId":"528c1b70-c5fb-442b-b603-c0a0dd45f4b1","method":"POST","path":"/api/v1/organizations/3bbbe440-823e-40f1-849d-31fa80417e98/products/8a965c7a-471a-493d-8ae9-9792c5a7fd7a/image-upload-url","statusCode":401,"durationMs":22.44}
+# Subtest: CT-FILE-001 product image upload URL requires bearer authentication
+ok 21 - CT-FILE-001 product image upload URL requires bearer authentication
+  ---
+  duration_ms: 308.139958
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.555Z","requestId":"c97fcd79-7fef-4952-a2c9-88cc9358bbd6","method":"POST","path":"/api/v1/organizations/3bbbe440-823e-40f1-849d-31fa80417e98/orders/2c5c2fff-9964-486c-9a2c-3dee6ad8f5ea/payment-slip-upload-url","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.556Z","requestId":"c97fcd79-7fef-4952-a2c9-88cc9358bbd6","method":"POST","path":"/api/v1/organizations/3bbbe440-823e-40f1-849d-31fa80417e98/orders/2c5c2fff-9964-486c-9a2c-3dee6ad8f5ea/payment-slip-upload-url","statusCode":401,"durationMs":1.14}
+# Subtest: CT-FILE-002 payment slip upload URL requires bearer authentication
+ok 22 - CT-FILE-002 payment slip upload URL requires bearer authentication
+  ---
+  duration_ms: 12.990542
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.561Z","requestId":"dcb4f303-fb4c-4ad1-b23b-5f7e7326771c","method":"POST","path":"/api/v1/organizations/3bbbe440-823e-40f1-849d-31fa80417e98/files/download-url","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.561Z","requestId":"dcb4f303-fb4c-4ad1-b23b-5f7e7326771c","method":"POST","path":"/api/v1/organizations/3bbbe440-823e-40f1-849d-31fa80417e98/files/download-url","statusCode":401,"durationMs":0.51}
+# Subtest: CT-FILE-003 private file download URL requires bearer authentication
+ok 23 - CT-FILE-003 private file download URL requires bearer authentication
+  ---
+  duration_ms: 4.74975
+  ...
+# Subtest: CT-FILE-004 S3 pre-signed URL default expiry is exactly 900 seconds
+ok 24 - CT-FILE-004 S3 pre-signed URL default expiry is exactly 900 seconds
+  ---
+  duration_ms: 0.120459
+  ...
+# Subtest: CT-FILE-005 S3 adapter exposes direct PUT, GET, and HEAD primitives rather than file proxying
+ok 25 - CT-FILE-005 S3 adapter exposes direct PUT, GET, and HEAD primitives rather than file proxying
+  ---
+  duration_ms: 0.180125
+  ...
+# Subtest: CT-FILE-006 backend app does not configure a raw/multipart upload parser for documented file flow
+ok 26 - CT-FILE-006 backend app does not configure a raw/multipart upload parser for documented file flow
+  ---
+  duration_ms: 2.594208
+  ...
+# Subtest: CT-FILE-007 Product Image upload is authorized only for the correct Product and Organization
+ok 27 - CT-FILE-007 Product Image upload is authorized only for the correct Product and Organization # TODO BLOCKED: requires mounted Product image signing route plus authenticated tenant Product fixture
+  ---
+  duration_ms: 0.12175
+  ...
+# Subtest: CT-FILE-008 Product Image objectKey is products/{organizationId}/{productId}/{uuid}
+ok 28 - CT-FILE-008 Product Image objectKey is products/{organizationId}/{productId}/{uuid} # TODO BLOCKED: requires implemented Product image signing service and generated pre-signed response
+  ---
+  duration_ms: 0.048333
+  ...
+# Subtest: CT-FILE-009 Product Image accepts only jpeg/png/webp and rejects objects larger than 5 MiB
+ok 29 - CT-FILE-009 Product Image accepts only jpeg/png/webp and rejects objects larger than 5 MiB # TODO BLOCKED: requires Product file validation plus S3/LocalStack HEAD metadata fixtures
+  ---
+  duration_ms: 0.050375
+  ...
+# Subtest: CT-FILE-010 Product imageKey is persisted only after HEAD verifies existing object, allowed MIME, and size
+ok 30 - CT-FILE-010 Product imageKey is persisted only after HEAD verifies existing object, allowed MIME, and size # TODO BLOCKED: requires Product persistence plus forged missing/wrong-type/wrong-size S3 objects
+  ---
+  duration_ms: 0.133791
+  ...
+# Subtest: CT-FILE-011 public Storefront imageUrl derives only from stored Product imageKey and cannot sign arbitrary keys
+ok 31 - CT-FILE-011 public Storefront imageUrl derives only from stored Product imageKey and cannot sign arbitrary keys # TODO BLOCKED: requires Product/storefront implementation and Product image fixture
+  ---
+  duration_ms: 0.164333
+  ...
+# Subtest: CT-FILE-012 Payment Slip objectKey is payments/{organizationId}/{orderId}/{uuid}
+ok 32 - CT-FILE-012 Payment Slip objectKey is payments/{organizationId}/{orderId}/{uuid} # TODO BLOCKED: requires implemented Payment Slip signing service and owned Order fixture
+  ---
+  duration_ms: 0.047834
+  ...
+# Subtest: CT-FILE-013 Payment Slip accepts only jpeg/png/webp and rejects objects larger than 10 MiB
+ok 33 - CT-FILE-013 Payment Slip accepts only jpeg/png/webp and rejects objects larger than 10 MiB # TODO BLOCKED: requires Payment file validation plus S3/LocalStack HEAD metadata fixtures
+  ---
+  duration_ms: 0.040625
+  ...
+# Subtest: CT-FILE-014 Customer can request Payment Slip URLs only for own Order
+ok 34 - CT-FILE-014 Customer can request Payment Slip URLs only for own Order # TODO BLOCKED: requires two Customer fixtures, one owned Order, and mounted file routes
+  ---
+  duration_ms: 0.091333
+  ...
+# Subtest: CT-FILE-015 Staff/Admin can view Payment Slip only inside authorized Organization
+ok 35 - CT-FILE-015 Staff/Admin can view Payment Slip only inside authorized Organization # TODO BLOCKED: requires two-tenant Staff/Admin fixtures, Payment Slip object, and private download implementation
+  ---
+  duration_ms: 0.043083
+  ...
+# Subtest: CT-FILE-016 arbitrary or cross-path object keys are rejected before upload acceptance/download signing
+ok 36 - CT-FILE-016 arbitrary or cross-path object keys are rejected before upload acceptance/download signing # TODO BLOCKED: requires implemented object ownership/path authorization for Product and Payment files
+  ---
+  duration_ms: 0.044666
+  ...
+# Subtest: CT-FILE-017 Payment slipKey is accepted only after HEAD verifies existing object, allowed MIME, and size
+ok 37 - CT-FILE-017 Payment slipKey is accepted only after HEAD verifies existing object, allowed MIME, and size # TODO BLOCKED: requires Payment submission implementation and forged missing/wrong-type/wrong-size S3 objects
+  ---
+  duration_ms: 0.039417
+  ...
+# Subtest: CT-FILE-018 private file bucket/object is not publicly readable
+ok 38 - CT-FILE-018 private file bucket/object is not publicly readable # TODO BLOCKED: requires LocalStack/AWS deployed bucket policy/public-access-block verification
+  ---
+  duration_ms: 0.134709
+  ...
+# Subtest: CT-FILE-019 binary file transfer occurs Browser-to-S3 and the API does not proxy raw file bodies
+ok 39 - CT-FILE-019 binary file transfer occurs Browser-to-S3 and the API does not proxy raw file bodies # TODO BLOCKED: requires integrated Frontend/file workflow or deployed HTTP observation to prove transfer boundary end-to-end
+  ---
+  duration_ms: 0.046792
+  ...
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.444Z","requestId":"2610035d-1407-4ad4-a783-b8291b3ced87","method":"GET","path":"/health","statusCode":200,"durationMs":7.99}
+# Subtest: CT-HEALTH-001 GET /health is public and returns the canonical health envelope
+ok 40 - CT-HEALTH-001 GET /health is public and returns the canonical health envelope
+  ---
+  duration_ms: 347.835666
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.483Z","requestId":"aa339773-dc03-490f-ab33-50e5cb9570a1","method":"POST","path":"/api/v1/auth/register","statusCode":400,"errorCode":"VALIDATION_ERROR"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.483Z","requestId":"aa339773-dc03-490f-ab33-50e5cb9570a1","method":"POST","path":"/api/v1/auth/register","statusCode":400,"durationMs":8.28}
+# Subtest: CT-AUTH-001 POST /api/v1/auth/register exists and validates malformed input
+ok 41 - CT-AUTH-001 POST /api/v1/auth/register exists and validates malformed input
+  ---
+  duration_ms: 26.846666
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.493Z","requestId":"a4179e50-e05d-49c8-bb1b-fcb24c54f312","method":"POST","path":"/api/v1/auth/login","statusCode":400,"errorCode":"VALIDATION_ERROR"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.493Z","requestId":"a4179e50-e05d-49c8-bb1b-fcb24c54f312","method":"POST","path":"/api/v1/auth/login","statusCode":400,"durationMs":0.81}
+# Subtest: CT-AUTH-002 POST /api/v1/auth/login exists and validates malformed input
+ok 42 - CT-AUTH-002 POST /api/v1/auth/login exists and validates malformed input
+  ---
+  duration_ms: 10.030584
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.560Z","requestId":"924bb5ba-c9cb-4e83-b4fe-bf598dc5212e","method":"GET","path":"/api/v1/me","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.569Z","requestId":"924bb5ba-c9cb-4e83-b4fe-bf598dc5212e","method":"GET","path":"/api/v1/me","statusCode":401,"durationMs":10.52}
+# Subtest: CT-AUTH-003 GET /api/v1/me requires a bearer token
+ok 43 - CT-AUTH-003 GET /api/v1/me requires a bearer token
+  ---
+  duration_ms: 75.808708
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.573Z","requestId":"612b3361-1355-42e4-b130-e24e4c920145","method":"GET","path":"/api/v1/me","statusCode":401,"errorCode":"TOKEN_INVALID"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.573Z","requestId":"612b3361-1355-42e4-b130-e24e4c920145","method":"GET","path":"/api/v1/me","statusCode":401,"durationMs":0.66}
+# Subtest: CT-AUTH-004 GET /api/v1/me rejects a malformed bearer token
+ok 44 - CT-AUTH-004 GET /api/v1/me rejects a malformed bearer token
+  ---
+  duration_ms: 3.812708
+  ...
+# Subtest: CT-AUTH-005 successful register/login/current-user flow
+ok 45 - CT-AUTH-005 successful register/login/current-user flow # TODO Requires implemented auth routes plus disposable DynamoDB/Dev Mode fixture reset
+  ---
+  duration_ms: 0.106542
+  ...
+# Subtest: CT-AUTH-006 duplicate email and invalid-password behavior
+ok 46 - CT-AUTH-006 duplicate email and invalid-password behavior # TODO Requires implemented auth routes plus disposable DynamoDB/Dev Mode fixture reset
+  ---
+  duration_ms: 0.240458
+  ...
+# Subtest: CT-AUTH-007 expired-token and disabled-user behavior
+ok 47 - CT-AUTH-007 expired-token and disabled-user behavior # TODO Requires auth implementation plus controlled user/token fixtures
+  ---
+  duration_ms: 0.052625
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.445Z","requestId":"2ca71c02-c9aa-4ed9-86b9-f21641f89f8c","method":"GET","path":"/api/v1/organizations/2eeb51cb-ba45-42a0-ae3b-995e4548db19/orders?campaignId=7d53c053-e804-4a9a-99c0-6be2a0f17789&status=PENDING_PAYMENT","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.449Z","requestId":"2ca71c02-c9aa-4ed9-86b9-f21641f89f8c","method":"GET","path":"/api/v1/organizations/2eeb51cb-ba45-42a0-ae3b-995e4548db19/orders?campaignId=7d53c053-e804-4a9a-99c0-6be2a0f17789&status=PENDING_PAYMENT","statusCode":401,"durationMs":6.11}
+# Subtest: CT-ORDER-001 GET organization order list requires bearer authentication
+ok 48 - CT-ORDER-001 GET organization order list requires bearer authentication
+  ---
+  duration_ms: 341.571125
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.526Z","requestId":"4b16d97b-431e-4951-955c-0d55a6892060","method":"POST","path":"/api/v1/organizations/2eeb51cb-ba45-42a0-ae3b-995e4548db19/orders","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.527Z","requestId":"4b16d97b-431e-4951-955c-0d55a6892060","method":"POST","path":"/api/v1/organizations/2eeb51cb-ba45-42a0-ae3b-995e4548db19/orders","statusCode":401,"durationMs":7.55}
+# Subtest: CT-ORDER-002 POST create order requires bearer authentication
+ok 49 - CT-ORDER-002 POST create order requires bearer authentication
+  ---
+  duration_ms: 68.892667
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.530Z","requestId":"73debaee-eadb-455e-8ccc-bec4c062c8e9","method":"GET","path":"/api/v1/organizations/2eeb51cb-ba45-42a0-ae3b-995e4548db19/orders/f3d6fa49-4d10-48b9-a5dd-503380432ae3","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.530Z","requestId":"73debaee-eadb-455e-8ccc-bec4c062c8e9","method":"GET","path":"/api/v1/organizations/2eeb51cb-ba45-42a0-ae3b-995e4548db19/orders/f3d6fa49-4d10-48b9-a5dd-503380432ae3","statusCode":401,"durationMs":0.39}
+# Subtest: CT-ORDER-003 GET organization order detail requires bearer authentication
+ok 50 - CT-ORDER-003 GET organization order detail requires bearer authentication
+  ---
+  duration_ms: 3.124833
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.532Z","requestId":"b434a880-4d33-4b5a-bcaa-13101b1b9928","method":"GET","path":"/api/v1/me/orders","statusCode":404,"errorCode":"VALIDATION_ERROR"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.533Z","requestId":"b434a880-4d33-4b5a-bcaa-13101b1b9928","method":"GET","path":"/api/v1/me/orders","statusCode":404,"durationMs":0.36}
+# Subtest: CT-ORDER-004 GET /api/v1/me/orders requires bearer authentication
+not ok 51 - CT-ORDER-004 GET /api/v1/me/orders requires bearer authentication
+  ---
+  duration_ms: 2.724416
+  location: 'file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/contract/order.contract.test.mjs:72:1'
+  failureType: 'testCodeFailure'
+  error: 'Expected HTTP 401, got 404'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 401
+  actual: 404
+  operator: 'strictEqual'
+  stack: |-
+    assertHttpStatus (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/helpers/assertions.mjs:8:10)
+    assertAuthRequired (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/contract/order.contract.test.mjs:24:3)
+    file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/contract/order.contract.test.mjs:78:5
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async withBackendServer (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/helpers/backend-app.mjs:42:12)
+    async TestContext.<anonymous> (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/contract/order.contract.test.mjs:73:3)
+    async Test.run (node:internal/test_runner/test:657:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:389:7)
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.575Z","requestId":"9d06535f-1a13-42f4-acdf-5cf437bde93d","method":"GET","path":"/api/v1/me/orders/f3d6fa49-4d10-48b9-a5dd-503380432ae3","statusCode":404,"errorCode":"VALIDATION_ERROR"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.575Z","requestId":"9d06535f-1a13-42f4-acdf-5cf437bde93d","method":"GET","path":"/api/v1/me/orders/f3d6fa49-4d10-48b9-a5dd-503380432ae3","statusCode":404,"durationMs":0.5}
+# Subtest: CT-ORDER-005 GET /api/v1/me/orders/:orderId requires bearer authentication
+not ok 52 - CT-ORDER-005 GET /api/v1/me/orders/:orderId requires bearer authentication
+  ---
+  duration_ms: 41.897
+  location: 'file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/contract/order.contract.test.mjs:82:1'
+  failureType: 'testCodeFailure'
+  error: 'Expected HTTP 401, got 404'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 401
+  actual: 404
+  operator: 'strictEqual'
+  stack: |-
+    assertHttpStatus (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/helpers/assertions.mjs:8:10)
+    assertAuthRequired (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/contract/order.contract.test.mjs:24:3)
+    file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/contract/order.contract.test.mjs:88:5
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async withBackendServer (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/helpers/backend-app.mjs:42:12)
+    async TestContext.<anonymous> (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/contract/order.contract.test.mjs:83:3)
+    async Test.run (node:internal/test_runner/test:657:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:389:7)
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.580Z","requestId":"211623e4-a92b-4444-9a68-45a0c683e4b4","method":"POST","path":"/api/v1/me/orders/f3d6fa49-4d10-48b9-a5dd-503380432ae3/cancel","statusCode":404,"errorCode":"VALIDATION_ERROR"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.580Z","requestId":"211623e4-a92b-4444-9a68-45a0c683e4b4","method":"POST","path":"/api/v1/me/orders/f3d6fa49-4d10-48b9-a5dd-503380432ae3/cancel","statusCode":404,"durationMs":0.33}
+# Subtest: CT-ORDER-006 customer cancel endpoint requires bearer authentication
+not ok 53 - CT-ORDER-006 customer cancel endpoint requires bearer authentication
+  ---
+  duration_ms: 5.419333
+  location: 'file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/contract/order.contract.test.mjs:92:1'
+  failureType: 'testCodeFailure'
+  error: 'Expected HTTP 401, got 404'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 401
+  actual: 404
+  operator: 'strictEqual'
+  stack: |-
+    assertHttpStatus (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/helpers/assertions.mjs:8:10)
+    assertAuthRequired (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/contract/order.contract.test.mjs:24:3)
+    file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/contract/order.contract.test.mjs:99:5
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async withBackendServer (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/helpers/backend-app.mjs:42:12)
+    async TestContext.<anonymous> (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/contract/order.contract.test.mjs:93:3)
+    async Test.run (node:internal/test_runner/test:657:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:389:7)
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.583Z","requestId":"87e8a738-311d-4212-80c7-b3fc59b8ff3b","method":"POST","path":"/api/v1/organizations/2eeb51cb-ba45-42a0-ae3b-995e4548db19/orders/f3d6fa49-4d10-48b9-a5dd-503380432ae3/cancel","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.583Z","requestId":"87e8a738-311d-4212-80c7-b3fc59b8ff3b","method":"POST","path":"/api/v1/organizations/2eeb51cb-ba45-42a0-ae3b-995e4548db19/orders/f3d6fa49-4d10-48b9-a5dd-503380432ae3/cancel","statusCode":401,"durationMs":0.34}
+# Subtest: CT-ORDER-007 organization cancel endpoint requires bearer authentication
+ok 54 - CT-ORDER-007 organization cancel endpoint requires bearer authentication
+  ---
+  duration_ms: 2.664459
+  ...
+# Subtest: CT-ORDER-008 order creation succeeds only when Campaign is OPEN and starts PENDING_PAYMENT
+ok 55 - CT-ORDER-008 order creation succeeds only when Campaign is OPEN and starts PENDING_PAYMENT # TODO Requires authenticated Customer plus persisted OPEN/non-OPEN Campaign fixtures
+  ---
+  duration_ms: 0.168292
+  ...
+# Subtest: CT-ORDER-009 order creation rejects Product from another Organization
+ok 56 - CT-ORDER-009 order creation rejects Product from another Organization # TODO Requires two-tenant Product/Campaign fixtures and implemented tenant validation
+  ---
+  duration_ms: 0.056083
+  ...
+# Subtest: CT-ORDER-010 Product.storeId must equal Campaign.storeId
+ok 57 - CT-ORDER-010 Product.storeId must equal Campaign.storeId # TODO Requires same-tenant cross-Store Product/Campaign fixtures
+  ---
+  duration_ms: 0.109333
+  ...
+# Subtest: CT-ORDER-011 Variant must belong to the selected Product
+ok 58 - CT-ORDER-011 Variant must belong to the selected Product # TODO Requires Product/Variant fixtures with deliberate mismatch
+  ---
+  duration_ms: 0.057125
+  ...
+# Subtest: CT-ORDER-012 quantity validation rejects invalid quantities
+ok 59 - CT-ORDER-012 quantity validation rejects invalid quantities # TODO Requires implemented Order validator and authenticated Customer fixture
+  ---
+  duration_ms: 0.043958
+  ...
+# Subtest: CT-ORDER-013 Backend ignores client price/total and uses authoritative Variant.price
+ok 60 - CT-ORDER-013 Backend ignores client price/total and uses authoritative Variant.price # TODO Requires persisted Variant price plus request containing forged price/total fields
+  ---
+  duration_ms: 0.041458
+  ...
+# Subtest: CT-ORDER-014 subtotal and total are computed as integer satang
+ok 61 - CT-ORDER-014 subtotal and total are computed as integer satang # TODO Requires persisted multi-item Product/Variant fixtures and Order creation implementation
+  ---
+  duration_ms: 0.134666
+  ...
+# Subtest: CT-ORDER-015 OrderItem snapshot captures productName, variantName, unitPrice, quantity, totalPrice
+ok 62 - CT-ORDER-015 OrderItem snapshot captures productName, variantName, unitPrice, quantity, totalPrice # TODO Requires successful Order creation with persisted Product/Variant fixtures
+  ---
+  duration_ms: 0.048959
+  ...
+# Subtest: CT-ORDER-016 Product or Variant edits after Order creation do not mutate OrderItem snapshot
+ok 63 - CT-ORDER-016 Product or Variant edits after Order creation do not mutate OrderItem snapshot # TODO Requires persisted Order plus subsequent Product/Variant edits
+  ---
+  duration_ms: 0.111
+  ...
+# Subtest: CT-ORDER-017 Customer can list/get own Orders without Organization membership
+ok 64 - CT-ORDER-017 Customer can list/get own Orders without Organization membership # TODO Requires Customer Order fixture and authenticated own-order flow
+  ---
+  duration_ms: 0.138958
+  ...
+# Subtest: CT-ORDER-018 another Customer cannot access the owner's Order
+ok 65 - CT-ORDER-018 another Customer cannot access the owner's Order # TODO Requires two authenticated Customer fixtures and one owned Order
+  ---
+  duration_ms: 0.048916
+  ...
+# Subtest: CT-ORDER-019 Staff/Admin can access Orders only within their active Organization membership
+ok 66 - CT-ORDER-019 Staff/Admin can access Orders only within their active Organization membership # TODO Requires two-tenant STAFF/ORGANIZATION_ADMIN fixtures and persisted Orders
+  ---
+  duration_ms: 0.039542
+  ...
+# Subtest: CT-ORDER-020 Customer can cancel own PENDING_PAYMENT or PAYMENT_REJECTED Order and creates ORDER_CANCELLED Audit
+ok 67 - CT-ORDER-020 Customer can cancel own PENDING_PAYMENT or PAYMENT_REJECTED Order and creates ORDER_CANCELLED Audit # TODO Requires own Order fixtures in both cancellable states plus Audit persistence
+  ---
+  duration_ms: 0.036
+  ...
+# Subtest: CT-ORDER-021 Organization Admin can cancel tenant PENDING_PAYMENT or PAYMENT_REJECTED Order
+ok 68 - CT-ORDER-021 Organization Admin can cancel tenant PENDING_PAYMENT or PAYMENT_REJECTED Order # TODO Requires authenticated Organization Admin and tenant Order fixtures
+  ---
+  duration_ms: 0.09525
+  ...
+# Subtest: CT-ORDER-022 Staff cannot use organization general cancellation
+ok 69 - CT-ORDER-022 Staff cannot use organization general cancellation # TODO Requires authenticated STAFF fixture and tenant Order
+  ---
+  duration_ms: 0.039084
+  ...
+# Subtest: CT-ORDER-023 PAYMENT_REVIEW and paid-or-later Orders cannot be cancelled
+ok 70 - CT-ORDER-023 PAYMENT_REVIEW and paid-or-later Orders cannot be cancelled # TODO Requires persisted Orders across PAYMENT_REVIEW/PAID/CONFIRMED/IN_PRODUCTION/READY_FOR_PICKUP/RECEIVED states
+  ---
+  duration_ms: 0.03275
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.444Z","requestId":"9b2d5f8b-38eb-4ea9-9c56-408121051f6c","method":"GET","path":"/api/v1/organizations","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.450Z","requestId":"9b2d5f8b-38eb-4ea9-9c56-408121051f6c","method":"GET","path":"/api/v1/organizations","statusCode":401,"durationMs":6.89}
+# Subtest: CT-ORG-001 GET /api/v1/organizations requires bearer authentication
+ok 71 - CT-ORG-001 GET /api/v1/organizations requires bearer authentication
+  ---
+  duration_ms: 350.926167
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.532Z","requestId":"281aa13b-321e-4789-ae8a-b67c834974c8","method":"POST","path":"/api/v1/organizations","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.532Z","requestId":"281aa13b-321e-4789-ae8a-b67c834974c8","method":"POST","path":"/api/v1/organizations","statusCode":401,"durationMs":12.15}
+# Subtest: CT-ORG-002 POST /api/v1/organizations requires bearer authentication
+ok 72 - CT-ORG-002 POST /api/v1/organizations requires bearer authentication
+  ---
+  duration_ms: 66.115167
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.534Z","requestId":"4a56c734-d4b6-4b02-9bc8-3b5f7eda25b5","method":"GET","path":"/api/v1/organizations/59fca83d-b514-4833-8a10-db67e5399180","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.535Z","requestId":"4a56c734-d4b6-4b02-9bc8-3b5f7eda25b5","method":"GET","path":"/api/v1/organizations/59fca83d-b514-4833-8a10-db67e5399180","statusCode":401,"durationMs":0.41}
+# Subtest: CT-ORG-003 GET /api/v1/organizations/:organizationId requires bearer authentication
+ok 73 - CT-ORG-003 GET /api/v1/organizations/:organizationId requires bearer authentication
+  ---
+  duration_ms: 2.72
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.539Z","requestId":"2dde17d0-2abc-465f-b270-91edbe1a60be","method":"PATCH","path":"/api/v1/organizations/59fca83d-b514-4833-8a10-db67e5399180","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.539Z","requestId":"2dde17d0-2abc-465f-b270-91edbe1a60be","method":"PATCH","path":"/api/v1/organizations/59fca83d-b514-4833-8a10-db67e5399180","statusCode":401,"durationMs":0.63}
+# Subtest: CT-ORG-004 PATCH /api/v1/organizations/:organizationId requires bearer authentication
+ok 74 - CT-ORG-004 PATCH /api/v1/organizations/:organizationId requires bearer authentication
+  ---
+  duration_ms: 4.079875
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.542Z","requestId":"a18de74b-45b3-4910-b694-dc1805b765c7","method":"GET","path":"/api/v1/organizations/59fca83d-b514-4833-8a10-db67e5399180/members","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.542Z","requestId":"a18de74b-45b3-4910-b694-dc1805b765c7","method":"GET","path":"/api/v1/organizations/59fca83d-b514-4833-8a10-db67e5399180/members","statusCode":401,"durationMs":0.52}
+# Subtest: CT-MEMBER-001 GET member list requires bearer authentication
+ok 75 - CT-MEMBER-001 GET member list requires bearer authentication
+  ---
+  duration_ms: 3.097042
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.546Z","requestId":"4d7f4954-87ed-490a-a835-85cc50f0b2ce","method":"POST","path":"/api/v1/organizations/59fca83d-b514-4833-8a10-db67e5399180/members","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.546Z","requestId":"4d7f4954-87ed-490a-a835-85cc50f0b2ce","method":"POST","path":"/api/v1/organizations/59fca83d-b514-4833-8a10-db67e5399180/members","statusCode":401,"durationMs":0.52}
+# Subtest: CT-MEMBER-002 POST add-member requires bearer authentication
+ok 76 - CT-MEMBER-002 POST add-member requires bearer authentication
+  ---
+  duration_ms: 4.326417
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.566Z","requestId":"57ea4819-c6db-4f78-93b3-3af85269f355","method":"PATCH","path":"/api/v1/organizations/59fca83d-b514-4833-8a10-db67e5399180/members/f306d867-8cad-494d-aea0-c465f9e6ba9c","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.570Z","requestId":"57ea4819-c6db-4f78-93b3-3af85269f355","method":"PATCH","path":"/api/v1/organizations/59fca83d-b514-4833-8a10-db67e5399180/members/f306d867-8cad-494d-aea0-c465f9e6ba9c","statusCode":401,"durationMs":11.91}
+# Subtest: CT-MEMBER-003 PATCH member role requires bearer authentication
+ok 77 - CT-MEMBER-003 PATCH member role requires bearer authentication
+  ---
+  duration_ms: 23.743708
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.572Z","requestId":"ee0a035e-088e-4437-af4c-ff481ab0c33f","method":"DELETE","path":"/api/v1/organizations/59fca83d-b514-4833-8a10-db67e5399180/members/f306d867-8cad-494d-aea0-c465f9e6ba9c","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.573Z","requestId":"ee0a035e-088e-4437-af4c-ff481ab0c33f","method":"DELETE","path":"/api/v1/organizations/59fca83d-b514-4833-8a10-db67e5399180/members/f306d867-8cad-494d-aea0-c465f9e6ba9c","statusCode":401,"durationMs":0.41}
+# Subtest: CT-MEMBER-004 DELETE member requires bearer authentication
+ok 78 - CT-MEMBER-004 DELETE member requires bearer authentication
+  ---
+  duration_ms: 2.254542
+  ...
+# Subtest: CT-ORG-005 creating an Organization grants creator ORGANIZATION_ADMIN membership
+ok 79 - CT-ORG-005 creating an Organization grants creator ORGANIZATION_ADMIN membership # TODO Requires implemented auth/organization persistence plus disposable DynamoDB fixtures
+  ---
+  duration_ms: 1.830875
+  ...
+# Subtest: CT-MEMBER-005 add-member normalizes email and returns USER_NOT_FOUND for unknown User
+ok 80 - CT-MEMBER-005 add-member normalizes email and returns USER_NOT_FOUND for unknown User # TODO Requires implemented auth/member repositories plus controlled user fixtures
+  ---
+  duration_ms: 3.486625
+  ...
+# Subtest: CT-MEMBER-006 only STAFF and ORGANIZATION_ADMIN are valid organization membership roles
+ok 81 - CT-MEMBER-006 only STAFF and ORGANIZATION_ADMIN are valid organization membership roles # TODO Requires implemented member validation and authenticated Organization Admin fixture
+  ---
+  duration_ms: 0.930667
+  ...
+# Subtest: CT-MEMBER-007 Staff cannot perform Organization Admin-only member management
+ok 82 - CT-MEMBER-007 Staff cannot perform Organization Admin-only member management # TODO Requires authenticated STAFF and ORGANIZATION_ADMIN fixtures
+  ---
+  duration_ms: 0.162042
+  ...
+# Subtest: CT-MEMBER-008 demoting the final active Organization Admin returns 409 LAST_ORGANIZATION_ADMIN
+ok 83 - CT-MEMBER-008 demoting the final active Organization Admin returns 409 LAST_ORGANIZATION_ADMIN # TODO Requires controlled membership fixtures and implemented member-role mutation
+  ---
+  duration_ms: 0.342333
+  ...
+# Subtest: CT-MEMBER-009 removing the final active Organization Admin returns 409 LAST_ORGANIZATION_ADMIN
+ok 84 - CT-MEMBER-009 removing the final active Organization Admin returns 409 LAST_ORGANIZATION_ADMIN # TODO Requires controlled membership fixtures and implemented member removal
+  ---
+  duration_ms: 0.522167
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.439Z","requestId":"344d914c-fb7d-4875-9a8e-f8c1254c6f8f","method":"GET","path":"/api/v1/organizations/f13072df-1106-4701-aa6e-3d8a7bbc3f90/payments?status=PENDING_REVIEW&campaignId=e634753c-d209-4a02-bb32-2f38481ce628&orderId=a2fd3ede-274c-4477-a953-cbfb6d8e5746","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.450Z","requestId":"344d914c-fb7d-4875-9a8e-f8c1254c6f8f","method":"GET","path":"/api/v1/organizations/f13072df-1106-4701-aa6e-3d8a7bbc3f90/payments?status=PENDING_REVIEW&campaignId=e634753c-d209-4a02-bb32-2f38481ce628&orderId=a2fd3ede-274c-4477-a953-cbfb6d8e5746","statusCode":401,"durationMs":11.16}
+# Subtest: CT-PAYMENT-REVIEW-001 GET payment list requires bearer authentication
+ok 85 - CT-PAYMENT-REVIEW-001 GET payment list requires bearer authentication
+  ---
+  duration_ms: 330.366209
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.470Z","requestId":"9e340a7f-70ba-420c-91d0-4a0998306e26","method":"GET","path":"/api/v1/organizations/f13072df-1106-4701-aa6e-3d8a7bbc3f90/payments/83b1a461-e560-4191-a29b-446e7c06f6bf","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.471Z","requestId":"9e340a7f-70ba-420c-91d0-4a0998306e26","method":"GET","path":"/api/v1/organizations/f13072df-1106-4701-aa6e-3d8a7bbc3f90/payments/83b1a461-e560-4191-a29b-446e7c06f6bf","statusCode":401,"durationMs":1.66}
+# Subtest: CT-PAYMENT-REVIEW-002 GET payment detail requires bearer authentication
+ok 86 - CT-PAYMENT-REVIEW-002 GET payment detail requires bearer authentication
+  ---
+  duration_ms: 9.16075
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.474Z","requestId":"8c56065c-611f-4532-b915-628fec77ce8a","method":"POST","path":"/api/v1/organizations/f13072df-1106-4701-aa6e-3d8a7bbc3f90/payments/83b1a461-e560-4191-a29b-446e7c06f6bf/approve","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.475Z","requestId":"8c56065c-611f-4532-b915-628fec77ce8a","method":"POST","path":"/api/v1/organizations/f13072df-1106-4701-aa6e-3d8a7bbc3f90/payments/83b1a461-e560-4191-a29b-446e7c06f6bf/approve","statusCode":401,"durationMs":0.49}
+# Subtest: CT-PAYMENT-REVIEW-003 approve action requires bearer authentication
+ok 87 - CT-PAYMENT-REVIEW-003 approve action requires bearer authentication
+  ---
+  duration_ms: 2.963792
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.493Z","requestId":"793e996f-2699-45b8-9667-118700542cfa","method":"POST","path":"/api/v1/organizations/f13072df-1106-4701-aa6e-3d8a7bbc3f90/payments/83b1a461-e560-4191-a29b-446e7c06f6bf/reject","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.493Z","requestId":"793e996f-2699-45b8-9667-118700542cfa","method":"POST","path":"/api/v1/organizations/f13072df-1106-4701-aa6e-3d8a7bbc3f90/payments/83b1a461-e560-4191-a29b-446e7c06f6bf/reject","statusCode":401,"durationMs":7.14}
+# Subtest: CT-PAYMENT-REVIEW-004 reject action requires bearer authentication
+ok 88 - CT-PAYMENT-REVIEW-004 reject action requires bearer authentication
+  ---
+  duration_ms: 18.539375
+  ...
+# Subtest: CT-PAYMENT-REVIEW-005 Staff and Organization Admin can list/get Payments only inside their active Organization
+ok 89 - CT-PAYMENT-REVIEW-005 Staff and Organization Admin can list/get Payments only inside their active Organization # TODO Requires authenticated STAFF/ORGANIZATION_ADMIN fixtures in two tenants plus persisted Payments
+  ---
+  duration_ms: 0.13375
+  ...
+# Subtest: CT-PAYMENT-REVIEW-006 Customer cannot review or use tenant Payment-review endpoints
+ok 90 - CT-PAYMENT-REVIEW-006 Customer cannot review or use tenant Payment-review endpoints # TODO Requires authenticated Customer fixture and pending Payment
+  ---
+  duration_ms: 0.051333
+  ...
+# Subtest: CT-PAYMENT-REVIEW-007 approving a Payment while Campaign is OPEN sets Payment APPROVED and Order PAID
+ok 91 - CT-PAYMENT-REVIEW-007 approving a Payment while Campaign is OPEN sets Payment APPROVED and Order PAID # TODO Requires OPEN Campaign plus PAYMENT_REVIEW Order/PENDING_REVIEW Payment fixture
+  ---
+  duration_ms: 0.111625
+  ...
+# Subtest: CT-PAYMENT-REVIEW-008 approving a Payment while Campaign is CLOSED sets Payment APPROVED and Order CONFIRMED
+ok 92 - CT-PAYMENT-REVIEW-008 approving a Payment while Campaign is CLOSED sets Payment APPROVED and Order CONFIRMED # TODO Requires CLOSED Campaign plus PAYMENT_REVIEW Order/PENDING_REVIEW Payment fixture
+  ---
+  duration_ms: 0.044083
+  ...
+# Subtest: CT-PAYMENT-REVIEW-009 approval records reviewedBy/reviewedAt, updates CampaignOrderLink, creates Audit, and publishes PAYMENT_APPROVED
+ok 93 - CT-PAYMENT-REVIEW-009 approval records reviewedBy/reviewedAt, updates CampaignOrderLink, creates Audit, and publishes PAYMENT_APPROVED # TODO Requires Payment review transaction plus Audit/CampaignOrderLink/event fixtures
+  ---
+  duration_ms: 0.133042
+  ...
+# Subtest: CT-PAYMENT-REVIEW-010 approval while Campaign is PRODUCING or later returns PAYMENT_NOT_REVIEWABLE without state change
+ok 94 - CT-PAYMENT-REVIEW-010 approval while Campaign is PRODUCING or later returns PAYMENT_NOT_REVIEWABLE without state change # TODO Requires Campaign fixtures across PRODUCING/READY_FOR_PICKUP/COMPLETED plus pending Payment
+  ---
+  duration_ms: 0.186917
+  ...
+# Subtest: CT-PAYMENT-REVIEW-011 rejecting a Payment requires a non-empty reason
+ok 95 - CT-PAYMENT-REVIEW-011 rejecting a Payment requires a non-empty reason # TODO Requires authenticated tenant reviewer and PENDING_REVIEW Payment fixture
+  ---
+  duration_ms: 0.061125
+  ...
+# Subtest: CT-PAYMENT-REVIEW-012 reject sets Payment REJECTED, Order PAYMENT_REJECTED, rejectReason, reviewedBy, and reviewedAt
+ok 96 - CT-PAYMENT-REVIEW-012 reject sets Payment REJECTED, Order PAYMENT_REJECTED, rejectReason, reviewedBy, and reviewedAt # TODO Requires authenticated tenant reviewer and PENDING_REVIEW Payment fixture
+  ---
+  duration_ms: 0.0505
+  ...
+# Subtest: CT-PAYMENT-REVIEW-013 reject creates Audit and publishes PAYMENT_REJECTED event
+ok 97 - CT-PAYMENT-REVIEW-013 reject creates Audit and publishes PAYMENT_REJECTED event # TODO Requires Payment rejection transaction plus Audit/event observation fixtures
+  ---
+  duration_ms: 0.056625
+  ...
+# Subtest: CT-PAYMENT-REVIEW-014 reviewer cannot approve a Payment outside their Organization tenant
+ok 98 - CT-PAYMENT-REVIEW-014 reviewer cannot approve a Payment outside their Organization tenant # TODO Requires two-tenant STAFF/ORGANIZATION_ADMIN fixtures and cross-tenant Payment
+  ---
+  duration_ms: 0.133916
+  ...
+# Subtest: CT-PAYMENT-REVIEW-015 reviewer cannot reject a Payment outside their Organization tenant
+ok 99 - CT-PAYMENT-REVIEW-015 reviewer cannot reject a Payment outside their Organization tenant # TODO Requires two-tenant STAFF/ORGANIZATION_ADMIN fixtures and cross-tenant Payment
+  ---
+  duration_ms: 0.048459
+  ...
+# Subtest: CT-PAYMENT-REVIEW-016 Staff cannot access an unauthorized tenant payment slip through Payment review flow
+ok 100 - CT-PAYMENT-REVIEW-016 Staff cannot access an unauthorized tenant payment slip through Payment review flow # TODO Requires two-tenant reviewer fixtures, private slipKey, and file authorization implementation
+  ---
+  duration_ms: 0.093583
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.599Z","requestId":"db5a8717-36c9-458d-9503-3224d0eb8dab","method":"POST","path":"/api/v1/organizations/0e44966a-80dc-4f01-b807-ae9a421aa3de/orders/6cb7dc7e-9ef7-44c4-9f1b-f7e5483fa1e5/payment-slip-upload-url","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.603Z","requestId":"db5a8717-36c9-458d-9503-3224d0eb8dab","method":"POST","path":"/api/v1/organizations/0e44966a-80dc-4f01-b807-ae9a421aa3de/orders/6cb7dc7e-9ef7-44c4-9f1b-f7e5483fa1e5/payment-slip-upload-url","statusCode":401,"durationMs":25.9}
+# Subtest: CT-PAYMENT-SUBMIT-001 payment-slip upload URL requires bearer authentication
+ok 101 - CT-PAYMENT-SUBMIT-001 payment-slip upload URL requires bearer authentication
+  ---
+  duration_ms: 375.868209
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.622Z","requestId":"af52a645-2001-4796-9820-71e81376eb86","method":"POST","path":"/api/v1/organizations/0e44966a-80dc-4f01-b807-ae9a421aa3de/orders/6cb7dc7e-9ef7-44c4-9f1b-f7e5483fa1e5/payment","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.625Z","requestId":"af52a645-2001-4796-9820-71e81376eb86","method":"POST","path":"/api/v1/organizations/0e44966a-80dc-4f01-b807-ae9a421aa3de/orders/6cb7dc7e-9ef7-44c4-9f1b-f7e5483fa1e5/payment","statusCode":401,"durationMs":3.48}
+# Subtest: CT-PAYMENT-SUBMIT-002 payment submission requires bearer authentication
+ok 102 - CT-PAYMENT-SUBMIT-002 payment submission requires bearer authentication
+  ---
+  duration_ms: 16.67725
+  ...
+# Subtest: CT-PAYMENT-SUBMIT-003 upload-url accepts only image/jpeg, image/png, image/webp and requires contentType before signing
+ok 103 - CT-PAYMENT-SUBMIT-003 upload-url accepts only image/jpeg, image/png, image/webp and requires contentType before signing # TODO Requires authenticated Order owner plus implemented pre-signed upload route
+  ---
+  duration_ms: 0.361875
+  ...
+# Subtest: CT-PAYMENT-SUBMIT-004 upload-url returns PUT, 900-second expiry, and payments/{organizationId}/{orderId}/{uuid} object key
+ok 104 - CT-PAYMENT-SUBMIT-004 upload-url returns PUT, 900-second expiry, and payments/{organizationId}/{orderId}/{uuid} object key # TODO Requires authenticated Order owner plus S3/LocalStack signing implementation
+  ---
+  duration_ms: 0.354458
+  ...
+# Subtest: CT-PAYMENT-SUBMIT-005 submitted slipKey must remain inside the owning Order payment path
+ok 105 - CT-PAYMENT-SUBMIT-005 submitted slipKey must remain inside the owning Order payment path # TODO Requires authenticated Order owner, S3 metadata fixture, and implemented payment submission validation
+  ---
+  duration_ms: 0.1725
+  ...
+# Subtest: CT-PAYMENT-SUBMIT-006 Backend validates uploaded slip metadata before accepting slipKey
+ok 106 - CT-PAYMENT-SUBMIT-006 Backend validates uploaded slip metadata before accepting slipKey # TODO Requires S3/LocalStack HEAD metadata fixtures including allowed MIME and 10 MiB size boundary
+  ---
+  duration_ms: 0.439875
+  ...
+# Subtest: CT-PAYMENT-SUBMIT-007 first valid submission creates one Payment PENDING_REVIEW and moves Order to PAYMENT_REVIEW
+ok 107 - CT-PAYMENT-SUBMIT-007 first valid submission creates one Payment PENDING_REVIEW and moves Order to PAYMENT_REVIEW # TODO Requires OPEN/CLOSED Campaign, owning Customer Order, uploaded slip, and Payment persistence
+  ---
+  duration_ms: 0.088291
+  ...
+# Subtest: CT-PAYMENT-SUBMIT-008 rejected Payment resubmission reuses the same paymentId
+ok 108 - CT-PAYMENT-SUBMIT-008 rejected Payment resubmission reuses the same paymentId # TODO Requires existing PAYMENT_REJECTED Order/Payment fixture and replacement uploaded slip
+  ---
+  duration_ms: 0.051584
+  ...
+# Subtest: CT-PAYMENT-SUBMIT-009 rejected Payment resubmission replaces slipKey and clears reject/reviewer fields
+ok 109 - CT-PAYMENT-SUBMIT-009 rejected Payment resubmission replaces slipKey and clears reject/reviewer fields # TODO Requires existing rejected Payment with rejectReason/reviewedBy/reviewedAt plus replacement slip
+  ---
+  duration_ms: 0.051833
+  ...
+# Subtest: CT-PAYMENT-SUBMIT-010 rejected Payment resubmission returns Payment to PENDING_REVIEW and Order to PAYMENT_REVIEW
+ok 110 - CT-PAYMENT-SUBMIT-010 rejected Payment resubmission returns Payment to PENDING_REVIEW and Order to PAYMENT_REVIEW # TODO Requires rejected Payment fixture and implemented resubmission transaction
+  ---
+  duration_ms: 0.117875
+  ...
+# Subtest: CT-PAYMENT-SUBMIT-011 approved or paid-or-later Order cannot submit another slip
+ok 111 - CT-PAYMENT-SUBMIT-011 approved or paid-or-later Order cannot submit another slip # TODO Requires approved/PAID/CONFIRMED/IN_PRODUCTION/READY_FOR_PICKUP/RECEIVED fixtures
+  ---
+  duration_ms: 0.060666
+  ...
+# Subtest: CT-PAYMENT-SUBMIT-012 submission/resubmission while Campaign is PRODUCING or later returns PAYMENT_NOT_REVIEWABLE
+ok 112 - CT-PAYMENT-SUBMIT-012 submission/resubmission while Campaign is PRODUCING or later returns PAYMENT_NOT_REVIEWABLE # TODO Requires Campaign/Order/Payment fixtures across PRODUCING and later states
+  ---
+  duration_ms: 0.047042
+  ...
+# Subtest: CT-PAYMENT-SUBMIT-013 CLOSED Campaign may still accept valid payment submission/resubmission
+ok 113 - CT-PAYMENT-SUBMIT-013 CLOSED Campaign may still accept valid payment submission/resubmission # TODO Requires CLOSED Campaign plus owning Customer Order/Payment fixtures
+  ---
+  duration_ms: 0.119625
+  ...
+# Subtest: CT-PAYMENT-SUBMIT-014 Customer cannot submit a slip for another Customer Order
+ok 114 - CT-PAYMENT-SUBMIT-014 Customer cannot submit a slip for another Customer Order # TODO Requires two authenticated Customer fixtures and one owned Order
+  ---
+  duration_ms: 0.10325
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.882Z","requestId":"9b2762e3-6d4b-4800-849a-0d1d70debb8b","method":"GET","path":"/api/v1/organizations/676d024d-7fd9-4fae-aed4-da862b75f4cd/pickups?campaignId=ce43a57b-3887-4a74-962f-5381987819ec&status=READY&orderId=1672fefc-5e06-42d8-b095-7748231e84a5","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.891Z","requestId":"9b2762e3-6d4b-4800-849a-0d1d70debb8b","method":"GET","path":"/api/v1/organizations/676d024d-7fd9-4fae-aed4-da862b75f4cd/pickups?campaignId=ce43a57b-3887-4a74-962f-5381987819ec&status=READY&orderId=1672fefc-5e06-42d8-b095-7748231e84a5","statusCode":401,"durationMs":10.54}
+# Subtest: CT-PICKUP-001 organization pickup list requires bearer authentication
+ok 115 - CT-PICKUP-001 organization pickup list requires bearer authentication
+  ---
+  duration_ms: 275.368167
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.912Z","requestId":"004f97b6-0b0a-4bfe-be0d-21b3740b25a5","method":"GET","path":"/api/v1/organizations/676d024d-7fd9-4fae-aed4-da862b75f4cd/pickups/c7e37b51-ad65-4814-bd4b-f81e8939b31d","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.912Z","requestId":"004f97b6-0b0a-4bfe-be0d-21b3740b25a5","method":"GET","path":"/api/v1/organizations/676d024d-7fd9-4fae-aed4-da862b75f4cd/pickups/c7e37b51-ad65-4814-bd4b-f81e8939b31d","statusCode":401,"durationMs":0.54}
+# Subtest: CT-PICKUP-002 organization pickup detail requires bearer authentication
+ok 116 - CT-PICKUP-002 organization pickup detail requires bearer authentication
+  ---
+  duration_ms: 9.426334
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.942Z","requestId":"39e61cf3-d2f2-483d-8ed1-0f2971f92d05","method":"POST","path":"/api/v1/organizations/676d024d-7fd9-4fae-aed4-da862b75f4cd/pickups/c7e37b51-ad65-4814-bd4b-f81e8939b31d/confirm","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.943Z","requestId":"39e61cf3-d2f2-483d-8ed1-0f2971f92d05","method":"POST","path":"/api/v1/organizations/676d024d-7fd9-4fae-aed4-da862b75f4cd/pickups/c7e37b51-ad65-4814-bd4b-f81e8939b31d/confirm","statusCode":401,"durationMs":0.53}
+# Subtest: CT-PICKUP-003 pickup confirm requires bearer authentication
+ok 117 - CT-PICKUP-003 pickup confirm requires bearer authentication
+  ---
+  duration_ms: 30.265084
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.970Z","requestId":"b9d07c38-3ef2-4065-bc6c-9078295d45af","method":"GET","path":"/api/v1/me/orders/1672fefc-5e06-42d8-b095-7748231e84a5/pickup","statusCode":404,"errorCode":"VALIDATION_ERROR"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.971Z","requestId":"b9d07c38-3ef2-4065-bc6c-9078295d45af","method":"GET","path":"/api/v1/me/orders/1672fefc-5e06-42d8-b095-7748231e84a5/pickup","statusCode":404,"durationMs":0.51}
+# Subtest: CT-PICKUP-004 customer own pickup endpoint requires bearer authentication
+not ok 118 - CT-PICKUP-004 customer own pickup endpoint requires bearer authentication
+  ---
+  duration_ms: 28.4915
+  location: 'file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/contract/pickup.contract.test.mjs:62:1'
+  failureType: 'testCodeFailure'
+  error: 'Expected HTTP 401, got 404'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 401
+  actual: 404
+  operator: 'strictEqual'
+  stack: |-
+    assertHttpStatus (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/helpers/assertions.mjs:8:10)
+    assertAuthRequired (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/contract/pickup.contract.test.mjs:23:3)
+    file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/contract/pickup.contract.test.mjs:69:5
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async withBackendServer (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/helpers/backend-app.mjs:42:12)
+    async TestContext.<anonymous> (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/contract/pickup.contract.test.mjs:63:3)
+    async Test.run (node:internal/test_runner/test:657:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:389:7)
+  ...
+# Subtest: CT-PICKUP-005 Customer can obtain own Pickup token when eligible without Organization membership
+ok 119 - CT-PICKUP-005 Customer can obtain own Pickup token when eligible without Organization membership # TODO BLOCKED: requires authenticated Customer, READY_FOR_PICKUP owned Order, and Pickup creation flow
+  ---
+  duration_ms: 0.46
+  ...
+# Subtest: CT-PICKUP-006 Pickup token is 128-bit cryptographically secure base64url encoded as 22 unpadded characters
+ok 120 - CT-PICKUP-006 Pickup token is 128-bit cryptographically secure base64url encoded as 22 unpadded characters # TODO BLOCKED: requires implemented production Pickup token generator to validate generated tokens
+  ---
+  duration_ms: 0.054291
+  ...
+# Subtest: CT-PICKUP-007 ready-for-pickup flow creates canonical Pickup and Organization-scoped PickupLink
+ok 121 - CT-PICKUP-007 ready-for-pickup flow creates canonical Pickup and Organization-scoped PickupLink # TODO BLOCKED: requires Campaign ready-for-pickup transition plus persisted Order/Pickup/PickupLink fixtures
+  ---
+  duration_ms: 0.054041
+  ...
+# Subtest: CT-PICKUP-008 Staff can list own-Organization Pickups through PickupLink query without table Scan
+ok 122 - CT-PICKUP-008 Staff can list own-Organization Pickups through PickupLink query without table Scan # TODO BLOCKED: requires Pickup repository/list implementation and authenticated STAFF fixture
+  ---
+  duration_ms: 0.051542
+  ...
+# Subtest: CT-PICKUP-009 Staff resolves pickupId through tenant-scoped PickupLink before loading canonical Pickup
+ok 123 - CT-PICKUP-009 Staff resolves pickupId through tenant-scoped PickupLink before loading canonical Pickup # TODO BLOCKED: requires Pickup detail repository/service implementation and persisted PickupLink/Pickup pair
+  ---
+  duration_ms: 0.191959
+  ...
+# Subtest: CT-PICKUP-010 token lookup requires active organizationId and remains tenant-scoped
+ok 124 - CT-PICKUP-010 token lookup requires active organizationId and remains tenant-scoped # TODO BLOCKED: requires token lookup implementation plus two-tenant Pickup fixtures
+  ---
+  duration_ms: 0.185667
+  ...
+# Subtest: CT-PICKUP-011 Staff from another Organization cannot get or confirm Pickup
+ok 125 - CT-PICKUP-011 Staff from another Organization cannot get or confirm Pickup # TODO BLOCKED: requires two-tenant STAFF memberships and a Pickup owned by the other Organization
+  ---
+  duration_ms: 0.064459
+  ...
+# Subtest: CT-PICKUP-012 confirm requires Order READY_FOR_PICKUP
+ok 126 - CT-PICKUP-012 confirm requires Order READY_FOR_PICKUP # TODO BLOCKED: requires persisted Pickup plus Order fixtures in eligible and ineligible states
+  ---
+  duration_ms: 0.066416
+  ...
+# Subtest: CT-PICKUP-013 confirm atomically updates Pickup, PickupLink, and Order to RECEIVED
+ok 127 - CT-PICKUP-013 confirm atomically updates Pickup, PickupLink, and Order to RECEIVED # TODO BLOCKED: requires implemented Pickup confirmation transaction and persisted READY fixture
+  ---
+  duration_ms: 0.046292
+  ...
+# Subtest: CT-PICKUP-014 confirm records receivedBy and canonical receivedAt
+ok 128 - CT-PICKUP-014 confirm records receivedBy and canonical receivedAt # TODO BLOCKED: requires authenticated Staff/Admin confirm flow and persisted Pickup fixture
+  ---
+  duration_ms: 0.118583
+  ...
+# Subtest: CT-PICKUP-015 confirm creates Pickup confirmation Audit entry
+ok 129 - CT-PICKUP-015 confirm creates Pickup confirmation Audit entry # TODO BLOCKED: requires implemented confirmation transaction plus Audit persistence
+  ---
+  duration_ms: 0.061
+  ...
+# Subtest: CT-PICKUP-016 duplicate confirmation returns PICKUP_ALREADY_RECEIVED and does not mutate receipt metadata
+ok 130 - CT-PICKUP-016 duplicate confirmation returns PICKUP_ALREADY_RECEIVED and does not mutate receipt metadata # TODO BLOCKED: requires persisted RECEIVED Pickup/PickupLink/Order fixture and duplicate-confirm handling
+  ---
+  duration_ms: 0.099875
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.899Z","requestId":"352a3d20-ed17-408f-b327-114090767813","method":"GET","path":"/api/v1/organizations/b813d962-26e0-4297-a971-74cdde62befd/production?campaignId=677bc3eb-eb94-4b48-90e5-b77dace928e4","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.924Z","requestId":"352a3d20-ed17-408f-b327-114090767813","method":"GET","path":"/api/v1/organizations/b813d962-26e0-4297-a971-74cdde62befd/production?campaignId=677bc3eb-eb94-4b48-90e5-b77dace928e4","statusCode":401,"durationMs":26.15}
+# Subtest: CT-PRODUCTION-001 production summary requires bearer authentication
+ok 131 - CT-PRODUCTION-001 production summary requires bearer authentication
+  ---
+  duration_ms: 240.142333
+  ...
+# Subtest: CT-PRODUCTION-002 campaignId query is required
+ok 132 - CT-PRODUCTION-002 campaignId query is required # TODO BLOCKED: requires mounted Production route plus authenticated Organization Admin fixture
+  ---
+  duration_ms: 0.115625
+  ...
+# Subtest: CT-PRODUCTION-003 Organization Admin can access Production Summary for own tenant
+ok 133 - CT-PRODUCTION-003 Organization Admin can access Production Summary for own tenant # TODO BLOCKED: requires authenticated Organization Admin plus Campaign/Order/Payment fixtures
+  ---
+  duration_ms: 0.059125
+  ...
+# Subtest: CT-PRODUCTION-004 Staff is forbidden from Production Summary
+ok 134 - CT-PRODUCTION-004 Staff is forbidden from Production Summary # TODO BLOCKED: requires authenticated STAFF fixture and mounted Production route
+  ---
+  duration_ms: 0.048542
+  ...
+# Subtest: CT-PRODUCTION-005 Production Summary is tenant-isolated
+ok 135 - CT-PRODUCTION-005 Production Summary is tenant-isolated # TODO BLOCKED: requires two-tenant Organization Admin fixtures and Campaign data owned by the other tenant
+  ---
+  duration_ms: 0.045334
+  ...
+# Subtest: CT-PRODUCTION-006 Production Summary is campaign-isolated
+ok 136 - CT-PRODUCTION-006 Production Summary is campaign-isolated # TODO BLOCKED: requires two Campaigns in one tenant with distinct paid OrderItem fixtures
+  ---
+  duration_ms: 0.040041
+  ...
+# Subtest: CT-PRODUCTION-007 unpaid, rejected-payment, and cancelled Orders are excluded
+ok 137 - CT-PRODUCTION-007 unpaid, rejected-payment, and cancelled Orders are excluded # TODO BLOCKED: requires mixed Order/Payment lifecycle fixtures and implemented Production aggregation
+  ---
+  duration_ms: 0.116291
+  ...
+# Subtest: CT-PRODUCTION-008 PAID Order with APPROVED Payment is included
+ok 138 - CT-PRODUCTION-008 PAID Order with APPROVED Payment is included # TODO BLOCKED: requires APPROVED Payment plus PAID Order fixture
+  ---
+  duration_ms: 0.04275
+  ...
+# Subtest: CT-PRODUCTION-009 CONFIRMED Order produced by approval after Campaign close is included
+ok 139 - CT-PRODUCTION-009 CONFIRMED Order produced by approval after Campaign close is included # TODO BLOCKED: requires CLOSED Campaign approval flow and CONFIRMED Order fixture
+  ---
+  duration_ms: 0.107458
+  ...
+# Subtest: CT-PRODUCTION-010 IN_PRODUCTION, READY_FOR_PICKUP, and RECEIVED paid Orders are included
+ok 140 - CT-PRODUCTION-010 IN_PRODUCTION, READY_FOR_PICKUP, and RECEIVED paid Orders are included # TODO BLOCKED: requires paid fixtures across all later lifecycle states
+  ---
+  duration_ms: 0.113292
+  ...
+# Subtest: CT-PRODUCTION-011 quantities group by Product then Variant and sum correctly
+ok 141 - CT-PRODUCTION-011 quantities group by Product then Variant and sum correctly # TODO BLOCKED: requires multiple paid Orders sharing Product/Variant snapshots
+  ---
+  duration_ms: 0.061125
+  ...
+# Subtest: CT-PRODUCTION-012 normal Production Summary request path avoids full-table Scan
+ok 142 - CT-PRODUCTION-012 normal Production Summary request path avoids full-table Scan # TODO BLOCKED: Production repository/request path is not implemented yet; verify CampaignOrderLink/query strategy when available
+  ---
+  duration_ms: 0.044875
+  ...
+# Subtest: CT-PRODUCTION-013 response shape contains campaignId and products[].variants[].quantity only from authorized aggregate data
+ok 143 - CT-PRODUCTION-013 response shape contains campaignId and products[].variants[].quantity only from authorized aggregate data # TODO BLOCKED: requires implemented Production Summary response with disposable paid-order fixtures
+  ---
+  duration_ms: 0.042542
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.894Z","requestId":"755b2b6e-c6d4-4cd4-a037-cf333739b341","method":"GET","path":"/api/v1/organizations/fb020c7d-32c0-492f-8352-90c5117b2951/reports","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.899Z","requestId":"755b2b6e-c6d4-4cd4-a037-cf333739b341","method":"GET","path":"/api/v1/organizations/fb020c7d-32c0-492f-8352-90c5117b2951/reports","statusCode":401,"durationMs":6.37}
+# Subtest: CT-GOV-001 organization report requires bearer authentication
+ok 144 - CT-GOV-001 organization report requires bearer authentication
+  ---
+  duration_ms: 219.160458
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.914Z","requestId":"33241215-e156-4c40-a461-0f6a68f81926","method":"GET","path":"/api/v1/organizations/fb020c7d-32c0-492f-8352-90c5117b2951/audit-logs","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.915Z","requestId":"33241215-e156-4c40-a461-0f6a68f81926","method":"GET","path":"/api/v1/organizations/fb020c7d-32c0-492f-8352-90c5117b2951/audit-logs","statusCode":401,"durationMs":1.23}
+# Subtest: CT-GOV-002 audit log list requires bearer authentication
+ok 145 - CT-GOV-002 audit log list requires bearer authentication
+  ---
+  duration_ms: 6.545709
+  ...
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.920Z","requestId":"cd50dec4-a831-433b-87bb-9f2cebeb7ae4","method":"GET","path":"/api/v1/platform/organizations","statusCode":404,"durationMs":0.42}
+# Subtest: CT-GOV-003 GET /api/v1/platform/organizations requires bearer authentication
+not ok 146 - CT-GOV-003 GET /api/v1/platform/organizations requires bearer authentication
+  ---
+  duration_ms: 5.153875
+  location: 'file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/contract/report-audit-platform.contract.test.mjs:52:3'
+  failureType: 'testCodeFailure'
+  error: 'Expected HTTP 401, got 404'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 401
+  actual: 404
+  operator: 'strictEqual'
+  stack: |-
+    assertHttpStatus (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/helpers/assertions.mjs:8:10)
+    assertAuthRequired (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/contract/report-audit-platform.contract.test.mjs:20:3)
+    file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/contract/report-audit-platform.contract.test.mjs:55:7
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async withBackendServer (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/helpers/backend-app.mjs:42:12)
+    async TestContext.<anonymous> (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/contract/report-audit-platform.contract.test.mjs:53:5)
+    async Test.run (node:internal/test_runner/test:657:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:389:7)
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.919Z","requestId":"cd50dec4-a831-433b-87bb-9f2cebeb7ae4","method":"GET","path":"/api/v1/platform/organizations","statusCode":404,"errorCode":"VALIDATION_ERROR"}
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.923Z","requestId":"c5c9c414-1b66-4b94-9232-eb41b4be2a97","method":"POST","path":"/api/v1/platform/organizations/fb020c7d-32c0-492f-8352-90c5117b2951/approve","statusCode":404,"errorCode":"VALIDATION_ERROR"}
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.925Z","requestId":"ef74f1ba-2ada-4e37-a9ee-2a053c6a02d9","method":"POST","path":"/api/v1/platform/organizations/fb020c7d-32c0-492f-8352-90c5117b2951/suspend","statusCode":404,"errorCode":"VALIDATION_ERROR"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.923Z","requestId":"c5c9c414-1b66-4b94-9232-eb41b4be2a97","method":"POST","path":"/api/v1/platform/organizations/fb020c7d-32c0-492f-8352-90c5117b2951/approve","statusCode":404,"durationMs":0.39}
+# Subtest: CT-GOV-004 POST /api/v1/platform/organizations/fb020c7d-32c0-492f-8352-90c5117b2951/approve requires bearer authentication
+not ok 147 - CT-GOV-004 POST /api/v1/platform/organizations/fb020c7d-32c0-492f-8352-90c5117b2951/approve requires bearer authentication
+  ---
+  duration_ms: 2.793042
+  location: 'file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/contract/report-audit-platform.contract.test.mjs:52:3'
+  failureType: 'testCodeFailure'
+  error: 'Expected HTTP 401, got 404'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 401
+  actual: 404
+  operator: 'strictEqual'
+  stack: |-
+    assertHttpStatus (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/helpers/assertions.mjs:8:10)
+    assertAuthRequired (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/contract/report-audit-platform.contract.test.mjs:20:3)
+    file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/contract/report-audit-platform.contract.test.mjs:55:7
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async withBackendServer (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/helpers/backend-app.mjs:42:12)
+    async TestContext.<anonymous> (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/contract/report-audit-platform.contract.test.mjs:53:5)
+    async Test.run (node:internal/test_runner/test:657:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:389:7)
+  ...
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.926Z","requestId":"ef74f1ba-2ada-4e37-a9ee-2a053c6a02d9","method":"POST","path":"/api/v1/platform/organizations/fb020c7d-32c0-492f-8352-90c5117b2951/suspend","statusCode":404,"durationMs":0.44}
+# Subtest: CT-GOV-005 POST /api/v1/platform/organizations/fb020c7d-32c0-492f-8352-90c5117b2951/suspend requires bearer authentication
+not ok 148 - CT-GOV-005 POST /api/v1/platform/organizations/fb020c7d-32c0-492f-8352-90c5117b2951/suspend requires bearer authentication
+  ---
+  duration_ms: 7.477208
+  location: 'file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/contract/report-audit-platform.contract.test.mjs:52:3'
+  failureType: 'testCodeFailure'
+  error: 'Expected HTTP 401, got 404'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 401
+  actual: 404
+  operator: 'strictEqual'
+  stack: |-
+    assertHttpStatus (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/helpers/assertions.mjs:8:10)
+    assertAuthRequired (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/contract/report-audit-platform.contract.test.mjs:20:3)
+    file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/contract/report-audit-platform.contract.test.mjs:55:7
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async withBackendServer (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/helpers/backend-app.mjs:42:12)
+    async TestContext.<anonymous> (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/contract/report-audit-platform.contract.test.mjs:53:5)
+    async Test.run (node:internal/test_runner/test:657:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:389:7)
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.937Z","requestId":"1a28a615-c24e-4a7a-ad26-82cf8b882a23","method":"GET","path":"/api/v1/platform/users","statusCode":404,"errorCode":"VALIDATION_ERROR"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.937Z","requestId":"1a28a615-c24e-4a7a-ad26-82cf8b882a23","method":"GET","path":"/api/v1/platform/users","statusCode":404,"durationMs":0.39}
+# Subtest: CT-GOV-006 GET /api/v1/platform/users requires bearer authentication
+not ok 149 - CT-GOV-006 GET /api/v1/platform/users requires bearer authentication
+  ---
+  duration_ms: 6.783166
+  location: 'file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/contract/report-audit-platform.contract.test.mjs:52:3'
+  failureType: 'testCodeFailure'
+  error: 'Expected HTTP 401, got 404'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 401
+  actual: 404
+  operator: 'strictEqual'
+  stack: |-
+    assertHttpStatus (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/helpers/assertions.mjs:8:10)
+    assertAuthRequired (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/contract/report-audit-platform.contract.test.mjs:20:3)
+    file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/contract/report-audit-platform.contract.test.mjs:55:7
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async withBackendServer (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/helpers/backend-app.mjs:42:12)
+    async TestContext.<anonymous> (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/contract/report-audit-platform.contract.test.mjs:53:5)
+    async Test.run (node:internal/test_runner/test:657:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:389:7)
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.942Z","requestId":"cb446a49-1f89-440f-bf98-6f876e6ce60a","method":"GET","path":"/api/v1/platform/summary","statusCode":404,"errorCode":"VALIDATION_ERROR"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.943Z","requestId":"cb446a49-1f89-440f-bf98-6f876e6ce60a","method":"GET","path":"/api/v1/platform/summary","statusCode":404,"durationMs":0.73}
+# Subtest: CT-GOV-007 GET /api/v1/platform/summary requires bearer authentication
+not ok 150 - CT-GOV-007 GET /api/v1/platform/summary requires bearer authentication
+  ---
+  duration_ms: 6.687041
+  location: 'file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/contract/report-audit-platform.contract.test.mjs:52:3'
+  failureType: 'testCodeFailure'
+  error: 'Expected HTTP 401, got 404'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 401
+  actual: 404
+  operator: 'strictEqual'
+  stack: |-
+    assertHttpStatus (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/helpers/assertions.mjs:8:10)
+    assertAuthRequired (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/contract/report-audit-platform.contract.test.mjs:20:3)
+    file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/contract/report-audit-platform.contract.test.mjs:55:7
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async withBackendServer (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/helpers/backend-app.mjs:42:12)
+    async TestContext.<anonymous> (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/contract/report-audit-platform.contract.test.mjs:53:5)
+    async Test.run (node:internal/test_runner/test:657:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:389:7)
+  ...
+# Subtest: CT-GOV-008 Organization Admin can access own Organization dashboard/report
+ok 151 - CT-GOV-008 Organization Admin can access own Organization dashboard/report # TODO BLOCKED: requires implemented reports module, authenticated Organization Admin, and disposable organization data
+  ---
+  duration_ms: 0.76525
+  ...
+# Subtest: CT-GOV-009 Staff is forbidden from Organization dashboard/report
+ok 152 - CT-GOV-009 Staff is forbidden from Organization dashboard/report # TODO BLOCKED: requires implemented reports route and authenticated STAFF membership
+  ---
+  duration_ms: 0.3625
+  ...
+# Subtest: CT-GOV-010 dashboard response includes the minimum metric schema and paidRevenueSatang is integer satang
+ok 153 - CT-GOV-010 dashboard response includes the minimum metric schema and paidRevenueSatang is integer satang # TODO BLOCKED: requires implemented report aggregation with disposable Store/Product/Campaign/Order/Payment data
+  ---
+  duration_ms: 0.413208
+  ...
+# Subtest: CT-GOV-011 report campaignId/storeId filters scope metrics to the requested Organization resources
+ok 154 - CT-GOV-011 report campaignId/storeId filters scope metrics to the requested Organization resources # TODO BLOCKED: requires report implementation and multiple Store/Campaign fixtures in one Organization
+  ---
+  duration_ms: 0.174291
+  ...
+# Subtest: CT-GOV-012 paidRevenueSatang includes PAID-or-later paid Orders and excludes cancelled/unpaid Orders
+ok 155 - CT-GOV-012 paidRevenueSatang includes PAID-or-later paid Orders and excludes cancelled/unpaid Orders # TODO BLOCKED: requires mixed paid/unpaid/cancelled Order fixtures and report aggregation
+  ---
+  duration_ms: 0.185666
+  ...
+# Subtest: CT-GOV-013 Organization Admin can list Audit Logs only for own Organization
+ok 156 - CT-GOV-013 Organization Admin can list Audit Logs only for own Organization # TODO BLOCKED: requires implemented audit list route plus two-tenant admin and Audit fixtures
+  ---
+  duration_ms: 0.383708
+  ...
+# Subtest: CT-GOV-014 Staff is forbidden from Organization Audit Logs
+ok 157 - CT-GOV-014 Staff is forbidden from Organization Audit Logs # TODO BLOCKED: requires implemented audit route and authenticated STAFF fixture
+  ---
+  duration_ms: 0.429917
+  ...
+# Subtest: CT-GOV-015 Audit list supports actorId/action/resourceType/resourceId/cursor filters without tenant leakage
+ok 158 - CT-GOV-015 Audit list supports actorId/action/resourceType/resourceId/cursor filters without tenant leakage # TODO BLOCKED: requires Audit repository/query implementation and filtered disposable Audit fixtures
+  ---
+  duration_ms: 0.159875
+  ...
+# Subtest: CT-GOV-016 Payment approve/reject and Pickup confirm create required Audit events
+ok 159 - CT-GOV-016 Payment approve/reject and Pickup confirm create required Audit events # TODO BLOCKED: requires implemented Payment/Pickup business transactions and Audit persistence
+  ---
+  duration_ms: 0.386167
+  ...
+# Subtest: CT-GOV-017 Organization approve/suspend create ORGANIZATION_APPROVED and ORGANIZATION_SUSPENDED Audit events
+ok 160 - CT-GOV-017 Organization approve/suspend create ORGANIZATION_APPROVED and ORGANIZATION_SUSPENDED Audit events # TODO BLOCKED: requires implemented Platform Admin actions and Audit persistence
+  ---
+  duration_ms: 0.43125
+  ...
+# Subtest: CT-GOV-018 Audit metadata excludes credentials, JWTs, and Payment Slip binary data
+ok 161 - CT-GOV-018 Audit metadata excludes credentials, JWTs, and Payment Slip binary data # TODO BLOCKED: requires Audit write helpers and representative business events with observable persisted metadata
+  ---
+  duration_ms: 0.161291
+  ...
+# Subtest: CT-GOV-019 Platform Admin authority comes only from persisted user.platformRole=PLATFORM_ADMIN reloaded from User state
+ok 162 - CT-GOV-019 Platform Admin authority comes only from persisted user.platformRole=PLATFORM_ADMIN reloaded from User state # TODO BLOCKED: requires implemented platform-admin authorization plus mutable persisted User fixtures
+  ---
+  duration_ms: 0.121667
+  ...
+# Subtest: CT-GOV-020 Organization membership alone never grants Platform Admin endpoints
+ok 163 - CT-GOV-020 Organization membership alone never grants Platform Admin endpoints # TODO BLOCKED: requires Organization Admin fixture with platformRole=null and implemented platform routes
+  ---
+  duration_ms: 0.106125
+  ...
+# Subtest: CT-GOV-021 Platform Admin can list Organizations and Users independently of Organization membership
+ok 164 - CT-GOV-021 Platform Admin can list Organizations and Users independently of Organization membership # TODO BLOCKED: requires persisted PLATFORM_ADMIN user plus implemented platform list routes
+  ---
+  duration_ms: 0.256583
+  ...
+# Subtest: CT-GOV-022 approve Organization performs PENDING -> ACTIVE
+ok 165 - CT-GOV-022 approve Organization performs PENDING -> ACTIVE # TODO BLOCKED: requires PENDING Organization fixture and implemented Platform Admin approve action
+  ---
+  duration_ms: 0.1225
+  ...
+# Subtest: CT-GOV-023 suspend Organization sets status SUSPENDED
+ok 166 - CT-GOV-023 suspend Organization sets status SUSPENDED # TODO BLOCKED: requires active Organization fixture and implemented Platform Admin suspend action
+  ---
+  duration_ms: 0.097
+  ...
+# Subtest: CT-GOV-024 Platform summary returns organizationsByStatus and usersByStatus
+ok 167 - CT-GOV-024 Platform summary returns organizationsByStatus and usersByStatus # TODO BLOCKED: requires implemented platform summary aggregation and disposable Organization/User status fixtures
+  ---
+  duration_ms: 0.091791
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.894Z","requestId":"888c00f7-0e50-4c96-a953-14b57703fcc1","method":"GET","path":"/api/v1/organizations/33bcfe8e-59be-46a1-9820-6764b0eea60d/stores","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.897Z","requestId":"888c00f7-0e50-4c96-a953-14b57703fcc1","method":"GET","path":"/api/v1/organizations/33bcfe8e-59be-46a1-9820-6764b0eea60d/stores","statusCode":401,"durationMs":3.67}
+# Subtest: CT-STORE-001 GET store list requires bearer authentication
+ok 168 - CT-STORE-001 GET store list requires bearer authentication
+  ---
+  duration_ms: 209.4495
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.983Z","requestId":"4342bf28-79e9-4380-96fd-e242d7137120","method":"POST","path":"/api/v1/organizations/33bcfe8e-59be-46a1-9820-6764b0eea60d/stores","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.983Z","requestId":"4342bf28-79e9-4380-96fd-e242d7137120","method":"POST","path":"/api/v1/organizations/33bcfe8e-59be-46a1-9820-6764b0eea60d/stores","statusCode":401,"durationMs":72.7}
+# Subtest: CT-STORE-002 POST store requires bearer authentication
+ok 169 - CT-STORE-002 POST store requires bearer authentication
+  ---
+  duration_ms: 81.429042
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.986Z","requestId":"3656d50c-add7-463d-95ca-fcab21c4a4a1","method":"GET","path":"/api/v1/organizations/33bcfe8e-59be-46a1-9820-6764b0eea60d/stores/f02f1da6-c115-414c-868c-3293512d4bf3","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.986Z","requestId":"3656d50c-add7-463d-95ca-fcab21c4a4a1","method":"GET","path":"/api/v1/organizations/33bcfe8e-59be-46a1-9820-6764b0eea60d/stores/f02f1da6-c115-414c-868c-3293512d4bf3","statusCode":401,"durationMs":0.44}
+# Subtest: CT-STORE-003 GET store detail requires bearer authentication
+ok 170 - CT-STORE-003 GET store detail requires bearer authentication
+  ---
+  duration_ms: 13.843166
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:21.002Z","requestId":"c2efa097-1edd-4ac0-99c7-ad303558edd1","method":"PATCH","path":"/api/v1/organizations/33bcfe8e-59be-46a1-9820-6764b0eea60d/stores/f02f1da6-c115-414c-868c-3293512d4bf3","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:21.002Z","requestId":"c2efa097-1edd-4ac0-99c7-ad303558edd1","method":"PATCH","path":"/api/v1/organizations/33bcfe8e-59be-46a1-9820-6764b0eea60d/stores/f02f1da6-c115-414c-868c-3293512d4bf3","statusCode":401,"durationMs":0.64}
+# Subtest: CT-STORE-004 PATCH store requires bearer authentication
+ok 171 - CT-STORE-004 PATCH store requires bearer authentication
+  ---
+  duration_ms: 4.798334
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:21.011Z","requestId":"598b6d1a-24aa-4490-9d49-b89789979829","method":"GET","path":"/api/v1/organizations/33bcfe8e-59be-46a1-9820-6764b0eea60d/products?storeId=f02f1da6-c115-414c-868c-3293512d4bf3","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:21.012Z","requestId":"598b6d1a-24aa-4490-9d49-b89789979829","method":"GET","path":"/api/v1/organizations/33bcfe8e-59be-46a1-9820-6764b0eea60d/products?storeId=f02f1da6-c115-414c-868c-3293512d4bf3","statusCode":401,"durationMs":0.51}
+# Subtest: CT-PRODUCT-001 GET product list requires bearer authentication
+ok 172 - CT-PRODUCT-001 GET product list requires bearer authentication
+  ---
+  duration_ms: 9.950417
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:21.015Z","requestId":"e34347b4-4d3e-4501-9030-237a0746c0d9","method":"POST","path":"/api/v1/organizations/33bcfe8e-59be-46a1-9820-6764b0eea60d/products","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:21.015Z","requestId":"e34347b4-4d3e-4501-9030-237a0746c0d9","method":"POST","path":"/api/v1/organizations/33bcfe8e-59be-46a1-9820-6764b0eea60d/products","statusCode":401,"durationMs":0.46}
+# Subtest: CT-PRODUCT-002 POST product requires bearer authentication
+ok 173 - CT-PRODUCT-002 POST product requires bearer authentication
+  ---
+  duration_ms: 2.905167
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:21.019Z","requestId":"7c7647c0-5807-48b3-b9fc-96f3b65a966b","method":"GET","path":"/api/v1/organizations/33bcfe8e-59be-46a1-9820-6764b0eea60d/products/3b743d99-5b95-46e2-a0f1-f2f187047579","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:21.020Z","requestId":"7c7647c0-5807-48b3-b9fc-96f3b65a966b","method":"GET","path":"/api/v1/organizations/33bcfe8e-59be-46a1-9820-6764b0eea60d/products/3b743d99-5b95-46e2-a0f1-f2f187047579","statusCode":401,"durationMs":1.1}
+# Subtest: CT-PRODUCT-003 GET product detail requires bearer authentication
+ok 174 - CT-PRODUCT-003 GET product detail requires bearer authentication
+  ---
+  duration_ms: 5.296667
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:21.024Z","requestId":"2b814191-eab1-48af-9323-b960bfe9b86e","method":"PATCH","path":"/api/v1/organizations/33bcfe8e-59be-46a1-9820-6764b0eea60d/products/3b743d99-5b95-46e2-a0f1-f2f187047579","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:21.024Z","requestId":"2b814191-eab1-48af-9323-b960bfe9b86e","method":"PATCH","path":"/api/v1/organizations/33bcfe8e-59be-46a1-9820-6764b0eea60d/products/3b743d99-5b95-46e2-a0f1-f2f187047579","statusCode":401,"durationMs":0.58}
+# Subtest: CT-PRODUCT-004 PATCH product requires bearer authentication
+ok 175 - CT-PRODUCT-004 PATCH product requires bearer authentication
+  ---
+  duration_ms: 4.104833
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:21.029Z","requestId":"f43ccbb6-4a70-46a6-b047-87d4b2478687","method":"DELETE","path":"/api/v1/organizations/33bcfe8e-59be-46a1-9820-6764b0eea60d/products/3b743d99-5b95-46e2-a0f1-f2f187047579","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:21.029Z","requestId":"f43ccbb6-4a70-46a6-b047-87d4b2478687","method":"DELETE","path":"/api/v1/organizations/33bcfe8e-59be-46a1-9820-6764b0eea60d/products/3b743d99-5b95-46e2-a0f1-f2f187047579","statusCode":401,"durationMs":0.5}
+# Subtest: CT-PRODUCT-005 DELETE product requires bearer authentication
+ok 176 - CT-PRODUCT-005 DELETE product requires bearer authentication
+  ---
+  duration_ms: 4.799125
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:21.033Z","requestId":"5f968e16-6d96-49ae-a053-0ecfe5665a34","method":"POST","path":"/api/v1/organizations/33bcfe8e-59be-46a1-9820-6764b0eea60d/products/3b743d99-5b95-46e2-a0f1-f2f187047579/variants","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:21.033Z","requestId":"5f968e16-6d96-49ae-a053-0ecfe5665a34","method":"POST","path":"/api/v1/organizations/33bcfe8e-59be-46a1-9820-6764b0eea60d/products/3b743d99-5b95-46e2-a0f1-f2f187047579/variants","statusCode":401,"durationMs":0.46}
+# Subtest: CT-VARIANT-001 POST variant requires bearer authentication
+ok 177 - CT-VARIANT-001 POST variant requires bearer authentication
+  ---
+  duration_ms: 3.849
+  ...
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:21.042Z","requestId":"f5335011-b81b-4327-a49d-9067b7140f73","method":"PATCH","path":"/api/v1/organizations/33bcfe8e-59be-46a1-9820-6764b0eea60d/products/3b743d99-5b95-46e2-a0f1-f2f187047579/variants/2a7bc4e9-88d2-4f19-bf37-d39edbd5259a","statusCode":401,"durationMs":1.27}
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:21.042Z","requestId":"f5335011-b81b-4327-a49d-9067b7140f73","method":"PATCH","path":"/api/v1/organizations/33bcfe8e-59be-46a1-9820-6764b0eea60d/products/3b743d99-5b95-46e2-a0f1-f2f187047579/variants/2a7bc4e9-88d2-4f19-bf37-d39edbd5259a","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# Subtest: CT-VARIANT-002 PATCH variant requires bearer authentication
+ok 178 - CT-VARIANT-002 PATCH variant requires bearer authentication
+  ---
+  duration_ms: 10.311583
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:21.047Z","requestId":"20a623e5-dd27-4151-a301-13f6f8d58d31","method":"DELETE","path":"/api/v1/organizations/33bcfe8e-59be-46a1-9820-6764b0eea60d/products/3b743d99-5b95-46e2-a0f1-f2f187047579/variants/2a7bc4e9-88d2-4f19-bf37-d39edbd5259a","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:21.048Z","requestId":"20a623e5-dd27-4151-a301-13f6f8d58d31","method":"DELETE","path":"/api/v1/organizations/33bcfe8e-59be-46a1-9820-6764b0eea60d/products/3b743d99-5b95-46e2-a0f1-f2f187047579/variants/2a7bc4e9-88d2-4f19-bf37-d39edbd5259a","statusCode":401,"durationMs":0.35}
+# Subtest: CT-VARIANT-003 DELETE variant requires bearer authentication
+ok 179 - CT-VARIANT-003 DELETE variant requires bearer authentication
+  ---
+  duration_ms: 4.076333
+  ...
+# Subtest: CT-STORE-005 StoreDTO shape and tenant organizationId are authoritative
+ok 180 - CT-STORE-005 StoreDTO shape and tenant organizationId are authoritative # TODO Requires authenticated Organization Admin plus disposable Store fixture
+  ---
+  duration_ms: 0.086917
+  ...
+# Subtest: CT-PRODUCT-006 ProductDTO/VariantDTO response shapes use integer satang and no storage fields
+ok 181 - CT-PRODUCT-006 ProductDTO/VariantDTO response shapes use integer satang and no storage fields # TODO Requires authenticated Organization Admin plus disposable Product/Variant fixtures
+  ---
+  duration_ms: 0.114167
+  ...
+# Subtest: CT-PRODUCT-007 product storeId and all nested resources remain tenant-scoped
+ok 182 - CT-PRODUCT-007 product storeId and all nested resources remain tenant-scoped # TODO Requires two-tenant authenticated fixtures to verify TENANT_MISMATCH/FORBIDDEN behavior
+  ---
+  duration_ms: 0.04525
+  ...
+# Subtest: CT-PRODUCT-008 imageKey must match products/{organizationId}/{productId}/ and reference an allowed existing object within 5 MiB
+ok 183 - CT-PRODUCT-008 imageKey must match products/{organizationId}/{productId}/ and reference an allowed existing object within 5 MiB # TODO Requires S3/LocalStack fixture and implemented Product image metadata validation
+  ---
+  duration_ms: 0.086125
+  ...
+# Subtest: CT-PRODUCT-009 management ProductDTO may return imageKey/imageUrl while Storefront omits imageKey
+ok 184 - CT-PRODUCT-009 management ProductDTO may return imageKey/imageUrl while Storefront omits imageKey # TODO Requires Product image fixture and both management/storefront implementations
+  ---
+  duration_ms: 0.041417
+  ...
+# Subtest: CT-PRODUCT-010 product and variant delete are soft deactivation and return 204
+ok 185 - CT-PRODUCT-010 product and variant delete are soft deactivation and return 204 # TODO Requires authenticated Organization Admin plus persisted Product/Variant fixtures
+  ---
+  duration_ms: 0.132416
+  ...
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.896Z","requestId":"69badb26-440a-4915-8841-d2157aff77e1","method":"GET","path":"/api/v1/storefront/organizations","statusCode":200,"durationMs":3.83}
+# Subtest: CT-STOREFRONT-001 GET /api/v1/storefront/organizations is public
+ok 186 - CT-STOREFRONT-001 GET /api/v1/storefront/organizations is public
+  ---
+  duration_ms: 207.416125
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.907Z","requestId":"bb9e13b4-ee66-4dcf-94fa-13d92e4df862","method":"GET","path":"/api/v1/storefront/organizations/2c3531d0-6cdf-432d-8ebe-93df2422f60d/stores","statusCode":404,"errorCode":"ORGANIZATION_NOT_FOUND"}
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.912Z","requestId":"6cfdd574-342c-4ba4-a630-54c467e98bf3","method":"GET","path":"/api/v1/storefront/organizations/2c3531d0-6cdf-432d-8ebe-93df2422f60d/stores/f56cda6d-087a-41ac-8c03-4bdc8a1250cb","statusCode":404,"errorCode":"ORGANIZATION_NOT_FOUND"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.908Z","requestId":"bb9e13b4-ee66-4dcf-94fa-13d92e4df862","method":"GET","path":"/api/v1/storefront/organizations/2c3531d0-6cdf-432d-8ebe-93df2422f60d/stores","statusCode":404,"durationMs":1.51}
+# Subtest: CT-STOREFRONT-002 organization store listing is public
+ok 187 - CT-STOREFRONT-002 organization store listing is public
+  ---
+  duration_ms: 6.926959
+  ...
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.912Z","requestId":"6cfdd574-342c-4ba4-a630-54c467e98bf3","method":"GET","path":"/api/v1/storefront/organizations/2c3531d0-6cdf-432d-8ebe-93df2422f60d/stores/f56cda6d-087a-41ac-8c03-4bdc8a1250cb","statusCode":404,"durationMs":0.75}
+# Subtest: CT-STOREFRONT-003 store detail is public
+ok 188 - CT-STOREFRONT-003 store detail is public
+  ---
+  duration_ms: 3.774916
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.965Z","requestId":"d8ebd305-4158-4a8e-a7b3-b42f4cb3cdf1","method":"GET","path":"/api/v1/storefront/organizations/2c3531d0-6cdf-432d-8ebe-93df2422f60d/stores/f56cda6d-087a-41ac-8c03-4bdc8a1250cb/products","statusCode":404,"errorCode":"ORGANIZATION_NOT_FOUND"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.969Z","requestId":"d8ebd305-4158-4a8e-a7b3-b42f4cb3cdf1","method":"GET","path":"/api/v1/storefront/organizations/2c3531d0-6cdf-432d-8ebe-93df2422f60d/stores/f56cda6d-087a-41ac-8c03-4bdc8a1250cb/products","statusCode":404,"durationMs":4.07}
+# Subtest: CT-STOREFRONT-004 product listing is public
+ok 189 - CT-STOREFRONT-004 product listing is public
+  ---
+  duration_ms: 56.914458
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.977Z","requestId":"503354ab-80e5-4669-9edd-ce042bb741bc","method":"GET","path":"/api/v1/storefront/organizations/2c3531d0-6cdf-432d-8ebe-93df2422f60d/stores/f56cda6d-087a-41ac-8c03-4bdc8a1250cb/products/709772ce-9be6-4d47-ba95-17d5ad672991","statusCode":404,"errorCode":"ORGANIZATION_NOT_FOUND"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.979Z","requestId":"503354ab-80e5-4669-9edd-ce042bb741bc","method":"GET","path":"/api/v1/storefront/organizations/2c3531d0-6cdf-432d-8ebe-93df2422f60d/stores/f56cda6d-087a-41ac-8c03-4bdc8a1250cb/products/709772ce-9be6-4d47-ba95-17d5ad672991","statusCode":404,"durationMs":3.09}
+# Subtest: CT-STOREFRONT-005 product detail is public and never exposes imageKey
+ok 190 - CT-STOREFRONT-005 product detail is public and never exposes imageKey
+  ---
+  duration_ms: 10.607
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.983Z","requestId":"a4ec1783-99f5-4f5b-a317-0479b0073139","method":"GET","path":"/api/v1/storefront/organizations/2c3531d0-6cdf-432d-8ebe-93df2422f60d/stores/f56cda6d-087a-41ac-8c03-4bdc8a1250cb/campaigns","statusCode":404,"errorCode":"ORGANIZATION_NOT_FOUND"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.983Z","requestId":"a4ec1783-99f5-4f5b-a317-0479b0073139","method":"GET","path":"/api/v1/storefront/organizations/2c3531d0-6cdf-432d-8ebe-93df2422f60d/stores/f56cda6d-087a-41ac-8c03-4bdc8a1250cb/campaigns","statusCode":404,"durationMs":0.39}
+# Subtest: CT-STOREFRONT-006 campaign listing is public
+ok 191 - CT-STOREFRONT-006 campaign listing is public
+  ---
+  duration_ms: 3.379541
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.987Z","requestId":"2bb70ab3-82e5-4eb3-8136-911f6b20932d","method":"GET","path":"/api/v1/storefront/organizations/2c3531d0-6cdf-432d-8ebe-93df2422f60d/stores/f56cda6d-087a-41ac-8c03-4bdc8a1250cb/campaigns/cb9b1bc1-b137-4aca-8df0-7a8d517c3f39","statusCode":404,"errorCode":"ORGANIZATION_NOT_FOUND"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.987Z","requestId":"2bb70ab3-82e5-4eb3-8136-911f6b20932d","method":"GET","path":"/api/v1/storefront/organizations/2c3531d0-6cdf-432d-8ebe-93df2422f60d/stores/f56cda6d-087a-41ac-8c03-4bdc8a1250cb/campaigns/cb9b1bc1-b137-4aca-8df0-7a8d517c3f39","statusCode":404,"durationMs":0.48}
+# Subtest: CT-STOREFRONT-007 campaign detail is public
+ok 192 - CT-STOREFRONT-007 campaign detail is public
+  ---
+  duration_ms: 4.405084
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:20.998Z","requestId":"36eab316-2732-411c-a757-29c2634e5585","method":"POST","path":"/api/v1/organizations/2c3531d0-6cdf-432d-8ebe-93df2422f60d/orders","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:20.998Z","requestId":"36eab316-2732-411c-a757-29c2634e5585","method":"POST","path":"/api/v1/organizations/2c3531d0-6cdf-432d-8ebe-93df2422f60d/orders","statusCode":401,"durationMs":4.42}
+# Subtest: CT-STOREFRONT-008 order creation still requires bearer authentication
+ok 193 - CT-STOREFRONT-008 order creation still requires bearer authentication
+  ---
+  duration_ms: 10.524
+  ...
+# Subtest: E2E-CORE-001 canonical register-to-received flow
+ok 194 - E2E-CORE-001 canonical register-to-received flow # TODO BLOCKED: core E2E owning implementations are incomplete: backend/src/modules/payments/payment.routes.js, backend/src/modules/production/production.routes.js, backend/src/modules/pickups/pickup.routes.js, backend/src/modules/notifications/notification.routes.js, backend/src/worker.js
+  ---
+  duration_ms: 5.028208
+  ...
+# Subtest: E2E-PAYMENT-REJECT-001 reject -> notify -> resubmit -> approve -> PAID with audit trail
+ok 195 - E2E-PAYMENT-REJECT-001 reject -> notify -> resubmit -> approve -> PAID with audit trail # TODO BLOCKED: payment-rejection E2E owning implementations are incomplete: backend/src/modules/payments/payment.routes.js, backend/src/modules/notifications/notification.routes.js, backend/src/modules/audit/audit.routes.js, backend/src/worker.js
+  ---
+  duration_ms: 4.713625
+  ...
+# Subtest: E2E-PAYMENT-REJECT-001 customer can read the exact Payment rejection reason through a documented own-order payment read contract
+ok 196 - E2E-PAYMENT-REJECT-001 customer can read the exact Payment rejection reason through a documented own-order payment read contract # TODO BLOCKED: Testing/Frontend require Customer-visible rejection reason, but the current API contract defines no Customer-readable Payment detail endpoint or Payment field on OrderDTO. Do not invent a route/shape; Integration/API contract must resolve this read path.
+  ---
+  duration_ms: 0.129875
+  ...
+# Subtest: E2E-TENANT-001 two-organization cross-tenant denial matrix
+ok 197 - E2E-TENANT-001 two-organization cross-tenant denial matrix # TODO BLOCKED: tenant E2E owning implementations are incomplete: backend/src/modules/payments/payment.routes.js, backend/src/modules/pickups/pickup.routes.js
+  ---
+  duration_ms: 13.077917
+  ...
+# Subtest: E2E-NOTIFY-001 business event -> SQS -> Worker -> Notification -> mark-read for approved/rejected/ready events
+ok 198 - E2E-NOTIFY-001 business event -> SQS -> Worker -> Notification -> mark-read for approved/rejected/ready events # TODO BLOCKED: notification E2E owning implementations are incomplete: backend/src/modules/payments/payment.routes.js, backend/src/modules/pickups/pickup.routes.js, backend/src/modules/notifications/notification.routes.js, backend/src/worker.js
+  ---
+  duration_ms: 9.741292
+  ...
+# Subtest: E2E-NOTIFY-001 duplicate delivery maps eventId to notificationId and creates only one Notification
+ok 199 - E2E-NOTIFY-001 duplicate delivery maps eventId to notificationId and creates only one Notification # TODO BLOCKED: duplicate-delivery E2E requires Notification route/Worker: backend/src/modules/notifications/notification.routes.js, backend/src/worker.js
+  ---
+  duration_ms: 3.954833
+  ...
+# Subtest: FE-001 Frontend Next.js project manifest exists
+not ok 200 - FE-001 Frontend Next.js project manifest exists
+  ---
+  duration_ms: 7.807041
+  location: 'file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/frontend/frontend-interaction.test.mjs:10:1'
+  failureType: 'testCodeFailure'
+  error: "ENOENT: no such file or directory, access '/Users/mba135816/Documents/GitHub/UniStore_Hub/frontend/package.json'"
+  code: 'ENOENT'
+  stack: |-
+    async access (node:internal/fs/promises:603:10)
+    async TestContext.<anonymous> (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/frontend/frontend-interaction.test.mjs:11:3)
+    async Test.run (node:internal/test_runner/test:657:9)
+    async startSubtest (node:internal/test_runner/harness:235:3)
+  ...
+# Subtest: FE-002 required App Router entry/login/register pages exist
+not ok 201 - FE-002 required App Router entry/login/register pages exist
+  ---
+  duration_ms: 2.678792
+  location: 'file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/frontend/frontend-interaction.test.mjs:14:1'
+  failureType: 'testCodeFailure'
+  error: "ENOENT: no such file or directory, access '/Users/mba135816/Documents/GitHub/UniStore_Hub/frontend/src/app/page.tsx'"
+  code: 'ENOENT'
+  stack: |-
+    async access (node:internal/fs/promises:603:10)
+    async TestContext.<anonymous> (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/frontend/frontend-interaction.test.mjs:22:5)
+    async Test.run (node:internal/test_runner/test:657:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:389:7)
+  ...
+# Subtest: FE-003 public Storefront renders active browse data without JWT while Order creation requires authentication
+ok 202 - FE-003 public Storefront renders active browse data without JWT while Order creation requires authentication # TODO BLOCKED: Frontend application/routes are not implemented yet; requires rendered Storefront with API stubs or live Backend
+  ---
+  duration_ms: 0.18875
+  ...
+# Subtest: FE-004 Login page handles successful login and stable API error-code feedback
+ok 203 - FE-004 Login page handles successful login and stable API error-code feedback # TODO BLOCKED: requires Login UI, shared API client, session helper, and executable browser/component harness
+  ---
+  duration_ms: 0.055417
+  ...
+# Subtest: FE-005 Register page handles successful registration and stable API error-code feedback
+ok 204 - FE-005 Register page handles successful registration and stable API error-code feedback # TODO BLOCKED: requires Register UI, shared API client, session helper, and executable browser/component harness
+  ---
+  duration_ms: 0.055708
+  ...
+# Subtest: FE-006 session restore reads unistoreHub.accessToken and restores identity via GET /me
+ok 205 - FE-006 session restore reads unistoreHub.accessToken and restores identity via GET /me # TODO BLOCKED: requires auth/session implementation and browser sessionStorage harness
+  ---
+  duration_ms: 0.045666
+  ...
+# Subtest: FE-007 logout clears unistoreHub.accessToken from sessionStorage
+ok 206 - FE-007 logout clears unistoreHub.accessToken from sessionStorage # TODO BLOCKED: requires auth/session implementation and browser sessionStorage harness
+  ---
+  duration_ms: 0.039875
+  ...
+# Subtest: FE-008 401 clears invalid auth state and renders/login-redirects without treating user as authenticated
+ok 207 - FE-008 401 clears invalid auth state and renders/login-redirects without treating user as authenticated # TODO BLOCKED: requires shared HTTP client, auth boundary, and route rendering harness
+  ---
+  duration_ms: 0.096084
+  ...
+# Subtest: FE-009 403 retains authenticated state and renders forbidden UI without redirecting to Login
+ok 208 - FE-009 403 retains authenticated state and renders forbidden UI without redirecting to Login # TODO BLOCKED: requires shared HTTP client, authenticated fixture, and forbidden-state UI
+  ---
+  duration_ms: 0.0625
+  ...
+# Subtest: FE-010 remote-data screens expose loading, success, empty, error/retry, unauthorized, and forbidden states
+ok 209 - FE-010 remote-data screens expose loading, success, empty, error/retry, unauthorized, and forbidden states # TODO BLOCKED: requires implemented feature screens and component/browser harness
+  ---
+  duration_ms: 0.1175
+  ...
+# Subtest: FE-011 invalid runtime query parameters render controlled invalid-link state before repeated malformed API calls
+ok 210 - FE-011 invalid runtime query parameters render controlled invalid-link state before repeated malformed API calls # TODO BLOCKED: requires static query-parameter entity routes and route-state validation
+  ---
+  duration_ms: 0.06075
+  ...
+# Subtest: FE-012 Customer own-order flow supports list/detail/status and only eligible own cancellation actions
+ok 211 - FE-012 Customer own-order flow supports list/detail/status and only eligible own cancellation actions # TODO BLOCKED: requires Order UI/services plus authenticated Customer fixtures
+  ---
+  duration_ms: 0.050042
+  ...
+# Subtest: FE-013 Order creation submits only campaignId/productId/variantId/quantity and no authoritative prices or totals
+ok 212 - FE-013 Order creation submits only campaignId/productId/variantId/quantity and no authoritative prices or totals # TODO BLOCKED: requires Order form and observable API adapter request payload
+  ---
+  duration_ms: 0.044583
+  ...
+# Subtest: FE-014 Payment UI displays backend rejection reason and supports replacement-slip resubmission
+ok 213 - FE-014 Payment UI displays backend rejection reason and supports replacement-slip resubmission # TODO BLOCKED: requires Customer Payment UI and rejected Payment fixture
+  ---
+  duration_ms: 0.113458
+  ...
+# Subtest: FE-015 Product Image and Payment Slip uploads use Backend pre-sign then direct PUT to S3 rather than proxying binary through API
+ok 214 - FE-015 Product Image and Payment Slip uploads use Backend pre-sign then direct PUT to S3 rather than proxying binary through API # TODO BLOCKED: requires file service/UI implementation and observable browser network flow
+  ---
+  duration_ms: 0.047542
+  ...
+# Subtest: FE-016 Payment Slip client validation enforces jpeg/png/webp and 10 MiB before requesting pre-sign
+ok 215 - FE-016 Payment Slip client validation enforces jpeg/png/webp and 10 MiB before requesting pre-sign # TODO BLOCKED: requires Payment upload component and file-selection harness
+  ---
+  duration_ms: 0.094292
+  ...
+# Subtest: FE-017 Production view is Organization Admin-only UX and renders Backend summary rather than rebuilding totals client-side
+ok 216 - FE-017 Production view is Organization Admin-only UX and renders Backend summary rather than rebuilding totals client-side # TODO BLOCKED: requires Production route/module and role-specific authenticated fixtures
+  ---
+  duration_ms: 0.120084
+  ...
+# Subtest: FE-018 Pickup UI refreshes after confirm and maps PICKUP_ALREADY_RECEIVED to controlled duplicate-conflict feedback
+ok 217 - FE-018 Pickup UI refreshes after confirm and maps PICKUP_ALREADY_RECEIVED to controlled duplicate-conflict feedback # TODO BLOCKED: requires Pickup staff/admin UI and confirm API fixture
+  ---
+  duration_ms: 0.141833
+  ...
+# Subtest: FE-019 Notification UI renders read/unread state and marks owned Notification read
+ok 218 - FE-019 Notification UI renders read/unread state and marks owned Notification read # TODO BLOCKED: requires Notification module, API client, and authenticated notification fixtures
+  ---
+  duration_ms: 0.055542
+  ...
+# Subtest: FE-020 role-aware navigation matches Customer, Staff, Organization Admin, and persisted Platform Admin roles
+ok 219 - FE-020 role-aware navigation matches Customer, Staff, Organization Admin, and persisted Platform Admin roles # TODO BLOCKED: requires navigation shell plus GET /me membership/platformRole fixtures
+  ---
+  duration_ms: 0.109875
+  ...
+# Subtest: FE-021 Staff navigation hides Production while Organization Admin shows Production
+ok 220 - FE-021 Staff navigation hides Production while Organization Admin shows Production # TODO BLOCKED: requires role-aware navigation implementation and Staff/Admin fixtures
+  ---
+  duration_ms: 0.044166
+  ...
+# Subtest: FE-022 Organization query parameter is treated as navigation context only and privileged nav requires current membership
+ok 221 - FE-022 Organization query parameter is treated as navigation context only and privileged nav requires current membership # TODO BLOCKED: requires organization-context navigation implementation and multiple membership fixtures
+  ---
+  duration_ms: 0.036709
+  ...
+# Subtest: FE-023 empty states show no fake rows for Orders, Payment review, Notifications, and Production
+ok 222 - FE-023 empty states show no fake rows for Orders, Payment review, Notifications, and Production # TODO BLOCKED: requires respective screens and successful-empty API fixtures
+  ---
+  duration_ms: 0.031834
+  ...
+# Subtest: STATIC-001 frontend package.json exists
+not ok 223 - STATIC-001 frontend package.json exists
+  ---
+  duration_ms: 9.079458
+  location: 'file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/frontend/static-export.test.mjs:36:1'
+  failureType: 'testCodeFailure'
+  error: "ENOENT: no such file or directory, access '/Users/mba135816/Documents/GitHub/UniStore_Hub/frontend/package.json'"
+  code: 'ENOENT'
+  stack: |-
+    async access (node:internal/fs/promises:603:10)
+    async TestContext.<anonymous> (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/frontend/static-export.test.mjs:37:3)
+    async Test.run (node:internal/test_runner/test:657:9)
+    async startSubtest (node:internal/test_runner/harness:235:3)
+  ...
+# Subtest: STATIC-002 frontend package-lock.json exists for deterministic npm ci
+not ok 224 - STATIC-002 frontend package-lock.json exists for deterministic npm ci
+  ---
+  duration_ms: 5.586167
+  location: 'file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/frontend/static-export.test.mjs:40:1'
+  failureType: 'testCodeFailure'
+  error: "ENOENT: no such file or directory, access '/Users/mba135816/Documents/GitHub/UniStore_Hub/frontend/package-lock.json'"
+  code: 'ENOENT'
+  stack: |-
+    async access (node:internal/fs/promises:603:10)
+    async TestContext.<anonymous> (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/frontend/static-export.test.mjs:41:3)
+    async Test.run (node:internal/test_runner/test:657:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:389:7)
+  ...
+# Subtest: STATIC-003 Next.js config exists and declares output=export plus trailingSlash=true
+not ok 225 - STATIC-003 Next.js config exists and declares output=export plus trailingSlash=true
+  ---
+  duration_ms: 5.588375
+  location: 'file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/frontend/static-export.test.mjs:44:1'
+  failureType: 'testCodeFailure'
+  error: 'Expected next.config.js, next.config.mjs, or next.config.ts'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: ~
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/frontend/static-export.test.mjs:51:10)
+    async Test.run (node:internal/test_runner/test:657:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:389:7)
+  ...
+# Subtest: STATIC-004 runtime entity routes are implemented as static pages, not dynamic [id] pages
+not ok 226 - STATIC-004 runtime entity routes are implemented as static pages, not dynamic [id] pages
+  ---
+  duration_ms: 5.246791
+  location: 'file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/frontend/static-export.test.mjs:58:1'
+  failureType: 'testCodeFailure'
+  error: 'Expected implemented App Router page files'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/frontend/static-export.test.mjs:61:10)
+    async Test.run (node:internal/test_runner/test:657:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:389:7)
+  ...
+# Subtest: STATIC-005 canonical query-parameter entity route page files exist
+not ok 227 - STATIC-005 canonical query-parameter entity route page files exist
+  ---
+  duration_ms: 2.110042
+  location: 'file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/frontend/static-export.test.mjs:73:1'
+  failureType: 'testCodeFailure'
+  error: "ENOENT: no such file or directory, access '/Users/mba135816/Documents/GitHub/UniStore_Hub/frontend/src/app/stores/view/page.tsx'"
+  code: 'ENOENT'
+  stack: |-
+    async access (node:internal/fs/promises:603:10)
+    async TestContext.<anonymous> (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/frontend/static-export.test.mjs:83:5)
+    async Test.run (node:internal/test_runner/test:657:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:389:7)
+  ...
+# Subtest: STATIC-006 frontend/out exists as a directory after production build
+not ok 228 - STATIC-006 frontend/out exists as a directory after production build
+  ---
+  duration_ms: 0.495875
+  location: 'file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/frontend/static-export.test.mjs:87:1'
+  failureType: 'testCodeFailure'
+  error: "ENOENT: no such file or directory, stat '/Users/mba135816/Documents/GitHub/UniStore_Hub/frontend/out'"
+  code: 'ENOENT'
+  stack: |-
+    async stat (node:internal/fs/promises:1029:18)
+    async TestContext.<anonymous> (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/frontend/static-export.test.mjs:89:22)
+    async Test.run (node:internal/test_runner/test:657:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:389:7)
+  ...
+# Subtest: STATIC-007 npm ci -> npm test -> npm run build succeeds and produces frontend/out
+ok 229 - STATIC-007 npm ci -> npm test -> npm run build succeeds and produces frontend/out # TODO BLOCKED: frontend package manifest/lockfile and application implementation are currently absent
+  ---
+  duration_ms: 0.152875
+  ...
+# Subtest: STATIC-008 exported canonical route directories contain index.html files under frontend/out
+ok 230 - STATIC-008 exported canonical route directories contain index.html files under frontend/out # TODO BLOCKED: requires successful Next.js static-export build output
+  ---
+  duration_ms: 0.100792
+  ...
+# Subtest: STATIC-009 direct refresh of canonical trailing-slash URLs resolves with S3 Website path semantics
+ok 231 - STATIC-009 direct refresh of canonical trailing-slash URLs resolves with S3 Website path semantics # TODO BLOCKED: requires built frontend/out and an S3 Website-compatible static HTTP serving check
+  ---
+  duration_ms: 0.09825
+  ...
+# Subtest: STATIC-010 query-parameter entity routes load/refresh arbitrary runtime IDs without generateStaticParams or build-time API data
+ok 232 - STATIC-010 query-parameter entity routes load/refresh arbitrary runtime IDs without generateStaticParams or build-time API data # TODO BLOCKED: requires implemented static pages and successful build to exercise arbitrary runtime query IDs
+  ---
+  duration_ms: 0.161333
+  ...
+# Subtest: loadTestEnv uses canonical local defaults and supports explicit overrides
+ok 233 - loadTestEnv uses canonical local defaults and supports explicit overrides
+  ---
+  duration_ms: 0.938833
+  ...
+# Subtest: fixture factories are deterministic and produce contract-shaped primitive values
+ok 234 - fixture factories are deterministic and produce contract-shaped primitive values
+  ---
+  duration_ms: 2.141167
+  ...
+# Subtest: HTTP helpers build query strings and send JSON with bearer auth
+ok 235 - HTTP helpers build query strings and send JSON with bearer auth
+  ---
+  duration_ms: 18.802667
+  ...
+# Subtest: reusable assertions validate API envelopes and storage-field privacy
+ok 236 - reusable assertions validate API envelopes and storage-field privacy
+  ---
+  duration_ms: 0.716125
+  ...
+# Subtest: INFRA-CFN-001 required CloudFormation resource inventory and resource types exist
+ok 237 - INFRA-CFN-001 required CloudFormation resource inventory and resource types exist
+  ---
+  duration_ms: 2.168208
+  ...
+# Subtest: INFRA-CFN-002 AppTable uses PAY_PER_REQUEST with PK/SK and GSI1PK/GSI1SK on GSI1
+ok 238 - INFRA-CFN-002 AppTable uses PAY_PER_REQUEST with PK/SK and GSI1PK/GSI1SK on GSI1
+  ---
+  duration_ms: 0.51625
+  ...
+# Subtest: INFRA-CFN-003 FilesBucket is private, AES256 encrypted, and CORS allows only GET/PUT/HEAD
+ok 239 - INFRA-CFN-003 FilesBucket is private, AES256 encrypted, and CORS allows only GET/PUT/HEAD
+  ---
+  duration_ms: 0.571584
+  ...
+# Subtest: INFRA-CFN-004 Frontend bucket is a static website and public policy grants only s3:GetObject
+ok 240 - INFRA-CFN-004 Frontend bucket is a static website and public policy grants only s3:GetObject
+  ---
+  duration_ms: 0.114541
+  ...
+# Subtest: INFRA-CFN-005 Lambda functions use existing LabRole and template creates no custom IAM role/user/group
+ok 241 - INFRA-CFN-005 Lambda functions use existing LabRole and template creates no custom IAM role/user/group
+  ---
+  duration_ms: 0.196375
+  ...
+# Subtest: INFRA-CFN-006 Lambda Environment.Variables does not inject reserved AWS_REGION
+ok 242 - INFRA-CFN-006 Lambda Environment.Variables does not inject reserved AWS_REGION
+  ---
+  duration_ms: 0.108208
+  ...
+# Subtest: INFRA-CFN-007 SQS event mapping connects NotificationQueue to WorkerFunction with normal redelivery baseline
+ok 243 - INFRA-CFN-007 SQS event mapping connects NotificationQueue to WorkerFunction with normal redelivery baseline
+  ---
+  duration_ms: 0.182292
+  ...
+# Subtest: INFRA-CFN-008 Backend, Worker, and API access CloudWatch log groups retain logs for 7 days
+ok 244 - INFRA-CFN-008 Backend, Worker, and API access CloudWatch log groups retain logs for 7 days
+  ---
+  duration_ms: 0.193084
+  ...
+# Subtest: INFRA-CFN-009 API Gateway proxy/deployment/stage and Lambda invoke permission are wired
+ok 245 - INFRA-CFN-009 API Gateway proxy/deployment/stage and Lambda invoke permission are wired
+  ---
+  duration_ms: 0.224625
+  ...
+# Subtest: INFRA-CFN-010 forbidden Learner Lab services and project-created IAM roles are absent
+ok 246 - INFRA-CFN-010 forbidden Learner Lab services and project-created IAM roles are absent
+  ---
+  duration_ms: 0.253875
+  ...
+# Subtest: INFRA-CFN-011 JWT secret parameter is NoEcho without default and expected stack outputs exist
+ok 247 - INFRA-CFN-011 JWT secret parameter is NoEcho without default and expected stack outputs exist
+  ---
+  duration_ms: 0.167625
+  ...
+# Subtest: INFRA-CFN-012 infrastructure-owned validator passes the canonical template
+ok 248 - INFRA-CFN-012 infrastructure-owned validator passes the canonical template
+  ---
+  duration_ms: 111.449583
+  ...
+# Subtest: DATA-001 generated entity IDs are UUID v4
+ok 249 - DATA-001 generated entity IDs are UUID v4
+  ---
+  duration_ms: 2.748959
+  ...
+# Subtest: DATA-002 persisted timestamp utility emits canonical ISO 8601 UTC with milliseconds
+ok 250 - DATA-002 persisted timestamp utility emits canonical ISO 8601 UTC with milliseconds
+  ---
+  duration_ms: 2.539167
+  ...
+# Subtest: DATA-003 organization membership roles remain STAFF and ORGANIZATION_ADMIN
+ok 251 - DATA-003 organization membership roles remain STAFF and ORGANIZATION_ADMIN
+  ---
+  duration_ms: 0.820708
+  ...
+# Subtest: DATA-004 core PK/SK key builders match the single-table contract
+ok 252 - DATA-004 core PK/SK key builders match the single-table contract
+  ---
+  duration_ms: 0.203084
+  ...
+# Subtest: DATA-005 GSI1 builders use tenant/user-qualified lookup prefixes
+ok 253 - DATA-005 GSI1 builders use tenant/user-qualified lookup prefixes
+  ---
+  duration_ms: 0.159375
+  ...
+# Subtest: DATA-006 CampaignOrderLink key supports campaign order listing without Scan
+ok 254 - DATA-006 CampaignOrderLink key supports campaign order listing without Scan
+  ---
+  duration_ms: 0.146708
+  ...
+# Subtest: DATA-007 OrderItem, Payment, and Pickup child keys carry organizationId in the partition
+ok 255 - DATA-007 OrderItem, Payment, and Pickup child keys carry organizationId in the partition
+  ---
+  duration_ms: 0.105667
+  ...
+# Subtest: DATA-008 Pickup lookup remains tenant-qualified
+ok 256 - DATA-008 Pickup lookup remains tenant-qualified
+  ---
+  duration_ms: 0.772042
+  ...
+# Subtest: DATA-009 Audit and Notification keys match their required namespaces
+ok 257 - DATA-009 Audit and Notification keys match their required namespaces
+  ---
+  duration_ms: 0.544833
+  ...
+# Subtest: DATA-010 normal backend request-path source does not depend on DynamoDB Scan
+ok 258 - DATA-010 normal backend request-path source does not depend on DynamoDB Scan
+  ---
+  duration_ms: 60.844666
+  ...
+# Subtest: DATA-011 Order/OrderItem monetary fields are persisted as integer satang and snapshots remain immutable
+ok 259 - DATA-011 Order/OrderItem monetary fields are persisted as integer satang and snapshots remain immutable # TODO BLOCKED: requires implemented Order repository/service and persisted Order/OrderItem fixtures
+  ---
+  duration_ms: 0.110667
+  ...
+# Subtest: DATA-012 all Organization-owned persisted entities include explicit organizationId
+ok 260 - DATA-012 all Organization-owned persisted entities include explicit organizationId # TODO BLOCKED: Store/Product/Campaign/Order/Payment/Pickup/Audit repositories are not fully implemented yet
+  ---
+  duration_ms: 0.06825
+  ...
+# Subtest: DATA-013 CampaignOrderLink item includes organizationId/campaignId/orderId/customerId/status and tracks status transactionally
+ok 261 - DATA-013 CampaignOrderLink item includes organizationId/campaignId/orderId/customerId/status and tracks status transactionally # TODO BLOCKED: requires implemented Order lifecycle persistence and CampaignOrderLink transaction writes
+  ---
+  duration_ms: 0.038958
+  ...
+# Subtest: DATA-014 Worker-created Notification uses notificationId=eventId and createdAt=occurredAt with conditional put idempotency
+ok 262 - DATA-014 Worker-created Notification uses notificationId=eventId and createdAt=occurredAt with conditional put idempotency # TODO BLOCKED: Notification Worker persistence is not implemented yet
+  ---
+  duration_ms: 0.092334
+  ...
+# Subtest: DATA-015 Payment and Pickup status persistence uses canonical enums
+ok 263 - DATA-015 Payment and Pickup status persistence uses canonical enums # TODO BLOCKED: Payment and Pickup persistence modules are not implemented yet
+  ---
+  duration_ms: 0.044
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:21.235Z","requestId":"476968bf-445e-48b8-9607-39fbbe4b525f","method":"GET","path":"/api/v1/notifications?read=false","statusCode":404,"errorCode":"VALIDATION_ERROR"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:21.237Z","requestId":"476968bf-445e-48b8-9607-39fbbe4b525f","method":"GET","path":"/api/v1/notifications?read=false","statusCode":404,"durationMs":3.01}
+# Subtest: CT-NOTIFY-001 notification list requires bearer authentication
+not ok 264 - CT-NOTIFY-001 notification list requires bearer authentication
+  ---
+  duration_ms: 98.616292
+  location: 'file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/integration/notification-resilience.test.mjs:38:1'
+  failureType: 'testCodeFailure'
+  error: 'Expected HTTP 401, got 404'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 401
+  actual: 404
+  operator: 'strictEqual'
+  stack: |-
+    assertHttpStatus (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/helpers/assertions.mjs:8:10)
+    assertAuthRequired (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/integration/notification-resilience.test.mjs:33:3)
+    file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/integration/notification-resilience.test.mjs:45:5
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async withBackendServer (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/helpers/backend-app.mjs:42:12)
+    async TestContext.<anonymous> (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/integration/notification-resilience.test.mjs:39:3)
+    async Test.run (node:internal/test_runner/test:657:9)
+    async startSubtest (node:internal/test_runner/harness:235:3)
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:21.246Z","requestId":"69437768-4d89-4c5b-a8e9-da78f620b4f4","method":"PATCH","path":"/api/v1/notifications/04de9d65-403b-4f27-87c9-9b497f5f4411/read","statusCode":404,"errorCode":"VALIDATION_ERROR"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:21.246Z","requestId":"69437768-4d89-4c5b-a8e9-da78f620b4f4","method":"PATCH","path":"/api/v1/notifications/04de9d65-403b-4f27-87c9-9b497f5f4411/read","statusCode":404,"durationMs":0.67}
+# Subtest: CT-NOTIFY-002 mark-read requires bearer authentication
+not ok 265 - CT-NOTIFY-002 mark-read requires bearer authentication
+  ---
+  duration_ms: 4.680875
+  location: 'file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/integration/notification-resilience.test.mjs:49:1'
+  failureType: 'testCodeFailure'
+  error: 'Expected HTTP 401, got 404'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 401
+  actual: 404
+  operator: 'strictEqual'
+  stack: |-
+    assertHttpStatus (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/helpers/assertions.mjs:8:10)
+    assertAuthRequired (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/integration/notification-resilience.test.mjs:33:3)
+    file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/integration/notification-resilience.test.mjs:57:5
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async withBackendServer (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/helpers/backend-app.mjs:42:12)
+    async TestContext.<anonymous> (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/integration/notification-resilience.test.mjs:50:3)
+    async Test.run (node:internal/test_runner/test:657:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:389:7)
+  ...
+# Subtest: CT-NOTIFY-003 SQS adapter sends the canonical JSON payload to the configured queue URL
+ok 266 - CT-NOTIFY-003 SQS adapter sends the canonical JSON payload to the configured queue URL
+  ---
+  duration_ms: 0.851708
+  ...
+# Subtest: CT-NOTIFY-004 Backend Worker entrypoint src/worker.js exists
+not ok 267 - CT-NOTIFY-004 Backend Worker entrypoint src/worker.js exists
+  ---
+  duration_ms: 0.8955
+  location: 'file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/integration/notification-resilience.test.mjs:91:1'
+  failureType: 'testCodeFailure'
+  error: "ENOENT: no such file or directory, access '/Users/mba135816/Documents/GitHub/UniStore_Hub/backend/src/worker.js'"
+  code: 'ENOENT'
+  stack: |-
+    async access (node:internal/fs/promises:603:10)
+    async TestContext.<anonymous> (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/integration/notification-resilience.test.mjs:94:3)
+    async Test.run (node:internal/test_runner/test:657:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:389:7)
+  ...
+# Subtest: CT-NOTIFY-005 current-user Notification list returns only notification.userId matching authenticated user
+ok 268 - CT-NOTIFY-005 current-user Notification list returns only notification.userId matching authenticated user # TODO BLOCKED: requires mounted Notification routes plus two authenticated users with distinct persisted Notifications
+  ---
+  duration_ms: 0.172583
+  ...
+# Subtest: CT-NOTIFY-006 read filter and cursor pagination remain scoped to current user
+ok 269 - CT-NOTIFY-006 read filter and cursor pagination remain scoped to current user # TODO BLOCKED: requires Notification repository/list implementation with disposable read/unread fixtures
+  ---
+  duration_ms: 0.116791
+  ...
+# Subtest: CT-NOTIFY-007 mark-read requires Notification ownership and sets readAt to current canonical ISO UTC timestamp
+ok 270 - CT-NOTIFY-007 mark-read requires Notification ownership and sets readAt to current canonical ISO UTC timestamp # TODO BLOCKED: requires mounted mark-read route and persisted Notifications owned by two different users
+  ---
+  duration_ms: 0.048375
+  ...
+# Subtest: CT-NOTIFY-008 PAYMENT_APPROVED publishes canonical version-1 event only after Payment/Order/Audit core transaction commits
+ok 271 - CT-NOTIFY-008 PAYMENT_APPROVED publishes canonical version-1 event only after Payment/Order/Audit core transaction commits # TODO BLOCKED: requires implemented Payment approval transaction plus injectable failing/recording SQS publisher
+  ---
+  duration_ms: 0.03825
+  ...
+# Subtest: CT-NOTIFY-009 PAYMENT_REJECTED publishes canonical version-1 event only after core rejection transaction commits
+ok 272 - CT-NOTIFY-009 PAYMENT_REJECTED publishes canonical version-1 event only after core rejection transaction commits # TODO BLOCKED: requires implemented Payment rejection transaction plus injectable failing/recording SQS publisher
+  ---
+  duration_ms: 0.094791
+  ...
+# Subtest: CT-NOTIFY-010 READY_FOR_PICKUP publishes one canonical event per eligible Order after core ready-for-pickup writes commit
+ok 273 - CT-NOTIFY-010 READY_FOR_PICKUP publishes one canonical event per eligible Order after core ready-for-pickup writes commit # TODO BLOCKED: requires Campaign ready-for-pickup implementation plus Order/Pickup/PickupLink fixtures and observable publisher
+  ---
+  duration_ms: 0.164666
+  ...
+# Subtest: CT-NOTIFY-011 SQS publish failure after Payment approval does not roll back committed Payment/Order state and is observable
+ok 274 - CT-NOTIFY-011 SQS publish failure after Payment approval does not roll back committed Payment/Order state and is observable # TODO BLOCKED: mandatory resilience case requires implemented Payment approval with injectable SQS failure and observable logging
+  ---
+  duration_ms: 0.052459
+  ...
+# Subtest: CT-NOTIFY-012 Worker failure after message receipt does not alter committed core state and is reported as failure for retry
+ok 275 - CT-NOTIFY-012 Worker failure after message receipt does not alter committed core state and is reported as failure for retry # TODO BLOCKED: mandatory resilience case requires src/worker.js and injectable failing Notification repository
+  ---
+  duration_ms: 0.043833
+  ...
+# Subtest: CT-NOTIFY-013 Worker maps notificationId=eventId and createdAt=occurredAt
+ok 276 - CT-NOTIFY-013 Worker maps notificationId=eventId and createdAt=occurredAt # TODO BLOCKED: requires implemented Worker event-to-Notification mapping
+  ---
+  duration_ms: 0.111
+  ...
+# Subtest: CT-NOTIFY-014 duplicate delivery of the same eventId creates only one Notification and succeeds idempotently
+ok 277 - CT-NOTIFY-014 duplicate delivery of the same eventId creates only one Notification and succeeds idempotently # TODO BLOCKED: requires Worker conditional-put implementation and duplicate SQS event fixture
+  ---
+  duration_ms: 0.101083
+  ...
+# Subtest: CT-NOTIFY-015 Worker write failure is not reported as successful processing
+ok 278 - CT-NOTIFY-015 Worker write failure is not reported as successful processing # TODO BLOCKED: requires implemented Worker handler and injectable failing DynamoDB Notification write
+  ---
+  duration_ms: 0.047625
+  ...
+# Subtest: CT-NOTIFY-016 canonical event payload excludes passwordHash, JWT, AWS credentials, and slip binary
+ok 279 - CT-NOTIFY-016 canonical event payload excludes passwordHash, JWT, AWS credentials, and slip binary # TODO BLOCKED: requires implemented notification publisher/event builders for Payment and ready-for-pickup flows
+  ---
+  duration_ms: 0.040792
+  ...
+# Subtest: TRACE-001 FR-01 through FR-15 each have mapped executable verification and existing evidence artifacts
+ok 280 - TRACE-001 FR-01 through FR-15 each have mapped executable verification and existing evidence artifacts
+  ---
+  duration_ms: 39.473
+  ...
+# Subtest: TRACE-002 human-readable traceability and handoff reports exist
+ok 281 - TRACE-002 human-readable traceability and handoff reports exist
+  ---
+  duration_ms: 0.6915
+  ...
+# Subtest: SEC-TENANT-001 Staff from Organization A cannot read Organization B Order by guessed orderId
+ok 282 - SEC-TENANT-001 Staff from Organization A cannot read Organization B Order by guessed orderId # TODO BLOCKED: requires mounted Order routes plus disposable Organization A/B STAFF memberships and an Order owned by Organization B
+  ---
+  duration_ms: 0.831625
+  ...
+# Subtest: SEC-TENANT-002 Organization Admin from A cannot update Store/Product/Campaign in B
+ok 283 - SEC-TENANT-002 Organization Admin from A cannot update Store/Product/Campaign in B # TODO BLOCKED: requires mounted Store/Product/Campaign routes plus disposable Organization A/B admin and tenant-owned resource fixtures
+  ---
+  duration_ms: 0.077958
+  ...
+# Subtest: SEC-TENANT-003 Customer cannot access another Customer's own-order endpoint
+ok 284 - SEC-TENANT-003 Customer cannot access another Customer's own-order endpoint # TODO BLOCKED: requires mounted own-order routes plus two authenticated Customer fixtures and an Order owned by the second Customer
+  ---
+  duration_ms: 0.05875
+  ...
+# Subtest: SEC-TENANT-004 Customer cannot request private Payment Slip download URL for another Customer's Order
+ok 285 - SEC-TENANT-004 Customer cannot request private Payment Slip download URL for another Customer's Order # TODO BLOCKED: requires mounted Order/File routes, two authenticated Customer fixtures, and a private Payment Slip owned by the second Customer
+  ---
+  duration_ms: 0.056125
+  ...
+# Subtest: SEC-TENANT-005 Staff cannot approve/reject Payment outside their Organization
+ok 286 - SEC-TENANT-005 Staff cannot approve/reject Payment outside their Organization # TODO BLOCKED: requires mounted Payment review routes plus Organization A/B STAFF memberships and a Payment owned by Organization B
+  ---
+  duration_ms: 0.869791
+  ...
+# Subtest: SEC-TENANT-006 Staff cannot confirm Pickup outside their Organization
+ok 287 - SEC-TENANT-006 Staff cannot confirm Pickup outside their Organization # TODO BLOCKED: requires mounted Pickup confirm route plus Organization A/B STAFF memberships and a READY Pickup owned by Organization B
+  ---
+  duration_ms: 0.069917
+  ...
+# Subtest: SEC-TENANT-007 Notification endpoint returns only current user's Notifications
+ok 288 - SEC-TENANT-007 Notification endpoint returns only current user's Notifications # TODO BLOCKED: requires mounted Notification routes plus two authenticated users with distinct Notification fixtures
+  ---
+  duration_ms: 0.126458
+  ...
+# Subtest: SEC-TENANT-008 client-supplied Organization role is ignored as authoritative data
+ok 289 - SEC-TENANT-008 client-supplied Organization role is ignored as authoritative data # TODO BLOCKED: requires a mounted protected organization-scoped route plus authenticated user whose persisted membership disagrees with a forged client role
+  ---
+  duration_ms: 0.058333
+  ...
+# Subtest: SEC-TENANT-009 resource ID alone is insufficient to authorize tenant-owned data
+ok 290 - SEC-TENANT-009 resource ID alone is insufficient to authorize tenant-owned data # TODO BLOCKED: requires mounted tenant-owned resource routes plus two-tenant fixtures where a valid resourceId is supplied under the wrong Organization context
+  ---
+  duration_ms: 0.113959
+  ...
+# Subtest: AWS-001 Learner Lab identity is reachable and stack unistore-hub-dev is deployed in us-east-1
+ok 291 - AWS-001 Learner Lab identity is reachable and stack unistore-hub-dev is deployed in us-east-1 # TODO BLOCKED: AWS CLI is not installed/available on the Testing Agent machine
+  ---
+  duration_ms: 0.848417
+  ...
+# Subtest: AWS-002 deployed stack exposes all required outputs
+ok 292 - AWS-002 deployed stack exposes all required outputs # TODO BLOCKED: AWS CLI is not installed/available on the Testing Agent machine
+  ---
+  duration_ms: 1.2355
+  ...
+# Subtest: AWS-003 FrontendWebsiteURL responds with static site content
+ok 293 - AWS-003 FrontendWebsiteURL responds with static site content # TODO BLOCKED: AWS CLI is not installed/available on the Testing Agent machine
+  ---
+  duration_ms: 0.137916
+  ...
+# Subtest: AWS-004 GET <ApiBaseURL>/health returns the canonical healthy response
+ok 294 - AWS-004 GET <ApiBaseURL>/health returns the canonical healthy response # TODO BLOCKED: AWS CLI is not installed/available on the Testing Agent machine
+  ---
+  duration_ms: 0.090666
+  ...
+# Subtest: AWS-005 deployed AppTable has expected keys, GSI1, and PAY_PER_REQUEST billing
+ok 295 - AWS-005 deployed AppTable has expected keys, GSI1, and PAY_PER_REQUEST billing # TODO BLOCKED: AWS CLI is not installed/available on the Testing Agent machine
+  ---
+  duration_ms: 0.412709
+  ...
+# Subtest: AWS-006 deployed FilesBucket is not publicly readable
+ok 296 - AWS-006 deployed FilesBucket is not publicly readable # TODO BLOCKED: AWS CLI is not installed/available on the Testing Agent machine
+  ---
+  duration_ms: 0.1605
+  ...
+# Subtest: AWS-007 NotificationQueue is connected to WorkerFunction through an enabled event source mapping
+ok 297 - AWS-007 NotificationQueue is connected to WorkerFunction through an enabled event source mapping # TODO BLOCKED: AWS CLI is not installed/available on the Testing Agent machine
+  ---
+  duration_ms: 0.091292
+  ...
+# Subtest: AWS-008 Backend and Worker emit CloudWatch logs after invocation
+ok 298 - AWS-008 Backend and Worker emit CloudWatch logs after invocation # TODO BLOCKED: AWS CLI is not installed/available on the Testing Agent machine
+  ---
+  duration_ms: 0.17225
+  ...
+# Subtest: AWS-009 deployed stack contains only the resolved Learner Lab baseline service families
+ok 299 - AWS-009 deployed stack contains only the resolved Learner Lab baseline service families # TODO BLOCKED: AWS CLI is not installed/available on the Testing Agent machine
+  ---
+  duration_ms: 0.13675
+  ...
+# Subtest: DEV-001 root developer interface exposes dev:setup/dev/dev:seed/dev:reset/dev:down
+not ok 300 - DEV-001 root developer interface exposes dev:setup/dev/dev:seed/dev:reset/dev:down
+  ---
+  duration_ms: 4.428292
+  location: 'file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/smoke/dev-mode-a.test.mjs:51:1'
+  failureType: 'testCodeFailure'
+  error: "ENOENT: no such file or directory, access '/Users/mba135816/Documents/GitHub/UniStore_Hub/package.json'"
+  code: 'ENOENT'
+  stack: |-
+    async access (node:internal/fs/promises:603:10)
+    async TestContext.<anonymous> (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/smoke/dev-mode-a.test.mjs:53:3)
+    async Test.run (node:internal/test_runner/test:657:9)
+    async startSubtest (node:internal/test_runner/harness:235:3)
+  ...
+# Subtest: DEV-001 dev:setup starts healthy LocalStack and idempotently ensures DynamoDB table, Files bucket, and SQS queue
+ok 301 - DEV-001 dev:setup starts healthy LocalStack and idempotently ensures DynamoDB table, Files bucket, and SQS queue # TODO BLOCKED: root dev:setup command is absent; execute real local dependency/resource verification once Integration implements it
+  ---
+  duration_ms: 0.716833
+  ...
+# Subtest: DEV-002 backend local entrypoint serves GET http://localhost:4000/health
+ok 302 - DEV-002 backend local entrypoint serves GET http://localhost:4000/health # TODO BLOCKED: localhost:4000 is occupied by a non-canonical HTTP service (status 404)
+  ---
+  duration_ms: 28.456041
+  ...
+# Subtest: DEV-003 Frontend dev server loads at http://localhost:3000
+not ok 303 - DEV-003 Frontend dev server loads at http://localhost:3000
+  ---
+  duration_ms: 1.0065
+  location: 'file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/smoke/dev-mode-a.test.mjs:124:1'
+  failureType: 'testCodeFailure'
+  error: "ENOENT: no such file or directory, access '/Users/mba135816/Documents/GitHub/UniStore_Hub/frontend/package.json'"
+  code: 'ENOENT'
+  stack: |-
+    async access (node:internal/fs/promises:603:10)
+    async TestContext.<anonymous> (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/smoke/dev-mode-a.test.mjs:126:3)
+    async Test.run (node:internal/test_runner/test:657:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:389:7)
+  ...
+# Subtest: DEV-004 real local Register -> Login -> Bearer JWT -> GET /me works without auth bypass
+ok 304 - DEV-004 real local Register -> Login -> Bearer JWT -> GET /me works without auth bypass # TODO BLOCKED: requires DEV-001 LocalStack table/setup plus real local auth persistence; do not replace with mocked repository auth
+  ---
+  duration_ms: 0.196125
+  ...
+# (node:16171) Warning: NodeVersionSupportWarning: The AWS SDK for JavaScript (v3)
+# versions published after the first week of January 2027
+# will require node >=22. You are running node v20.13.0.
+# To continue receiving updates to AWS services, bug fixes,
+# and security updates please upgrade to node >=22.
+# More information can be found at: https://a.co/c895JFp
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: DEV-005 shared Backend primitives preserve production Data semantics in Dev Mode
+ok 305 - DEV-005 shared Backend primitives preserve production Data semantics in Dev Mode
+  ---
+  duration_ms: 2.239916
+  ...
+# Subtest: DEV-005 LocalStack DynamoDB round-trip uses the same entity/key/status shapes as the Data Spec
+ok 306 - DEV-005 LocalStack DynamoDB round-trip uses the same entity/key/status shapes as the Data Spec # TODO BLOCKED: requires DEV-001 LocalStack setup/table plus implemented Order/Payment/Pickup persistence for a real parity round-trip
+  ---
+  duration_ms: 0.065625
+  ...
+# Subtest: DEV-006 AWS client configuration accepts the canonical LocalStack endpoint
+ok 307 - DEV-006 AWS client configuration accepts the canonical LocalStack endpoint
+  ---
+  duration_ms: 3.043834
+  ...
+# Subtest: DEV-006 Payment Slip uses Backend-authorized pre-sign then Browser-to-LocalStack-S3 PUT with canonical key/MIME/size rules
+ok 308 - DEV-006 Payment Slip uses Backend-authorized pre-sign then Browser-to-LocalStack-S3 PUT with canonical key/MIME/size rules # TODO BLOCKED: Payment/File services and DEV-001 Files bucket/CORS setup are not implemented end-to-end yet
+  ---
+  duration_ms: 0.065792
+  ...
+# Subtest: DEV-007 required Local Worker entrypoint exists for LocalStack SQS consumption
+not ok 309 - DEV-007 required Local Worker entrypoint exists for LocalStack SQS consumption
+  ---
+  duration_ms: 3.334
+  location: 'file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/smoke/dev-mode-b.test.mjs:91:1'
+  failureType: 'testCodeFailure'
+  error: "ENOENT: no such file or directory, access '/Users/mba135816/Documents/GitHub/UniStore_Hub/backend/src/worker.js'"
+  code: 'ENOENT'
+  stack: |-
+    async access (node:internal/fs/promises:603:10)
+    async TestContext.<anonymous> (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/smoke/dev-mode-b.test.mjs:92:3)
+    async Test.run (node:internal/test_runner/test:657:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:389:7)
+  ...
+# Subtest: DEV-007 Backend -> LocalStack SQS -> Local Worker -> DynamoDB Notification preserves canonical event/data semantics
+ok 310 - DEV-007 Backend -> LocalStack SQS -> Local Worker -> DynamoDB Notification preserves canonical event/data semantics # TODO BLOCKED: backend/src/worker.js and Notification persistence are absent; requires real LocalStack queue/table flow
+  ---
+  duration_ms: 0.551584
+  ...
+# Subtest: DEV-008 root dev:reset command exists and its implementation contains a local-endpoint safety guard
+not ok 311 - DEV-008 root dev:reset command exists and its implementation contains a local-endpoint safety guard
+  ---
+  duration_ms: 0.565708
+  location: 'file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/smoke/dev-mode-b.test.mjs:103:1'
+  failureType: 'testCodeFailure'
+  error: "ENOENT: no such file or directory, access '/Users/mba135816/Documents/GitHub/UniStore_Hub/package.json'"
+  code: 'ENOENT'
+  stack: |-
+    async access (node:internal/fs/promises:603:10)
+    async TestContext.<anonymous> (file:///Users/mba135816/Documents/GitHub/UniStore_Hub/tests/smoke/dev-mode-b.test.mjs:105:3)
+    async Test.run (node:internal/test_runner/test:657:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:389:7)
+  ...
+# Subtest: DEV-008 dev:reset refuses a non-local AWS endpoint without deleting any resource
+ok 312 - DEV-008 dev:reset refuses a non-local AWS endpoint without deleting any resource # TODO BLOCKED: root dev:reset implementation is absent; execute a non-local endpoint refusal test once Integration provides it
+  ---
+  duration_ms: 0.125
+  ...
+# {"level":"error","message":"http_request_failed","timestamp":"2026-09-29T10:27:21.298Z","requestId":"bf842c31-d281-4ed6-b4e1-5bbb95686727","method":"GET","path":"/api/v1/organizations/9b6df6c6-5933-4556-b1e0-6703adb4e524/stores","statusCode":401,"errorCode":"AUTH_REQUIRED"}
+# {"level":"info","message":"http_request_completed","timestamp":"2026-09-29T10:27:21.300Z","requestId":"bf842c31-d281-4ed6-b4e1-5bbb95686727","method":"GET","path":"/api/v1/organizations/9b6df6c6-5933-4556-b1e0-6703adb4e524/stores","statusCode":401,"durationMs":2.35}
+# Subtest: DEV-009 development mode still requires authentication on protected Organization routes
+ok 313 - DEV-009 development mode still requires authentication on protected Organization routes
+  ---
+  duration_ms: 88.078916
+  ...
+# Subtest: DEV-009 Dev Mode enforces tenant membership, RBAC, ownership, Campaign transitions, Payment review rules, and Pickup duplicate protection exactly as production contracts
+ok 314 - DEV-009 Dev Mode enforces tenant membership, RBAC, ownership, Campaign transitions, Payment review rules, and Pickup duplicate protection exactly as production contracts # TODO BLOCKED: requires DEV-001 disposable LocalStack data plus the currently missing Store/Order/Payment/Pickup business flows
+  ---
+  duration_ms: 0.256625
+  ...
+1..314
+# tests 314
+# suites 0
+# pass 98
+# fail 24
+# cancelled 0
+# skipped 0
+# todo 192
+# duration_ms 1350.90975

@@ -1,0 +1,18 @@
+{
+  "name": "unistore-hub-cross-system-tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "test:contract": "node --test contract",
+    "test:integration": "node --test integration",
+    "test:security": "node --test security",
+    "test:frontend": "node --test frontend",
+    "test:smoke": "node --test smoke",
+    "test:e2e": "node --test e2e",
+    "test:infrastructure": "node --test infrastructure"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

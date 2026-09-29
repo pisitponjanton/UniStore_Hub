@@ -1,0 +1,450 @@
+{
+  "schemaVersion": 1,
+  "snapshotDate": "2026-09-29",
+  "source": "docs/specs/testing/SPEC.md requirement traceability matrix",
+  "statusRule": "FR status is PASS only when the Testing-spec minimum verification is fully demonstrated. Any unresolved required path keeps the FR BLOCKED even when some mapped checks pass.",
+  "regressionNote": "Recorded results come from phase reports 03-27. Some early reports predate later Backend source additions; Phase 29 full regression is required to refresh current pass/fail truth.",
+  "requirements": [
+    {
+      "fr": "FR-01",
+      "requirement": "Authentication + JWT",
+      "minimumVerification": "UT/CT/SEC + E2E login",
+      "mappedTests": [
+        "CT-AUTH-001",
+        "CT-AUTH-003",
+        "CT-AUTH-005",
+        "DEV-004",
+        "E2E-CORE-001"
+      ],
+      "artifacts": [
+        "reports/phase-03-health-auth.md",
+        "reports/phase-21-dev-mode-a.md",
+        "reports/phase-25-core-e2e.md"
+      ],
+      "status": "BLOCKED",
+      "recordedResults": [
+        "Phase 03: CT-HEALTH-001 PASS; CT-AUTH-001..004 FAIL; CT-AUTH-005..007 TODO/BLOCKED.",
+        "Phase 21: DEV-004 TODO/BLOCKED pending real LocalStack-backed auth parity.",
+        "Phase 25: E2E-CORE-001 TODO/BLOCKED."
+      ],
+      "owners": [
+        "Backend",
+        "Integration/Dev"
+      ],
+      "blockers": [
+        "Real auth E2E has not executed against disposable persistence.",
+        "Phase 03 auth results predate the current auth module and require Phase 29 refresh."
+      ]
+    },
+    {
+      "fr": "FR-02",
+      "requirement": "Organization",
+      "minimumVerification": "API contract + organization integration/E2E",
+      "mappedTests": [
+        "CT-ORG-001",
+        "CT-ORG-005",
+        "E2E-CORE-001"
+      ],
+      "artifacts": [
+        "reports/phase-05-organization-members.md",
+        "reports/phase-25-core-e2e.md"
+      ],
+      "status": "BLOCKED",
+      "recordedResults": [
+        "Phase 05: Organization surface tests recorded FAIL and persisted behavior remained TODO/BLOCKED.",
+        "Phase 25: Organization path inside E2E-CORE-001 TODO/BLOCKED."
+      ],
+      "owners": [
+        "Backend"
+      ],
+      "blockers": [
+        "Organization E2E not executed.",
+        "Phase 05 result predates the current Organization implementation and requires Phase 29 refresh."
+      ]
+    },
+    {
+      "fr": "FR-03",
+      "requirement": "Staff / Member",
+      "minimumVerification": "RBAC + membership + tenant tests",
+      "mappedTests": [
+        "CT-MEMBER-001",
+        "CT-MEMBER-005",
+        "SEC-TENANT-008",
+        "E2E-TENANT-001"
+      ],
+      "artifacts": [
+        "reports/phase-05-organization-members.md",
+        "reports/phase-12-tenant-isolation-b.md",
+        "reports/phase-27-tenant-notification-e2e.md"
+      ],
+      "status": "BLOCKED",
+      "recordedResults": [
+        "Phase 05: Member route surface recorded FAIL; behavior TODO/BLOCKED.",
+        "Phase 12: SEC-TENANT-008 TODO/BLOCKED.",
+        "Phase 27: E2E-TENANT-001 TODO/BLOCKED."
+      ],
+      "owners": [
+        "Backend"
+      ],
+      "blockers": [
+        "Multi-user/multi-tenant membership and client-role distrust have not executed end-to-end."
+      ]
+    },
+    {
+      "fr": "FR-04",
+      "requirement": "Store",
+      "minimumVerification": "CRUD contract + tenant tests",
+      "mappedTests": [
+        "CT-STORE-001",
+        "CT-STORE-005",
+        "SEC-TENANT-002",
+        "E2E-TENANT-001"
+      ],
+      "artifacts": [
+        "reports/phase-06-store-product.md",
+        "reports/phase-11-tenant-isolation-a.md",
+        "reports/phase-27-tenant-notification-e2e.md"
+      ],
+      "status": "BLOCKED",
+      "recordedResults": [
+        "Phase 06: Store surface checks recorded FAIL; behavior TODO/BLOCKED.",
+        "Phase 11: tenant mutation isolation TODO/BLOCKED.",
+        "Phase 27: tenant E2E TODO/BLOCKED."
+      ],
+      "owners": [
+        "Backend"
+      ],
+      "blockers": [
+        "Store CRUD + tenant integration has not executed with disposable authenticated data.",
+        "Phase 06 predates the current Store implementation and requires Phase 29 refresh."
+      ]
+    },
+    {
+      "fr": "FR-05",
+      "requirement": "Product / Variant",
+      "minimumVerification": "CRUD + price + snapshot + file tests",
+      "mappedTests": [
+        "CT-PRODUCT-001",
+        "CT-VARIANT-001",
+        "CT-ORDER-013",
+        "CT-ORDER-015",
+        "CT-FILE-007",
+        "DATA-011"
+      ],
+      "artifacts": [
+        "reports/phase-06-store-product.md",
+        "reports/phase-08-order.md",
+        "reports/phase-13-data-contract.md",
+        "reports/phase-16-file-security.md"
+      ],
+      "status": "BLOCKED",
+      "recordedResults": [
+        "Phase 06: Product/Variant surface recorded FAIL; data behavior TODO/BLOCKED.",
+        "Phase 08: authoritative price and OrderItem snapshot behavior TODO/BLOCKED.",
+        "Phase 13: DATA-001..010 PASS, persistence snapshot DATA-011 TODO/BLOCKED.",
+        "Phase 16: 6 file-boundary checks PASS; Product file behavior remains TODO/BLOCKED."
+      ],
+      "owners": [
+        "Backend"
+      ],
+      "blockers": [
+        "Authoritative Product/Variant price/snapshot persistence and file ownership/metadata checks remain unexecuted."
+      ]
+    },
+    {
+      "fr": "FR-06",
+      "requirement": "Pre-order Campaign",
+      "minimumVerification": "lifecycle tests + invalid transition",
+      "mappedTests": [
+        "CT-CAMPAIGN-012",
+        "CT-CAMPAIGN-013",
+        "CT-CAMPAIGN-014",
+        "E2E-CORE-001"
+      ],
+      "artifacts": [
+        "reports/phase-07-campaign.md",
+        "reports/phase-25-core-e2e.md"
+      ],
+      "status": "BLOCKED",
+      "recordedResults": [
+        "Phase 07: campaign surface recorded FAIL; lifecycle cases CT-CAMPAIGN-011..019 TODO/BLOCKED.",
+        "Phase 25: canonical lifecycle E2E TODO/BLOCKED."
+      ],
+      "owners": [
+        "Backend"
+      ],
+      "blockers": [
+        "Lifecycle integration has not executed with Orders/Payments.",
+        "Phase 07 predates current Campaign source additions and requires Phase 29 refresh."
+      ]
+    },
+    {
+      "fr": "FR-07",
+      "requirement": "Order",
+      "minimumVerification": "create/list/detail + snapshot + ownership",
+      "mappedTests": [
+        "CT-ORDER-001",
+        "CT-ORDER-008",
+        "CT-ORDER-015",
+        "CT-ORDER-018",
+        "SEC-TENANT-001",
+        "SEC-TENANT-003",
+        "E2E-CORE-001"
+      ],
+      "artifacts": [
+        "reports/phase-08-order.md",
+        "reports/phase-11-tenant-isolation-a.md",
+        "reports/phase-25-core-e2e.md"
+      ],
+      "status": "BLOCKED",
+      "recordedResults": [
+        "Phase 08: Order routes recorded 7 FAIL; 16 business/data checks TODO/BLOCKED.",
+        "Phase 11: SEC-TENANT-001 and SEC-TENANT-003 TODO/BLOCKED.",
+        "Phase 25: E2E-CORE-001 TODO/BLOCKED."
+      ],
+      "owners": [
+        "Backend"
+      ],
+      "blockers": [
+        "Order route/service/controller are not yet available as a complete request path; only partial repository/constants source is currently visible."
+      ]
+    },
+    {
+      "fr": "FR-08",
+      "requirement": "Payment Slip / Verification",
+      "minimumVerification": "private file + submit/approve/reject/resubmit",
+      "mappedTests": [
+        "CT-PAYMENT-SUBMIT-007",
+        "CT-PAYMENT-SUBMIT-008",
+        "CT-PAYMENT-REVIEW-005",
+        "CT-PAYMENT-REVIEW-006",
+        "CT-FILE-014",
+        "SEC-TENANT-004",
+        "SEC-TENANT-005",
+        "E2E-PAYMENT-REJECT-001"
+      ],
+      "artifacts": [
+        "reports/phase-09-payment-submission.md",
+        "reports/phase-10-payment-review.md",
+        "reports/phase-16-file-security.md",
+        "reports/phase-26-payment-rejection-e2e.md"
+      ],
+      "status": "BLOCKED",
+      "recordedResults": [
+        "Phase 09: 2 FAIL, 12 TODO/BLOCKED.",
+        "Phase 10: 4 FAIL, 12 TODO/BLOCKED.",
+        "Phase 16: pre-sign/direct-transfer capabilities partially PASS; ownership/MIME/size/HEAD behavior blocked.",
+        "Phase 26: reject/resubmit/approve E2E and Customer-visible rejection reason both TODO/BLOCKED."
+      ],
+      "owners": [
+        "Backend",
+        "Integration/API contract"
+      ],
+      "blockers": [
+        "Order/Payment/File end-to-end behavior incomplete.",
+        "Customer-visible rejection reason is required by Testing/Frontend but no Customer-readable Payment detail contract is defined."
+      ]
+    },
+    {
+      "fr": "FR-09",
+      "requirement": "Production Summary",
+      "minimumVerification": "paid-only grouping",
+      "mappedTests": [
+        "CT-PRODUCTION-007",
+        "CT-PRODUCTION-008",
+        "CT-PRODUCTION-010",
+        "CT-PRODUCTION-011",
+        "E2E-CORE-001"
+      ],
+      "artifacts": [
+        "reports/phase-14-production.md",
+        "reports/phase-25-core-e2e.md"
+      ],
+      "status": "BLOCKED",
+      "recordedResults": [
+        "Phase 14: auth boundary PASS; 12 aggregation/authorization cases TODO/BLOCKED.",
+        "Phase 25: paid-order Production Summary E2E TODO/BLOCKED."
+      ],
+      "owners": [
+        "Backend"
+      ],
+      "blockers": [
+        "Production aggregation implementation and disposable paid lifecycle fixtures are unavailable."
+      ]
+    },
+    {
+      "fr": "FR-10",
+      "requirement": "Pickup QR / Token",
+      "minimumVerification": "own-token + staff confirm + duplicate prevention",
+      "mappedTests": [
+        "CT-PICKUP-005",
+        "CT-PICKUP-006",
+        "CT-PICKUP-013",
+        "CT-PICKUP-016",
+        "SEC-TENANT-006",
+        "E2E-CORE-001"
+      ],
+      "artifacts": [
+        "reports/phase-15-pickup.md",
+        "reports/phase-12-tenant-isolation-b.md",
+        "reports/phase-25-core-e2e.md"
+      ],
+      "status": "BLOCKED",
+      "recordedResults": [
+        "Phase 15: 3 auth-boundary PASS, 1 route FAIL, 12 TODO/BLOCKED.",
+        "Phase 12: SEC-TENANT-006 TODO/BLOCKED.",
+        "Phase 25: pickup portion of core E2E TODO/BLOCKED."
+      ],
+      "owners": [
+        "Backend"
+      ],
+      "blockers": [
+        "Pickup/PickupLink creation, token generation, confirmation transaction, and duplicate prevention are not implemented end-to-end."
+      ]
+    },
+    {
+      "fr": "FR-11",
+      "requirement": "Dashboard / Report",
+      "minimumVerification": "metric-schema contract + Organization Admin authorization + UI test",
+      "mappedTests": [
+        "CT-GOV-001",
+        "CT-GOV-008",
+        "CT-GOV-010",
+        "CT-GOV-012",
+        "FE-010",
+        "FE-020"
+      ],
+      "artifacts": [
+        "reports/phase-18-report-audit-platform.md",
+        "reports/phase-19-frontend-interaction.md"
+      ],
+      "status": "BLOCKED",
+      "recordedResults": [
+        "Phase 18: report auth boundary PASS; report aggregation/role checks TODO/BLOCKED.",
+        "Phase 19: Frontend baseline FAIL and all interaction checks TODO/BLOCKED."
+      ],
+      "owners": [
+        "Backend",
+        "Frontend"
+      ],
+      "blockers": [
+        "Report aggregation is not implemented.",
+        "Frontend application is absent; no dedicated Dashboard/Report UI interaction has executed."
+      ]
+    },
+    {
+      "fr": "FR-12",
+      "requirement": "Audit Log",
+      "minimumVerification": "required side effects + list authorization",
+      "mappedTests": [
+        "CT-GOV-002",
+        "CT-GOV-013",
+        "CT-GOV-016",
+        "CT-GOV-017",
+        "E2E-PAYMENT-REJECT-001"
+      ],
+      "artifacts": [
+        "reports/phase-18-report-audit-platform.md",
+        "reports/phase-26-payment-rejection-e2e.md"
+      ],
+      "status": "BLOCKED",
+      "recordedResults": [
+        "Phase 18: Audit list auth boundary PASS; tenant/role/filter/side-effect checks TODO/BLOCKED.",
+        "Phase 26: Payment reject/approve Audit E2E TODO/BLOCKED."
+      ],
+      "owners": [
+        "Backend"
+      ],
+      "blockers": [
+        "Audit list route/repository and business-side Audit persistence are not available end-to-end."
+      ]
+    },
+    {
+      "fr": "FR-13",
+      "requirement": "In-app Notification",
+      "minimumVerification": "SQS/Worker/API/read flow",
+      "mappedTests": [
+        "CT-NOTIFY-003",
+        "CT-NOTIFY-004",
+        "CT-NOTIFY-014",
+        "SEC-TENANT-007",
+        "DEV-007",
+        "E2E-NOTIFY-001"
+      ],
+      "artifacts": [
+        "reports/phase-17-notification.md",
+        "reports/phase-12-tenant-isolation-b.md",
+        "reports/phase-22-dev-mode-b.md",
+        "reports/phase-27-tenant-notification-e2e.md"
+      ],
+      "status": "BLOCKED",
+      "recordedResults": [
+        "Phase 17: SQS adapter PASS; Notification API/Worker recorded FAIL and behavior TODO/BLOCKED.",
+        "Phase 22: Worker entrypoint FAIL; real SQS→Worker→DynamoDB flow TODO/BLOCKED.",
+        "Phase 27: event/read/idempotency E2E all TODO/BLOCKED."
+      ],
+      "owners": [
+        "Backend",
+        "Worker"
+      ],
+      "blockers": [
+        "Notification routes/repository and backend/src/worker.js are absent."
+      ]
+    },
+    {
+      "fr": "FR-14",
+      "requirement": "Platform Admin",
+      "minimumVerification": "approve/suspend/list users/summary + role isolation",
+      "mappedTests": [
+        "CT-GOV-003",
+        "CT-GOV-004",
+        "CT-GOV-005",
+        "CT-GOV-006",
+        "CT-GOV-007",
+        "CT-GOV-019",
+        "CT-GOV-020"
+      ],
+      "artifacts": [
+        "reports/phase-18-report-audit-platform.md"
+      ],
+      "status": "BLOCKED",
+      "recordedResults": [
+        "Phase 18: all five Platform Admin route surfaces recorded FAIL; persisted-role and behavior checks TODO/BLOCKED."
+      ],
+      "owners": [
+        "Backend"
+      ],
+      "blockers": [
+        "Platform Admin router/service/authorization behavior is not implemented."
+      ]
+    },
+    {
+      "fr": "FR-15",
+      "requirement": "Health Check",
+      "minimumVerification": "local + AWS smoke",
+      "mappedTests": [
+        "CT-HEALTH-001",
+        "DEV-002",
+        "AWS-004"
+      ],
+      "artifacts": [
+        "reports/phase-03-health-auth.md",
+        "reports/phase-21-dev-mode-a.md",
+        "reports/phase-24-aws-deployment.md"
+      ],
+      "status": "BLOCKED",
+      "recordedResults": [
+        "Phase 03: CT-HEALTH-001 PASS.",
+        "Phase 21: DEV-002 TODO/BLOCKED by localhost:4000 port collision during that run.",
+        "Phase 24: AWS-004 TODO/BLOCKED because AWS CLI is unavailable."
+      ],
+      "owners": [
+        "Integration/Dev",
+        "AWS environment"
+      ],
+      "blockers": [
+        "Local canonical health smoke and deployed AWS health smoke have not both completed."
+      ]
+    }
+  ]
+}
