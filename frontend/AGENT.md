@@ -38,8 +38,25 @@ Read before implementation:
 3. `../docs/specs/00-shared-contracts.md`
 4. `../docs/api/API_CONTRACT.md`
 5. `../docs/specs/frontend/SPEC.md`
+6. `.agents/skills/interface-design/SKILL.md` for any user-facing UI/design work
 
 Read `../docs/architecture/AWS_ARCHITECTURE.md` only when working on API connectivity, Pre-signed URL flow, or deployment-sensitive behavior.
+
+## UI / UX Skill
+
+The Frontend Agent uses the vendored prompt-only skill:
+
+```text
+.agents/skills/interface-design/SKILL.md
+```
+
+Upstream: `Dammyjay93/interface-design` (MIT). No runtime UI plugin or application dependency is required.
+
+For Staff, Organization Admin, and Platform Admin surfaces, use the skill with a restrained SaaS direction: simple navigation, clear hierarchy, low cognitive load, compact-but-readable data views, and intentional use of color/depth. Avoid decorative complexity that makes routine operations harder.
+
+Project contracts remain authoritative. The design skill may guide presentation and interaction quality, but it must not invent routes, permissions, business rules, API behavior, statuses, or data semantics that conflict with project docs.
+
+If `.interface-design/system.md` is created later after a reviewed direction is approved, read it before subsequent UI work and keep the saved patterns consistent.
 
 ## Responsibilities
 
