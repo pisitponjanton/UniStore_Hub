@@ -218,7 +218,10 @@
         "CT-PAYMENT-SUBMIT-008",
         "CT-PAYMENT-REVIEW-005",
         "CT-PAYMENT-REVIEW-006",
+        "CT-CUSTOMER-PAYMENT-READ-002",
+        "CT-CUSTOMER-PAYMENT-READ-004",
         "CT-FILE-014",
+        "SEC-CUSTOMER-PAYMENT-001",
         "SEC-TENANT-004",
         "SEC-TENANT-005",
         "E2E-PAYMENT-REJECT-001"
@@ -234,15 +237,17 @@
         "Phase 09: 2 FAIL, 12 TODO/BLOCKED.",
         "Phase 10: 4 FAIL, 12 TODO/BLOCKED.",
         "Phase 16: pre-sign/direct-transfer capabilities partially PASS; ownership/MIME/size/HEAD behavior blocked.",
-        "Phase 26: reject/resubmit/approve E2E and Customer-visible rejection reason both TODO/BLOCKED."
+        "Customer own-Payment contract/security checks now PASS, including exact rejectReason and Customer A/B isolation.",
+        "Phase 26 live reject/resubmit/approve flow now includes the documented own-Payment read assertions; live execution remains environment-gated."
       ],
       "owners": [
         "Backend",
-        "Integration/API contract"
+        "Frontend",
+        "Integration/API contract",
+        "Testing"
       ],
       "blockers": [
-        "Order/Payment/File end-to-end behavior incomplete.",
-        "Customer-visible rejection reason is required by Testing/Frontend but no Customer-readable Payment detail contract is defined."
+        "Full live Order/Payment/File/Notification/Audit E2E still requires the configured disposable Dev Mode/AWS-like environment."
       ]
     },
     {

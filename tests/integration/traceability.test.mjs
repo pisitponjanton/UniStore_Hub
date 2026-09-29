@@ -65,3 +65,27 @@ test('TRACE-002 human-readable traceability and handoff reports exist', async ()
   await access(path.join(testsRoot, 'reports', 'fr-traceability.md'));
   await access(path.join(testsRoot, 'reports', 'testing-handoff.md'));
 });
+
+test('TRACE-003 FR-08 records the resolved Customer own-Payment read contract and ownership coverage', async () => {
+  const matrix = JSON.parse(await readFile(traceabilityPath, 'utf8'));
+  const payment = matrix.requirements.find((entry) => entry.fr === 'FR-08');
+
+  assert.ok(payment, 'FR-08 must exist');
+  assert.ok(
+    payment.mappedTests.includes('CT-CUSTOMER-PAYMENT-READ-002'),
+    'FR-08 must map the Customer own-Payment success contract',
+  );
+  assert.ok(
+    payment.mappedTests.includes('CT-CUSTOMER-PAYMENT-READ-004'),
+    'FR-08 must map fail-closed cross-Customer ownership',
+  );
+  assert.ok(
+    payment.mappedTests.includes('SEC-CUSTOMER-PAYMENT-001'),
+    'FR-08 must map Customer A/B Payment isolation',
+  );
+  assert.equal(
+    payment.blockers.some((item) => /no Customer-readable Payment detail contract/i.test(item)),
+    false,
+    'Resolved Customer Payment read contract must not remain recorded as a blocker',
+  );
+});

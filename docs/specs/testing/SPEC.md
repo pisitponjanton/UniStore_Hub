@@ -398,13 +398,23 @@ PAYMENT_REJECTED
 
 Approved/paid-or-later Order cannot submit another slip.
 
+Customer Payment read contract must verify:
+
+- owning Customer can `GET /api/v1/me/orders/:orderId/payment` without Organization membership
+- rejected Payment response includes the persisted exact `rejectReason`
+- another Customer's `orderId` fails closed as `ORDER_NOT_FOUND` and does not reveal Payment existence
+- an owned Order with no Payment returns `PAYMENT_NOT_FOUND`
+- returned Payment must match the owned Order's `organizationId`, `orderId`, and `customerId`
+- Customer does not use `/organizations/:organizationId/payments/:paymentId` for own read
+- Notification contents are not used as authoritative Payment state/rejection reason
+
 Required negative/boundary cases:
 
 - payment-slip upload-url requires `contentType` and rejects unsupported MIME before signing
 - approve outside tenant
 - reject without reason
 - arbitrary slipKey outside expected path
-- Customer reviews Payment
+- Customer cannot approve/reject Payment through Staff/Admin review actions
 - Staff accesses unauthorized tenant slip
 - submission/resubmission once Campaign is `PRODUCING` or later returns `PAYMENT_NOT_REVIEWABLE`
 - approval once Campaign is `PRODUCING` or later returns `PAYMENT_NOT_REVIEWABLE`
@@ -537,7 +547,9 @@ Frontend must verify:
 - error/retry state
 - invalid runtime query parameter state
 - Customer own-order flow
-- Payment reject reason display
+- Customer own-Payment read via `GET /me/orders/:orderId/payment`
+- Payment rejection reason display survives page reload and comes from `PaymentDTO.rejectReason`
+- owned Order with no Payment handles `PAYMENT_NOT_FOUND` as the not-yet-submitted state
 - direct S3 upload flow
 - Production view
 - Pickup duplicate-conflict UI
@@ -737,14 +749,19 @@ PAID
 Order
 → upload slip
 → Staff rejects with reason
-→ Customer sees rejection reason
-→ PAYMENT_REJECTED notification
+→ Customer loads GET /me/orders/:orderId/payment
+→ Customer sees exact PaymentDTO.rejectReason
+→ PAYMENT_REJECTED notification is delivered independently
 → Customer resubmits
+→ same paymentId is reused
+→ rejectReason/reviewedBy/reviewedAt are cleared
 → Staff approves
 → PAID
 ~~~
 
 Verify Audit entries for reject and approve.
+
+The notification is an alert, not the authoritative rejection-reason source.
 
 ---
 

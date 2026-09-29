@@ -733,6 +733,10 @@ SK = PAYMENT#{paymentId}
 
 Payment child access always includes tenant context in the partition key.
 
+For Customer own-Payment reads, request authorization does not query Payment by `paymentId` alone. Backend first resolves the authenticated Customer's owned Order, derives `organizationId` from that Order, then queries the Order Payment partition using `organizationId + orderId`.
+
+This reuses the canonical Order child partition and requires no new GSI.
+
 GSI1 for organization payment-review queue:
 
 ```text
@@ -991,7 +995,7 @@ Rules:
 | AP-13 | List Customer own Orders | GSI1 `USER#{customerId}` over Order items |
 | AP-14 | List Campaign Orders | Query `PK=ORG#{organizationId}, begins_with(SK,"CAMPAIGN#{campaignId}#ORDER#")` over CampaignOrderLink items |
 | AP-15 | List Order Items | Query `PK=ORG#{organizationId}#ORDER#{orderId}, begins_with(SK,"ITEM#")` |
-| AP-16 | Get/List Order Payments | Query `PK=ORG#{organizationId}#ORDER#{orderId}, begins_with(SK,"PAYMENT#")` |
+| AP-16 | Get/List Order Payments, including Customer own-Payment read after owned Order resolution | Query `PK=ORG#{organizationId}#ORDER#{orderId}, begins_with(SK,"PAYMENT#")` |
 | AP-17 | Payment review queue by Organization | GSI1 `ORG#{organizationId}` + payment prefix |
 | AP-18 | Get Order Pickup | `PK=ORG#{organizationId}#ORDER#{orderId}, SK=PICKUP` |
 | AP-19 | Lookup Pickup by token | GSI1 `ORG#{organizationId}#PICKUP_TOKEN#{token}` |

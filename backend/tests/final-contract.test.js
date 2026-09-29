@@ -104,6 +104,7 @@ test('documented module routers expose only the canonical direct route surface',
 
   assertSurface(createOwnOrderRouter({}), [
     'GET /',
+    'GET /:orderId/payment',
     'GET /:orderId',
     'POST /:orderId/cancel',
   ]);

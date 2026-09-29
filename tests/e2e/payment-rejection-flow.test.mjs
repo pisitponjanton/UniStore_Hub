@@ -232,6 +232,21 @@ test('E2E-PAYMENT-REJECT-001 reject -> notify -> resubmit -> approve -> PAID wit
   );
   assert.equal(rejectedOrder.data.status, 'PAYMENT_REJECTED');
 
+  const customerRejectedPayment = await apiJson(
+    baseUrl,
+    `/api/v1/me/orders/${order.data.orderId}/payment`,
+    {
+      token: customer.token,
+      expectedStatus: 200,
+    },
+  );
+  assert.equal(customerRejectedPayment.data.paymentId, paymentId);
+  assert.equal(customerRejectedPayment.data.status, 'REJECTED');
+  assert.equal(
+    customerRejectedPayment.data.rejectReason,
+    rejectionReason,
+  );
+
   const rejectedNotification = await waitForNotification(
     baseUrl,
     customer.token,
@@ -265,6 +280,21 @@ test('E2E-PAYMENT-REJECT-001 reject -> notify -> resubmit -> approve -> PAID wit
   assert.equal(resubmitted.data.reviewedBy, null);
   assert.equal(resubmitted.data.reviewedAt, null);
 
+  const customerResubmittedPayment = await apiJson(
+    baseUrl,
+    `/api/v1/me/orders/${order.data.orderId}/payment`,
+    {
+      token: customer.token,
+      expectedStatus: 200,
+    },
+  );
+  assert.equal(customerResubmittedPayment.data.paymentId, paymentId);
+  assert.equal(customerResubmittedPayment.data.status, 'PENDING_REVIEW');
+  assert.equal(customerResubmittedPayment.data.slipKey, secondSlipKey);
+  assert.equal(customerResubmittedPayment.data.rejectReason, null);
+  assert.equal(customerResubmittedPayment.data.reviewedBy, null);
+  assert.equal(customerResubmittedPayment.data.reviewedAt, null);
+
   await apiJson(
     baseUrl,
     `/api/v1/organizations/${organizationId}/payments/${paymentId}/approve`,
@@ -284,6 +314,18 @@ test('E2E-PAYMENT-REJECT-001 reject -> notify -> resubmit -> approve -> PAID wit
     },
   );
   assert.equal(paidOrder.data.status, 'PAID');
+
+  const customerApprovedPayment = await apiJson(
+    baseUrl,
+    `/api/v1/me/orders/${order.data.orderId}/payment`,
+    {
+      token: customer.token,
+      expectedStatus: 200,
+    },
+  );
+  assert.equal(customerApprovedPayment.data.paymentId, paymentId);
+  assert.equal(customerApprovedPayment.data.status, 'APPROVED');
+  assert.equal(customerApprovedPayment.data.rejectReason, null);
 
   const rejectAudits = await listAuditItems(
     baseUrl,
@@ -323,11 +365,3 @@ test('E2E-PAYMENT-REJECT-001 reject -> notify -> resubmit -> approve -> PAID wit
     'Expected PAYMENT_APPROVED Audit entry',
   );
 });
-
-test(
-  'E2E-PAYMENT-REJECT-001 customer can read the exact Payment rejection reason through a documented own-order payment read contract',
-  {
-    todo: 'BLOCKED: Testing/Frontend require Customer-visible rejection reason, but the current API contract defines no Customer-readable Payment detail endpoint or Payment field on OrderDTO. Do not invent a route/shape; Integration/API contract must resolve this read path.',
-  },
-  () => {},
-);

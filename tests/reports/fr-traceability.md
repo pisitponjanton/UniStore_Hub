@@ -14,7 +14,7 @@ This matrix follows the minimum-verification mapping in `docs/specs/testing/SPEC
 | FR-04 | Store | CRUD contract + tenant tests | **BLOCKED** | `CT-STORE-001`, `CT-STORE-005`, `SEC-TENANT-002`, `E2E-TENANT-001` | `reports/phase-06-store-product.md`<br>`reports/phase-11-tenant-isolation-a.md`<br>`reports/phase-27-tenant-notification-e2e.md` |
 | FR-05 | Product / Variant | CRUD + price + snapshot + file tests | **BLOCKED** | `CT-PRODUCT-001`, `CT-VARIANT-001`, `CT-ORDER-013`, `CT-ORDER-015`, `CT-FILE-007`, `DATA-011` | `reports/phase-06-store-product.md`<br>`reports/phase-08-order.md`<br>`reports/phase-13-data-contract.md`<br>`reports/phase-16-file-security.md` |
 | FR-06 | Pre-order Campaign | lifecycle tests + invalid transition | **BLOCKED** | `CT-CAMPAIGN-012`, `CT-CAMPAIGN-013`, `CT-CAMPAIGN-014`, `E2E-CORE-001` | `reports/phase-07-campaign.md`<br>`reports/phase-25-core-e2e.md` |
-| FR-07 | Order | create/list/detail + snapshot + ownership | **BLOCKED** | `CT-ORDER-001`, `CT-ORDER-008`, `CT-ORDER-015`, `CT-ORDER-018`, `SEC-TENANT-001`, `SEC-TENANT-003`, `E2E-CORE-001` | `reports/phase-08-order.md`<br>`reports/phase-11-tenant-isolation-a.md`<br>`reports/phase-25-core-e2e.md` |
+| FR-08 | Payment Slip / Verification | private file + submit/approve/reject/resubmit + Customer own-Payment read | **BLOCKED** | `CT-PAYMENT-SUBMIT-007`, `CT-PAYMENT-SUBMIT-008`, `CT-PAYMENT-REVIEW-005`, `CT-PAYMENT-REVIEW-006`, `CT-CUSTOMER-PAYMENT-READ-002`, `CT-CUSTOMER-PAYMENT-READ-004`, `CT-FILE-014`, `SEC-CUSTOMER-PAYMENT-001`, `SEC-TENANT-004`, `SEC-TENANT-005`, `E2E-PAYMENT-REJECT-001` | `reports/phase-09-payment-submission.md`<br>`reports/phase-10-payment-review.md`<br>`reports/phase-16-file-security.md`<br>`reports/phase-26-payment-rejection-e2e.md` |
 | FR-08 | Payment Slip / Verification | private file + submit/approve/reject/resubmit | **BLOCKED** | `CT-PAYMENT-SUBMIT-007`, `CT-PAYMENT-SUBMIT-008`, `CT-PAYMENT-REVIEW-005`, `CT-PAYMENT-REVIEW-006`, `CT-FILE-014`, `SEC-TENANT-004`, `SEC-TENANT-005`, `E2E-PAYMENT-REJECT-001` | `reports/phase-09-payment-submission.md`<br>`reports/phase-10-payment-review.md`<br>`reports/phase-16-file-security.md`<br>`reports/phase-26-payment-rejection-e2e.md` |
 | FR-09 | Production Summary | paid-only grouping | **BLOCKED** | `CT-PRODUCTION-007`, `CT-PRODUCTION-008`, `CT-PRODUCTION-010`, `CT-PRODUCTION-011`, `E2E-CORE-001` | `reports/phase-14-production.md`<br>`reports/phase-25-core-e2e.md` |
 | FR-10 | Pickup QR / Token | own-token + staff confirm + duplicate prevention | **BLOCKED** | `CT-PICKUP-005`, `CT-PICKUP-006`, `CT-PICKUP-013`, `CT-PICKUP-016`, `SEC-TENANT-006`, `E2E-CORE-001` | `reports/phase-15-pickup.md`<br>`reports/phase-12-tenant-isolation-b.md`<br>`reports/phase-25-core-e2e.md` |
@@ -30,9 +30,9 @@ All 15 FRs have at least one concrete mapped verification path under `tests/**`,
 
 The strongest currently recorded completed layers are the Data-contract primitives (`DATA-001..010`), file-adapter/auth boundaries, CloudFormation static verification (`INFRA-CFN-001..012`), and the public health contract (`CT-HEALTH-001`). Those passes must not be generalized to the still-blocked business flows.
 
-## Known contract-integration gap
+## Customer Payment contract resolution
 
-FR-08 requires the Customer to see a Payment rejection reason. The Testing and Frontend specs require this behavior, but the current API contract does not define a Customer-readable Payment detail endpoint and `OrderDTO` does not carry `rejectReason`. Testing keeps this explicitly blocked rather than inventing a route or response shape.
+The previous FR-08 contract gap is resolved. Customer Payment state and rejection reason are now read through the canonical `GET /api/v1/me/orders/:orderId/payment -> PaymentDTO` path. Contract tests verify exact `rejectReason`, fail-closed cross-Customer ownership, and tenant derivation from the owned Order. FR-08 remains **BLOCKED** overall only because its full live E2E/file/notification environment verification is still environment-dependent; the API contract itself is no longer the blocker.
 
 ## Machine-readable source
 

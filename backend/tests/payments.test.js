@@ -154,6 +154,12 @@ function createPaymentHarness({
         assert.equal(orderId, 'order-1');
         return order;
       },
+      async findOwnedById(customerId, orderId) {
+        assert.equal(orderId, 'order-1');
+        return customerId === order.customerId
+          ? order
+          : null;
+      },
     },
     campaignRepository: {
       async getById(organizationId, campaignId) {
@@ -203,6 +209,82 @@ function createPaymentHarness({
 function getTransactionItem(transaction, predicate) {
   return transaction.TransactItems.find(predicate);
 }
+
+
+test('Customer own-Payment read derives tenant from owned Order and returns exact rejection reason', async () => {
+  const rejectionReason = 'Slip amount does not match order';
+  const harness = createPaymentHarness({
+    order: makeOrder({
+      status: ORDER_STATUS.PAYMENT_REJECTED,
+    }),
+    payment: makePayment({
+      status: PAYMENT_STATUS.REJECTED,
+      rejectReason: rejectionReason,
+      reviewedBy: 'staff-1',
+      reviewedAt: FIXED_TIME,
+    }),
+  });
+
+  const result = await harness.service.getOwnPayment({
+    customerId: 'customer-1',
+    orderId: 'order-1',
+  });
+
+  assert.equal(result.paymentId, 'payment-1');
+  assert.equal(result.organizationId, 'org-1');
+  assert.equal(result.orderId, 'order-1');
+  assert.equal(result.customerId, 'customer-1');
+  assert.equal(result.status, PAYMENT_STATUS.REJECTED);
+  assert.equal(result.rejectReason, rejectionReason);
+});
+
+test('Customer own-Payment read fails closed for another Customer Order', async () => {
+  const harness = createPaymentHarness();
+
+  await assert.rejects(
+    harness.service.getOwnPayment({
+      customerId: 'customer-other',
+      orderId: 'order-1',
+    }),
+    (error) =>
+      error.code === 'ORDER_NOT_FOUND' &&
+      error.httpStatus === 404,
+  );
+});
+
+test('Customer own-Payment read returns PAYMENT_NOT_FOUND for owned Order without Payment', async () => {
+  const harness = createPaymentHarness({
+    existingPayment: null,
+  });
+
+  await assert.rejects(
+    harness.service.getOwnPayment({
+      customerId: 'customer-1',
+      orderId: 'order-1',
+    }),
+    (error) =>
+      error.code === 'PAYMENT_NOT_FOUND' &&
+      error.httpStatus === 404,
+  );
+});
+
+test('Customer own-Payment read rejects a mismatched Payment record without leaking it', async () => {
+  const harness = createPaymentHarness({
+    payment: makePayment({
+      customerId: 'customer-other',
+    }),
+  });
+
+  await assert.rejects(
+    harness.service.getOwnPayment({
+      customerId: 'customer-1',
+      orderId: 'order-1',
+    }),
+    (error) =>
+      error.code === 'PAYMENT_NOT_FOUND' &&
+      error.httpStatus === 404,
+  );
+});
 
 test('first payment submission validates slip, writes one logical Payment and synchronizes Order projection', async () => {
   const order = makeOrder({
@@ -986,6 +1068,60 @@ test('payment list filters by tenant review index and campaign/order filters fai
     result.items.map((item) => item.paymentId),
     ['payment-a'],
   );
+});
+
+
+function createOwnPaymentRouteApp({
+  userId = 'customer-1',
+  paymentService,
+} = {}) {
+  return createApp({
+    users: {
+      authMiddleware(req, res, next) {
+        req.user = {
+          userId,
+          email: userId + '@example.com',
+          status: 'ACTIVE',
+        };
+        next();
+      },
+      payments: {
+        paymentService,
+      },
+    },
+  });
+}
+
+test('Customer own-Payment route uses authenticated userId and own-Payment service only', async () => {
+  let seenInput;
+  let reviewerGetCalled = false;
+  const app = createOwnPaymentRouteApp({
+    paymentService: {
+      async getOwnPayment(input) {
+        seenInput = input;
+        return makePayment({
+          status: PAYMENT_STATUS.REJECTED,
+          rejectReason: 'Wrong amount',
+        });
+      },
+      async getPayment() {
+        reviewerGetCalled = true;
+        throw new Error('tenant reviewer get must not be used');
+      },
+    },
+  });
+
+  const response = await request(app)
+    .get('/api/v1/me/orders/order-1/payment')
+    .expect(200);
+
+  assert.deepEqual(seenInput, {
+    customerId: 'customer-1',
+    orderId: 'order-1',
+  });
+  assert.equal(reviewerGetCalled, false);
+  assert.equal(response.body.data.status, PAYMENT_STATUS.REJECTED);
+  assert.equal(response.body.data.rejectReason, 'Wrong amount');
 });
 
 function createPaymentRouteApp({

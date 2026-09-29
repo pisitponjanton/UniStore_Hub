@@ -2,7 +2,7 @@
 
 ## Canonical source-backed flow
 
-`E2E-PAYMENT-REJECT-001` covers:
+`E2E-PAYMENT-REJECT-001` now covers:
 
 ```text
 Order
@@ -11,36 +11,44 @@ Order
 → Staff rejects with required reason
 → Payment REJECTED
 → Order PAYMENT_REJECTED
-→ PAYMENT_REJECTED notification
+→ Customer reads GET /me/orders/:orderId/payment
+→ Customer sees exact PaymentDTO.rejectReason
+→ PAYMENT_REJECTED notification is delivered independently
 → Customer uploads replacement slip
 → same paymentId reused
-→ reject/reviewer fields cleared
-→ Payment PENDING_REVIEW
+→ rejectReason/reviewedBy/reviewedAt cleared
+→ Customer own-Payment read returns PENDING_REVIEW with cleared review fields
 → Staff approves
 → Order PAID
+→ Customer own-Payment read returns APPROVED
 → PAYMENT_REJECTED Audit exists
 → PAYMENT_APPROVED Audit exists
 ```
 
 The executable scenario also verifies that replacement submission changes `slipKey` while retaining the logical `paymentId`.
 
-## Customer-visible rejection reason contract gap
+## Customer-visible rejection reason contract resolution
 
-The Testing spec explicitly requires:
+The previous contract gap is resolved by the canonical Customer endpoint:
 
-```text
-Customer sees rejection reason
+```http
+GET /api/v1/me/orders/:orderId/payment
 ```
 
-The Frontend spec likewise says Customer can view payment state/rejection reason.
+Success returns the canonical `PaymentDTO`. The E2E flow now reads the rejected Payment through this Customer-owned endpoint before waiting for the notification, proving that the notification is not the authoritative source of `rejectReason`.
 
-However, the current API contract does not define a Customer-readable Payment detail endpoint, and `OrderDTO` does not include Payment or `rejectReason`. The documented tenant Payment detail endpoint is Staff / Organization Admin only.
+The corresponding contract/security coverage verifies:
 
-Testing therefore does **not** invent a route, extend OrderDTO, or assume the notification message contains the rejection reason. The exact Customer-visible rejection-reason read path is kept as an explicit TODO/BLOCKED contract-integration finding.
+- exact persisted `rejectReason` is returned to the owning Customer
+- Customer access requires Order ownership, not Organization membership
+- Customer A cannot read Customer B Payment
+- an owned Order without a Payment returns `PAYMENT_NOT_FOUND`
+- a mismatched Payment record fails closed
+- Staff/Admin tenant Payment-review detail is not reused by the Customer route
 
 ## Readiness gate
 
-Before creating disposable E2E data, the executable flow requires:
+Before creating disposable E2E data, the live flow requires:
 
 - Orders route
 - Payments route
@@ -50,24 +58,10 @@ Before creating disposable E2E data, the executable flow requires:
 
 Live execution additionally requires `E2E_API_BASE_URL` and deterministic `E2E_RUN_ID`; a Platform Admin token is required if a newly created Organization remains `PENDING`.
 
-## Latest execution
+## Current verification
 
-Command:
+Focused non-live verification now passes through Backend-local, contract, security, Frontend, and traceability tests.
 
-```bash
-node --test e2e/payment-rejection-flow.test.mjs
-```
+The live E2E scenario remains environment-gated when `E2E_API_BASE_URL` / `E2E_RUN_ID` are not configured. This environment gate is distinct from the former API-contract gap: the Customer Payment read contract is now defined and asserted inside the live scenario.
 
-Result:
-
-- E2E-PAYMENT-REJECT-001 core reject/resubmit/approve/Audit/notification flow — TODO/BLOCKED because the owning Backend implementations are still incomplete:
-  - `backend/src/modules/orders/order.routes.js`
-  - `backend/src/modules/payments/payment.routes.js`
-  - `backend/src/modules/notifications/notification.routes.js`
-  - `backend/src/modules/audit/audit.routes.js`
-  - `backend/src/worker.js`
-- E2E-PAYMENT-REJECT-001 Customer-visible exact rejection reason — TODO/BLOCKED because the current source contracts require the UX behavior but do not define a Customer-readable Payment detail endpoint or an OrderDTO field carrying `rejectReason`.
-
-Focused summary: 2 tests total — 0 pass, 0 fail, 2 todo.
-
-No blocked check is counted as passing, and Testing did not invent an API route/response shape to close the source-contract gap.
+No blocked environment check is counted as a functional pass.

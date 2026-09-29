@@ -35,7 +35,10 @@ function createUserRouter(options = {}) {
   router.use(
     '/me/orders',
     authMiddleware,
-    createOwnOrderRouter(options.orders),
+    createOwnOrderRouter({
+      ...(options.orders || {}),
+      payments: options.payments,
+    }),
   );
 
   return router;

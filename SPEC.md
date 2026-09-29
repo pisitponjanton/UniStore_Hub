@@ -197,7 +197,7 @@ AWS Cost Explorer / Learner Lab Budget
 - Select Product Variant
 - Create Order
 - Upload Payment Slip
-- Track Order / Payment
+- Track own Order / Payment, including current Payment state and rejection reason
 - View Pickup QR / Token
 - View In-app Notification
 
@@ -312,10 +312,11 @@ This prevents historical orders from changing when Product / Variant data is edi
 ### 6.3 Payment
 
 - Payment Slip is private.
-- Customer can manage only their own Order payment flow.
+- Customer can manage and read Payment state/rejection reason only for their own Order.
 - Staff / Admin can review only Orders inside their Organization.
 - Reject requires a reason.
 - Approve / Reject must produce Audit and Notification events.
+- The authoritative Customer read path is the own-Order Payment API; Notification is only an asynchronous signal and is not the source of `rejectReason`.
 
 ### 6.4 Production
 
@@ -924,6 +925,7 @@ Locked decisions include:
 - JWT minimum claims and Frontend sessionStorage
 - Platform Admin authority via `User.platformRole`
 - Customer Order/Payment/Pickup ownership path without requiring Organization membership
+- Customer own-Payment read via `GET /api/v1/me/orders/:orderId/payment` returning `PaymentDTO`
 - Campaign cancellation guard
 - post-PAID Order lifecycle including CLOSED-Campaign late-payment approval
 - `CLOSED → PRODUCING` blocked while Payment review remains

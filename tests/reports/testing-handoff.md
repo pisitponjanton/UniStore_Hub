@@ -95,3 +95,10 @@ Testing fixed two harness issues only: Storefront route tests no longer require 
 The remaining 24 failures are current project gaps: 12 Backend/API/Worker tests, 9 Frontend/static-export tests, and 3 Dev Mode/Integration tests. See `reports/phase-29-full-regression.md` and `reports/phase-29-full-regression.log`.
 
 Auth validation and public Storefront route surfaces now pass in the current regression, superseding the historical phase-03/04 route-absence observations. Their full FRs remain blocked because required persistence/E2E layers are still outstanding.
+Auth validation and public Storefront route surfaces now pass in the current regression, superseding the historical phase-03/04 route-absence observations. Their full FRs remain blocked because required persistence/E2E layers are still outstanding.
+
+## Post-handoff Customer Payment read update
+
+The previously recorded API/Integration gap for Customer-visible Payment rejection reason is resolved. The canonical read path is `GET /api/v1/me/orders/:orderId/payment -> PaymentDTO`; it is ownership-scoped, requires no Organization membership, returns exact `rejectReason`, and fails closed across Customers.
+
+Current focused evidence includes Backend-local Payment tests, root contract/security coverage, Frontend payment-service/view tests, and the updated payment-rejection E2E scenario. Notification remains an asynchronous alert and is not used as the authoritative Payment status/rejection-reason source.

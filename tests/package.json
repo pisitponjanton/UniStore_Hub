@@ -4,12 +4,12 @@
   "type": "module",
   "scripts": {
     "test": "node --test",
-    "test:contract": "node --test contract",
+    "test:contract": "node --test contract/*.test.mjs",
     "test:integration": "node --test integration",
-    "test:security": "node --test security",
+    "test:security": "node --test security/*.test.mjs",
     "test:frontend": "node --test frontend",
     "test:smoke": "node --test smoke",
-    "test:e2e": "node --test e2e",
+    "test:e2e": "node --test e2e/*.test.mjs",
     "test:infrastructure": "node --test infrastructure"
   },
   "engines": {

@@ -55,3 +55,10 @@ Result:
 Focused summary: 2 tests total — 2 pass, 0 fail, 0 todo.
 
 This pass validates traceability/handoff completeness only. It does not convert any blocked FR into a functional pass.
+This pass validates traceability/handoff completeness only. It does not convert any blocked FR into a functional pass.
+
+## Post-snapshot Customer Payment read resolution
+
+The FR-08 Customer-visible rejection-reason contract gap recorded above has since been resolved canonically as `GET /api/v1/me/orders/:orderId/payment -> PaymentDTO`.
+
+Traceability now maps `CT-CUSTOMER-PAYMENT-READ-002`, `CT-CUSTOMER-PAYMENT-READ-004`, and `SEC-CUSTOMER-PAYMENT-001`; the live payment-rejection E2E scenario also asserts the exact Customer `rejectReason`, cleared review fields after resubmission, and final APPROVED Payment state. Remaining FR-08 blocking status is due to live environment/file/notification execution prerequisites, not an unresolved API contract.

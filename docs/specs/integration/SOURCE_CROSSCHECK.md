@@ -15,6 +15,18 @@ Resolution summary:
 
 Additional Phase 11 gaps were also resolved in the canonical specs.
 
+### Post-implementation Customer Payment read gap
+
+A later Frontend/Testing cross-check found that the source-aligned requirement for a Customer to track Payment state and see a rejection reason was represented in Frontend/Testing/Data contracts, but the API contract did not define a Customer-readable Payment detail path.
+
+This gap is now resolved as an explicit PROJECT DECISION:
+
+```http
+GET /api/v1/me/orders/:orderId/payment
+```
+
+The route returns canonical `PaymentDTO`, resolves the authenticated Customer's owned Order first, derives `organizationId` from that Order, requires no Organization membership, and fails closed for another Customer's Order. Notifications remain asynchronous alerts and are not the authoritative `rejectReason` source.
+
 > Temporary verification artifact for Phase 10.  
 > Basis: Final System & Deployment Specification + attached AWS architecture diagram.  
 > Resolution target: Phase 12 — Fix source mismatches and contract gaps.

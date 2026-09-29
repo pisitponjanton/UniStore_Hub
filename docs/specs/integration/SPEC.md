@@ -226,6 +226,10 @@ Verify:
 - list pagination uses items + nextCursor
 - role/status tokens match
 - Customer Order/Payment/Pickup flows use authenticated ownership without requiring Organization membership
+- Customer Payment tracking uses `GET /api/v1/me/orders/:orderId/payment -> PaymentDTO`
+- Customer own-Payment read resolves the owned Order first and derives tenant context from that Order
+- Customer UI does not call Staff/Admin `/organizations/:organizationId/payments/:paymentId`
+- `PAYMENT_REJECTED` Notification is not the authoritative source of `rejectReason`
 - Frontend never depends on Backend storage fields
 
 No local adapter may hide a contract mismatch without updating the canonical API contract.
@@ -434,6 +438,8 @@ Integration verifies:
 - idempotency
 - core transaction independence from notification failure
 - Frontend notification DTO compatibility
+- `PAYMENT_REJECTED` Notification is an asynchronous alert only
+- Customer current Payment status/rejectReason comes from `GET /me/orders/:orderId/payment`, not Notification message/data
 
 ---
 
@@ -598,12 +604,15 @@ no project-created SQS DLQ
 CloudFormation tooling artifact bucket
 Platform Admin persistence
 public Storefront read API
+Customer own-Payment read API for Payment state/rejectReason
 Static Export trailing-slash routing
 Frontend/Backend command handoff
 Testing ownership under tests/**
 ~~~
 
-There are no remaining MVP-blocking OPEN DECISIONs.
+The Customer Payment read gap is resolved canonically as `GET /api/v1/me/orders/:orderId/payment -> PaymentDTO`. It uses authenticated Order ownership, derives tenant context from the owned Order, and does not require Organization membership.
+
+There are no remaining MVP-blocking OPEN DECISIONs in the canonical specification set after this resolution.
 
 If a new unresolved requirement appears, register it in Shared Contracts and stop only the dependent slice until Integration resolves it.
 

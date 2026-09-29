@@ -588,7 +588,30 @@ Historical Order Item commercial/display data must not change because Product or
 - Approve / Reject creates an Audit event.
 - Approve / Reject creates a Notification event.
 
-### 11.0 Payment Submission / Resubmission
+### 11.0 Customer Own Payment Read
+
+**PROJECT DECISION — resolves Customer rejection-reason read gap**
+
+The authoritative Customer read path for an existing Order Payment is:
+
+```http
+GET /api/v1/me/orders/:orderId/payment
+```
+
+Rules:
+
+- requires an authenticated active User
+- does not require `OrganizationMember` membership
+- Backend first resolves `orderId` through the current User's own-Order ownership path
+- Backend derives `organizationId` from that owned Order; Customer does not provide tenant authority
+- Backend then loads the one logical Payment for that Order and verifies Payment `organizationId`, `orderId`, and `customerId` against the owned Order/current User
+- another Customer's `orderId` fails closed as `ORDER_NOT_FOUND`
+- an owned Order with no Payment yet returns `PAYMENT_NOT_FOUND`
+- success returns the canonical `PaymentDTO`, including current `status` and `rejectReason`
+- the Staff/Admin Organization payment-review endpoints are not a Customer read path
+- Notifications may alert the Customer about rejection/approval but are not authoritative for `rejectReason`
+
+### 11.1 Payment Submission / Resubmission
 
 **PROJECT DECISION**
 
@@ -605,7 +628,7 @@ REJECTED
 
 AuditLog preserves review history. A `PAID`/approved Order cannot submit another slip.
 
-### 11.1 Payment Entity Status
+### 11.2 Payment Entity Status
 
 **PROJECT DECISION — resolved by API/Data contract**
 
@@ -804,6 +827,12 @@ READY_FOR_PICKUP
 ```
 
 Display text can be localized independently.
+
+**PROJECT DECISION — Customer Payment read authority**
+
+`PAYMENT_REJECTED` and `PAYMENT_APPROVED` Notifications are asynchronous signals only. They are not the authoritative source of the current Payment status or `rejectReason`.
+
+A Customer who needs the current state/rejection reason reads the Payment through the documented own-Order Payment API after ownership is verified.
 
 ### 15.2 Event Delivery Invariant
 

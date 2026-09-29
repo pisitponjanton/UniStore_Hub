@@ -378,7 +378,7 @@ ORGANIZATION_ADMIN
 
 Customer Order / Payment / Pickup operations do not require an `OrganizationMember` record.
 
-Backend instead requires:
+For Organization-scoped Customer write flows such as Order creation or Payment submission, Backend requires:
 
 ~~~text
 authenticated user
@@ -388,6 +388,8 @@ authenticated user
 → verify order.customerId == current userId when accessing an existing customer-owned resource
 → continue
 ~~~
+
+For current-user own-resource reads under `/api/v1/me/...`, Backend first resolves the Order through authenticated `userId + orderId`, then derives `organizationId` from that owned Order before loading child Payment/Pickup data. A Customer-supplied resource ID or tenant ID alone is never authorization proof.
 
 Order creation verifies the Campaign/Product/Variant tenant relationship before writing the new Order.
 
@@ -745,9 +747,10 @@ Paid-or-later and `PAYMENT_REVIEW` Orders cannot cancel in MVP because refund/re
 
 Owns:
 
+- customer own-Payment read for an owned Order
 - payment submission/resubmission
 - review queue
-- get Payment
+- tenant reviewer get Payment
 - approve
 - reject
 - Payment ↔ Order status synchronization
@@ -759,6 +762,33 @@ PENDING_REVIEW
 APPROVED
 REJECTED
 ~~~
+
+### Customer Own Payment Read
+
+**PROJECT DECISION — resolves Customer rejection-reason read gap**
+
+Canonical route:
+
+~~~http
+GET /api/v1/me/orders/:orderId/payment
+~~~
+
+Authorization/data flow:
+
+~~~text
+authenticate current User
+→ resolve orderId through own-Order access using current userId
+→ if Order is not owned/not visible: ORDER_NOT_FOUND
+→ derive organizationId from the owned Order
+→ load the one logical Payment by organizationId + orderId
+→ if no Payment exists: PAYMENT_NOT_FOUND
+→ verify Payment organizationId/orderId/customerId against the owned Order/current User
+→ map to PaymentDTO
+~~~
+
+No `OrganizationMember` lookup is required for this Customer route. Do not authorize it by `paymentId` alone and do not reuse the Staff/Admin tenant Payment-review endpoint.
+
+The returned Payment record is authoritative for current Payment `status` and `rejectReason`. Notification delivery is not authoritative for either value.
 
 ### Submit
 

@@ -179,6 +179,23 @@ function createPaymentService(options = {}) {
     return order;
   }
 
+  async function requireCustomerOwnedOrder(
+    customerId,
+    orderId,
+  ) {
+    const order =
+      await getOrderRepository().findOwnedById(
+        customerId,
+        orderId,
+      );
+
+    if (!order || order.customerId !== customerId) {
+      throw notFound('ORDER_NOT_FOUND', 'Order not found');
+    }
+
+    return order;
+  }
+
   async function requireOrder(organizationId, orderId) {
     const order = await getOrderRepository().getById(
       organizationId,
@@ -871,6 +888,42 @@ function createPaymentService(options = {}) {
         slipKey,
         existingPayment,
       });
+    },
+
+    async getOwnPayment({
+      customerId,
+      orderId,
+    }) {
+      const order = await requireCustomerOwnedOrder(
+        customerId,
+        orderId,
+      );
+
+      const payment =
+        await getPaymentRepository().getByOrder(
+          order.organizationId,
+          order.orderId,
+        );
+
+      if (!payment) {
+        throw notFound(
+          'PAYMENT_NOT_FOUND',
+          'Payment not found',
+        );
+      }
+
+      if (
+        payment.organizationId !== order.organizationId ||
+        payment.orderId !== order.orderId ||
+        payment.customerId !== customerId
+      ) {
+        throw notFound(
+          'PAYMENT_NOT_FOUND',
+          'Payment not found',
+        );
+      }
+
+      return toPaymentDto(payment);
     },
 
     async listPayments({

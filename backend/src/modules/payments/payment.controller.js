@@ -91,6 +91,20 @@ function createPaymentController(options = {}) {
       }
     },
 
+    async getOwn(req, res, next) {
+      try {
+        return sendSuccess(
+          res,
+          await paymentService.getOwnPayment({
+            customerId: req.user.userId,
+            orderId: req.params.orderId,
+          }),
+        );
+      } catch (error) {
+        return next(error);
+      }
+    },
+
     async approve(req, res, next) {
       try {
         return sendSuccess(

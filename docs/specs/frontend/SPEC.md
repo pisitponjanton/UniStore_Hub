@@ -839,7 +839,26 @@ Customer side:
 - upload directly to S3
 - submit `slipKey`
 - resubmit after rejection
-- view payment state/rejection reason
+- load current Payment state/rejection reason through the documented own-Order Payment read endpoint
+
+Canonical Customer read:
+
+```text
+GET /me/orders/:orderId
+→ verify/load owned Order context
+GET /me/orders/:orderId/payment
+→ PaymentDTO
+```
+
+Rules:
+
+- `/my/payment/?orderId=...` loads the owned Order first
+- when Payment state is needed, Frontend calls `GET /me/orders/:orderId/payment`
+- `PAYMENT_NOT_FOUND` for an owned `PENDING_PAYMENT` Order means no Payment record has been submitted yet
+- `PaymentDTO.status` and `PaymentDTO.rejectReason` are authoritative for the Customer view
+- after submit/resubmit, Frontend may use the returned `PaymentDTO` immediately and should refresh authoritative Order/Payment state as needed
+- Customer UI must never call `/organizations/:organizationId/payments/:paymentId`
+- Notifications are alerts only and must not be used as the authoritative source of `rejectReason`
 
 Staff/Admin side:
 
@@ -1372,7 +1391,7 @@ Frontend Agent must provide tests/checks for:
 - THB ↔ satang conversion
 - Product image direct-upload flow
 - Payment Slip direct-upload flow
-- Payment rejection reason display
+- Payment rejection reason display after page reload via `GET /me/orders/:orderId/payment`, including owned-order `PAYMENT_NOT_FOUND` initial state
 - Pickup duplicate error display
 - notification mark-read flow
 - static export build

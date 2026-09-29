@@ -1158,7 +1158,7 @@ GET /api/v1/organizations/:organizationId/orders/:orderId
 
 Staff/Admin: tenant membership required.
 
-Customer access requires ownership.
+Customer own-order reads use the `/api/v1/me/orders/:orderId` path in Section 11.4 and are authorized by ownership rather than Organization membership.
 
 ### 11.4 Customer Own Orders
 
@@ -1289,10 +1289,40 @@ cursor
 GET /api/v1/organizations/:organizationId/payments/:paymentId
 ```
 
-Role: Staff / Organization Admin  
-Customer access is only through their own Order payment flow.
+Role: Staff / Organization Admin.
 
-### 12.4 Approve Payment
+This is a tenant payment-review endpoint. Customer must not use it to read their own Payment.
+
+### 12.4 Get Customer Own Payment
+
+**PROJECT DECISION — resolves Customer rejection-reason read gap**
+
+```http
+GET /api/v1/me/orders/:orderId/payment
+```
+
+Auth: Bearer JWT. Customer ownership required; Organization membership is not required.
+
+Backend authorization sequence:
+
+```text
+authenticated current user
+→ resolve orderId through current user's own-Order access
+→ if not owned/not visible: ORDER_NOT_FOUND
+→ derive organizationId from the owned Order
+→ load the one logical Payment by organizationId + orderId
+→ if no Payment exists for the owned Order: PAYMENT_NOT_FOUND
+→ verify Payment.organizationId == Order.organizationId
+→ verify Payment.orderId == Order.orderId
+→ verify Payment.customerId == current userId
+→ return PaymentDTO
+```
+
+This endpoint must fail closed for another Customer's Order and must not reveal whether that Order has a Payment.
+
+A successful response uses the canonical `PaymentDTO`. `status` and `rejectReason` are authoritative for Customer payment tracking. On rejected resubmission, the same `paymentId` is returned by the submit endpoint and `rejectReason`, `reviewedBy`, and `reviewedAt` are cleared as defined by the Payment resubmission contract.
+
+### 12.5 Approve Payment
 
 **PROJECT DECISION endpoint shape; source-defined action**
 
@@ -1317,7 +1347,7 @@ Other required effects:
 - update CampaignOrderLink projection
 - publish `PAYMENT_APPROVED` event after the core transaction
 
-### 12.5 Reject Payment
+### 12.6 Reject Payment
 
 ```http
 POST /api/v1/organizations/:organizationId/payments/:paymentId/reject
@@ -1692,6 +1722,10 @@ Optional query:
 read
 cursor
 ```
+
+**PROJECT DECISION — Payment read authority**
+
+`PAYMENT_APPROVED` / `PAYMENT_REJECTED` Notifications are asynchronous user alerts. `NotificationDTO` does not carry the authoritative Payment state or rejection reason. Customer Payment state and `rejectReason` must be read from `GET /api/v1/me/orders/:orderId/payment`.
 
 ### 18.2 Mark Notification Read
 
