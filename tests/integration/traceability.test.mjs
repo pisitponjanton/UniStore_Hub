@@ -7,23 +7,75 @@ import { fileURLToPath } from 'node:url';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const testsRoot = path.resolve(here, '..');
 const traceabilityPath = path.join(testsRoot, 'reports', 'fr-traceability.json');
+const traceabilityMarkdownPath = path.join(
+  testsRoot,
+  'reports',
+  'fr-traceability.md',
+);
 
-async function collectExecutableSources(directory) {
+async function collectExecutableTestIds(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
-  const contents = [];
+  const ids = new Set();
 
   for (const entry of entries) {
     if (entry.name === 'reports' || entry.name === 'node_modules') continue;
     const full = path.join(directory, entry.name);
 
     if (entry.isDirectory()) {
-      contents.push(...await collectExecutableSources(full));
-    } else if (/\.(?:mjs|js)$/.test(entry.name)) {
-      contents.push(await readFile(full, 'utf8'));
+      for (const id of await collectExecutableTestIds(full)) ids.add(id);
+      continue;
+    }
+
+    if (!entry.isFile() || !/\.(?:mjs|js)$/.test(entry.name)) continue;
+
+    const source = await readFile(full, 'utf8');
+    const directPattern =
+      /\btest(?:\.\w+)?\s*\(\s*['"`]([A-Z][A-Z0-9-]+)\b/g;
+    for (const match of source.matchAll(directPattern)) ids.add(match[1]);
+
+    const dynamicPattern =
+      /\btest(?:\.\w+)?\s*\(\s*`\$\{([A-Za-z_][A-Za-z0-9_]*)\}/g;
+    for (const dynamicMatch of source.matchAll(dynamicPattern)) {
+      const variableName = dynamicMatch[1];
+      const loopPattern = new RegExp(
+        `for\\s*\\(\\s*const\\s*\\[\\s*${variableName}\\b[^\\]]*\\]\\s*of\\s*\\[([\\s\\S]*?)\\]\\s*\\)\\s*\\{`,
+        'g',
+      );
+
+      for (const loopMatch of source.matchAll(loopPattern)) {
+        const fixtureRows = loopMatch[1];
+        const fixtureIdPattern = /\[\s*['"`]([A-Z][A-Z0-9-]+)\b/g;
+        for (const fixtureMatch of fixtureRows.matchAll(fixtureIdPattern)) {
+          ids.add(fixtureMatch[1]);
+        }
+      }
     }
   }
 
-  return contents;
+  return ids;
+}
+
+function parseMarkdownTraceabilityRows(markdown) {
+  return markdown
+    .split('\n')
+    .filter((line) => /^\|\s*FR-\d{2}\s*\|/.test(line))
+    .map((line) => {
+      const cells = line
+        .split('|')
+        .slice(1, -1)
+        .map((cell) => cell.trim());
+
+      assert.equal(cells.length, 6, `Traceability row must contain 6 columns: ${line}`);
+
+      return {
+        fr: cells[0],
+        requirement: cells[1],
+        minimumVerification: cells[2],
+        status: cells[3].replace(/\*\*/g, ''),
+        mappedTests: [...cells[4].matchAll(/`([^`]+)`/g)].map((match) => match[1]),
+        artifacts: [...cells[5].matchAll(/`([^`]+)`/g)].map((match) => match[1]),
+      };
+    });
 }
 
 test('TRACE-001 FR-01 through FR-15 each have mapped executable verification and existing evidence artifacts', async () => {
@@ -36,8 +88,9 @@ test('TRACE-001 FR-01 through FR-15 each have mapped executable verification and
     `FR-${String(index + 1).padStart(2, '0')}`
   );
   assert.deepEqual(requirements.map((entry) => entry.fr), expected);
+  assert.equal(new Set(requirements.map((entry) => entry.fr)).size, 15);
 
-  const sourceCorpus = (await collectExecutableSources(testsRoot)).join('\n');
+  const executableTestIds = await collectExecutableTestIds(testsRoot);
 
   for (const entry of requirements) {
     assert.ok(entry.requirement);
@@ -50,8 +103,8 @@ test('TRACE-001 FR-01 through FR-15 each have mapped executable verification and
 
     for (const testId of entry.mappedTests) {
       assert.ok(
-        sourceCorpus.includes(testId),
-        `${entry.fr} maps missing executable test ID ${testId}`,
+        executableTestIds.has(testId),
+        `${entry.fr} maps ${testId}, but no executable test definition was found`,
       );
     }
 
@@ -61,12 +114,36 @@ test('TRACE-001 FR-01 through FR-15 each have mapped executable verification and
   }
 });
 
-test('TRACE-002 human-readable traceability and handoff reports exist', async () => {
-  await access(path.join(testsRoot, 'reports', 'fr-traceability.md'));
+test('TRACE-002 Markdown traceability is exactly ordered and in parity with JSON', async () => {
+  const matrix = JSON.parse(await readFile(traceabilityPath, 'utf8'));
+  const markdown = await readFile(traceabilityMarkdownPath, 'utf8');
+  const rows = parseMarkdownTraceabilityRows(markdown);
+  const expected = Array.from({ length: 15 }, (_, index) =>
+    `FR-${String(index + 1).padStart(2, '0')}`
+  );
+
+  assert.equal(rows.length, 15, 'Markdown must contain exactly 15 FR rows');
+  assert.equal(new Set(rows.map((row) => row.fr)).size, 15);
+  assert.deepEqual(rows.map((row) => row.fr), expected);
+
+  const jsonRows = matrix.requirements.map((entry) => ({
+    fr: entry.fr,
+    requirement: entry.requirement,
+    minimumVerification: entry.minimumVerification,
+    status: entry.status,
+    mappedTests: entry.mappedTests,
+    artifacts: entry.artifacts,
+  }));
+
+  assert.deepEqual(rows, jsonRows);
+});
+
+test('TRACE-003 human-readable traceability and handoff reports exist', async () => {
+  await access(traceabilityMarkdownPath);
   await access(path.join(testsRoot, 'reports', 'testing-handoff.md'));
 });
 
-test('TRACE-003 FR-08 records the resolved Customer own-Payment read contract and ownership coverage', async () => {
+test('TRACE-004 FR-08 records the resolved Customer own-Payment read contract and ownership coverage', async () => {
   const matrix = JSON.parse(await readFile(traceabilityPath, 'utf8'));
   const payment = matrix.requirements.find((entry) => entry.fr === 'FR-08');
 

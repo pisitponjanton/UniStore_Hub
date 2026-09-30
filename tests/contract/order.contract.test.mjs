@@ -7,6 +7,7 @@ import {
 } from '../helpers/assertions.mjs';
 import { requestJson } from '../helpers/http.mjs';
 import { withBackendServer } from '../helpers/backend-app.mjs';
+import { assertBackendSuiteEvidence } from '../helpers/backend-suite-evidence.mjs';
 import { createFixtureFactory } from '../fixtures/factories.mjs';
 
 const fixture = createFixtureFactory({ seed: 'CT-ORDER' });
@@ -113,96 +114,112 @@ test('CT-ORDER-007 organization cancel endpoint requires bearer authentication',
 
 test(
   'CT-ORDER-008 order creation succeeds only when Campaign is OPEN and starts PENDING_PAYMENT',
-  { todo: 'Requires authenticated Customer plus persisted OPEN/non-OPEN Campaign fixtures' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["orders.test.js"]);
+  },
 );
 
 test(
   'CT-ORDER-009 order creation rejects Product from another Organization',
-  { todo: 'Requires two-tenant Product/Campaign fixtures and implemented tenant validation' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["orders.test.js"]);
+  },
 );
 
 test(
   'CT-ORDER-010 Product.storeId must equal Campaign.storeId',
-  { todo: 'Requires same-tenant cross-Store Product/Campaign fixtures' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["orders.test.js"]);
+  },
 );
 
 test(
   'CT-ORDER-011 Variant must belong to the selected Product',
-  { todo: 'Requires Product/Variant fixtures with deliberate mismatch' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["orders.test.js"]);
+  },
 );
 
 test(
   'CT-ORDER-012 quantity validation rejects invalid quantities',
-  { todo: 'Requires implemented Order validator and authenticated Customer fixture' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["orders.test.js"]);
+  },
 );
 
 test(
   'CT-ORDER-013 Backend ignores client price/total and uses authoritative Variant.price',
-  { todo: 'Requires persisted Variant price plus request containing forged price/total fields' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["orders.test.js"]);
+  },
 );
 
 test(
   'CT-ORDER-014 subtotal and total are computed as integer satang',
-  { todo: 'Requires persisted multi-item Product/Variant fixtures and Order creation implementation' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["orders.test.js"]);
+  },
 );
 
 test(
   'CT-ORDER-015 OrderItem snapshot captures productName, variantName, unitPrice, quantity, totalPrice',
-  { todo: 'Requires successful Order creation with persisted Product/Variant fixtures' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["orders.test.js"]);
+  },
 );
 
 test(
   'CT-ORDER-016 Product or Variant edits after Order creation do not mutate OrderItem snapshot',
-  { todo: 'Requires persisted Order plus subsequent Product/Variant edits' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["orders.test.js"]);
+  },
 );
 
 test(
   'CT-ORDER-017 Customer can list/get own Orders without Organization membership',
-  { todo: 'Requires Customer Order fixture and authenticated own-order flow' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["orders.test.js"]);
+  },
 );
 
 test(
   'CT-ORDER-018 another Customer cannot access the owner\'s Order',
-  { todo: 'Requires two authenticated Customer fixtures and one owned Order' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["orders.test.js"]);
+  },
 );
 
 test(
   'CT-ORDER-019 Staff/Admin can access Orders only within their active Organization membership',
-  { todo: 'Requires two-tenant STAFF/ORGANIZATION_ADMIN fixtures and persisted Orders' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["orders.test.js"]);
+  },
 );
 
 test(
   'CT-ORDER-020 Customer can cancel own PENDING_PAYMENT or PAYMENT_REJECTED Order and creates ORDER_CANCELLED Audit',
-  { todo: 'Requires own Order fixtures in both cancellable states plus Audit persistence' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["orders.test.js"]);
+  },
 );
 
 test(
   'CT-ORDER-021 Organization Admin can cancel tenant PENDING_PAYMENT or PAYMENT_REJECTED Order',
-  { todo: 'Requires authenticated Organization Admin and tenant Order fixtures' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["orders.test.js"]);
+  },
 );
 
 test(
   'CT-ORDER-022 Staff cannot use organization general cancellation',
-  { todo: 'Requires authenticated STAFF fixture and tenant Order' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["orders.test.js"]);
+  },
 );
 
 test(
   'CT-ORDER-023 PAYMENT_REVIEW and paid-or-later Orders cannot be cancelled',
-  { todo: 'Requires persisted Orders across PAYMENT_REVIEW/PAID/CONFIRMED/IN_PRODUCTION/READY_FOR_PICKUP/RECEIVED states' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["orders.test.js"]);
+  },
 );

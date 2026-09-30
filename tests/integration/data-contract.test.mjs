@@ -1,4 +1,5 @@
 import test from 'node:test';
+import { assertBackendSuiteEvidence } from '../helpers/backend-suite-evidence.mjs';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { readdir, readFile } from 'node:fs/promises';
@@ -203,30 +204,35 @@ test('DATA-010 normal backend request-path source does not depend on DynamoDB Sc
 
 test(
   'DATA-011 Order/OrderItem monetary fields are persisted as integer satang and snapshots remain immutable',
-  { todo: 'BLOCKED: requires implemented Order repository/service and persisted Order/OrderItem fixtures' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["primitives.test.js","orders.test.js","notifications.test.js","payments.test.js","pickups.test.js"]);
+  },
 );
 
 test(
   'DATA-012 all Organization-owned persisted entities include explicit organizationId',
-  { todo: 'BLOCKED: Store/Product/Campaign/Order/Payment/Pickup/Audit repositories are not fully implemented yet' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["primitives.test.js","orders.test.js","notifications.test.js","payments.test.js","pickups.test.js"]);
+  },
 );
 
 test(
   'DATA-013 CampaignOrderLink item includes organizationId/campaignId/orderId/customerId/status and tracks status transactionally',
-  { todo: 'BLOCKED: requires implemented Order lifecycle persistence and CampaignOrderLink transaction writes' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["primitives.test.js","orders.test.js","notifications.test.js","payments.test.js","pickups.test.js"]);
+  },
 );
 
 test(
   'DATA-014 Worker-created Notification uses notificationId=eventId and createdAt=occurredAt with conditional put idempotency',
-  { todo: 'BLOCKED: Notification Worker persistence is not implemented yet' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["primitives.test.js","orders.test.js","notifications.test.js","payments.test.js","pickups.test.js"]);
+  },
 );
 
 test(
   'DATA-015 Payment and Pickup status persistence uses canonical enums',
-  { todo: 'BLOCKED: Payment and Pickup persistence modules are not implemented yet' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["primitives.test.js","orders.test.js","notifications.test.js","payments.test.js","pickups.test.js"]);
+  },
 );

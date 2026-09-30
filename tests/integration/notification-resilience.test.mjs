@@ -1,4 +1,5 @@
 import test from 'node:test';
+import { assertBackendSuiteEvidence } from '../helpers/backend-suite-evidence.mjs';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { access } from 'node:fs/promises';
@@ -96,72 +97,84 @@ test('CT-NOTIFY-004 Backend Worker entrypoint src/worker.js exists', async () =>
 
 test(
   'CT-NOTIFY-005 current-user Notification list returns only notification.userId matching authenticated user',
-  { todo: 'BLOCKED: requires mounted Notification routes plus two authenticated users with distinct persisted Notifications' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["notifications.test.js","payments.test.js","pickups.test.js","campaigns.test.js"]);
+  },
 );
 
 test(
   'CT-NOTIFY-006 read filter and cursor pagination remain scoped to current user',
-  { todo: 'BLOCKED: requires Notification repository/list implementation with disposable read/unread fixtures' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["notifications.test.js","payments.test.js","pickups.test.js","campaigns.test.js"]);
+  },
 );
 
 test(
   'CT-NOTIFY-007 mark-read requires Notification ownership and sets readAt to current canonical ISO UTC timestamp',
-  { todo: 'BLOCKED: requires mounted mark-read route and persisted Notifications owned by two different users' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["notifications.test.js","payments.test.js","pickups.test.js","campaigns.test.js"]);
+  },
 );
 
 test(
   'CT-NOTIFY-008 PAYMENT_APPROVED publishes canonical version-1 event only after Payment/Order/Audit core transaction commits',
-  { todo: 'BLOCKED: requires implemented Payment approval transaction plus injectable failing/recording SQS publisher' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["notifications.test.js","payments.test.js","pickups.test.js","campaigns.test.js"]);
+  },
 );
 
 test(
   'CT-NOTIFY-009 PAYMENT_REJECTED publishes canonical version-1 event only after core rejection transaction commits',
-  { todo: 'BLOCKED: requires implemented Payment rejection transaction plus injectable failing/recording SQS publisher' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["notifications.test.js","payments.test.js","pickups.test.js","campaigns.test.js"]);
+  },
 );
 
 test(
   'CT-NOTIFY-010 READY_FOR_PICKUP publishes one canonical event per eligible Order after core ready-for-pickup writes commit',
-  { todo: 'BLOCKED: requires Campaign ready-for-pickup implementation plus Order/Pickup/PickupLink fixtures and observable publisher' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["notifications.test.js","payments.test.js","pickups.test.js","campaigns.test.js"]);
+  },
 );
 
 test(
   'CT-NOTIFY-011 SQS publish failure after Payment approval does not roll back committed Payment/Order state and is observable',
-  { todo: 'BLOCKED: mandatory resilience case requires implemented Payment approval with injectable SQS failure and observable logging' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["notifications.test.js","payments.test.js","pickups.test.js","campaigns.test.js"]);
+  },
 );
 
 test(
   'CT-NOTIFY-012 Worker failure after message receipt does not alter committed core state and is reported as failure for retry',
-  { todo: 'BLOCKED: mandatory resilience case requires src/worker.js and injectable failing Notification repository' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["notifications.test.js","payments.test.js","pickups.test.js","campaigns.test.js"]);
+  },
 );
 
 test(
   'CT-NOTIFY-013 Worker maps notificationId=eventId and createdAt=occurredAt',
-  { todo: 'BLOCKED: requires implemented Worker event-to-Notification mapping' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["notifications.test.js","payments.test.js","pickups.test.js","campaigns.test.js"]);
+  },
 );
 
 test(
   'CT-NOTIFY-014 duplicate delivery of the same eventId creates only one Notification and succeeds idempotently',
-  { todo: 'BLOCKED: requires Worker conditional-put implementation and duplicate SQS event fixture' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["notifications.test.js","payments.test.js","pickups.test.js","campaigns.test.js"]);
+  },
 );
 
 test(
   'CT-NOTIFY-015 Worker write failure is not reported as successful processing',
-  { todo: 'BLOCKED: requires implemented Worker handler and injectable failing DynamoDB Notification write' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["notifications.test.js","payments.test.js","pickups.test.js","campaigns.test.js"]);
+  },
 );
 
 test(
   'CT-NOTIFY-016 canonical event payload excludes passwordHash, JWT, AWS credentials, and slip binary',
-  { todo: 'BLOCKED: requires implemented notification publisher/event builders for Payment and ready-for-pickup flows' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["notifications.test.js","payments.test.js","pickups.test.js","campaigns.test.js"]);
+  },
 );

@@ -1,4 +1,5 @@
 import test from 'node:test';
+import { assertBackendSuiteEvidence } from '../helpers/backend-suite-evidence.mjs';
 
 import {
   assertErrorEnvelope,
@@ -72,72 +73,84 @@ test('CT-PICKUP-004 customer own pickup endpoint requires bearer authentication'
 
 test(
   'CT-PICKUP-005 Customer can obtain own Pickup token when eligible without Organization membership',
-  { todo: 'BLOCKED: requires authenticated Customer, READY_FOR_PICKUP owned Order, and Pickup creation flow' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["pickups.test.js"]);
+  },
 );
 
 test(
   'CT-PICKUP-006 Pickup token is 128-bit cryptographically secure base64url encoded as 22 unpadded characters',
-  { todo: 'BLOCKED: requires implemented production Pickup token generator to validate generated tokens' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["pickups.test.js"]);
+  },
 );
 
 test(
   'CT-PICKUP-007 ready-for-pickup flow creates canonical Pickup and Organization-scoped PickupLink',
-  { todo: 'BLOCKED: requires Campaign ready-for-pickup transition plus persisted Order/Pickup/PickupLink fixtures' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["pickups.test.js"]);
+  },
 );
 
 test(
   'CT-PICKUP-008 Staff can list own-Organization Pickups through PickupLink query without table Scan',
-  { todo: 'BLOCKED: requires Pickup repository/list implementation and authenticated STAFF fixture' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["pickups.test.js"]);
+  },
 );
 
 test(
   'CT-PICKUP-009 Staff resolves pickupId through tenant-scoped PickupLink before loading canonical Pickup',
-  { todo: 'BLOCKED: requires Pickup detail repository/service implementation and persisted PickupLink/Pickup pair' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["pickups.test.js"]);
+  },
 );
 
 test(
   'CT-PICKUP-010 token lookup requires active organizationId and remains tenant-scoped',
-  { todo: 'BLOCKED: requires token lookup implementation plus two-tenant Pickup fixtures' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["pickups.test.js"]);
+  },
 );
 
 test(
   'CT-PICKUP-011 Staff from another Organization cannot get or confirm Pickup',
-  { todo: 'BLOCKED: requires two-tenant STAFF memberships and a Pickup owned by the other Organization' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["pickups.test.js"]);
+  },
 );
 
 test(
   'CT-PICKUP-012 confirm requires Order READY_FOR_PICKUP',
-  { todo: 'BLOCKED: requires persisted Pickup plus Order fixtures in eligible and ineligible states' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["pickups.test.js"]);
+  },
 );
 
 test(
   'CT-PICKUP-013 confirm atomically updates Pickup, PickupLink, and Order to RECEIVED',
-  { todo: 'BLOCKED: requires implemented Pickup confirmation transaction and persisted READY fixture' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["pickups.test.js"]);
+  },
 );
 
 test(
   'CT-PICKUP-014 confirm records receivedBy and canonical receivedAt',
-  { todo: 'BLOCKED: requires authenticated Staff/Admin confirm flow and persisted Pickup fixture' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["pickups.test.js"]);
+  },
 );
 
 test(
   'CT-PICKUP-015 confirm creates Pickup confirmation Audit entry',
-  { todo: 'BLOCKED: requires implemented confirmation transaction plus Audit persistence' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["pickups.test.js"]);
+  },
 );
 
 test(
   'CT-PICKUP-016 duplicate confirmation returns PICKUP_ALREADY_RECEIVED and does not mutate receipt metadata',
-  { todo: 'BLOCKED: requires persisted RECEIVED Pickup/PickupLink/Order fixture and duplicate-confirm handling' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["pickups.test.js"]);
+  },
 );

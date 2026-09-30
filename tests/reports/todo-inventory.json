@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "snapshotDate": "2026-09-30",
+  "scope": "active explicit todo:/t.todo() markers under tests contract/integration/security/frontend/smoke/e2e/infrastructure suites",
+  "totalMarkers": 192,
+  "categories": {
+    "A": {
+      "label": "stale_or_executable_now",
+      "count": 167,
+      "definition": "The stated blocker is stale or the current implementation can be exercised deterministically from Testing without waiting for the canonical live Dev/AWS environment.",
+      "files": {
+        "contract/campaign.contract.test.mjs": 9,
+        "contract/file-security.contract.test.mjs": 11,
+        "contract/health-auth.contract.test.mjs": 3,
+        "contract/order.contract.test.mjs": 16,
+        "contract/organization-members.contract.test.mjs": 6,
+        "contract/payment-review.contract.test.mjs": 12,
+        "contract/payment-submission.contract.test.mjs": 12,
+        "contract/pickup.contract.test.mjs": 12,
+        "contract/production.contract.test.mjs": 12,
+        "contract/report-audit-platform.contract.test.mjs": 17,
+        "contract/store-product.contract.test.mjs": 6,
+        "frontend/frontend-interaction.test.mjs": 21,
+        "frontend/static-export.test.mjs": 4,
+        "integration/data-contract.test.mjs": 5,
+        "integration/notification-resilience.test.mjs": 12,
+        "security/tenant-isolation-a.test.mjs": 4,
+        "security/tenant-isolation-b.test.mjs": 5
+      },
+      "notes": [
+        "contract/file-security.contract.test.mjs has 13 markers total; two live/deployed boundary markers are category B and the remaining 11 are category A.",
+        "Category A does not mean PASS. Each marker must be replaced by an executable assertion and then run before its result can be classified as PASS/FAIL."
+      ]
+    },
+    "B": {
+      "label": "genuine_environment_blocker",
+      "count": 20,
+      "definition": "The check genuinely requires canonical local disposable infrastructure, a live E2E runtime, browser/deployed transfer observation, or AWS Learner Lab deployment evidence.",
+      "items": [
+        {
+          "file": "contract/file-security.contract.test.mjs",
+          "line": 173,
+          "reason": "Private Files bucket public-access verification requires LocalStack/AWS deployed bucket policy/public-access-block evidence."
+        },
+        {
+          "file": "contract/file-security.contract.test.mjs",
+          "line": 179,
+          "reason": "Browser-to-S3 direct-transfer proof requires integrated Frontend/file workflow or deployed HTTP observation."
+        },
+        {
+          "file": "e2e/core-flow.test.mjs",
+          "line": 133,
+          "reason": "Requires E2E_API_BASE_URL and deterministic E2E_RUN_ID."
+        },
+        {
+          "file": "e2e/core-flow.test.mjs",
+          "line": 180,
+          "reason": "Requires E2E_PLATFORM_ADMIN_TOKEN when the created Organization is PENDING."
+        },
+        {
+          "file": "e2e/payment-rejection-flow.test.mjs",
+          "line": 35,
+          "reason": "Requires E2E_API_BASE_URL and deterministic E2E_RUN_ID."
+        },
+        {
+          "file": "e2e/payment-rejection-flow.test.mjs",
+          "line": 77,
+          "reason": "Requires E2E_PLATFORM_ADMIN_TOKEN when the created Organization is PENDING."
+        },
+        {
+          "file": "e2e/tenant-notification-flow.test.mjs",
+          "line": 209,
+          "reason": "Tenant-denial E2E requires E2E_API_BASE_URL and E2E_RUN_ID."
+        },
+        {
+          "file": "e2e/tenant-notification-flow.test.mjs",
+          "line": 260,
+          "reason": "Tenant-denial E2E requires E2E_PLATFORM_ADMIN_TOKEN when new Organizations are PENDING."
+        },
+        {
+          "file": "e2e/tenant-notification-flow.test.mjs",
+          "line": 382,
+          "reason": "Notification business-flow E2E requires E2E_API_BASE_URL and E2E_RUN_ID."
+        },
+        {
+          "file": "e2e/tenant-notification-flow.test.mjs",
+          "line": 413,
+          "reason": "Notification business-flow E2E requires E2E_PLATFORM_ADMIN_TOKEN when the Organization is PENDING."
+        },
+        {
+          "file": "e2e/tenant-notification-flow.test.mjs",
+          "line": 589,
+          "reason": "Duplicate-delivery E2E requires API URL, queue URL, run ID, recipient token, and recipient user ID."
+        },
+        {
+          "file": "smoke/dev-mode-a.test.mjs",
+          "markerCount": 3,
+          "reason": "Canonical Dev Mode checks require root dev:setup/local resources, an uncontended canonical local port, and real local auth persistence."
+        },
+        {
+          "file": "smoke/dev-mode-b.test.mjs",
+          "markerCount": 5,
+          "reason": "Local data/file/notification/reset/business parity checks require root LocalStack orchestration and dev:reset safety implementation."
+        },
+        {
+          "file": "smoke/aws-deployment.test.mjs",
+          "markerCount": 1,
+          "reason": "The shared deployment gate requires AWS CLI, active Learner Lab credentials, and a deployed stack. One source marker can produce multiple runtime TODO tests."
+        }
+      ]
+    },
+    "C": {
+      "label": "historical_or_duplicate_guard",
+      "count": 5,
+      "definition": "Historical conditional readiness guards still encode old implementation-absence assumptions. Current repository evidence shows these owning implementations now exist; the guards should be removed or replaced with current runtime prerequisites rather than converted to PASS.",
+      "items": [
+        {
+          "file": "e2e/core-flow.test.mjs",
+          "line": 122,
+          "reason": "Historical 'owning implementations are incomplete' source-file readiness gate."
+        },
+        {
+          "file": "e2e/payment-rejection-flow.test.mjs",
+          "line": 24,
+          "reason": "Historical Payment/Order/Notification/Audit/Worker implementation-presence readiness gate."
+        },
+        {
+          "file": "e2e/tenant-notification-flow.test.mjs",
+          "line": 199,
+          "reason": "Historical tenant-flow Order/Payment/Pickup implementation-presence readiness gate."
+        },
+        {
+          "file": "e2e/tenant-notification-flow.test.mjs",
+          "line": 372,
+          "reason": "Historical notification-flow implementation-presence readiness gate."
+        },
+        {
+          "file": "e2e/tenant-notification-flow.test.mjs",
+          "line": 576,
+          "reason": "Historical duplicate-delivery Notification route/Worker implementation-presence readiness gate."
+        }
+      ]
+    }
+  },
+  "evidence": {
+    "backend": "Current Backend implementation exists for Order, Payment, Production, Pickup, Notification, Audit, Platform Admin and Worker; Backend subsystem verification previously passed 261/261 on supported Node 24.",
+    "frontend": "Current Frontend application, tests and static export exist; Frontend subsystem verification previously passed 190/190 and production static build succeeded on supported Node 24.",
+    "devMode": "Root Integration-owned package.json/dev:setup/dev/dev:seed/dev:reset/dev:down interface is still absent, so live LocalStack Dev Mode blockers remain valid.",
+    "aws": "AWS CLI/Learner Lab live deployment prerequisites are still unavailable in the Testing Agent environment."
+  },
+  "classificationRule": "A marker is not considered passed by classification alone. Phase 4/5 must replace category A markers with executable assertions, category B must remain blocked until the required environment exists, and category C must be removed or rewritten as historical readiness logic without weakening E2E."
+}

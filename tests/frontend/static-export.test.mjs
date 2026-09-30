@@ -1,8 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { access, readFile, readdir, stat } from 'node:fs/promises';
+import { createServer } from 'node:http';
+import {
+  access,
+  readFile,
+  readdir,
+  stat,
+} from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import {
+  assertFrontendBuildEvidence,
+  assertFrontendSuiteEvidence,
+} from '../helpers/frontend-suite-evidence.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const frontendRoot = path.resolve(here, '../../frontend');
@@ -31,6 +42,58 @@ async function collectPageFiles(directory) {
   }
 
   return result;
+}
+
+async function withStaticExportServer(outputRoot, run) {
+  const server = createServer(async (request, response) => {
+    try {
+      const url = new URL(request.url || '/', 'http://127.0.0.1');
+      const decodedPath = decodeURIComponent(url.pathname);
+      const relative = decodedPath.replace(/^\/+/, '');
+      const target = path.resolve(
+        outputRoot,
+        relative === ''
+          ? 'index.html'
+          : decodedPath.endsWith('/')
+            ? path.join(relative, 'index.html')
+            : relative,
+      );
+
+      const outputPrefix = `${path.resolve(outputRoot)}${path.sep}`;
+      if (
+        target !== path.resolve(outputRoot, 'index.html') &&
+        !target.startsWith(outputPrefix)
+      ) {
+        response.writeHead(403);
+        response.end('Forbidden');
+        return;
+      }
+
+      const body = await readFile(target);
+      response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+      response.end(body);
+    } catch {
+      response.writeHead(404);
+      response.end('Not Found');
+    }
+  });
+
+  await new Promise((resolve, reject) => {
+    server.once('error', reject);
+    server.listen(0, '127.0.0.1', resolve);
+  });
+
+  const address = server.address();
+  assert.ok(address && typeof address === 'object');
+  const baseUrl = `http://127.0.0.1:${address.port}`;
+
+  try {
+    return await run(baseUrl);
+  } finally {
+    await new Promise((resolve, reject) => {
+      server.close((error) => (error ? reject(error) : resolve()));
+    });
+  }
 }
 
 test('STATIC-001 frontend package.json exists', async () => {
@@ -90,26 +153,94 @@ test('STATIC-006 frontend/out exists as a directory after production build', asy
   assert.equal(outputStat.isDirectory(), true);
 });
 
-test(
-  'STATIC-007 npm ci -> npm test -> npm run build succeeds and produces frontend/out',
-  { todo: 'BLOCKED: frontend package manifest/lockfile and application implementation are currently absent' },
-  () => {},
-);
+test('STATIC-007 Frontend tests and production static build succeed without modifying production source', async () => {
+  await assertFrontendSuiteEvidence(
+    'src/app/static-export.test.ts',
+    [
+      'keeps Next.js configured for trailing-slash static export',
+      'uses query-based entity routes instead of runtime dynamic route directories',
+    ],
+  );
 
-test(
-  'STATIC-008 exported canonical route directories contain index.html files under frontend/out',
-  { todo: 'BLOCKED: requires successful Next.js static-export build output' },
-  () => {},
-);
+  const build = await assertFrontendBuildEvidence();
+  await access(path.join(build.outputRoot, 'index.html'));
+});
 
-test(
-  'STATIC-009 direct refresh of canonical trailing-slash URLs resolves with S3 Website path semantics',
-  { todo: 'BLOCKED: requires built frontend/out and an S3 Website-compatible static HTTP serving check' },
-  () => {},
-);
+test('STATIC-008 exported canonical route directories contain index.html files under build output', async () => {
+  const { outputRoot } = await assertFrontendBuildEvidence();
+  const required = [
+    'stores/view/index.html',
+    'products/view/index.html',
+    'campaigns/view/index.html',
+    'my/order/index.html',
+    'my/payment/index.html',
+    'my/pickup/index.html',
+    'org/orders/view/index.html',
+    'org/production/index.html',
+    'notifications/index.html',
+    'login/index.html',
+    'register/index.html',
+  ];
 
-test(
-  'STATIC-010 query-parameter entity routes load/refresh arbitrary runtime IDs without generateStaticParams or build-time API data',
-  { todo: 'BLOCKED: requires implemented static pages and successful build to exercise arbitrary runtime query IDs' },
-  () => {},
-);
+  for (const relativePath of required) {
+    await access(path.join(outputRoot, relativePath));
+  }
+});
+
+test('STATIC-009 direct refresh of canonical trailing-slash URLs resolves with S3 Website path semantics', async () => {
+  const { outputRoot } = await assertFrontendBuildEvidence();
+
+  await withStaticExportServer(outputRoot, async (baseUrl) => {
+    for (const route of [
+      '/',
+      '/stores/view/',
+      '/products/view/',
+      '/campaigns/view/',
+      '/my/order/',
+      '/org/orders/view/',
+      '/notifications/',
+    ]) {
+      const response = await fetch(`${baseUrl}${route}`);
+      assert.equal(response.status, 200, `Expected direct refresh of ${route} to resolve`);
+      assert.match(
+        response.headers.get('content-type') || '',
+        /text\/html/,
+      );
+    }
+  });
+});
+
+test('STATIC-010 query-parameter entity routes load/refresh arbitrary runtime IDs without generateStaticParams or build-time API data', async () => {
+  const { outputRoot } = await assertFrontendBuildEvidence();
+
+  await assertFrontendSuiteEvidence(
+    'src/app/static-export.test.ts',
+    ['uses query-based entity routes instead of runtime dynamic route directories'],
+  );
+
+  const appRoot = path.join(frontendRoot, 'src', 'app');
+  const pages = await collectPageFiles(appRoot);
+  for (const pageFile of pages) {
+    const source = await readFile(pageFile, 'utf8');
+    assert.doesNotMatch(
+      source,
+      /generateStaticParams/,
+      `Runtime entity page must not depend on generateStaticParams: ${path.relative(appRoot, pageFile)}`,
+    );
+  }
+
+  await withStaticExportServer(outputRoot, async (baseUrl) => {
+    const routes = [
+      '/stores/view/?storeId=runtime-store-arbitrary',
+      '/products/view/?productId=runtime-product-arbitrary',
+      '/campaigns/view/?campaignId=runtime-campaign-arbitrary',
+      '/my/order/?orderId=runtime-order-arbitrary',
+      '/org/orders/view/?organizationId=runtime-org&orderId=runtime-order',
+    ];
+
+    for (const route of routes) {
+      const response = await fetch(`${baseUrl}${route}`);
+      assert.equal(response.status, 200, `Expected runtime query route to refresh: ${route}`);
+    }
+  });
+});

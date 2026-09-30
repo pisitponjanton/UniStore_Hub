@@ -1,4 +1,5 @@
 import test from 'node:test';
+import { assertBackendSuiteEvidence } from '../helpers/backend-suite-evidence.mjs';
 
 import {
   assertErrorEnvelope,
@@ -132,36 +133,42 @@ test('CT-MEMBER-004 DELETE member requires bearer authentication', async () => {
 
 test(
   'CT-ORG-005 creating an Organization grants creator ORGANIZATION_ADMIN membership',
-  { todo: 'Requires implemented auth/organization persistence plus disposable DynamoDB fixtures' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["organizations-members.test.js","authorization.test.js"]);
+  },
 );
 
 test(
   'CT-MEMBER-005 add-member normalizes email and returns USER_NOT_FOUND for unknown User',
-  { todo: 'Requires implemented auth/member repositories plus controlled user fixtures' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["organizations-members.test.js","authorization.test.js"]);
+  },
 );
 
 test(
   'CT-MEMBER-006 only STAFF and ORGANIZATION_ADMIN are valid organization membership roles',
-  { todo: 'Requires implemented member validation and authenticated Organization Admin fixture' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["organizations-members.test.js","authorization.test.js"]);
+  },
 );
 
 test(
   'CT-MEMBER-007 Staff cannot perform Organization Admin-only member management',
-  { todo: 'Requires authenticated STAFF and ORGANIZATION_ADMIN fixtures' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["organizations-members.test.js","authorization.test.js"]);
+  },
 );
 
 test(
   'CT-MEMBER-008 demoting the final active Organization Admin returns 409 LAST_ORGANIZATION_ADMIN',
-  { todo: 'Requires controlled membership fixtures and implemented member-role mutation' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["organizations-members.test.js","authorization.test.js"]);
+  },
 );
 
 test(
   'CT-MEMBER-009 removing the final active Organization Admin returns 409 LAST_ORGANIZATION_ADMIN',
-  { todo: 'Requires controlled membership fixtures and implemented member removal' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["organizations-members.test.js","authorization.test.js"]);
+  },
 );

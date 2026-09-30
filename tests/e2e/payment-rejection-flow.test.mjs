@@ -4,29 +4,12 @@ import assert from 'node:assert/strict';
 import {
   apiJson,
   listAuditItems,
-  missingRepoFiles,
   registerAndLogin,
   uploadPaymentSlip,
   waitForNotification,
 } from './live-e2e-helpers.mjs';
 
-const REQUIRED_BACKEND_FILES = [
-  'backend/src/modules/orders/order.routes.js',
-  'backend/src/modules/payments/payment.routes.js',
-  'backend/src/modules/notifications/notification.routes.js',
-  'backend/src/modules/audit/audit.routes.js',
-  'backend/src/worker.js',
-];
-
 test('E2E-PAYMENT-REJECT-001 reject -> notify -> resubmit -> approve -> PAID with audit trail', async (t) => {
-  const missing = await missingRepoFiles(REQUIRED_BACKEND_FILES);
-  if (missing.length > 0) {
-    t.todo(
-      `BLOCKED: payment-rejection E2E owning implementations are incomplete: ${missing.join(', ')}`,
-    );
-    return;
-  }
-
   const baseUrl = process.env.E2E_API_BASE_URL;
   const runId = process.env.E2E_RUN_ID;
   const platformAdminToken = process.env.E2E_PLATFORM_ADMIN_TOKEN;

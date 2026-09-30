@@ -6,6 +6,17 @@ import { fileURLToPath } from 'node:url';
 const here = path.dirname(fileURLToPath(import.meta.url));
 export const repoRoot = path.resolve(here, '../..');
 
+function buildApiUrl(baseUrl, route) {
+  const normalizedBase = baseUrl.replace(/\/$/, '');
+  if (
+    normalizedBase.endsWith('/api/v1') &&
+    route.startsWith('/api/v1/')
+  ) {
+    return `${normalizedBase}${route.slice('/api/v1'.length)}`;
+  }
+  return `${normalizedBase}${route}`;
+}
+
 export const tinyPng = Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9ZKxkAAAAASUVORK5CYII=',
   'base64',
@@ -29,7 +40,7 @@ export async function apiJson(baseUrl, route, {
   body,
   expectedStatus,
 } = {}) {
-  const response = await fetch(`${baseUrl.replace(/\/$/, '')}${route}`, {
+  const response = await fetch(buildApiUrl(baseUrl, route), {
     method,
     headers: {
       Accept: 'application/json',
@@ -115,10 +126,11 @@ export async function uploadPaymentSlip(baseUrl, {
     body: tinyPng,
     signal: AbortSignal.timeout(15000),
   });
+  const putBody = await putResponse.text();
 
   assert.ok(
     putResponse.ok,
-    `Pre-signed Payment Slip PUT failed: ${putResponse.status}`,
+    `Pre-signed Payment Slip PUT failed: ${putResponse.status}: ${putBody}`,
   );
 
   return upload.data.objectKey;

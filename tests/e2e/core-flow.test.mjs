@@ -1,37 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { access } from 'node:fs/promises';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-
-const here = path.dirname(fileURLToPath(import.meta.url));
-const repoRoot = path.resolve(here, '../..');
-
-const REQUIRED_BACKEND_FILES = [
-  'backend/src/modules/campaigns/campaign.routes.js',
-  'backend/src/modules/orders/order.routes.js',
-  'backend/src/modules/payments/payment.routes.js',
-  'backend/src/modules/production/production.routes.js',
-  'backend/src/modules/pickups/pickup.routes.js',
-  'backend/src/modules/notifications/notification.routes.js',
-  'backend/src/worker.js',
-];
-
 const tinyPng = Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9ZKxkAAAAASUVORK5CYII=',
   'base64',
 );
 
-async function missingBackendFiles() {
-  const missing = [];
-  for (const relativePath of REQUIRED_BACKEND_FILES) {
-    try {
-      await access(path.join(repoRoot, relativePath));
-    } catch {
-      missing.push(relativePath);
-    }
+function buildApiUrl(baseUrl, route) {
+  const normalizedBase = baseUrl.replace(/\/$/, '');
+  if (normalizedBase.endsWith('/api/v1') && route.startsWith('/api/v1/')) {
+    return `${normalizedBase}${route.slice('/api/v1'.length)}`;
   }
-  return missing;
+  return `${normalizedBase}${route}`;
 }
 
 async function apiJson(baseUrl, route, {
@@ -40,7 +19,7 @@ async function apiJson(baseUrl, route, {
   body,
   expectedStatus,
 } = {}) {
-  const response = await fetch(`${baseUrl.replace(/\/$/, '')}${route}`, {
+  const response = await fetch(buildApiUrl(baseUrl, route), {
     method,
     headers: {
       Accept: 'application/json',
@@ -117,14 +96,6 @@ async function waitForReadyNotification(baseUrl, token, { attempts = 20 } = {}) 
 }
 
 test('E2E-CORE-001 canonical register-to-received flow', async (t) => {
-  const missing = await missingBackendFiles();
-  if (missing.length > 0) {
-    t.todo(
-      `BLOCKED: core E2E owning implementations are incomplete: ${missing.join(', ')}`,
-    );
-    return;
-  }
-
   const baseUrl = process.env.E2E_API_BASE_URL;
   const runId = process.env.E2E_RUN_ID;
   const platformAdminToken = process.env.E2E_PLATFORM_ADMIN_TOKEN;
@@ -332,7 +303,8 @@ test('E2E-CORE-001 canonical register-to-received flow', async (t) => {
     body: tinyPng,
     signal: AbortSignal.timeout(15000),
   });
-  assert.ok(putResponse.ok, `Pre-signed Payment Slip PUT failed: ${putResponse.status}`);
+  const putBody = await putResponse.text();
+  assert.ok(putResponse.ok, `Pre-signed Payment Slip PUT failed: ${putResponse.status}: ${putBody}`);
 
   const payment = await apiJson(
     baseUrl,

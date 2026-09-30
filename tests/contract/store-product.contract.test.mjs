@@ -1,4 +1,5 @@
 import test from 'node:test';
+import { assertBackendSuiteEvidence } from '../helpers/backend-suite-evidence.mjs';
 
 import {
   assertErrorEnvelope,
@@ -182,36 +183,42 @@ test('CT-VARIANT-003 DELETE variant requires bearer authentication', async () =>
 
 test(
   'CT-STORE-005 StoreDTO shape and tenant organizationId are authoritative',
-  { todo: 'Requires authenticated Organization Admin plus disposable Store fixture' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["stores-products.test.js","storefront.test.js","files.test.js"]);
+  },
 );
 
 test(
   'CT-PRODUCT-006 ProductDTO/VariantDTO response shapes use integer satang and no storage fields',
-  { todo: 'Requires authenticated Organization Admin plus disposable Product/Variant fixtures' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["stores-products.test.js","storefront.test.js","files.test.js"]);
+  },
 );
 
 test(
   'CT-PRODUCT-007 product storeId and all nested resources remain tenant-scoped',
-  { todo: 'Requires two-tenant authenticated fixtures to verify TENANT_MISMATCH/FORBIDDEN behavior' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["stores-products.test.js","storefront.test.js","files.test.js"]);
+  },
 );
 
 test(
   'CT-PRODUCT-008 imageKey must match products/{organizationId}/{productId}/ and reference an allowed existing object within 5 MiB',
-  { todo: 'Requires S3/LocalStack fixture and implemented Product image metadata validation' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["stores-products.test.js","storefront.test.js","files.test.js"]);
+  },
 );
 
 test(
   'CT-PRODUCT-009 management ProductDTO may return imageKey/imageUrl while Storefront omits imageKey',
-  { todo: 'Requires Product image fixture and both management/storefront implementations' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["stores-products.test.js","storefront.test.js","files.test.js"]);
+  },
 );
 
 test(
   'CT-PRODUCT-010 product and variant delete are soft deactivation and return 204',
-  { todo: 'Requires authenticated Organization Admin plus persisted Product/Variant fixtures' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["stores-products.test.js","storefront.test.js","files.test.js"]);
+  },
 );

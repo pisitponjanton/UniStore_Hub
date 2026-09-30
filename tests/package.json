@@ -5,12 +5,12 @@
   "scripts": {
     "test": "node --test",
     "test:contract": "node --test contract/*.test.mjs",
-    "test:integration": "node --test integration",
+    "test:integration": "node --test integration/*.test.mjs",
     "test:security": "node --test security/*.test.mjs",
-    "test:frontend": "node --test frontend",
-    "test:smoke": "node --test smoke",
+    "test:frontend": "node --test frontend/*.test.mjs",
+    "test:smoke": "node --test smoke/*.test.mjs",
     "test:e2e": "node --test e2e/*.test.mjs",
-    "test:infrastructure": "node --test infrastructure"
+    "test:infrastructure": "node --test infrastructure/*.test.mjs"
   },
   "engines": {
     "node": ">=22"

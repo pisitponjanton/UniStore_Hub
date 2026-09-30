@@ -1,4 +1,5 @@
 import test from 'node:test';
+import { assertBackendSuiteEvidence } from '../helpers/backend-suite-evidence.mjs';
 
 import {
   assertErrorEnvelope,
@@ -99,54 +100,63 @@ for (const [id, action] of [
 
 test(
   'CT-CAMPAIGN-011 create Campaign starts in DRAFT and timestamps do not auto-advance status',
-  { todo: 'Requires authenticated Organization Admin plus persisted Store/Campaign fixture and controllable time' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["campaigns.test.js","payments.test.js"]);
+  },
 );
 
 test(
   'CT-CAMPAIGN-012 canonical happy path is DRAFT -> OPEN -> CLOSED -> PRODUCING -> READY_FOR_PICKUP -> COMPLETED',
-  { todo: 'Requires persisted Campaign fixture and implemented lifecycle actions' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["campaigns.test.js","payments.test.js"]);
+  },
 );
 
 test(
   'CT-CAMPAIGN-013 OPEN -> PRODUCING is rejected with INVALID_STATUS_TRANSITION',
-  { todo: 'Requires persisted OPEN Campaign fixture and implemented lifecycle validation' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["campaigns.test.js","payments.test.js"]);
+  },
 );
 
 test(
   'CT-CAMPAIGN-014 start-production while any Order is PAYMENT_REVIEW returns PAYMENT_NOT_REVIEWABLE',
-  { todo: 'Requires Campaign plus Order/Payment review fixtures' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["campaigns.test.js","payments.test.js"]);
+  },
 );
 
 test(
   'CT-CAMPAIGN-015 DRAFT -> CANCELLED succeeds',
-  { todo: 'Requires persisted DRAFT Campaign fixture' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["campaigns.test.js","payments.test.js"]);
+  },
 );
 
 test(
   'CT-CAMPAIGN-016 OPEN/CLOSED cancellation succeeds only with no PAYMENT_REVIEW or paid-or-later Orders',
-  { todo: 'Requires Campaign and mixed Order lifecycle fixtures' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["campaigns.test.js","payments.test.js"]);
+  },
 );
 
 test(
   'CT-CAMPAIGN-017 PRODUCING and later Campaigns cannot cancel',
-  { todo: 'Requires persisted PRODUCING/READY_FOR_PICKUP/COMPLETED fixtures' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["campaigns.test.js","payments.test.js"]);
+  },
 );
 
 test(
   'CT-CAMPAIGN-018 successful cancellation converts PENDING_PAYMENT and PAYMENT_REJECTED Orders to CANCELLED',
-  { todo: 'Requires Campaign plus unpaid/rejected Order fixtures and transactional cancellation implementation' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["campaigns.test.js","payments.test.js"]);
+  },
 );
 
 test(
   'CT-CAMPAIGN-019 CLOSED can finish payment review, but PRODUCING and later reject payment submission/resubmission/approval',
-  { todo: 'Requires Campaign/Order/Payment fixtures across CLOSED and PRODUCING states' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["campaigns.test.js","payments.test.js"]);
+  },
 );

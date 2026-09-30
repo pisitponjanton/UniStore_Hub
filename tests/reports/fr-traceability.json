@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "snapshotDate": "2026-09-29",
+  "snapshotDate": "2026-09-30",
   "source": "docs/specs/testing/SPEC.md requirement traceability matrix",
-  "statusRule": "FR status is PASS only when the Testing-spec minimum verification is fully demonstrated. Any unresolved required path keeps the FR BLOCKED even when some mapped checks pass.",
-  "regressionNote": "Recorded results come from phase reports 03-27. Some early reports predate later Backend source additions; Phase 29 full regression is required to refresh current pass/fail truth.",
+  "statusRule": "FR status is PASS only when the Testing-spec minimum verification is fully demonstrated. FAIL means a required path executed and demonstrated a current incompatibility. BLOCKED means a required path could not execute because of an unresolved prerequisite/environment dependency.",
+  "regressionNote": "Current-state refresh includes Phase 4 Backend/Security modernization, Phase 5 Frontend/static-export modernization, Phase 6 Local Dev/live E2E qualification, Phase 7 AWS smoke qualification, and Phase 9 supported-Node full regression (323 total / 300 pass / 0 fail / 23 todo on Node v24.2.0). The default environment-gated regression does not supersede the stronger live Phase 6 Payment Slip failure evidence.",
   "requirements": [
     {
       "fr": "FR-01",
@@ -17,24 +17,19 @@
         "E2E-CORE-001"
       ],
       "artifacts": [
-        "reports/phase-03-health-auth.md",
-        "reports/phase-21-dev-mode-a.md",
-        "reports/phase-25-core-e2e.md"
+        "reports/phase-04-backend-security-modernization.md",
+        "reports/phase-06-local-dev-e2e-qualification.md"
       ],
-      "status": "BLOCKED",
+      "status": "PASS",
       "recordedResults": [
-        "Phase 03: CT-HEALTH-001 PASS; CT-AUTH-001..004 FAIL; CT-AUTH-005..007 TODO/BLOCKED.",
-        "Phase 21: DEV-004 TODO/BLOCKED pending real LocalStack-backed auth parity.",
-        "Phase 25: E2E-CORE-001 TODO/BLOCKED."
+        "Phase 4: current Auth/JWT cross-system contract evidence executes successfully through the owning Backend suite.",
+        "Phase 6: live E2E successfully completed Register/Login and used the resulting Bearer identities through Organization/catalog/order setup before the later Payment Slip S3 failure."
       ],
       "owners": [
         "Backend",
         "Integration/Dev"
       ],
-      "blockers": [
-        "Real auth E2E has not executed against disposable persistence.",
-        "Phase 03 auth results predate the current auth module and require Phase 29 refresh."
-      ]
+      "blockers": []
     },
     {
       "fr": "FR-02",
@@ -46,21 +41,18 @@
         "E2E-CORE-001"
       ],
       "artifacts": [
-        "reports/phase-05-organization-members.md",
-        "reports/phase-25-core-e2e.md"
+        "reports/phase-04-backend-security-modernization.md",
+        "reports/phase-06-local-dev-e2e-qualification.md"
       ],
-      "status": "BLOCKED",
+      "status": "PASS",
       "recordedResults": [
-        "Phase 05: Organization surface tests recorded FAIL and persisted behavior remained TODO/BLOCKED.",
-        "Phase 25: Organization path inside E2E-CORE-001 TODO/BLOCKED."
+        "Phase 4: Organization contract behavior executes successfully against current Backend evidence.",
+        "Phase 6: live E2E created Organizations and successfully performed Platform Admin approval before the later Payment Slip upload failure."
       ],
       "owners": [
         "Backend"
       ],
-      "blockers": [
-        "Organization E2E not executed.",
-        "Phase 05 result predates the current Organization implementation and requires Phase 29 refresh."
-      ]
+      "blockers": []
     },
     {
       "fr": "FR-03",
@@ -73,22 +65,18 @@
         "E2E-TENANT-001"
       ],
       "artifacts": [
-        "reports/phase-05-organization-members.md",
-        "reports/phase-12-tenant-isolation-b.md",
-        "reports/phase-27-tenant-notification-e2e.md"
+        "reports/phase-04-backend-security-modernization.md",
+        "reports/phase-06-local-dev-e2e-qualification.md"
       ],
-      "status": "BLOCKED",
+      "status": "PASS",
       "recordedResults": [
-        "Phase 05: Member route surface recorded FAIL; behavior TODO/BLOCKED.",
-        "Phase 12: SEC-TENANT-008 TODO/BLOCKED.",
-        "Phase 27: E2E-TENANT-001 TODO/BLOCKED."
+        "Phase 4: Member/RBAC contract checks and SEC-TENANT-008 client-role distrust execute successfully.",
+        "Phase 6: live tenant setup successfully created separate users/Organizations/membership context before the downstream Payment Slip failure."
       ],
       "owners": [
         "Backend"
       ],
-      "blockers": [
-        "Multi-user/multi-tenant membership and client-role distrust have not executed end-to-end."
-      ]
+      "blockers": []
     },
     {
       "fr": "FR-04",
@@ -101,23 +89,18 @@
         "E2E-TENANT-001"
       ],
       "artifacts": [
-        "reports/phase-06-store-product.md",
-        "reports/phase-11-tenant-isolation-a.md",
-        "reports/phase-27-tenant-notification-e2e.md"
+        "reports/phase-04-backend-security-modernization.md",
+        "reports/phase-06-local-dev-e2e-qualification.md"
       ],
-      "status": "BLOCKED",
+      "status": "PASS",
       "recordedResults": [
-        "Phase 06: Store surface checks recorded FAIL; behavior TODO/BLOCKED.",
-        "Phase 11: tenant mutation isolation TODO/BLOCKED.",
-        "Phase 27: tenant E2E TODO/BLOCKED."
+        "Phase 4: current Store CRUD contract evidence and SEC-TENANT-002 cross-Organization mutation isolation execute successfully.",
+        "Phase 6: live E2E created Stores for disposable Organizations before the downstream Payment Slip failure."
       ],
       "owners": [
         "Backend"
       ],
-      "blockers": [
-        "Store CRUD + tenant integration has not executed with disposable authenticated data.",
-        "Phase 06 predates the current Store implementation and requires Phase 29 refresh."
-      ]
+      "blockers": []
     },
     {
       "fr": "FR-05",
@@ -132,24 +115,18 @@
         "DATA-011"
       ],
       "artifacts": [
-        "reports/phase-06-store-product.md",
-        "reports/phase-08-order.md",
-        "reports/phase-13-data-contract.md",
-        "reports/phase-16-file-security.md"
+        "reports/phase-04-backend-security-modernization.md",
+        "reports/phase-05-frontend-modernization.md"
       ],
-      "status": "BLOCKED",
+      "status": "PASS",
       "recordedResults": [
-        "Phase 06: Product/Variant surface recorded FAIL; data behavior TODO/BLOCKED.",
-        "Phase 08: authoritative price and OrderItem snapshot behavior TODO/BLOCKED.",
-        "Phase 13: DATA-001..010 PASS, persistence snapshot DATA-011 TODO/BLOCKED.",
-        "Phase 16: 6 file-boundary checks PASS; Product file behavior remains TODO/BLOCKED."
+        "Phase 4: Product/Variant CRUD, authoritative pricing, OrderItem snapshot persistence, canonical file association/metadata, and Data-contract evidence execute successfully.",
+        "Phase 5: Frontend Product Image direct pre-sign -> S3 PUT -> imageKey persistence flow is covered by executable Frontend evidence."
       ],
       "owners": [
         "Backend"
       ],
-      "blockers": [
-        "Authoritative Product/Variant price/snapshot persistence and file ownership/metadata checks remain unexecuted."
-      ]
+      "blockers": []
     },
     {
       "fr": "FR-06",
@@ -162,21 +139,18 @@
         "E2E-CORE-001"
       ],
       "artifacts": [
-        "reports/phase-07-campaign.md",
-        "reports/phase-25-core-e2e.md"
+        "reports/phase-04-backend-security-modernization.md",
+        "reports/phase-06-local-dev-e2e-qualification.md"
       ],
-      "status": "BLOCKED",
+      "status": "PASS",
       "recordedResults": [
-        "Phase 07: campaign surface recorded FAIL; lifecycle cases CT-CAMPAIGN-011..019 TODO/BLOCKED.",
-        "Phase 25: canonical lifecycle E2E TODO/BLOCKED."
+        "Phase 4: Campaign lifecycle and invalid-transition contract evidence execute successfully against current Backend behavior.",
+        "Phase 6: live core/tenant setup successfully created and opened Campaigns before the later Payment Slip S3 failure."
       ],
       "owners": [
         "Backend"
       ],
-      "blockers": [
-        "Lifecycle integration has not executed with Orders/Payments.",
-        "Phase 07 predates current Campaign source additions and requires Phase 29 refresh."
-      ]
+      "blockers": []
     },
     {
       "fr": "FR-07",
@@ -192,22 +166,18 @@
         "E2E-CORE-001"
       ],
       "artifacts": [
-        "reports/phase-08-order.md",
-        "reports/phase-11-tenant-isolation-a.md",
-        "reports/phase-25-core-e2e.md"
+        "reports/phase-04-backend-security-modernization.md",
+        "reports/phase-06-local-dev-e2e-qualification.md"
       ],
-      "status": "BLOCKED",
+      "status": "PASS",
       "recordedResults": [
-        "Phase 08: Order routes recorded 7 FAIL; 16 business/data checks TODO/BLOCKED.",
-        "Phase 11: SEC-TENANT-001 and SEC-TENANT-003 TODO/BLOCKED.",
-        "Phase 25: E2E-CORE-001 TODO/BLOCKED."
+        "Phase 4: Order create/list/detail, authoritative snapshot, ownership, SEC-TENANT-001, and SEC-TENANT-003 evidence execute successfully.",
+        "Phase 6: live E2E successfully created Customer Orders before failing at the subsequent Payment Slip direct upload."
       ],
       "owners": [
         "Backend"
       ],
-      "blockers": [
-        "Order route/service/controller are not yet available as a complete request path; only partial repository/constants source is currently visible."
-      ]
+      "blockers": []
     },
     {
       "fr": "FR-08",
@@ -227,18 +197,15 @@
         "E2E-PAYMENT-REJECT-001"
       ],
       "artifacts": [
-        "reports/phase-09-payment-submission.md",
-        "reports/phase-10-payment-review.md",
-        "reports/phase-16-file-security.md",
-        "reports/phase-26-payment-rejection-e2e.md"
+        "reports/phase-04-backend-security-modernization.md",
+        "reports/phase-05-frontend-modernization.md",
+        "reports/phase-06-local-dev-e2e-qualification.md"
       ],
-      "status": "BLOCKED",
+      "status": "FAIL",
       "recordedResults": [
-        "Phase 09: 2 FAIL, 12 TODO/BLOCKED.",
-        "Phase 10: 4 FAIL, 12 TODO/BLOCKED.",
-        "Phase 16: pre-sign/direct-transfer capabilities partially PASS; ownership/MIME/size/HEAD behavior blocked.",
-        "Customer own-Payment contract/security checks now PASS, including exact rejectReason and Customer A/B isolation.",
-        "Phase 26 live reject/resubmit/approve flow now includes the documented own-Payment read assertions; live execution remains environment-gated."
+        "Phase 4: Payment submit/review, Customer own-Payment read, ownership, rejectReason, resubmission, and file authorization contract/security evidence execute successfully.",
+        "Phase 5: Frontend pre-sign/direct-PUT/resubmit/rejection-reason behavior is executable and passes at the Frontend boundary.",
+        "Phase 6: live Payment flows fail at the browser-equivalent pre-signed S3 PUT with LocalStack HTTP 400 InvalidRequest: x-amz-checksum-crc32 is invalid."
       ],
       "owners": [
         "Backend",
@@ -247,7 +214,7 @@
         "Testing"
       ],
       "blockers": [
-        "Full live Order/Payment/File/Notification/Audit E2E still requires the configured disposable Dev Mode/AWS-like environment."
+        "Current Backend AWS SDK S3 pre-sign output is incompatible with the canonical LocalStack direct PUT path because checksum query/header semantics produce HTTP 400."
       ]
     },
     {
@@ -262,20 +229,18 @@
         "E2E-CORE-001"
       ],
       "artifacts": [
-        "reports/phase-14-production.md",
-        "reports/phase-25-core-e2e.md"
+        "reports/phase-04-backend-security-modernization.md",
+        "reports/phase-05-frontend-modernization.md"
       ],
-      "status": "BLOCKED",
+      "status": "PASS",
       "recordedResults": [
-        "Phase 14: auth boundary PASS; 12 aggregation/authorization cases TODO/BLOCKED.",
-        "Phase 25: paid-order Production Summary E2E TODO/BLOCKED."
+        "Phase 4: paid-only Production Summary grouping and authorization evidence execute successfully against the current Backend suite.",
+        "Phase 5: Production UI evidence verifies Organization Admin-only access and renders Backend-owned summary totals rather than rebuilding totals client-side."
       ],
       "owners": [
         "Backend"
       ],
-      "blockers": [
-        "Production aggregation implementation and disposable paid lifecycle fixtures are unavailable."
-      ]
+      "blockers": []
     },
     {
       "fr": "FR-10",
@@ -290,22 +255,18 @@
         "E2E-CORE-001"
       ],
       "artifacts": [
-        "reports/phase-15-pickup.md",
-        "reports/phase-12-tenant-isolation-b.md",
-        "reports/phase-25-core-e2e.md"
+        "reports/phase-04-backend-security-modernization.md",
+        "reports/phase-05-frontend-modernization.md"
       ],
-      "status": "BLOCKED",
+      "status": "PASS",
       "recordedResults": [
-        "Phase 15: 3 auth-boundary PASS, 1 route FAIL, 12 TODO/BLOCKED.",
-        "Phase 12: SEC-TENANT-006 TODO/BLOCKED.",
-        "Phase 25: pickup portion of core E2E TODO/BLOCKED."
+        "Phase 4: Pickup ownership/token, Staff confirmation, duplicate prevention, and SEC-TENANT-006 cross-Organization denial execute successfully.",
+        "Phase 5: Pickup UI confirmation refresh and PICKUP_ALREADY_RECEIVED conflict handling execute successfully."
       ],
       "owners": [
         "Backend"
       ],
-      "blockers": [
-        "Pickup/PickupLink creation, token generation, confirmation transaction, and duplicate prevention are not implemented end-to-end."
-      ]
+      "blockers": []
     },
     {
       "fr": "FR-11",
@@ -320,22 +281,19 @@
         "FE-020"
       ],
       "artifacts": [
-        "reports/phase-18-report-audit-platform.md",
-        "reports/phase-19-frontend-interaction.md"
+        "reports/phase-04-backend-security-modernization.md",
+        "reports/phase-05-frontend-modernization.md"
       ],
-      "status": "BLOCKED",
+      "status": "PASS",
       "recordedResults": [
-        "Phase 18: report auth boundary PASS; report aggregation/role checks TODO/BLOCKED.",
-        "Phase 19: Frontend baseline FAIL and all interaction checks TODO/BLOCKED."
+        "Phase 4: Dashboard/Report metric-schema and Organization Admin authorization evidence execute successfully against current Backend tests.",
+        "Phase 5: current Frontend remote-state and role-aware navigation evidence executes successfully; Frontend application/static export is present."
       ],
       "owners": [
         "Backend",
         "Frontend"
       ],
-      "blockers": [
-        "Report aggregation is not implemented.",
-        "Frontend application is absent; no dedicated Dashboard/Report UI interaction has executed."
-      ]
+      "blockers": []
     },
     {
       "fr": "FR-12",
@@ -349,20 +307,18 @@
         "E2E-PAYMENT-REJECT-001"
       ],
       "artifacts": [
-        "reports/phase-18-report-audit-platform.md",
-        "reports/phase-26-payment-rejection-e2e.md"
+        "reports/phase-04-backend-security-modernization.md",
+        "reports/phase-06-local-dev-e2e-qualification.md"
       ],
-      "status": "BLOCKED",
+      "status": "PASS",
       "recordedResults": [
-        "Phase 18: Audit list auth boundary PASS; tenant/role/filter/side-effect checks TODO/BLOCKED.",
-        "Phase 26: Payment reject/approve Audit E2E TODO/BLOCKED."
+        "Phase 4: Audit list authorization/filtering and required business-side Audit persistence evidence execute successfully in current Backend suites.",
+        "Phase 6 payment-rejection live E2E did not reach Audit because the upstream Payment Slip S3 PUT failed; this does not invalidate the deterministic minimum-verification evidence."
       ],
       "owners": [
         "Backend"
       ],
-      "blockers": [
-        "Audit list route/repository and business-side Audit persistence are not available end-to-end."
-      ]
+      "blockers": []
     },
     {
       "fr": "FR-13",
@@ -377,23 +333,22 @@
         "E2E-NOTIFY-001"
       ],
       "artifacts": [
-        "reports/phase-17-notification.md",
-        "reports/phase-12-tenant-isolation-b.md",
-        "reports/phase-22-dev-mode-b.md",
-        "reports/phase-27-tenant-notification-e2e.md"
+        "reports/phase-04-backend-security-modernization.md",
+        "reports/phase-05-frontend-modernization.md",
+        "reports/phase-06-local-dev-e2e-qualification.md"
       ],
       "status": "BLOCKED",
       "recordedResults": [
-        "Phase 17: SQS adapter PASS; Notification API/Worker recorded FAIL and behavior TODO/BLOCKED.",
-        "Phase 22: Worker entrypoint FAIL; real SQS→Worker→DynamoDB flow TODO/BLOCKED.",
-        "Phase 27: event/read/idempotency E2E all TODO/BLOCKED."
+        "Phase 4: Notification API, SQS publication, Worker behavior/idempotency, mark-read, and SEC-TENANT-007 user isolation execute successfully through current Backend evidence.",
+        "Phase 5: Notification UI list/read/unread/mark-read evidence executes successfully.",
+        "Phase 6: live duplicate delivery passes SQS -> Local Worker -> DynamoDB Notification -> current-user API with exactly one Notification; the business-event notification E2E is blocked upstream by the Payment Slip S3 checksum failure."
       ],
       "owners": [
         "Backend",
         "Worker"
       ],
       "blockers": [
-        "Notification routes/repository and backend/src/worker.js are absent."
+        "The required live PAYMENT_APPROVED/PAYMENT_REJECTED/READY_FOR_PICKUP business-event notification path cannot complete until the upstream LocalStack Payment Slip direct-PUT failure is fixed."
       ]
     },
     {
@@ -410,18 +365,18 @@
         "CT-GOV-020"
       ],
       "artifacts": [
-        "reports/phase-18-report-audit-platform.md"
+        "reports/phase-04-backend-security-modernization.md",
+        "reports/phase-05-frontend-modernization.md"
       ],
-      "status": "BLOCKED",
+      "status": "PASS",
       "recordedResults": [
-        "Phase 18: all five Platform Admin route surfaces recorded FAIL; persisted-role and behavior checks TODO/BLOCKED."
+        "Phase 4: Platform Admin approve/suspend/list-users/summary and persisted platform-role isolation evidence execute successfully.",
+        "Phase 5: Frontend role-aware navigation derives Platform Admin authority from user.platformRole rather than Organization membership."
       ],
       "owners": [
         "Backend"
       ],
-      "blockers": [
-        "Platform Admin router/service/authorization behavior is not implemented."
-      ]
+      "blockers": []
     },
     {
       "fr": "FR-15",
@@ -433,22 +388,23 @@
         "AWS-004"
       ],
       "artifacts": [
-        "reports/phase-03-health-auth.md",
-        "reports/phase-21-dev-mode-a.md",
-        "reports/phase-24-aws-deployment.md"
+        "reports/phase-04-backend-security-modernization.md",
+        "reports/phase-06-local-dev-e2e-qualification.md",
+        "reports/phase-07-aws-smoke-qualification.md"
       ],
       "status": "BLOCKED",
       "recordedResults": [
-        "Phase 03: CT-HEALTH-001 PASS.",
-        "Phase 21: DEV-002 TODO/BLOCKED by localhost:4000 port collision during that run.",
-        "Phase 24: AWS-004 TODO/BLOCKED because AWS CLI is unavailable."
+        "Phase 4: CT-HEALTH-001 current health contract evidence passes.",
+        "Phase 6: current Backend health passes on isolated port 4100, while canonical localhost:4000 is occupied by a non-UniStore service and therefore DEV-002 cannot pass on the canonical port.",
+        "Phase 7: AWS-004 remains BLOCKED because AWS CLI/Learner Lab credentials/deployment are unavailable."
       ],
       "owners": [
         "Integration/Dev",
         "AWS environment"
       ],
       "blockers": [
-        "Local canonical health smoke and deployed AWS health smoke have not both completed."
+        "Canonical localhost:4000 is occupied by a non-UniStore service during qualification.",
+        "AWS CLI and active Learner Lab deployment credentials are unavailable, so deployed AWS health cannot be verified."
       ]
     }
   ]

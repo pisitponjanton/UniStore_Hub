@@ -7,7 +7,6 @@ import {
   apiError,
   apiJson,
   markNotificationRead,
-  missingRepoFiles,
   registerAndLogin,
   uploadPaymentSlip,
   waitForNotification,
@@ -18,20 +17,6 @@ const {
   createSqsAdapter,
   createSqsClient,
 } = requireFromHere('../../backend/src/aws/sqs.js');
-
-const REQUIRED_TENANT_FILES = [
-  'backend/src/modules/orders/order.routes.js',
-  'backend/src/modules/payments/payment.routes.js',
-  'backend/src/modules/pickups/pickup.routes.js',
-];
-
-const REQUIRED_NOTIFY_FILES = [
-  'backend/src/modules/orders/order.routes.js',
-  'backend/src/modules/payments/payment.routes.js',
-  'backend/src/modules/pickups/pickup.routes.js',
-  'backend/src/modules/notifications/notification.routes.js',
-  'backend/src/worker.js',
-];
 
 function deterministicUuid(seed) {
   const hex = createHash('sha256').update(seed).digest('hex').slice(0, 32);
@@ -194,14 +179,6 @@ async function createPaidOrder(baseUrl, {
 }
 
 test('E2E-TENANT-001 two-organization cross-tenant denial matrix', async (t) => {
-  const missing = await missingRepoFiles(REQUIRED_TENANT_FILES);
-  if (missing.length > 0) {
-    t.todo(
-      `BLOCKED: tenant E2E owning implementations are incomplete: ${missing.join(', ')}`,
-    );
-    return;
-  }
-
   const baseUrl = process.env.E2E_API_BASE_URL;
   const runId = process.env.E2E_RUN_ID;
   const platformAdminToken = process.env.E2E_PLATFORM_ADMIN_TOKEN;
@@ -367,14 +344,6 @@ test('E2E-TENANT-001 two-organization cross-tenant denial matrix', async (t) => 
 });
 
 test('E2E-NOTIFY-001 business event -> SQS -> Worker -> Notification -> mark-read for approved/rejected/ready events', async (t) => {
-  const missing = await missingRepoFiles(REQUIRED_NOTIFY_FILES);
-  if (missing.length > 0) {
-    t.todo(
-      `BLOCKED: notification E2E owning implementations are incomplete: ${missing.join(', ')}`,
-    );
-    return;
-  }
-
   const baseUrl = process.env.E2E_API_BASE_URL;
   const runId = process.env.E2E_RUN_ID;
   const platformAdminToken = process.env.E2E_PLATFORM_ADMIN_TOKEN;
@@ -568,17 +537,6 @@ test('E2E-NOTIFY-001 business event -> SQS -> Worker -> Notification -> mark-rea
 });
 
 test('E2E-NOTIFY-001 duplicate delivery maps eventId to notificationId and creates only one Notification', async (t) => {
-  const missing = await missingRepoFiles([
-    'backend/src/modules/notifications/notification.routes.js',
-    'backend/src/worker.js',
-  ]);
-  if (missing.length > 0) {
-    t.todo(
-      `BLOCKED: duplicate-delivery E2E requires Notification route/Worker: ${missing.join(', ')}`,
-    );
-    return;
-  }
-
   const baseUrl = process.env.E2E_API_BASE_URL;
   const queueUrl = process.env.E2E_NOTIFICATION_QUEUE_URL;
   const runId = process.env.E2E_RUN_ID;

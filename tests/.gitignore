@@ -1,5 +1,6 @@
 reports/*.json
 !reports/fr-traceability.json
+!reports/todo-inventory.json
 reports/*.log
 !reports/phase-29-full-regression.log
 reports/*.xml

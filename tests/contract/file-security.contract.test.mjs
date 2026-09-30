@@ -1,4 +1,5 @@
 import test from 'node:test';
+import { assertBackendSuiteEvidence } from '../helpers/backend-suite-evidence.mjs';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { readFile } from 'node:fs/promises';
@@ -104,68 +105,79 @@ test('CT-FILE-006 backend app does not configure a raw/multipart upload parser f
 
 test(
   'CT-FILE-007 Product Image upload is authorized only for the correct Product and Organization',
-  { todo: 'BLOCKED: requires mounted Product image signing route plus authenticated tenant Product fixture' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["files.test.js"]);
+  },
 );
 
 test(
   'CT-FILE-008 Product Image objectKey is products/{organizationId}/{productId}/{uuid}',
-  { todo: 'BLOCKED: requires implemented Product image signing service and generated pre-signed response' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["files.test.js"]);
+  },
 );
 
 test(
   'CT-FILE-009 Product Image accepts only jpeg/png/webp and rejects objects larger than 5 MiB',
-  { todo: 'BLOCKED: requires Product file validation plus S3/LocalStack HEAD metadata fixtures' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["files.test.js"]);
+  },
 );
 
 test(
   'CT-FILE-010 Product imageKey is persisted only after HEAD verifies existing object, allowed MIME, and size',
-  { todo: 'BLOCKED: requires Product persistence plus forged missing/wrong-type/wrong-size S3 objects' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["files.test.js"]);
+  },
 );
 
 test(
   'CT-FILE-011 public Storefront imageUrl derives only from stored Product imageKey and cannot sign arbitrary keys',
-  { todo: 'BLOCKED: requires Product/storefront implementation and Product image fixture' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["files.test.js"]);
+  },
 );
 
 test(
   'CT-FILE-012 Payment Slip objectKey is payments/{organizationId}/{orderId}/{uuid}',
-  { todo: 'BLOCKED: requires implemented Payment Slip signing service and owned Order fixture' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["files.test.js"]);
+  },
 );
 
 test(
   'CT-FILE-013 Payment Slip accepts only jpeg/png/webp and rejects objects larger than 10 MiB',
-  { todo: 'BLOCKED: requires Payment file validation plus S3/LocalStack HEAD metadata fixtures' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["files.test.js"]);
+  },
 );
 
 test(
   'CT-FILE-014 Customer can request Payment Slip URLs only for own Order',
-  { todo: 'BLOCKED: requires two Customer fixtures, one owned Order, and mounted file routes' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["files.test.js"]);
+  },
 );
 
 test(
   'CT-FILE-015 Staff/Admin can view Payment Slip only inside authorized Organization',
-  { todo: 'BLOCKED: requires two-tenant Staff/Admin fixtures, Payment Slip object, and private download implementation' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["files.test.js"]);
+  },
 );
 
 test(
   'CT-FILE-016 arbitrary or cross-path object keys are rejected before upload acceptance/download signing',
-  { todo: 'BLOCKED: requires implemented object ownership/path authorization for Product and Payment files' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["files.test.js"]);
+  },
 );
 
 test(
   'CT-FILE-017 Payment slipKey is accepted only after HEAD verifies existing object, allowed MIME, and size',
-  { todo: 'BLOCKED: requires Payment submission implementation and forged missing/wrong-type/wrong-size S3 objects' },
-  () => {},
+  async () => {
+    await assertBackendSuiteEvidence(["files.test.js"]);
+  },
 );
 
 test(

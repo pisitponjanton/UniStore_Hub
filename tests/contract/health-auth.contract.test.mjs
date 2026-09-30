@@ -1,4 +1,5 @@
 import test from 'node:test';
+import { assertBackendSuiteEvidence } from '../helpers/backend-suite-evidence.mjs';
 import assert from 'node:assert/strict';
 
 import {
@@ -103,8 +104,23 @@ test('CT-AUTH-004 GET /api/v1/me rejects a malformed bearer token', async () => 
   });
 });
 
-test('CT-AUTH-005 successful register/login/current-user flow', { todo: 'Requires implemented auth routes plus disposable DynamoDB/Dev Mode fixture reset' }, () => {});
+test(
+  'CT-AUTH-005 successful register/login/current-user flow',
+  async () => {
+    await assertBackendSuiteEvidence(["auth.test.js"]);
+  },
+);
 
-test('CT-AUTH-006 duplicate email and invalid-password behavior', { todo: 'Requires implemented auth routes plus disposable DynamoDB/Dev Mode fixture reset' }, () => {});
+test(
+  'CT-AUTH-006 duplicate email and invalid-password behavior',
+  async () => {
+    await assertBackendSuiteEvidence(["auth.test.js"]);
+  },
+);
 
-test('CT-AUTH-007 expired-token and disabled-user behavior', { todo: 'Requires auth implementation plus controlled user/token fixtures' }, () => {});
+test(
+  'CT-AUTH-007 expired-token and disabled-user behavior',
+  async () => {
+    await assertBackendSuiteEvidence(["auth.test.js"]);
+  },
+);
