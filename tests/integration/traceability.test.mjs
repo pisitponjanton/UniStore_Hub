@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { access, readFile, readdir } from 'node:fs/promises';
+import { access, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -13,42 +13,84 @@ const traceabilityMarkdownPath = path.join(
   'fr-traceability.md',
 );
 
-async function collectExecutableTestIds(directory) {
-  const entries = await readdir(directory, { withFileTypes: true });
+const canonicalTestSourceRoots = [
+  path.join(testsRoot, 'baseline.test.mjs'),
+  ...[
+    'contract',
+    'integration',
+    'security',
+    'frontend',
+    'smoke',
+    'e2e',
+    'infrastructure',
+    'helpers',
+  ].map((directory) => path.join(testsRoot, directory)),
+];
+
+function collectExecutableIdsFromSource(source) {
+  const ids = new Set();
+
+  const directPattern =
+    /\btest(?:\.\w+)?\s*\(\s*['"`]([A-Z][A-Z0-9-]+)\b/g;
+  for (const match of source.matchAll(directPattern)) ids.add(match[1]);
+
+  const dynamicPattern =
+    /\btest(?:\.\w+)?\s*\(\s*`\$\{([A-Za-z_][A-Za-z0-9_]*)\}/g;
+  for (const dynamicMatch of source.matchAll(dynamicPattern)) {
+    const variableName = dynamicMatch[1];
+    const loopPattern = new RegExp(
+      `for\\s*\\(\\s*const\\s*\\[\\s*${variableName}\\b[^\\]]*\\]\\s*of\\s*\\[([\\s\\S]*?)\\]\\s*\\)\\s*\\{`,
+      'g',
+    );
+
+    for (const loopMatch of source.matchAll(loopPattern)) {
+      const fixtureRows = loopMatch[1];
+      const fixtureIdPattern = /\[\s*['"`]([A-Z][A-Z0-9-]+)\b/g;
+      for (const fixtureMatch of fixtureRows.matchAll(fixtureIdPattern)) {
+        ids.add(fixtureMatch[1]);
+      }
+    }
+  }
+
+  return ids;
+}
+
+async function collectExecutableTestIdsFromPath(sourcePath) {
+  if (sourcePath.endsWith('.test.mjs')) {
+    return collectExecutableIdsFromSource(await readFile(sourcePath, 'utf8'));
+  }
+
+  const entries = await readdir(sourcePath, { withFileTypes: true });
   const ids = new Set();
 
   for (const entry of entries) {
-    if (entry.name === 'reports' || entry.name === 'node_modules') continue;
-    const full = path.join(directory, entry.name);
+    const full = path.join(sourcePath, entry.name);
 
     if (entry.isDirectory()) {
-      for (const id of await collectExecutableTestIds(full)) ids.add(id);
+      for (const id of await collectExecutableTestIdsFromPath(full)) {
+        ids.add(id);
+      }
       continue;
     }
 
-    if (!entry.isFile() || !/\.(?:mjs|js)$/.test(entry.name)) continue;
+    if (!entry.isFile() || !entry.name.endsWith('.test.mjs')) continue;
 
-    const source = await readFile(full, 'utf8');
-    const directPattern =
-      /\btest(?:\.\w+)?\s*\(\s*['"`]([A-Z][A-Z0-9-]+)\b/g;
-    for (const match of source.matchAll(directPattern)) ids.add(match[1]);
+    for (const id of collectExecutableIdsFromSource(
+      await readFile(full, 'utf8'),
+    )) {
+      ids.add(id);
+    }
+  }
 
-    const dynamicPattern =
-      /\btest(?:\.\w+)?\s*\(\s*`\$\{([A-Za-z_][A-Za-z0-9_]*)\}/g;
-    for (const dynamicMatch of source.matchAll(dynamicPattern)) {
-      const variableName = dynamicMatch[1];
-      const loopPattern = new RegExp(
-        `for\\s*\\(\\s*const\\s*\\[\\s*${variableName}\\b[^\\]]*\\]\\s*of\\s*\\[([\\s\\S]*?)\\]\\s*\\)\\s*\\{`,
-        'g',
-      );
+  return ids;
+}
 
-      for (const loopMatch of source.matchAll(loopPattern)) {
-        const fixtureRows = loopMatch[1];
-        const fixtureIdPattern = /\[\s*['"`]([A-Z][A-Z0-9-]+)\b/g;
-        for (const fixtureMatch of fixtureRows.matchAll(fixtureIdPattern)) {
-          ids.add(fixtureMatch[1]);
-        }
-      }
+async function collectCanonicalExecutableTestIds() {
+  const ids = new Set();
+
+  for (const sourceRoot of canonicalTestSourceRoots) {
+    for (const id of await collectExecutableTestIdsFromPath(sourceRoot)) {
+      ids.add(id);
     }
   }
 
@@ -90,7 +132,7 @@ test('TRACE-001 FR-01 through FR-15 each have mapped executable verification and
   assert.deepEqual(requirements.map((entry) => entry.fr), expected);
   assert.equal(new Set(requirements.map((entry) => entry.fr)).size, 15);
 
-  const executableTestIds = await collectExecutableTestIds(testsRoot);
+  const executableTestIds = await collectCanonicalExecutableTestIds();
 
   for (const entry of requirements) {
     assert.ok(entry.requirement);
@@ -141,6 +183,30 @@ test('TRACE-002 Markdown traceability is exactly ordered and in parity with JSON
 test('TRACE-003 human-readable traceability and handoff reports exist', async () => {
   await access(traceabilityMarkdownPath);
   await access(path.join(testsRoot, 'reports', 'testing-handoff.md'));
+});
+
+test('TRACE-005 executable-ID discovery ignores generated tests/.tmp content', async () => {
+  const decoyRoot = path.join(testsRoot, '.tmp', 'traceability-decoy');
+  const decoyId = 'TRACE-DECOY-999';
+
+  await rm(decoyRoot, { recursive: true, force: true });
+  await mkdir(decoyRoot, { recursive: true });
+  await writeFile(
+    path.join(decoyRoot, 'generated.test.mjs'),
+    `import test from 'node:test';\ntest('${decoyId} generated temp test', () => {});\n`,
+    'utf8',
+  );
+
+  try {
+    const ids = await collectCanonicalExecutableTestIds();
+    assert.equal(
+      ids.has(decoyId),
+      false,
+      'Generated tests/.tmp files must never be canonical executable traceability sources',
+    );
+  } finally {
+    await rm(decoyRoot, { recursive: true, force: true });
+  }
 });
 
 test('TRACE-004 FR-08 records the resolved Customer own-Payment read contract and ownership coverage', async () => {

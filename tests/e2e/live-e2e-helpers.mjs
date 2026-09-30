@@ -182,7 +182,7 @@ export async function apiError(baseUrl, route, {
   body,
   allowedStatuses = [403, 404],
 } = {}) {
-  const response = await fetch(`${baseUrl.replace(/\/$/, '')}${route}`, {
+  const response = await fetch(buildApiUrl(baseUrl, route), {
     method,
     headers: {
       Accept: 'application/json',

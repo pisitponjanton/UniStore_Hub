@@ -3,214 +3,164 @@
 Snapshot: 2026-09-30
 Scope owner: Testing Agent (`tests/**` only)
 
-## Current architecture
+## Current Testing architecture
 
 Cross-system Testing is organized as:
 
 - `contract/**` — API contract/auth/envelope/business boundaries
 - `security/**` — mandatory SEC-TENANT-001..009
 - `integration/**` — Data contract, Notification resilience, traceability parity
-- `frontend/**` — Frontend interaction and static-export integration evidence
+- `frontend/**` — Frontend interaction and static-export evidence
 - `smoke/**` — Local Dev Mode + live AWS deployment smoke
 - `infrastructure/**` — static CloudFormation verification
-- `e2e/**` — core, rejection/resubmit, tenant, Notification and duplicate-delivery flows
-- `helpers/**` — current Backend/Frontend evidence harnesses
-- `reports/**` — current qualification and historical phase evidence
+- `e2e/**` — core, payment rejection/resubmit, tenant, Notification and duplicate-delivery flows
+- `helpers/**` — Backend/Frontend evidence harnesses
+- `reports/**` — current qualification and historical evidence
 
-Canonical FR mapping:
+Canonical current FR mapping:
 
 - `reports/fr-traceability.json`
 - `reports/fr-traceability.md`
 
-Current TODO classification snapshot:
+Historical phase reports are not rewritten when current evidence changes.
 
-- `reports/todo-inventory.json`
-- `reports/todo-inventory.md`
+## Runtime baseline
 
-## Node/runtime baseline
-
-`tests/package.json` declares:
+Testing declares:
 
 ```text
 Node >=22
 ```
 
-Current modernization/qualification was executed with:
+Current harness and live qualification use:
 
 ```text
 Node v24.2.0
 ```
 
-The old directory-style aliases were corrected to explicit `*.test.mjs` globs for Node 22+ compatibility.
+No exact Node 22 binary is installed on this agent; Node 24.2.0 is within the declared supported range.
 
-Phase 9 still needs the final complete regression on the supported Node 22+ baseline.
+## Harness determinism
 
-## Current deterministic cross-system evidence
+The previous top-level race surfaces were corrected inside `tests/**`:
 
-Phase 4:
+- Frontend Vitest evidence is cross-process serialized and uses `--no-cache`
+- Frontend static builds use unique Testing-owned temp directories
+- TRACE executable-ID discovery scans only canonical Testing `*.test.mjs` sources
+- generated `tests/.tmp/**` content is excluded and protected by `TRACE-005`
+
+Public aliases on the current supported runtime:
 
 ```text
-test:contract
-198 tests
-196 pass
-0 fail
-2 todo
-
-test:integration
-35 tests
-35 pass
-0 fail
-0 todo
-
-test:security
-11 tests
-11 pass
-0 fail
-0 todo
+Contract:       198 total / 196 pass / 0 fail / 2 todo
+Integration:     36 total /  36 pass / 0 fail / 0 todo
+Security:        11 total /  11 pass / 0 fail / 0 todo
+Frontend cross:  33 total /  33 pass / 0 fail / 0 todo
+Smoke:           24 total /   9 pass / 0 fail / 15 todo
+E2E default:      5 total /   0 pass / 0 fail / 5 todo
+Infrastructure:  12 total /  12 pass / 0 fail / 0 todo
 ```
 
-The two Contract TODOs are live/deployed file-boundary checks:
+Authoritative top-level regression was executed three consecutive times:
+
+```text
+324 tests
+302 pass
+0 fail
+22 todo
+0 skipped
+```
+
+All 3 runs were identical, with no `ERR_REQUIRE_ESM`, `ENOENT`, or module-resolution failure.
+
+The 2 Contract TODOs remain the live/deployed file-boundary checks:
 
 - CT-FILE-018 — deployed/private Files bucket public-read posture
 - CT-FILE-019 — integrated Browser ↔ S3 transfer-boundary observation
 
-Phase 5:
+## Subsystem compatibility evidence
+
+Current subsystem evidence on Node v24.2.0:
 
 ```text
-test:frontend
-33 tests
-33 pass
-0 fail
-0 todo
+Backend:  282 / 282 pass
+Frontend: 190 / 190 pass
 ```
 
-Frontend subsystem evidence used by the cross-system harness was also verified on Node 24:
+Frontend cross-system qualification also performs a real isolated Next.js production static build.
+
+## Current Backend S3 handoff
+
+Current repository history includes:
 
 ```text
-Frontend subsystem: 190/190 pass
-Frontend production static build: PASS
+dfe48d9 fix(backend): make S3 presigned uploads LocalStack-compatible
 ```
 
-Backend subsystem evidence was verified on Node 24:
+Testing directly rechecked the production S3 adapter against canonical LocalStack:
 
 ```text
-Backend subsystem: 261/261 pass
+createPutUrl()
+→ browser-equivalent PUT image/png
+→ HTTP 200
+→ HeadObject succeeds
 ```
 
-## Local Dev qualification
+The previous checksum query fields are no longer present, and the earlier LocalStack `x-amz-checksum-crc32` failure is no longer reproducible.
 
-The current working tree exposes these commands through an Integration-owned root `package.json`. During Phase 10 review that root file is still **untracked outside `tests/**`**, so Integration must commit it separately before a clean checkout can reproduce the current Dev Mode smoke baseline. Testing does not own or stage that file.
+Testing did not modify Backend production code.
 
-The repository now exposes the canonical Integration-owned root commands:
+## Current live local E2E qualification
+
+Canonical `localhost:4000` is still occupied by a non-UniStore Docker-exposed service and returns 404 for `/health`.
+
+Testing did not stop or reconfigure that service.
+
+For disposable live qualification, the current Backend was started on:
 
 ```text
-dev:setup
-dev
-dev:seed
-dev:reset
-dev:down
+http://127.0.0.1:4100
 ```
 
-Canonical LocalStack resources were observed:
+with:
 
-```text
-DynamoDB: unistore-hub-dev-local
-S3:       unistore-hub-files-local
-SQS:      unistore-hub-notifications-local
-Endpoint: http://localhost:4566
-Region:   us-east-1
-```
+- canonical LocalStack DynamoDB
+- canonical LocalStack Files bucket
+- canonical LocalStack SQS
+- Local Notification Worker
+- seeded Platform Admin/Customer identities
+- direct S3 upload path
 
-Local smoke result from Phase 6, excluding the 9 AWS deployment cases:
+During the first post-fix run, Testing discovered that `apiError(...)` could double-prefix `/api/v1` when the base URL already included the API prefix. That Testing-owned helper was corrected before accepting the result.
 
-```text
-15 local DEV checks
-9 pass
-0 fail
-6 blocked
-```
-
-Important demonstrated items:
-
-- root Dev command surface exists
-- canonical LocalStack table/bucket/queue exist
-- Files bucket CORS exists for Frontend GET/PUT/HEAD
-- Frontend dev server responds
-- shared Backend data primitives remain canonical
-- LocalStack AWS client configuration works
-- local Worker entrypoint exists
-- `dev:reset` is wired through the shared local-only safety guard
-- a non-local `AWS_ENDPOINT_URL` is rejected before destructive reset work
-- protected Organization routes still require authentication
-
-Current canonical-port blocker:
-
-```text
-localhost:4000
-→ occupied by a non-UniStore HTTP service
-→ /health returns 404
-```
-
-Therefore canonical-port DEV-002/DEV-004 are not claimed as PASS.
-
-## Live local E2E qualification
-
-Phase 6 supplied real LocalStack runtime prerequisites plus the current Backend and Local Worker.
-
-Final result:
+Authoritative rerun after the helper correction:
 
 ```text
 5 tests
-1 pass
-4 fail
+5 pass
+0 fail
 0 todo
 ```
 
-### Live PASS
+Passing live scenarios:
 
-The duplicate Notification-delivery scenario passed:
+- E2E-CORE-001 — canonical register-to-received flow
+- E2E-PAYMENT-REJECT-001 — reject → notify → resubmit → approve → PAID with audit trail
+- E2E-TENANT-001 — two-Organization cross-tenant denial matrix
+- E2E-NOTIFY-001 — approved/rejected/ready business events → SQS → Worker → Notification → mark-read
+- E2E-NOTIFY-001 — duplicate delivery remains exactly one Notification
 
-```text
-SQS
-→ Local Worker
-→ DynamoDB Notification
-→ current-user Notification API
-→ duplicate event remains one Notification
-```
+The corrected tenant-denial rerun produced no new `/api/v1/api/v1/` requests.
 
-### Live FAIL
-
-The following all fail:
-
-- E2E-CORE-001
-- E2E-PAYMENT-REJECT-001
-- E2E-TENANT-001
-- E2E-NOTIFY-001 business-event flow
-
-All four reach the same current integration defect:
+The Local Worker processed the live notification batches with:
 
 ```text
-Backend-issued Payment Slip pre-signed URL
-→ browser-equivalent PUT to LocalStack S3
-→ HTTP 400 InvalidRequest
-→ Value for x-amz-checksum-crc32 header is invalid
+received=1
+failed=0
+deleted=1
 ```
 
-This was also reproduced directly with the current Backend S3 adapter, independent of the larger E2E flow.
-
-Likely owning investigation area:
-
-```text
-backend/src/aws/s3.js
-AWS SDK v3 request-checksum behavior
-LocalStack S3 compatibility
-```
-
-Testing did not alter production S3 behavior or bypass direct upload.
-
-## E2E environment-gating behavior
-
-With live E2E variables absent, the same suite intentionally remains blocked:
+Safe-default behavior remains explicit when no live E2E runtime variables are supplied:
 
 ```text
 5 tests
@@ -219,11 +169,23 @@ With live E2E variables absent, the same suite intentionally remains blocked:
 5 todo
 ```
 
-Historical implementation-file readiness guards were removed because the owning modules now exist. Current TODO conditions are environment/runtime gates, not old "module absent" assumptions.
+The isolated Backend/Worker processes were stopped after qualification. The unrelated port-4000 service was untouched.
 
-## AWS live qualification
+Detailed current live evidence:
 
-Phase 7:
+- `reports/harness-phase-05-live-e2e-after-s3-fix.md`
+
+## AWS qualification
+
+Live AWS qualification remains unavailable on this Testing Agent:
+
+```text
+AWS CLI: unavailable
+AWS credentials/session/profile: unavailable
+Learner Lab deployment access: unavailable
+```
+
+Therefore:
 
 ```text
 AWS-001..AWS-009
@@ -232,44 +194,29 @@ AWS-001..AWS-009
 9 blocked
 ```
 
-Current Testing Agent environment has:
-
-```text
-AWS CLI: unavailable
-AWS_ACCESS_KEY_ID: unset
-AWS_SECRET_ACCESS_KEY: unset
-AWS_SESSION_TOKEN: unset
-AWS_PROFILE: unset
-~/.aws/credentials: absent
-~/.aws/config: absent
-```
-
-Therefore no live Learner Lab deployment claim is made.
-
 Static Infrastructure remains:
 
 ```text
-test:infrastructure
 12 tests
 12 pass
 0 fail
 0 todo
 ```
 
-This does not substitute for AWS-001..AWS-009.
+Static Infrastructure is not a substitute for live AWS smoke.
 
 ## Current FR readiness
 
-Current canonical traceability status:
+Canonical current readiness is now:
 
 ```text
-PASS    12
-FAIL     1
-BLOCKED  2
+PASS    14
+FAIL     0
+BLOCKED  1
 TOTAL   15
 ```
 
-PASS minimum-verification requirements:
+PASS:
 
 ```text
 FR-01 Authentication + JWT
@@ -279,122 +226,78 @@ FR-04 Store
 FR-05 Product / Variant
 FR-06 Pre-order Campaign
 FR-07 Order
+FR-08 Payment Slip / Verification
 FR-09 Production Summary
 FR-10 Pickup QR / Token
 FR-11 Dashboard / Report
 FR-12 Audit Log
+FR-13 In-app Notification
 FR-14 Platform Admin
 ```
 
-Current FAIL:
+FR-08 is now PASS because the current live direct Payment Slip upload succeeds and the rejection/resubmission/approval/audit E2E completes.
+
+FR-13 is now PASS because the current live business-event Notification flow completes approved/rejected/ready events through SQS, Worker, persisted Notification, current-user API, and mark-read; duplicate-delivery idempotency also passes.
+
+Still BLOCKED:
 
 ```text
-FR-08 Payment Slip / Verification
-```
-
-Reason: live direct Payment Slip PUT fails against canonical LocalStack because of the checksum incompatibility.
-
-Current BLOCKED:
-
-```text
-FR-13 In-app Notification
 FR-15 Health Check
 ```
 
-FR-13 has deterministic Notification/Worker/API evidence and live duplicate-delivery evidence, but the required live business-event path is transitively blocked by the Payment Slip upload failure.
+Reasons:
 
-FR-15 is blocked because canonical localhost:4000 is occupied and live AWS health cannot run without AWS CLI/Learner Lab access.
+- canonical localhost:4000 is occupied by a non-UniStore service
+- live AWS health cannot be verified without AWS CLI + active Learner Lab deployment credentials
 
 ## Security status
 
-SEC-TENANT-001 through SEC-TENANT-009 now execute instead of carrying historical TODOs.
-
-The deterministic security suite result is:
+Mandatory tenant/security coverage remains executable:
 
 ```text
+SEC-TENANT-001 .. SEC-TENANT-009
+
 11 tests
 11 pass
 0 fail
 0 todo
 ```
 
-This includes evidence for:
-
-- stored `organizationId` tenant checks
-- cross-Customer own-Order denial
-- private Payment Slip ownership
-- cross-Organization Pickup denial
-- Notification user isolation
-- client-supplied role distrust
-- resource ID alone being insufficient authorization
-
-The live tenant E2E still fails later during paid-order setup because Payment Slip direct PUT is broken; that live failure is preserved.
+The corrected live tenant E2E also passes the intended denial routes rather than malformed double-prefixed paths.
 
 ## Traceability integrity
 
-The current traceability workflow now verifies:
+Current traceability requires:
 
 - exactly FR-01..FR-15
-- unique FR IDs
-- correct ordering
-- Markdown/JSON parity
-- mapped IDs resolve to executable test definitions
-- evidence report paths exist
+- unique ordered IDs
+- JSON/Markdown parity
+- mapped IDs resolve from canonical executable `*.test.mjs` sources only
+- generated `tests/.tmp/**` content cannot satisfy mappings
+- referenced evidence artifacts exist
+- FR-08 retains Customer own-Payment read/ownership coverage
 
-The previous FR-07 missing / duplicate FR-08 Markdown defect is fixed.
+`fr-traceability.json` remains the canonical machine-readable current state.
 
-`fr-traceability.json` is the canonical machine-readable current snapshot.
+## Current task review
 
-Historical phase reports remain historical and are not rewritten to pretend earlier implementation state was different.
-
-## Phase 9 supported-Node full regression
-
-Executed with Node `v24.2.0`, which satisfies the declared `>=22` baseline.
-
-Final complete Testing result:
+Final diff review result:
 
 ```text
-323 tests
-300 pass
-0 fail
-23 todo
-0 skipped
+PASS
 ```
 
-Named aliases:
+Reviewed properties:
 
-```text
-Contract:       198 / 196 pass / 0 fail / 2 todo
-Integration:     35 / 35 pass
-Security:        11 / 11 pass
-Frontend cross:  33 / 33 pass
-Smoke:           24 / 8 pass / 0 fail / 16 todo
-E2E default:      5 / 0 pass / 0 fail / 5 todo
-Infrastructure:  12 / 12 pass
-```
+- task changes remain under `tests/**`
+- no test weakening was found
+- canonical traceability remains ordered/unique and JSON/Markdown-parity protected
+- live E2E result remains 5/5 PASS after the Testing URL-normalization correction
+- FR-15/AWS blockers remain visible
+- `git diff --check`, JSON parsing, and Testing `.mjs` syntax checks pass
 
-Compatibility suites on the same runtime:
+Detailed review:
 
-```text
-Backend:  282 / 282 pass
-Frontend: 190 / 190 pass
-```
+- `reports/harness-phase-07-review-diff.md`
 
-The smoke rerun exposed and fixed one Testing-only readiness defect: a paused LocalStack container was incorrectly treated as runnable. DEV-001 now checks for `--status running` and reports paused/non-running LocalStack as BLOCKED instead of false FAIL.
-
-The zero-failure default regression does not override the live Phase 6 E2E result. The Payment Slip pre-signed LocalStack PUT checksum failure remains current product/integration evidence, and AWS live qualification remains blocked.
-
-Detailed evidence: `reports/phase-09-node22plus-full-regression.md`.
-
-## Next step — Phase 10
-
-Review only the task diff against scope, constraints and acceptance criteria.
-
-The review must keep these current findings visible:
-
-1. Payment Slip direct PUT / LocalStack checksum incompatibility.
-2. Canonical localhost:4000 collision.
-3. AWS live smoke unavailable without AWS CLI + active Learner Lab deployment.
-4. Environment-gated E2E remains TODO when live runtime variables are absent.
-
-Testing may correct Testing-owned review defects only. Product/Backend/Integration/AWS findings must not be hidden.
+No further Testing phase is pending for this task. Commit only Testing-owned changes when requested.
