@@ -20,6 +20,7 @@ function createS3Client(options = {}) {
 
   return new S3Client({
     ...buildAwsClientOptions(options),
+    requestChecksumCalculation: 'WHEN_REQUIRED',
     ...(endpoint ? { forcePathStyle: true } : {}),
   });
 }

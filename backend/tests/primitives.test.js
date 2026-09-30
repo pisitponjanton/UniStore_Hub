@@ -15,6 +15,7 @@ const {
 const {
   DEFAULT_PRESIGN_EXPIRES_SECONDS,
   createS3Adapter,
+  createS3Client,
   requireBucketName,
 } = require('../src/aws/s3');
 const {
@@ -235,6 +236,129 @@ test('AWS client options use the configured region and optional local endpoint',
   assert.deepEqual(buildAwsClientOptions({ region: 'us-east-1', endpoint: '' }), {
     region: 'us-east-1',
   });
+});
+
+test('S3 client keeps required-only request checksums in local and production modes', async () => {
+  const localClient = createS3Client({
+    region: 'us-east-1',
+    endpoint: 'http://localhost:4566',
+  });
+  const productionClient = createS3Client({
+    region: 'us-east-1',
+    endpoint: '',
+  });
+
+  try {
+    assert.equal(
+      await localClient.config.requestChecksumCalculation(),
+      'WHEN_REQUIRED',
+    );
+    assert.equal(
+      await productionClient.config.requestChecksumCalculation(),
+      'WHEN_REQUIRED',
+    );
+
+    const localForcePathStyle =
+      typeof localClient.config.forcePathStyle === 'function'
+        ? await localClient.config.forcePathStyle()
+        : localClient.config.forcePathStyle;
+    const productionForcePathStyle =
+      typeof productionClient.config.forcePathStyle === 'function'
+        ? await productionClient.config.forcePathStyle()
+        : productionClient.config.forcePathStyle;
+
+    assert.equal(localForcePathStyle, true);
+    assert.equal(productionForcePathStyle, false);
+  } finally {
+    localClient.destroy();
+    productionClient.destroy();
+  }
+});
+
+test('S3 presigned PUT keeps canonical path and expiry without optional checksum query parameters', async () => {
+  const previousAccessKey =
+    process.env.AWS_ACCESS_KEY_ID;
+  const previousSecretKey =
+    process.env.AWS_SECRET_ACCESS_KEY;
+  const previousSessionToken =
+    process.env.AWS_SESSION_TOKEN;
+  process.env.AWS_ACCESS_KEY_ID =
+    'local-presign-test';
+  process.env.AWS_SECRET_ACCESS_KEY =
+    'local-presign-test-secret';
+  delete process.env.AWS_SESSION_TOKEN;
+
+  const client = createS3Client({
+    region: 'us-east-1',
+    endpoint: 'http://localhost:4566',
+  });
+
+  try {
+    const adapter = createS3Adapter({
+      client,
+      bucketName: 'private-files-test',
+    });
+    const objectKey =
+      'payments/org-1/order-1/11111111-1111-4111-8111-111111111111';
+    const url = await adapter.createPutUrl({
+      objectKey,
+      contentType: 'image/png',
+      expiresInSeconds: 900,
+    });
+    const parsed = new URL(url);
+
+    assert.equal(
+      parsed.pathname,
+      `/private-files-test/${objectKey}`,
+    );
+    assert.equal(
+      parsed.searchParams.get('X-Amz-Expires'),
+      '900',
+    );
+    assert.equal(
+      parsed.searchParams.get('X-Amz-Algorithm'),
+      'AWS4-HMAC-SHA256',
+    );
+    assert.equal(
+      parsed.searchParams.get('X-Amz-Content-Sha256'),
+      'UNSIGNED-PAYLOAD',
+    );
+    assert.equal(
+      parsed.searchParams.has(
+        'x-amz-sdk-checksum-algorithm',
+      ),
+      false,
+    );
+    assert.equal(
+      parsed.searchParams.has(
+        'x-amz-checksum-crc32',
+      ),
+      false,
+    );
+  } finally {
+    client.destroy();
+
+    if (previousAccessKey === undefined) {
+      delete process.env.AWS_ACCESS_KEY_ID;
+    } else {
+      process.env.AWS_ACCESS_KEY_ID =
+        previousAccessKey;
+    }
+
+    if (previousSecretKey === undefined) {
+      delete process.env.AWS_SECRET_ACCESS_KEY;
+    } else {
+      process.env.AWS_SECRET_ACCESS_KEY =
+        previousSecretKey;
+    }
+
+    if (previousSessionToken === undefined) {
+      delete process.env.AWS_SESSION_TOKEN;
+    } else {
+      process.env.AWS_SESSION_TOKEN =
+        previousSessionToken;
+    }
+  }
 });
 
 test('DynamoDB repository injects the configured table and exposes no Scan operation', async () => {
