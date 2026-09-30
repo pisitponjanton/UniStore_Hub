@@ -374,11 +374,17 @@ test('configured CORS allows only exact configured origins and handles preflight
     ],
     /POST/,
   );
-  assert.match(
+  assert.equal(
     preflight.headers[
       'access-control-allow-headers'
     ],
-    /Authorization/,
+    'Authorization,Content-Type',
+  );
+  assert.equal(
+    preflight.headers[
+      'access-control-allow-headers'
+    ].includes('X-Request-Id'),
+    false,
   );
   assert.equal(
     preflight.headers.vary,

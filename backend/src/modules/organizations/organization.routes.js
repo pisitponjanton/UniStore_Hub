@@ -7,6 +7,7 @@ const {
 const {
   createOrganizationContextMiddleware,
   createOrganizationMembershipMiddleware,
+  createOrganizationProfileAccessMiddleware,
   requireOrganizationRoles,
 } = require('../../middleware/organization.middleware');
 const {
@@ -64,6 +65,23 @@ function createOrganizationRouter(options = {}) {
     createOrganizationMembershipMiddleware(
       options.membershipOptions,
     );
+  const profileReadAccessMiddleware =
+    options.profileReadAccessMiddleware ||
+    createOrganizationProfileAccessMiddleware({
+      ...options.profileAccessOptions,
+      allowedOrganizationRoles: [
+        ORGANIZATION_ROLE.STAFF,
+        ORGANIZATION_ROLE.ORGANIZATION_ADMIN,
+      ],
+    });
+  const profileUpdateAccessMiddleware =
+    options.profileUpdateAccessMiddleware ||
+    createOrganizationProfileAccessMiddleware({
+      ...options.profileAccessOptions,
+      allowedOrganizationRoles: [
+        ORGANIZATION_ROLE.ORGANIZATION_ADMIN,
+      ],
+    });
   const adminOnly = requireOrganizationRoles(
     ORGANIZATION_ROLE.ORGANIZATION_ADMIN,
   );
@@ -173,15 +191,14 @@ function createOrganizationRouter(options = {}) {
   router.get(
     '/:organizationId',
     organizationContextMiddleware,
-    membershipMiddleware,
+    profileReadAccessMiddleware,
     controller.get,
   );
 
   router.patch(
     '/:organizationId',
     organizationContextMiddleware,
-    membershipMiddleware,
-    adminOnly,
+    profileUpdateAccessMiddleware,
     controller.update,
   );
 

@@ -11,9 +11,11 @@
   "scripts": {
     "start": "node src/local.js",
     "dev": "node --watch src/local.js",
+    "worker:dev": "node src/local-worker.js",
     "test": "node --test",
     "check": "node scripts/check-syntax.js",
-    "seed:platform-admin": "node scripts/seed-platform-admin.js"
+    "seed:platform-admin": "node scripts/seed-platform-admin.js",
+    "dev:seed": "node scripts/dev-seed.js"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.0.0",

@@ -799,3 +799,282 @@ test('Organization Admin can list member route and receives canonical list envel
   assert.equal(response.body.data.nextCursor, null);
   assert.equal(response.body.data.items[0].user.email, 'staff@example.com');
 });
+
+
+function createOrganizationProfileTestApp({
+  caller,
+  membership,
+  persistedUser,
+  organizationStatus = ORGANIZATION_STATUS.ACTIVE,
+} = {}) {
+  return createApp({
+    organizations: {
+      authMiddleware(req, res, next) {
+        req.user = {
+          userId: caller?.userId || 'caller-1',
+          email: caller?.email || 'caller@example.com',
+          status: caller?.status || 'ACTIVE',
+          platformRole: caller?.platformRole ?? null,
+        };
+        next();
+      },
+      organizationContextMiddleware(req, res, next) {
+        req.organization = {
+          ...makeOrganization({
+            organizationId: req.params.organizationId,
+            status: organizationStatus,
+          }),
+        };
+        next();
+      },
+      profileAccessOptions: {
+        memberRepository: {
+          async getByOrganizationAndUser(organizationId, userId) {
+            assert.equal(organizationId, 'org-1');
+            assert.equal(userId, caller?.userId || 'caller-1');
+            return membership ?? null;
+          },
+        },
+        userRepository: {
+          async getById(userId) {
+            assert.equal(userId, caller?.userId || 'caller-1');
+            return persistedUser ?? {
+              userId,
+              email: caller?.email || 'caller@example.com',
+              name: 'Caller',
+              status: 'ACTIVE',
+              platformRole: null,
+              createdAt: FIXED_TIME,
+              updatedAt: FIXED_TIME,
+            };
+          },
+        },
+      },
+      organizationService: {
+        async getOrganization(organizationId) {
+          return makeOrganization({
+            organizationId,
+            status: organizationStatus,
+          });
+        },
+        async updateOrganization({
+          organizationId,
+          actorId,
+          changes,
+        }) {
+          return makeOrganization({
+            organizationId,
+            status: organizationStatus,
+            ...changes,
+            updatedAt: FIXED_TIME,
+            updatedBy: actorId,
+          });
+        },
+      },
+    },
+  });
+}
+
+test('persisted Platform Admin without Organization membership can GET and PATCH Organization profile', async () => {
+  const platformUser = {
+    userId: 'platform-1',
+    email: 'platform@example.com',
+    name: 'Platform Admin',
+    status: 'ACTIVE',
+    platformRole: 'PLATFORM_ADMIN',
+    createdAt: FIXED_TIME,
+    updatedAt: FIXED_TIME,
+  };
+  const app = createOrganizationProfileTestApp({
+    caller: {
+      userId: 'platform-1',
+      platformRole: null,
+    },
+    membership: null,
+    persistedUser: platformUser,
+  });
+
+  const getResponse = await request(app)
+    .get('/api/v1/organizations/org-1')
+    .expect(200);
+
+  assert.equal(getResponse.body.success, true);
+  assert.equal(
+    getResponse.body.data.organizationId,
+    'org-1',
+  );
+
+  const patchResponse = await request(app)
+    .patch('/api/v1/organizations/org-1')
+    .send({
+      name: 'Updated by Platform Admin',
+    })
+    .expect(200);
+
+  assert.equal(patchResponse.body.success, true);
+  assert.equal(
+    patchResponse.body.data.name,
+    'Updated by Platform Admin',
+  );
+});
+
+test('active Staff can GET Organization profile but cannot PATCH it', async () => {
+  const staffMembership = makeMembership({
+    userId: 'staff-1',
+    role: ORGANIZATION_ROLE.STAFF,
+    status: MEMBERSHIP_STATUS.ACTIVE,
+  });
+  const app = createOrganizationProfileTestApp({
+    caller: {
+      userId: 'staff-1',
+    },
+    membership: staffMembership,
+    persistedUser: makeUser({
+      userId: 'staff-1',
+      platformRole: null,
+    }),
+  });
+
+  await request(app)
+    .get('/api/v1/organizations/org-1')
+    .expect(200);
+
+  const patchResponse = await request(app)
+    .patch('/api/v1/organizations/org-1')
+    .send({
+      name: 'Not Allowed',
+    })
+    .expect(403);
+
+  assert.equal(
+    patchResponse.body.error.code,
+    'ROLE_FORBIDDEN',
+  );
+});
+
+test('active Organization Admin can GET and PATCH Organization profile', async () => {
+  const adminMembership = makeMembership({
+    userId: 'admin-1',
+    role: ORGANIZATION_ROLE.ORGANIZATION_ADMIN,
+    status: MEMBERSHIP_STATUS.ACTIVE,
+  });
+  const app = createOrganizationProfileTestApp({
+    caller: {
+      userId: 'admin-1',
+    },
+    membership: adminMembership,
+    persistedUser: makeUser({
+      userId: 'admin-1',
+      platformRole: null,
+    }),
+  });
+
+  await request(app)
+    .get('/api/v1/organizations/org-1')
+    .expect(200);
+
+  const patchResponse = await request(app)
+    .patch('/api/v1/organizations/org-1')
+    .send({
+      description: 'Admin update',
+    })
+    .expect(200);
+
+  assert.equal(
+    patchResponse.body.data.description,
+    'Admin update',
+  );
+});
+
+test('normal user without membership and inactive member are denied Organization profile access', async () => {
+  for (const membership of [
+    null,
+    makeMembership({
+      userId: 'user-1',
+      role: ORGANIZATION_ROLE.ORGANIZATION_ADMIN,
+      status: MEMBERSHIP_STATUS.INACTIVE,
+    }),
+  ]) {
+    const app = createOrganizationProfileTestApp({
+      caller: {
+        userId: 'user-1',
+        platformRole: 'PLATFORM_ADMIN',
+      },
+      membership,
+      persistedUser: makeUser({
+        userId: 'user-1',
+        platformRole: null,
+      }),
+    });
+
+    const getResponse = await request(app)
+      .get('/api/v1/organizations/org-1')
+      .expect(403);
+
+    assert.equal(
+      getResponse.body.error.code,
+      'MEMBERSHIP_REQUIRED',
+    );
+
+    const patchResponse = await request(app)
+      .patch('/api/v1/organizations/org-1')
+      .send({
+        name: 'Denied',
+      })
+      .expect(403);
+
+    assert.equal(
+      patchResponse.body.error.code,
+      'MEMBERSHIP_REQUIRED',
+    );
+  }
+});
+
+test('Platform Admin profile exception does not bypass membership on nested tenant routes', async () => {
+  let memberServiceCalls = 0;
+  const app = createApp({
+    organizations: {
+      authMiddleware(req, res, next) {
+        req.user = {
+          userId: 'platform-1',
+          email: 'platform@example.com',
+          status: 'ACTIVE',
+          platformRole: 'PLATFORM_ADMIN',
+        };
+        next();
+      },
+      organizationContextMiddleware(req, res, next) {
+        req.organization = {
+          organizationId: req.params.organizationId,
+          status: ORGANIZATION_STATUS.ACTIVE,
+        };
+        next();
+      },
+      membershipOptions: {
+        memberRepository: {
+          async getByOrganizationAndUser() {
+            return null;
+          },
+        },
+      },
+      members: {
+        memberService: {
+          async listMembers() {
+            memberServiceCalls += 1;
+            return [];
+          },
+        },
+      },
+    },
+  });
+
+  const response = await request(app)
+    .get('/api/v1/organizations/org-1/members')
+    .expect(403);
+
+  assert.equal(
+    response.body.error.code,
+    'MEMBERSHIP_REQUIRED',
+  );
+  assert.equal(memberServiceCalls, 0);
+});

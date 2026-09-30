@@ -25,6 +25,10 @@ const {
   validateNotificationListQuery,
 } = require('../src/validators/notification.validator');
 const {
+  assertLocalWorkerConfig,
+  createLocalNotificationWorker,
+} = require('../src/local-worker');
+const {
   createNotificationWorker,
 } = require('../src/worker');
 
@@ -755,4 +759,177 @@ test('notification HTTP routes use authenticated userId for list and mark-read o
       },
     },
   ]);
+});
+
+
+test('local notification worker polls SQS and deletes only successfully processed messages', async () => {
+  const deleted = [];
+  const worker = createNotificationWorker({
+    notificationRepository: {
+      async putNotification(notification) {
+        if (
+          notification.notificationId ===
+          SECOND_EVENT_ID
+        ) {
+          const error = new Error(
+            'DynamoDB unavailable',
+          );
+          error.code = 'DDB_UNAVAILABLE';
+          throw error;
+        }
+      },
+    },
+    logger: {
+      error() {},
+    },
+  });
+  const runtime =
+    createLocalNotificationWorker({
+      worker,
+      logger: {
+        info() {},
+      },
+      sqsAdapter: {
+        async receiveMessages(options) {
+          assert.deepEqual(options, {
+            maxNumberOfMessages: 10,
+            waitTimeSeconds: 20,
+          });
+
+          return [
+            {
+              MessageId: 'message-ok',
+              ReceiptHandle: 'receipt-ok',
+              Body: JSON.stringify(
+                makeEvent(),
+              ),
+            },
+            {
+              MessageId: 'message-fail',
+              ReceiptHandle: 'receipt-fail',
+              Body: JSON.stringify(
+                makeEvent({
+                  eventId:
+                    SECOND_EVENT_ID,
+                }),
+              ),
+            },
+          ];
+        },
+
+        async deleteMessage(
+          receiptHandle,
+        ) {
+          deleted.push(receiptHandle);
+        },
+      },
+    });
+
+  const summary =
+    await runtime.pollOnce();
+
+  assert.deepEqual(summary, {
+    received: 2,
+    failed: 1,
+    deleted: 1,
+  });
+  assert.deepEqual(deleted, [
+    'receipt-ok',
+  ]);
+});
+
+test('local notification worker treats idempotent duplicate delivery as success and deletes the SQS message', async () => {
+  const duplicateError = new Error(
+    'duplicate',
+  );
+  duplicateError.name =
+    'ConditionalCheckFailedException';
+  const deleted = [];
+  const worker = createNotificationWorker({
+    notificationRepository: {
+      async putNotification() {
+        throw duplicateError;
+      },
+    },
+  });
+  const runtime =
+    createLocalNotificationWorker({
+      worker,
+      logger: {
+        info() {},
+      },
+      sqsAdapter: {
+        async receiveMessages() {
+          return [
+            {
+              MessageId:
+                'duplicate-message',
+              ReceiptHandle:
+                'duplicate-receipt',
+              Body: JSON.stringify(
+                makeEvent(),
+              ),
+            },
+          ];
+        },
+
+        async deleteMessage(
+          receiptHandle,
+        ) {
+          deleted.push(receiptHandle);
+        },
+      },
+    });
+
+  const summary =
+    await runtime.pollOnce();
+
+  assert.deepEqual(summary, {
+    received: 1,
+    failed: 0,
+    deleted: 1,
+  });
+  assert.deepEqual(deleted, [
+    'duplicate-receipt',
+  ]);
+});
+
+test('local notification worker configuration refuses production or non-local AWS endpoints', () => {
+  assert.throws(
+    () =>
+      assertLocalWorkerConfig({
+        nodeEnv: 'production',
+        awsEndpointUrl:
+          'http://localhost:4566',
+        notificationQueueUrl:
+          'http://localhost:4566/000000000000/queue',
+      }),
+    (error) =>
+      error.code ===
+      'LOCAL_WORKER_FORBIDDEN',
+  );
+
+  assert.throws(
+    () =>
+      assertLocalWorkerConfig({
+        nodeEnv: 'development',
+        awsEndpointUrl:
+          'https://sqs.us-east-1.amazonaws.com',
+        notificationQueueUrl:
+          'https://sqs.us-east-1.amazonaws.com/123/queue',
+      }),
+    (error) =>
+      error.code ===
+      'LOCAL_WORKER_FORBIDDEN',
+  );
+
+  assert.doesNotThrow(() =>
+    assertLocalWorkerConfig({
+      nodeEnv: 'development',
+      awsEndpointUrl:
+        'http://localhost:4566',
+      notificationQueueUrl:
+        'http://localhost:4566/000000000000/unistore-hub-notifications-local',
+    }),
+  );
 });

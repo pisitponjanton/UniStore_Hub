@@ -6,9 +6,13 @@ const test = require('node:test');
 const {
   createOrganizationContextMiddleware,
   createOrganizationMembershipMiddleware,
+  createOrganizationProfileAccessMiddleware,
   requireOrganizationRoles,
   requireOperationalOrganization,
 } = require('../src/middleware/organization.middleware');
+const {
+  USER_STATUS,
+} = require('../src/modules/auth/auth.constants');
 const {
   ORGANIZATION_ROLE,
   MEMBERSHIP_STATUS,
@@ -16,6 +20,9 @@ const {
 const {
   ORGANIZATION_STATUS,
 } = require('../src/modules/organizations/organization.constants');
+const {
+  PLATFORM_ROLE,
+} = require('../src/modules/platform-admin/platform-admin.constants');
 const {
   requireActiveMembership,
   requireActiveOrganization,
@@ -483,4 +490,274 @@ test('customer ownership path does not require OrganizationMember', () => {
       userId: 'customer-1',
     }),
   );
+});
+
+
+test('organization profile access allows persisted Platform Admin without Organization membership', async () => {
+  const lookups = [];
+  const middleware = createOrganizationProfileAccessMiddleware({
+    allowedOrganizationRoles: [
+      ORGANIZATION_ROLE.STAFF,
+      ORGANIZATION_ROLE.ORGANIZATION_ADMIN,
+    ],
+    memberRepository: {
+      async getByOrganizationAndUser(organizationId, userId) {
+        lookups.push(['membership', organizationId, userId]);
+        return null;
+      },
+    },
+    userRepository: {
+      async getById(userId) {
+        lookups.push(['user', userId]);
+        return {
+          userId,
+          email: 'platform@example.com',
+          name: 'Platform Admin',
+          status: USER_STATUS.ACTIVE,
+          platformRole: PLATFORM_ROLE.PLATFORM_ADMIN,
+          createdAt: '2026-09-30T00:00:00.000Z',
+          updatedAt: '2026-09-30T00:00:00.000Z',
+        };
+      },
+    },
+  });
+  const req = {
+    user: {
+      userId: 'platform-1',
+      platformRole: null,
+    },
+    organization: {
+      organizationId: 'org-1',
+      status: ORGANIZATION_STATUS.ACTIVE,
+    },
+  };
+  const recorder = createNextRecorder();
+
+  await middleware(req, {}, recorder.next);
+
+  assert.deepEqual(lookups, [
+    ['membership', 'org-1', 'platform-1'],
+    ['user', 'platform-1'],
+  ]);
+  assert.deepEqual(recorder.calls, [undefined]);
+  assert.equal(
+    req.user.platformRole,
+    PLATFORM_ROLE.PLATFORM_ADMIN,
+  );
+  assert.equal(req.membership, undefined);
+});
+
+test('organization profile access ignores spoofed request platformRole and requires persisted Platform Admin authority', async () => {
+  const middleware = createOrganizationProfileAccessMiddleware({
+    allowedOrganizationRoles: [
+      ORGANIZATION_ROLE.ORGANIZATION_ADMIN,
+    ],
+    memberRepository: {
+      async getByOrganizationAndUser() {
+        return null;
+      },
+    },
+    userRepository: {
+      async getById(userId) {
+        return {
+          userId,
+          email: 'normal@example.com',
+          name: 'Normal User',
+          status: USER_STATUS.ACTIVE,
+          platformRole: null,
+        };
+      },
+    },
+  });
+  const req = {
+    user: {
+      userId: 'user-1',
+      platformRole: PLATFORM_ROLE.PLATFORM_ADMIN,
+    },
+    organization: {
+      organizationId: 'org-1',
+      status: ORGANIZATION_STATUS.ACTIVE,
+    },
+  };
+  const recorder = createNextRecorder();
+
+  await middleware(req, {}, recorder.next);
+
+  assert.equal(recorder.calls.length, 1);
+  assert.equal(recorder.calls[0].code, 'MEMBERSHIP_REQUIRED');
+  assert.equal(req.membership, undefined);
+});
+
+test('organization profile access accepts allowed active membership without requiring platform role', async () => {
+  let userLookups = 0;
+  const membership = {
+    organizationId: 'org-1',
+    userId: 'staff-1',
+    role: ORGANIZATION_ROLE.STAFF,
+    status: MEMBERSHIP_STATUS.ACTIVE,
+  };
+  const middleware = createOrganizationProfileAccessMiddleware({
+    allowedOrganizationRoles: [
+      ORGANIZATION_ROLE.STAFF,
+      ORGANIZATION_ROLE.ORGANIZATION_ADMIN,
+    ],
+    memberRepository: {
+      async getByOrganizationAndUser() {
+        return membership;
+      },
+    },
+    userRepository: {
+      async getById() {
+        userLookups += 1;
+        return null;
+      },
+    },
+  });
+  const req = {
+    user: {
+      userId: 'staff-1',
+      platformRole: null,
+    },
+    organization: {
+      organizationId: 'org-1',
+      status: ORGANIZATION_STATUS.ACTIVE,
+    },
+  };
+  const recorder = createNextRecorder();
+
+  await middleware(req, {}, recorder.next);
+
+  assert.deepEqual(recorder.calls, [undefined]);
+  assert.equal(req.membership, membership);
+  assert.equal(userLookups, 0);
+});
+
+test('organization profile update access rejects Staff and inactive membership without persisted Platform Admin role', async () => {
+  for (const membership of [
+    {
+      organizationId: 'org-1',
+      userId: 'user-1',
+      role: ORGANIZATION_ROLE.STAFF,
+      status: MEMBERSHIP_STATUS.ACTIVE,
+    },
+    {
+      organizationId: 'org-1',
+      userId: 'user-1',
+      role: ORGANIZATION_ROLE.ORGANIZATION_ADMIN,
+      status: MEMBERSHIP_STATUS.INACTIVE,
+    },
+  ]) {
+    const middleware = createOrganizationProfileAccessMiddleware({
+      allowedOrganizationRoles: [
+        ORGANIZATION_ROLE.ORGANIZATION_ADMIN,
+      ],
+      memberRepository: {
+        async getByOrganizationAndUser() {
+          return membership;
+        },
+      },
+      userRepository: {
+        async getById(userId) {
+          return {
+            userId,
+            status: USER_STATUS.ACTIVE,
+            platformRole: null,
+          };
+        },
+      },
+    });
+    const req = {
+      user: {
+        userId: 'user-1',
+      },
+      organization: {
+        organizationId: 'org-1',
+        status: ORGANIZATION_STATUS.ACTIVE,
+      },
+    };
+    const recorder = createNextRecorder();
+
+    await middleware(req, {}, recorder.next);
+
+    assert.equal(recorder.calls.length, 1);
+    assert.equal(
+      recorder.calls[0].code,
+      membership.status === MEMBERSHIP_STATUS.ACTIVE
+        ? 'ROLE_FORBIDDEN'
+        : 'MEMBERSHIP_REQUIRED',
+    );
+  }
+});
+
+test('organization profile access fails closed on cross-tenant membership data', async () => {
+  let userLookups = 0;
+  const middleware = createOrganizationProfileAccessMiddleware({
+    allowedOrganizationRoles: [
+      ORGANIZATION_ROLE.STAFF,
+      ORGANIZATION_ROLE.ORGANIZATION_ADMIN,
+    ],
+    memberRepository: {
+      async getByOrganizationAndUser() {
+        return {
+          organizationId: 'org-other',
+          userId: 'platform-1',
+          role: ORGANIZATION_ROLE.ORGANIZATION_ADMIN,
+          status: MEMBERSHIP_STATUS.ACTIVE,
+        };
+      },
+    },
+    userRepository: {
+      async getById() {
+        userLookups += 1;
+        return {
+          userId: 'platform-1',
+          status: USER_STATUS.ACTIVE,
+          platformRole: PLATFORM_ROLE.PLATFORM_ADMIN,
+        };
+      },
+    },
+  });
+  const req = {
+    user: {
+      userId: 'platform-1',
+    },
+    organization: {
+      organizationId: 'org-1',
+      status: ORGANIZATION_STATUS.ACTIVE,
+    },
+  };
+  const recorder = createNextRecorder();
+
+  await middleware(req, {}, recorder.next);
+
+  assert.equal(recorder.calls.length, 1);
+  assert.equal(recorder.calls[0].code, 'TENANT_MISMATCH');
+  assert.equal(userLookups, 0);
+});
+
+test('tenant membership middleware remains strict even when request user is a Platform Admin', async () => {
+  const middleware = createOrganizationMembershipMiddleware({
+    memberRepository: {
+      async getByOrganizationAndUser() {
+        return null;
+      },
+    },
+  });
+  const req = {
+    user: {
+      userId: 'platform-1',
+      platformRole: PLATFORM_ROLE.PLATFORM_ADMIN,
+    },
+    organization: {
+      organizationId: 'org-1',
+      status: ORGANIZATION_STATUS.ACTIVE,
+    },
+  };
+  const recorder = createNextRecorder();
+
+  await middleware(req, {}, recorder.next);
+
+  assert.equal(recorder.calls.length, 1);
+  assert.equal(recorder.calls[0].code, 'MEMBERSHIP_REQUIRED');
+  assert.equal(req.membership, undefined);
 });

@@ -5,7 +5,7 @@ const { config } = require('../config');
 const CORS_ALLOWED_METHODS =
   'GET,POST,PATCH,DELETE,OPTIONS';
 const CORS_ALLOWED_HEADERS =
-  'Authorization,Content-Type,X-Request-Id';
+  'Authorization,Content-Type';
 
 function appendVary(res, value) {
   const current = res.getHeader('Vary');

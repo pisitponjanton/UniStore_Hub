@@ -20,7 +20,9 @@ const {
 const {
   createSqsAdapter,
   requireQueueUrl,
+  requireReceiptHandle,
 } = require('../src/aws/sqs');
+
 
 function createFakeClient(responseFactory = () => ({})) {
   const commands = [];
@@ -387,5 +389,80 @@ test('SQS helper rejects use without a notification queue URL', () => {
       error.code === 'CONFIG_MISSING' &&
       error.message ===
         'NOTIFICATION_QUEUE_URL is required for SQS operations',
+  );
+});
+
+
+test('SQS adapter long-polls and deletes by receipt handle for local worker use', async () => {
+  const client = createFakeClient(
+    (command) => {
+      if (
+        command.constructor.name ===
+        'ReceiveMessageCommand'
+      ) {
+        return {
+          Messages: [
+            {
+              MessageId: 'message-1',
+              ReceiptHandle: 'receipt-1',
+              Body: '{"version":1}',
+            },
+          ],
+        };
+      }
+
+      return {};
+    },
+  );
+  const queueUrl =
+    'http://localhost:4566/000000000000/notifications';
+  const adapter = createSqsAdapter({
+    client,
+    queueUrl,
+  });
+
+  const messages =
+    await adapter.receiveMessages({
+      maxNumberOfMessages: 10,
+      waitTimeSeconds: 20,
+    });
+
+  assert.equal(messages.length, 1);
+  assert.equal(
+    client.commands[0].constructor.name,
+    'ReceiveMessageCommand',
+  );
+  assert.deepEqual(
+    client.commands[0].input,
+    {
+      QueueUrl: queueUrl,
+      MaxNumberOfMessages: 10,
+      WaitTimeSeconds: 20,
+    },
+  );
+
+  await adapter.deleteMessage(
+    'receipt-1',
+  );
+
+  assert.equal(
+    client.commands[1].constructor.name,
+    'DeleteMessageCommand',
+  );
+  assert.deepEqual(
+    client.commands[1].input,
+    {
+      QueueUrl: queueUrl,
+      ReceiptHandle: 'receipt-1',
+    },
+  );
+});
+
+test('SQS delete helper rejects a missing receipt handle', () => {
+  assert.throws(
+    () => requireReceiptHandle(),
+    (error) =>
+      error.code ===
+      'INVALID_SQS_MESSAGE',
   );
 });
