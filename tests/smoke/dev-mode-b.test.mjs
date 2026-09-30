@@ -86,7 +86,7 @@ test('DEV-006 AWS client configuration accepts the canonical LocalStack endpoint
 test(
   'DEV-006 Payment Slip uses Backend-authorized pre-sign then Browser-to-LocalStack-S3 PUT with canonical key/MIME/size rules',
   {
-    todo: 'BLOCKED by current local qualification failure: Backend-issued LocalStack Payment Slip pre-signed PUT returns HTTP 400 due invalid x-amz-checksum-crc32',
+    todo: 'BLOCKED for canonical Dev smoke only: direct Payment Slip pre-signed PUT is requalified PASS on the isolated live Backend + LocalStack flow; localhost:4000 is still occupied by a non-UniStore service, so the canonical :4000 runtime path cannot be exercised here',
   },
   () => {},
 );
@@ -177,7 +177,7 @@ test('DEV-009 development mode still requires authentication on protected Organi
 test(
   'DEV-009 Dev Mode enforces tenant membership, RBAC, ownership, Campaign transitions, Payment review rules, and Pickup duplicate protection exactly as production contracts',
   {
-    todo: 'BLOCKED: current business-flow E2E reaches Payment Slip upload but cannot continue past the LocalStack pre-signed PUT checksum failure',
+    todo: 'BLOCKED for canonical Dev smoke only: the full business-flow E2E is requalified PASS 5/5 on an isolated UniStore Backend + canonical LocalStack/Worker runtime; localhost:4000 remains occupied by a non-UniStore service, so the canonical :4000 Dev path cannot be exercised here',
   },
   () => {},
 );

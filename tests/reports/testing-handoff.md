@@ -32,13 +32,14 @@ Testing declares:
 Node >=22
 ```
 
-Current harness and live qualification use:
+Current authoritative qualification uses:
 
 ```text
-Node v24.2.0
+Node v24.20.0
+/Users/mba135816/.nvm/versions/node/v24.20.0/bin/node
 ```
 
-No exact Node 22 binary is installed on this agent; Node 24.2.0 is within the declared supported range.
+This runtime is within the declared supported range. The Testing workspace default shell currently resolves `/usr/local/bin/node` as Node v20.13.0, which is unsupported for this suite and reproduces the previously observed Vitest/Vite `ERR_REQUIRE_ESM` startup failure. Supported-runtime pass/fail claims therefore use Node >=22 explicitly.
 
 ## Harness determinism
 
@@ -80,14 +81,14 @@ The 2 Contract TODOs remain the live/deployed file-boundary checks:
 
 ## Subsystem compatibility evidence
 
-Current subsystem evidence on Node v24.2.0:
+Current subsystem evidence on supported Node v24.20.0:
 
 ```text
-Backend:  282 / 282 pass
+Backend:  284 / 284 pass
 Frontend: 190 / 190 pass
 ```
 
-Frontend cross-system qualification also performs a real isolated Next.js production static build.
+Frontend cross-system qualification also performs real Vitest execution and a real isolated Next.js production static build.
 
 ## Current Backend S3 handoff
 
@@ -279,25 +280,27 @@ Current traceability requires:
 
 `fr-traceability.json` remains the canonical machine-readable current state.
 
-## Current task review
+## Current supported-runtime requalification
 
-Final diff review result:
+Current runtime-cleanup task evidence:
 
 ```text
-PASS
+Frontend cross-system: 33 / 33 pass
+Top-level run 1:      324 total / 302 pass / 0 fail / 22 todo
+Top-level run 2:      324 total / 302 pass / 0 fail / 22 todo
+Top-level run 3:      324 total / 302 pass / 0 fail / 22 todo
 ```
 
-Reviewed properties:
+All three authoritative top-level runs used Node v24.20.0 and exited 0 with no `ERR_REQUIRE_ESM`, `ENOENT`, or module-resolution failure.
 
-- task changes remain under `tests/**`
-- no test weakening was found
-- canonical traceability remains ordered/unique and JSON/Markdown-parity protected
-- live E2E result remains 5/5 PASS after the Testing URL-normalization correction
-- FR-15/AWS blockers remain visible
-- `git diff --check`, JSON parsing, and Testing `.mjs` syntax checks pass
+The previously observed 23 Frontend-evidence failures were reproduced under the Testing workspace default Node v20.13.0, which is below the declared `Node >=22` engine. They are not accepted as supported-runtime product or harness failures.
 
-Detailed review:
+Current smoke blocker descriptions were refreshed so the resolved LocalStack S3 checksum incompatibility is no longer reported as active. The canonical port-4000 collision and unavailable live AWS Learner Lab access remain visible blockers.
 
-- `reports/harness-phase-07-review-diff.md`
+Detailed current evidence:
 
-No further Testing phase is pending for this task. Commit only Testing-owned changes when requested.
+- `reports/runtime-phase-01-reproduction.md`
+- `reports/runtime-phase-02-stress-regression.md`
+- `reports/harness-phase-05-live-e2e-after-s3-fix.md`
+
+Final review for the current supported-runtime cleanup task: **PASS**. Detailed review: `reports/runtime-phase-04-review.md`.
