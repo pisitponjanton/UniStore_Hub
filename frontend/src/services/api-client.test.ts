@@ -155,6 +155,30 @@ describe("ApiClient", () => {
     await expect(client.delete("/products/p1")).resolves.toBeUndefined();
   });
 
+  it("calls the default browser fetch with the global receiver", async () => {
+    const originalFetch = globalThis.fetch;
+    const receiverAwareFetch = vi.fn(async function (this: unknown) {
+      if (this !== globalThis) {
+        throw new TypeError("Illegal invocation");
+      }
+
+      return jsonResponse({ success: true, data: { ok: true } });
+    }) as unknown as typeof fetch;
+
+    globalThis.fetch = receiverAwareFetch;
+
+    try {
+      const client = new ApiClient({
+        baseUrl: "http://localhost:4000/api/v1",
+      });
+
+      await expect(client.get("/health")).resolves.toEqual({ ok: true });
+      expect(receiverAwareFetch).toHaveBeenCalledTimes(1);
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
   it("turns network failures into a safe client error without exposing stack data", async () => {
     const fetchMock = vi
       .fn<typeof fetch>()

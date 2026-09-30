@@ -138,7 +138,9 @@ export class ApiClient {
   constructor(config: ApiClientConfig = {}) {
     this.baseUrl = config.baseUrl?.replace(/\/+$/, "");
     this.getAccessToken = config.getAccessToken;
-    this.fetchImpl = config.fetchImpl ?? fetch;
+    this.fetchImpl =
+      config.fetchImpl ??
+      ((input, init) => globalThis.fetch(input, init));
   }
 
   async request<T>(
