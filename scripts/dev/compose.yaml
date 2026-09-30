@@ -1,0 +1,23 @@
+name: unistore-hub-dev
+
+services:
+  localstack:
+    image: localstack/localstack:3.8.1
+    container_name: unistore-hub-localstack
+    ports:
+      - "127.0.0.1:4566:4566"
+    environment:
+      SERVICES: dynamodb,s3,sqs
+      AWS_DEFAULT_REGION: us-east-1
+      PERSISTENCE: "1"
+      DEBUG: "${LOCALSTACK_DEBUG:-0}"
+    volumes:
+      - "./.state/localstack:/var/lib/localstack"
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - curl -fsS http://localhost:4566/_localstack/health >/dev/null || exit 1
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 5s
