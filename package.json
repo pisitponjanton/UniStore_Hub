@@ -1,0 +1,21 @@
+{
+  "name": "unistore-hub",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Root integration command surface for UniStore Hub",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "deploy": "bash scripts/deploy-all.sh",
+    "deploy:infra": "bash scripts/deploy-infra.sh",
+    "deploy:frontend": "bash scripts/deploy-frontend.sh",
+    "destroy": "bash scripts/destroy.sh",
+    "seed:platform-admin": "npm --prefix backend run seed:platform-admin",
+    "dev:setup": "bash scripts/dev-setup.sh",
+    "dev": "bash scripts/dev.sh",
+    "dev:seed": "bash scripts/dev-seed.sh",
+    "dev:reset": "bash scripts/dev-reset.sh",
+    "dev:down": "bash scripts/dev-down.sh"
+  }
+}
