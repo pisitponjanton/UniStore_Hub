@@ -41,6 +41,16 @@ Read before implementation:
 6. `../docs/specs/infrastructure/SPEC.md`
 7. `../docs/deployment/DEPLOYMENT_SPEC.md`
 
+## Local Inspection Report
+
+After the required canonical reading above, read:
+
+```text
+infrastructure-report.md
+```
+
+when the file exists. This is the Infrastructure Agent's local inspection/handoff report for current findings and qualification context. It is gitignored and is not a canonical source of truth. Verify each finding against the current Infrastructure working tree before planning or implementing, and defer to the canonical project docs/contracts on any conflict.
+
 ## Responsibilities
 
 Implement only Infrastructure-as-Code under `infrastructure/**`, including:

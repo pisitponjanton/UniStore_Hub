@@ -43,6 +43,16 @@ Read before implementation:
 
 When a command depends on Frontend/Backend outputs, read the relevant subsystem/shared/API contract, but do not modify those files.
 
+## Local Inspection Report
+
+After the required canonical reading above, read:
+
+```text
+scripts-report.md
+```
+
+when the file exists. This is the Deployment / Tooling Agent's local inspection/handoff report for current findings and planned follow-up context. It is gitignored and is not a canonical source of truth. Verify each finding against the current scripts/tooling working tree before planning or implementing, and defer to the canonical project docs/contracts on any conflict.
+
 ## Responsibilities
 
 Implement deployment/tooling scripts under `scripts/**`, including the documented targets such as:

@@ -171,6 +171,27 @@ Subsystem directories are **read/inspect/check by default**, not general-purpose
 If the root checker finds a problem inside a subsystem, it should report the finding to the owning agent. It may edit that subsystem only when the user explicitly requests the root agent to perform the fix, or when an explicit Integration handoff authorizes a minimal cross-system compatibility fix.
 
 
+## 2.3 Verification / Agent Reports
+
+Reports are local inspection/handoff artifacts and must be read **after** the canonical documents above when they exist.
+
+Report mapping:
+
+```text
+Root / Integration Agent  -> report.md
+Frontend Agent            -> frontend/frontend-report.md
+Backend Agent             -> backend/backend-report.md
+Deployment / Tooling      -> scripts/scripts-report.md
+Testing Agent             -> tests/tests-report.md
+Infrastructure Agent      -> infrastructure/infrastructure-report.md
+```
+
+The Root / Integration Agent must also read all existing subsystem reports when coordinating a project-wide plan, reconciliation, or fix pass.
+
+These report files are intentionally gitignored working artifacts. They record current inspection evidence, findings, blockers, and handoff context, but they are **not canonical source-of-truth documents**. If a report conflicts with a canonical specification or shared contract, the canonical document wins and the conflict must be surfaced to Integration.
+
+Before acting on a report finding, verify that it still matches the current working tree; do not assume an old finding is still valid after other agents have changed their owned area.
+
 ## 3. Source of Truth Hierarchy
 
 If implementation intent conflicts, use this order:

@@ -42,6 +42,16 @@ Read before implementation:
 
 Read `../docs/architecture/AWS_ARCHITECTURE.md` only when working on API connectivity, Pre-signed URL flow, or deployment-sensitive behavior.
 
+## Local Inspection Report
+
+After the required canonical reading above, read:
+
+```text
+frontend-report.md
+```
+
+when the file exists. This is the Frontend Agent's local inspection/handoff report for current findings and planned follow-up context. It is gitignored and is not a canonical source of truth. Verify each finding against the current Frontend working tree before planning or implementing, and defer to the canonical project docs/contracts on any conflict.
+
 ## UI / UX Skill
 
 The Frontend Agent uses the vendored prompt-only skill:

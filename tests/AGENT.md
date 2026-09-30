@@ -44,6 +44,16 @@ Read before implementation:
 
 Read subsystem specs as needed to verify their behavior.
 
+## Local Inspection Report
+
+After the required canonical reading above, read:
+
+```text
+tests-report.md
+```
+
+when the file exists. This is the Testing Agent's local inspection/handoff report for current findings, blockers, stale-test evidence, and planned follow-up context. It is gitignored and is not a canonical source of truth. Verify each finding against the current test tree and implementation evidence before planning or changing tests, and defer to canonical contracts/specs on any conflict.
+
 ## Responsibilities
 
 Own cross-system verification under `tests/**`, including:

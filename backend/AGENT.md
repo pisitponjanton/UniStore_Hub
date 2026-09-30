@@ -41,6 +41,16 @@ Read before implementation:
 6. `../docs/specs/backend/SPEC.md`
 7. `../docs/architecture/AWS_ARCHITECTURE.md`
 
+## Local Inspection Report
+
+After the required canonical reading above, read:
+
+```text
+backend-report.md
+```
+
+when the file exists. This is the Backend Agent's local inspection/handoff report for current findings and planned follow-up context. It is gitignored and is not a canonical source of truth. Verify each finding against the current Backend working tree before planning or implementing, and defer to the canonical project docs/contracts on any conflict.
+
 ## Responsibilities
 
 Implement the Backend contract under `backend/**`, including:
