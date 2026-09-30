@@ -1,0 +1,163 @@
+.page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 520px);
+  background: var(--canvas);
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--space-12);
+  padding: clamp(32px, 6vw, 80px);
+  background: var(--surface-muted);
+  border-right: 1px solid var(--line-soft);
+}
+
+.brand {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--ink);
+  font-weight: 600;
+  font-size: var(--text-title-sm);
+}
+
+.brandMark {
+  width: 12px;
+  height: 28px;
+  border-radius: 3px;
+  background: var(--campus);
+}
+
+.introCopy {
+  max-width: 620px;
+  display: grid;
+  gap: var(--space-5);
+}
+
+.eyebrow {
+  color: var(--campus);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.introTitle {
+  max-width: 700px;
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  line-height: 1.12;
+}
+
+.introDescription {
+  max-width: 560px;
+  font-size: var(--text-body-lg);
+  color: var(--ink-secondary);
+}
+
+.introMeta {
+  color: var(--ink-tertiary);
+  font-size: var(--text-caption);
+}
+
+.panel {
+  min-width: 0;
+  display: grid;
+  place-items: center;
+  padding: clamp(24px, 5vw, 64px);
+  background: var(--surface);
+}
+
+.formShell {
+  width: min(100%, 420px);
+  display: grid;
+  gap: var(--space-6);
+}
+
+.headingGroup {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.title {
+  font-size: var(--text-heading);
+}
+
+.description {
+  color: var(--ink-secondary);
+}
+
+.form {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.formActions {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.formActions button {
+  width: 100%;
+}
+
+.serverError {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
+  border-radius: var(--radius-md);
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-size: var(--text-body);
+}
+
+.switchText {
+  color: var(--ink-secondary);
+  font-size: var(--text-body);
+  text-align: center;
+}
+
+.switchLink,
+.backLink {
+  color: var(--campus);
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--campus) 35%, transparent);
+  text-underline-offset: 3px;
+}
+
+.backLink {
+  width: fit-content;
+  font-size: var(--text-body);
+}
+
+@media (max-width: 840px) {
+  .page {
+    grid-template-columns: 1fr;
+  }
+
+  .intro {
+    padding: var(--space-8) var(--space-5);
+    border-right: 0;
+    border-bottom: 1px solid var(--line-soft);
+  }
+
+  .introCopy {
+    gap: var(--space-3);
+  }
+
+  .introTitle {
+    font-size: 1.75rem;
+  }
+
+  .introMeta {
+    display: none;
+  }
+
+  .panel {
+    place-items: start center;
+    padding: var(--space-8) var(--space-4) var(--space-12);
+  }
+}

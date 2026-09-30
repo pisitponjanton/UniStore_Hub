@@ -1,0 +1,185 @@
+.page {
+  min-height: 100vh;
+  background: var(--canvas);
+}
+
+.main {
+  width: min(100%, var(--content-max));
+  margin-inline: auto;
+  padding: var(--space-8) var(--space-6) var(--space-16);
+  display: grid;
+  gap: var(--space-6);
+}
+
+.stateWrap {
+  width: min(100%, 860px);
+  margin-inline: auto;
+  padding: var(--space-12) var(--space-6);
+}
+
+.header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--space-5);
+  padding-bottom: var(--space-5);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.headerCopy {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.eyebrow {
+  color: var(--campus);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.title {
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1.1;
+}
+
+.description {
+  max-width: 760px;
+  color: var(--ink-secondary);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(300px, 0.7fr);
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.panel {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.form {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.sectionTitle {
+  font-size: var(--text-title-sm);
+}
+
+.memberList {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.memberCard {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.memberHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.memberIdentity {
+  min-width: 0;
+  display: grid;
+  gap: var(--space-1);
+}
+
+.memberName {
+  font-size: var(--text-title-sm);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.memberEmail,
+.meta {
+  color: var(--ink-tertiary);
+  font-size: var(--text-caption);
+  overflow-wrap: anywhere;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.memberActions {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) auto auto;
+  gap: var(--space-3);
+  align-items: end;
+}
+
+.inlineError {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.notice {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.finalAdmin {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--warning-soft);
+  color: var(--warning);
+  font-size: var(--text-caption);
+}
+
+@media (max-width: 960px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .header,
+  .memberHeader {
+    display: grid;
+    align-items: start;
+  }
+
+  .memberActions {
+    grid-template-columns: 1fr;
+  }
+
+  .memberActions button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 620px) {
+  .main,
+  .stateWrap {
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
+  }
+
+  .panel,
+  .memberCard {
+    padding: var(--space-4);
+  }
+}

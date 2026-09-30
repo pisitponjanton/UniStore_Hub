@@ -1,0 +1,260 @@
+.page {
+  min-height: 100vh;
+  background: var(--canvas);
+}
+
+.main {
+  width: min(100%, var(--content-max));
+  margin-inline: auto;
+  padding: var(--space-8) var(--space-6) var(--space-16);
+  display: grid;
+  gap: var(--space-6);
+}
+
+.stateWrap {
+  width: min(100%, 860px);
+  margin-inline: auto;
+  padding: var(--space-12) var(--space-6);
+}
+
+.header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--space-5);
+  padding-bottom: var(--space-5);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.headerCopy,
+.section,
+.cardCopy,
+.detailCopy,
+.metaItem {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.eyebrow {
+  color: var(--campus);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.title {
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1.1;
+}
+
+.description {
+  max-width: 780px;
+  color: var(--ink-secondary);
+}
+
+.filterPanel {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(160px, 1fr));
+  gap: var(--space-3);
+  align-items: end;
+}
+
+.filterActions,
+.cardActions,
+.detailActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(340px, 0.85fr);
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.list {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.card,
+.detailPanel,
+.orderPanel {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.card {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.cardTitle,
+.detailTitle {
+  color: var(--ink);
+  font-size: var(--text-title-sm);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.metaGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.metaLabel {
+  color: var(--ink-tertiary);
+  font-size: var(--text-caption);
+}
+
+.metaValue,
+.token {
+  color: var(--ink);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.token {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.cardAside {
+  display: grid;
+  justify-items: end;
+  align-content: space-between;
+  gap: var(--space-4);
+}
+
+.detailPanel {
+  position: sticky;
+  top: var(--space-4);
+}
+
+.detailHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+.orderSummary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.receivedBox,
+.infoBox,
+.errorBox,
+.notice {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+}
+
+.receivedBox,
+.notice {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.infoBox {
+  background: var(--info-soft);
+  color: var(--info);
+}
+
+.errorBox {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.loadMore {
+  display: flex;
+  justify-content: center;
+}
+
+.emptyDetail {
+  padding: var(--space-6);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-lg);
+  color: var(--ink-secondary);
+  background: var(--surface);
+}
+
+@media (max-width: 1040px) {
+  .filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .detailPanel {
+    position: static;
+  }
+}
+
+@media (max-width: 720px) {
+  .header,
+  .detailHeader {
+    display: grid;
+  }
+
+  .filters,
+  .metaGrid,
+  .orderSummary {
+    grid-template-columns: 1fr;
+  }
+
+  .card {
+    grid-template-columns: 1fr;
+  }
+
+  .cardAside {
+    justify-items: start;
+  }
+}
+
+@media (max-width: 620px) {
+  .main,
+  .stateWrap {
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
+  }
+
+  .filterPanel,
+  .card,
+  .detailPanel,
+  .orderPanel {
+    padding: var(--space-4);
+  }
+
+  .filterActions,
+  .cardActions,
+  .detailActions {
+    display: grid;
+  }
+
+  .filterActions button,
+  .cardActions button,
+  .detailActions button {
+    width: 100%;
+  }
+}

@@ -1,0 +1,317 @@
+.page {
+  min-height: 100vh;
+  background: var(--canvas);
+}
+
+.main {
+  width: min(100%, var(--content-max));
+  margin-inline: auto;
+  padding: var(--space-8) var(--space-6) var(--space-16);
+  display: grid;
+  gap: var(--space-6);
+}
+
+.stateWrap {
+  width: min(100%, 860px);
+  margin-inline: auto;
+  padding: var(--space-12) var(--space-6);
+}
+
+.header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--space-5);
+  padding-bottom: var(--space-5);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.headerCopy,
+.section,
+.cardCopy,
+.detailCopy,
+.metaItem {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.eyebrow {
+  color: var(--campus);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.title {
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1.1;
+}
+
+.description {
+  max-width: 780px;
+  color: var(--ink-secondary);
+}
+
+.filterPanel {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.filters {
+  display: grid;
+  grid-template-columns:
+    minmax(190px, 1fr)
+    minmax(190px, 1fr)
+    minmax(200px, 1fr);
+  gap: var(--space-3);
+  align-items: end;
+}
+
+.filterActions,
+.cardActions,
+.reviewActions,
+.downloadActions,
+.dialogActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(330px, 0.85fr);
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.section {
+  gap: var(--space-4);
+}
+
+.sectionTitle {
+  font-size: var(--text-title-sm);
+}
+
+.list {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.card,
+.detailPanel,
+.orderPanel {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.card {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+}
+
+.cardTitle,
+.detailTitle {
+  color: var(--ink);
+  font-size: var(--text-title-sm);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.metaGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.metaLabel {
+  color: var(--ink-tertiary);
+  font-size: var(--text-caption);
+}
+
+.metaValue {
+  color: var(--ink);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.cardAside {
+  display: grid;
+  justify-items: end;
+  gap: var(--space-4);
+}
+
+.detailPanel {
+  position: sticky;
+  top: var(--space-4);
+}
+
+.detailHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.detailCode {
+  color: var(--ink-tertiary);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: var(--text-caption);
+  overflow-wrap: anywhere;
+}
+
+.orderSummary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.amount {
+  font-size: var(--text-title-sm);
+  font-weight: 700;
+}
+
+.reviewedBox,
+.rejectBox,
+.downloadBox,
+.infoBox {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--surface-muted);
+}
+
+.rejectBox {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.downloadBox {
+  background: var(--info-soft);
+  color: var(--info);
+}
+
+.temporaryLink {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 var(--space-4);
+  border: 1px solid currentColor;
+  border-radius: var(--radius-md);
+  color: inherit;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.temporaryLink:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.inlineError {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.notice {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.loadMore {
+  display: flex;
+  justify-content: center;
+  padding-top: var(--space-2);
+}
+
+.emptyDetail {
+  padding: var(--space-6);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-lg);
+  color: var(--ink-secondary);
+  background: var(--surface);
+}
+
+.dialogBody {
+  display: grid;
+  gap: var(--space-4);
+}
+
+@media (max-width: 980px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .detailPanel {
+    position: static;
+  }
+}
+
+@media (max-width: 760px) {
+  .header,
+  .detailHeader {
+    display: grid;
+    align-items: start;
+  }
+
+  .filters,
+  .metaGrid,
+  .orderSummary {
+    grid-template-columns: 1fr;
+  }
+
+  .card {
+    grid-template-columns: 1fr;
+  }
+
+  .cardAside {
+    justify-items: start;
+  }
+}
+
+@media (max-width: 620px) {
+  .main,
+  .stateWrap {
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
+  }
+
+  .filterPanel,
+  .card,
+  .detailPanel,
+  .orderPanel {
+    padding: var(--space-4);
+  }
+
+  .filterActions,
+  .cardActions,
+  .reviewActions,
+  .downloadActions,
+  .dialogActions {
+    display: grid;
+  }
+
+  .filterActions button,
+  .cardActions button,
+  .reviewActions button,
+  .downloadActions button,
+  .dialogActions button,
+  .temporaryLink {
+    width: 100%;
+  }
+}

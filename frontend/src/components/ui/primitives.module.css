@@ -1,0 +1,556 @@
+.button {
+  min-height: var(--control-height);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  padding: 0 var(--space-4);
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background-color var(--motion-fast) var(--motion-ease-out),
+    border-color var(--motion-fast) var(--motion-ease-out),
+    color var(--motion-fast) var(--motion-ease-out),
+    transform var(--motion-fast) var(--motion-ease-out);
+}
+
+.button:hover:not(:disabled) {
+  text-decoration: none;
+}
+
+.button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.buttonPrimary {
+  background: var(--campus);
+  color: var(--ink-inverse);
+}
+
+.buttonPrimary:hover:not(:disabled) {
+  background: var(--campus-hover);
+}
+
+.buttonSecondary {
+  background: var(--surface);
+  color: var(--ink);
+  border-color: var(--line);
+}
+
+.buttonSecondary:hover:not(:disabled) {
+  background: var(--surface-muted);
+  border-color: var(--line-strong);
+}
+
+.buttonQuiet {
+  background: transparent;
+  color: var(--ink-secondary);
+}
+
+.buttonQuiet:hover:not(:disabled) {
+  background: var(--surface-muted);
+  color: var(--ink);
+}
+
+.buttonDanger {
+  background: var(--danger);
+  color: var(--ink-inverse);
+}
+
+.buttonDanger:hover:not(:disabled) {
+  filter: brightness(0.94);
+}
+
+.buttonSmall {
+  min-height: 36px;
+  padding-inline: var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-caption);
+}
+
+.buttonLarge {
+  min-height: var(--control-height-lg);
+  padding-inline: var(--space-5);
+  font-size: var(--text-body-lg);
+}
+
+.buttonSpinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 650ms linear infinite;
+}
+
+.field {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.fieldLabel {
+  color: var(--ink-secondary);
+  font-size: var(--text-body);
+  font-weight: 500;
+}
+
+.fieldRequired {
+  color: var(--danger);
+}
+
+.fieldControl {
+  width: 100%;
+  min-height: var(--control-height-lg);
+  border-radius: var(--radius-md);
+  padding: 0 var(--space-3);
+  transition:
+    border-color var(--motion-fast) var(--motion-ease-out),
+    background-color var(--motion-fast) var(--motion-ease-out);
+}
+
+.fieldControl:hover:not(:disabled) {
+  border-color: var(--line-strong);
+}
+
+.fieldControl:disabled {
+  cursor: not-allowed;
+  color: var(--ink-muted);
+  background: var(--surface-muted);
+}
+
+.textarea {
+  min-height: 112px;
+  resize: vertical;
+  padding-block: var(--space-3);
+  line-height: var(--leading-normal);
+}
+
+.fieldHint {
+  color: var(--ink-tertiary);
+  font-size: var(--text-caption);
+}
+
+.fieldError {
+  color: var(--danger);
+  font-size: var(--text-caption);
+  font-weight: 500;
+}
+
+.fieldInvalid {
+  border-color: var(--danger);
+}
+
+.badge {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 24px;
+  border-radius: 999px;
+  padding: 2px 9px;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.badgeNeutral {
+  background: var(--surface-muted);
+  color: var(--ink-secondary);
+}
+
+.badgeInfo {
+  background: var(--info-soft);
+  color: var(--info);
+}
+
+.badgeSuccess {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.badgeWarning {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.badgeDanger {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.badgeDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-lg);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-5) var(--space-3);
+}
+
+.cardTitle {
+  font-size: var(--text-title-sm);
+}
+
+.cardDescription {
+  margin-top: var(--space-1);
+  color: var(--ink-tertiary);
+  font-size: var(--text-body);
+}
+
+.cardBody {
+  padding: var(--space-4) var(--space-5) var(--space-5);
+}
+
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-5) var(--space-5);
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(9, 16, 18, 0.42);
+  backdrop-filter: blur(2px);
+  animation: fadeIn var(--motion-standard) var(--motion-ease-out);
+}
+
+.dialogContent {
+  position: fixed;
+  z-index: 51;
+  top: 50%;
+  left: 50%;
+  width: min(calc(100vw - 32px), 520px);
+  max-height: min(86dvh, 720px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  transform: translate(-50%, -50%);
+  background: var(--surface-raised);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  animation: dialogIn var(--motion-standard) var(--motion-ease-out);
+}
+
+.dialogHeader {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.dialogTitle {
+  font-size: var(--text-title);
+}
+
+.dialogDescription {
+  color: var(--ink-secondary);
+}
+
+.dialogBody {
+  margin-top: var(--space-5);
+}
+
+.dialogFooter {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+
+.dialogClose {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  width: 40px;
+  height: 40px;
+  display: inline-grid;
+  place-items: center;
+  border: 0;
+  border-radius: var(--radius-md);
+  color: var(--ink-secondary);
+  background: transparent;
+  cursor: pointer;
+}
+
+.dialogClose:hover:not(:disabled) {
+  background: var(--surface-muted);
+  color: var(--ink);
+}
+
+.dialogClose:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.dialogCloseSymbol {
+  width: 18px;
+  height: 18px;
+  position: relative;
+}
+
+.dialogCloseSymbol::before,
+.dialogCloseSymbol::after {
+  content: "";
+  position: absolute;
+  top: 8px;
+  left: 1px;
+  width: 16px;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.dialogCloseSymbol::before {
+  transform: rotate(45deg);
+}
+
+.dialogCloseSymbol::after {
+  transform: rotate(-45deg);
+}
+
+.tableFrame {
+  width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-gutter: stable;
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-lg);
+}
+
+.table {
+  width: 100%;
+  min-width: 640px;
+  text-align: left;
+}
+
+.tableCaption {
+  padding: var(--space-4) var(--space-5);
+  color: var(--ink-secondary);
+  font-size: var(--text-body);
+  text-align: left;
+}
+
+.tableHead {
+  background: var(--surface-muted);
+  color: var(--ink-tertiary);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.tableHeaderCell,
+.tableCell {
+  padding: 12px var(--space-4);
+  border-bottom: 1px solid var(--line-soft);
+  vertical-align: middle;
+}
+
+.tableHeaderCell {
+  white-space: nowrap;
+}
+
+.tableBodyRow:last-child .tableCell {
+  border-bottom: 0;
+}
+
+.tableBodyRow:hover {
+  background: var(--surface-raised);
+}
+
+.statePanel {
+  min-height: 168px;
+  display: grid;
+  place-items: center;
+  padding: var(--space-8) var(--space-5);
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-lg);
+  text-align: center;
+}
+
+.stateContent {
+  max-width: 480px;
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+}
+
+.stateEyebrow {
+  color: var(--ink-tertiary);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.stateTitle {
+  font-size: var(--text-title-sm);
+}
+
+.stateDescription {
+  color: var(--ink-secondary);
+}
+
+.stateActions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-1);
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--line-strong);
+  border-right-color: var(--campus);
+  border-radius: 50%;
+  animation: spin 700ms linear infinite;
+}
+
+.pageShell {
+  width: min(100%, var(--content-max));
+  margin-inline: auto;
+  padding: var(--space-8) var(--space-6) var(--space-12);
+}
+
+.pageHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-6);
+  margin-bottom: var(--space-8);
+}
+
+.pageHeadingGroup {
+  min-width: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.pageEyebrow {
+  color: var(--campus);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.pageTitleRow {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.ledgerMarker {
+  flex: 0 0 auto;
+  width: 4px;
+  height: 28px;
+  margin-top: 2px;
+  border-radius: 999px;
+  background: var(--campus);
+}
+
+.pageTitle {
+  font-size: var(--text-heading);
+}
+
+.pageDescription {
+  max-width: 720px;
+  color: var(--ink-secondary);
+  font-size: var(--text-body-lg);
+}
+
+.pageMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  color: var(--ink-tertiary);
+  font-size: var(--text-caption);
+}
+
+.pageActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.stack {
+  display: grid;
+  gap: var(--space-6);
+}
+
+@media (max-width: 720px) {
+  .pageShell {
+    padding: var(--space-6) var(--space-4) var(--space-10);
+  }
+
+  .pageHeader {
+    display: grid;
+    gap: var(--space-5);
+    margin-bottom: var(--space-6);
+  }
+
+  .pageActions {
+    justify-content: stretch;
+  }
+
+  .pageActions > * {
+    flex: 1 1 auto;
+  }
+
+  .dialogContent {
+    padding: var(--space-5);
+  }
+
+  .dialogFooter {
+    display: grid;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes dialogIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 8px)) scale(0.98);
+  }
+}

@@ -1,0 +1,193 @@
+.page {
+  min-height: 100vh;
+  background: var(--canvas);
+}
+
+.main {
+  width: min(100%, var(--content-max));
+  margin-inline: auto;
+  padding: var(--space-8) var(--space-6) var(--space-16);
+  display: grid;
+  gap: var(--space-6);
+}
+
+.stateWrap {
+  width: min(100%, 860px);
+  margin-inline: auto;
+  padding: var(--space-12) var(--space-6);
+}
+
+.header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--space-5);
+  padding-bottom: var(--space-5);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.headerCopy {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.eyebrow {
+  color: var(--campus);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.title {
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1.1;
+}
+
+.description {
+  color: var(--ink-secondary);
+  max-width: 720px;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.filterButton {
+  min-height: 40px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--ink-secondary);
+  font: inherit;
+  cursor: pointer;
+}
+
+.filterButton:hover {
+  border-color: var(--line-strong);
+  color: var(--ink);
+}
+
+.filterButtonActive {
+  border-color: var(--campus);
+  background: var(--info-soft);
+  color: var(--campus);
+  font-weight: 600;
+}
+
+.list {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.cardUnread {
+  border-color: var(--campus);
+}
+
+.content {
+  min-width: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.topline {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.unreadMarker {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--campus);
+  font-size: var(--text-caption);
+  font-weight: 600;
+}
+
+.unreadMarker::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--campus);
+}
+
+.cardTitle {
+  color: var(--ink);
+  font-size: var(--text-title-sm);
+  font-weight: 600;
+}
+
+.message {
+  color: var(--ink-secondary);
+}
+
+.meta {
+  color: var(--ink-tertiary);
+  font-size: var(--text-caption);
+}
+
+.actions {
+  display: flex;
+  align-items: start;
+  justify-content: flex-end;
+}
+
+.loadMore {
+  display: flex;
+  justify-content: center;
+  padding-top: var(--space-2);
+}
+
+.inlineError {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+@media (max-width: 720px) {
+  .header {
+    display: grid;
+    align-items: start;
+  }
+
+  .card {
+    grid-template-columns: 1fr;
+  }
+
+  .actions {
+    justify-content: stretch;
+  }
+
+  .actions button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 620px) {
+  .main,
+  .stateWrap {
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
+  }
+
+  .card {
+    padding: var(--space-4);
+  }
+}
