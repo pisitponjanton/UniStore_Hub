@@ -4,9 +4,11 @@ import {
   access,
   cp,
   mkdir,
+  mkdtemp,
   readFile,
   rm,
   symlink,
+  writeFile,
 } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -16,7 +18,12 @@ const execFileAsync = promisify(execFile);
 const here = path.dirname(fileURLToPath(import.meta.url));
 export const frontendRoot = path.resolve(here, '../../frontend');
 const testsRoot = path.resolve(here, '..');
-const vitestBin = path.join(frontendRoot, 'node_modules', 'vitest', 'vitest.mjs');
+const vitestBin = path.join(
+  frontendRoot,
+  'node_modules',
+  'vitest',
+  'vitest.mjs',
+);
 const nextBin = path.join(
   frontendRoot,
   'node_modules',
@@ -27,7 +34,82 @@ const nextBin = path.join(
 );
 
 const suiteCache = new Map();
+const frontendHarnessLockDir = path.join(
+  testsRoot,
+  '.tmp',
+  'frontend-harness.lock',
+);
 let buildPromise;
+
+async function sleep(ms) {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isProcessAlive(pid) {
+  if (!Number.isInteger(pid) || pid <= 0) return false;
+
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (error) {
+    if (error?.code === 'ESRCH') return false;
+    return true;
+  }
+}
+
+async function lockOwnerIsAlive() {
+  try {
+    const owner = JSON.parse(
+      await readFile(path.join(frontendHarnessLockDir, 'owner.json'), 'utf8'),
+    );
+    return isProcessAlive(owner.pid);
+  } catch {
+    // A contender can observe the directory between mkdir() and owner.json.
+    // Treat an unreadable owner as live and wait rather than deleting a lock
+    // that may have just been acquired by another test process.
+    return true;
+  }
+}
+
+async function withFrontendHarnessLock(run, { timeoutMs = 90000 } = {}) {
+  await mkdir(path.dirname(frontendHarnessLockDir), { recursive: true });
+
+  const deadline = Date.now() + timeoutMs;
+  while (true) {
+    try {
+      await mkdir(frontendHarnessLockDir);
+      await writeFile(
+        path.join(frontendHarnessLockDir, 'owner.json'),
+        JSON.stringify({
+          pid: process.pid,
+          startedAt: new Date().toISOString(),
+        }),
+        'utf8',
+      );
+      break;
+    } catch (error) {
+      if (error?.code !== 'EEXIST') throw error;
+
+      if (!(await lockOwnerIsAlive())) {
+        await rm(frontendHarnessLockDir, { recursive: true, force: true });
+        continue;
+      }
+
+      if (Date.now() >= deadline) {
+        assert.fail(
+          `Timed out waiting for isolated Frontend harness lock: ${frontendHarnessLockDir}`,
+        );
+      }
+      await sleep(50);
+    }
+  }
+
+  try {
+    return await run();
+  } finally {
+    await rm(frontendHarnessLockDir, { recursive: true, force: true });
+  }
+}
 
 function childEnv() {
   const env = {
@@ -38,28 +120,56 @@ function childEnv() {
   return env;
 }
 
-async function runFrontendSuite(suiteFile) {
-  if (!suiteCache.has(suiteFile)) {
-    suiteCache.set(
-      suiteFile,
-      execFileAsync(
-        process.execPath,
-        [vitestBin, 'run', suiteFile, '--reporter=verbose'],
-        {
-          cwd: frontendRoot,
-          env: childEnv(),
-          maxBuffer: 16 * 1024 * 1024,
-        },
-      ).then(({ stdout = '', stderr = '' }) => `${stdout}\n${stderr}`),
+function startFrontendSuiteBatch(suiteFiles) {
+  const files = [...new Set(suiteFiles)].sort();
+  if (files.length === 0) {
+    return Promise.resolve('');
+  }
+
+  const batchPromise = withFrontendHarnessLock(async () => {
+    const { stdout = '', stderr = '' } = await execFileAsync(
+      process.execPath,
+      [
+        vitestBin,
+        'run',
+        ...files,
+        '--reporter=verbose',
+        '--no-cache',
+      ],
+      {
+        cwd: frontendRoot,
+        env: childEnv(),
+        maxBuffer: 32 * 1024 * 1024,
+      },
     );
+
+    return `${stdout}\n${stderr}`;
+  });
+
+  for (const file of files) {
+    suiteCache.set(file, batchPromise);
+  }
+
+  return batchPromise;
+}
+
+async function runFrontendSuites(suiteFiles) {
+  const files = [...new Set(suiteFiles)];
+  const missing = files.filter((file) => !suiteCache.has(file));
+
+  if (missing.length > 0) {
+    startFrontendSuiteBatch(missing);
   }
 
   try {
-    return await suiteCache.get(suiteFile);
+    const outputs = await Promise.all(
+      files.map((file) => suiteCache.get(file)),
+    );
+    return [...new Set(outputs)].join('\n');
   } catch (error) {
     const output = `${error.stdout || ''}\n${error.stderr || ''}`;
     assert.fail(
-      `Owning Frontend evidence suite ${suiteFile} failed under ${process.version}.\n${output}`,
+      `Owning Frontend evidence suites ${files.join(', ')} failed under ${process.version}.\n${output}`,
     );
   }
 }
@@ -69,10 +179,12 @@ export async function assertFrontendSuiteEvidence(
   expectedPatterns = [],
 ) {
   const files = Array.isArray(suiteFiles) ? suiteFiles : [suiteFiles];
-  assert.ok(files.length > 0, 'At least one Frontend evidence suite is required');
+  assert.ok(
+    files.length > 0,
+    'At least one Frontend evidence suite is required',
+  );
 
-  const outputs = await Promise.all(files.map((file) => runFrontendSuite(file)));
-  const combined = outputs.join('\n');
+  const combined = await runFrontendSuites(files);
 
   for (const pattern of expectedPatterns) {
     if (pattern instanceof RegExp) {
@@ -119,9 +231,15 @@ export async function assertFrontendSourceEvidence(
 export async function assertFrontendBuildEvidence() {
   if (!buildPromise) {
     buildPromise = (async () => {
-      const tempRoot = path.join(testsRoot, '.tmp', 'frontend-static-build');
-      await rm(tempRoot, { recursive: true, force: true });
-      await mkdir(path.dirname(tempRoot), { recursive: true });
+      const tempParent = path.join(
+        testsRoot,
+        '.tmp',
+        'frontend-static-builds',
+      );
+      await mkdir(tempParent, { recursive: true });
+      const tempRoot = await mkdtemp(
+        path.join(tempParent, `${process.pid}-`),
+      );
 
       await cp(frontendRoot, tempRoot, {
         recursive: true,
@@ -162,7 +280,7 @@ export async function assertFrontendBuildEvidence() {
       } catch (error) {
         const output = `${error.stdout || ''}\n${error.stderr || ''}`;
         assert.fail(
-          `Frontend production static build failed in Testing-owned temp copy under ${process.version}.\n${output}`,
+          `Frontend production static build failed in isolated Testing-owned temp copy under ${process.version}.\n${output}`,
         );
       }
     })();
