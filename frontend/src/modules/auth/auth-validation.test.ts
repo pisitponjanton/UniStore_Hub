@@ -6,7 +6,11 @@ import {
   validateName,
   validatePassword,
 } from "./auth-validation";
-import { sanitizeAuthReturnPath } from "./return-route";
+import {
+  buildAuthPagePath,
+  getAuthNavigationContext,
+  sanitizeAuthReturnPath,
+} from "./return-route";
 
 describe("auth validation", () => {
   it("normalizes email according to the API baseline", () => {
@@ -38,5 +42,35 @@ describe("auth return route", () => {
     expect(sanitizeAuthReturnPath("https://example.com")).toBe("/");
     expect(sanitizeAuthReturnPath("//example.com/path")).toBe("/");
     expect(sanitizeAuthReturnPath("/\\example.com")).toBe("/");
+  });
+
+  it("preserves a safe return path when switching auth screens", () => {
+    expect(
+      buildAuthPagePath("/register/", "/products/view/?productId=product-1"),
+    ).toBe(
+      "/register/?returnTo=%2Fproducts%2Fview%2F%3FproductId%3Dproduct-1",
+    );
+
+    expect(buildAuthPagePath("/login/", "https://example.com")).toBe(
+      "/login/",
+    );
+  });
+
+  it("describes whether an auth page has a useful return context", () => {
+    expect(
+      getAuthNavigationContext(
+        "?returnTo=%2Fmy%2Forders%2F%3FcampaignId%3Dcampaign-1",
+      ),
+    ).toMatchObject({
+      returnPath: "/my/orders/?campaignId=campaign-1",
+      hasReturnContext: true,
+    });
+
+    expect(getAuthNavigationContext("?returnTo=https://example.com")).toEqual({
+      returnPath: "/",
+      hasReturnContext: false,
+      loginHref: "/login/",
+      registerHref: "/register/",
+    });
   });
 });

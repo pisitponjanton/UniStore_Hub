@@ -76,10 +76,10 @@ describe("DashboardView", () => {
 
     await screen.findByText("฿25,000.00");
 
-    fireEvent.change(screen.getByLabelText("Campaign ID"), {
+    fireEvent.change(screen.getByLabelText("รหัสแคมเปญ"), {
       target: { value: "  campaign-1  " },
     });
-    fireEvent.change(screen.getByLabelText("Store ID"), {
+    fireEvent.change(screen.getByLabelText("รหัสร้านค้า"), {
       target: { value: "  store-1  " },
     });
 
@@ -97,11 +97,7 @@ describe("DashboardView", () => {
       );
     });
 
-    expect(
-      screen.getByText(/Store store-1/),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(/Campaign campaign-1/),
-    ).toBeInTheDocument();
+    expect(screen.getByText("ร้านค้า: store-1")).toBeInTheDocument();
+    expect(screen.getByText("แคมเปญ: campaign-1")).toBeInTheDocument();
   });
 });

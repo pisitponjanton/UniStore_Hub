@@ -4,75 +4,163 @@
 }
 
 .main {
-  width: min(100%, 900px);
+  width: min(100%, var(--content-narrow));
   margin-inline: auto;
-  padding: var(--space-8) var(--space-6) var(--space-16);
+  padding: var(--page-block-start) var(--page-gutter) var(--page-block-end);
   display: grid;
   gap: var(--space-6);
 }
 
 .stateWrap {
-  width: min(100%, 860px);
+  width: min(100%, var(--content-narrow));
   margin-inline: auto;
-  padding: var(--space-12) var(--space-6);
+  padding: var(--space-12) var(--page-gutter);
 }
 
 .backLink {
   width: fit-content;
+  min-height: var(--control-height);
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
+  padding-inline: var(--space-3);
+  margin-left: calc(var(--space-3) * -1);
+  border-radius: var(--radius-md);
   color: var(--campus);
   font-weight: 500;
 }
 
 .backLink::before {
   content: "←";
+  margin-right: var(--space-2);
+}
+
+.backLink:hover {
+  background: var(--campus-soft);
 }
 
 .header {
-  display: grid;
-  gap: var(--space-3);
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--space-5);
   padding-bottom: var(--space-5);
   border-bottom: 1px solid var(--line-soft);
 }
 
-.eyebrow {
-  color: var(--campus);
-  font-size: var(--text-caption);
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+.header > div {
+  min-width: 0;
+  display: grid;
+  gap: var(--space-2);
 }
 
 .title {
-  font-size: clamp(2rem, 4vw, 3rem);
-  line-height: 1.1;
+  font-size: var(--text-heading);
+  line-height: 1.2;
+  text-wrap: balance;
 }
 
 .description {
+  max-width: 620px;
   color: var(--ink-secondary);
+  text-wrap: pretty;
 }
 
-.panel {
+.orderCode {
+  color: var(--ink-tertiary);
+  font-family: var(--font-technical);
+  font-size: var(--text-caption);
+  overflow-wrap: anywhere;
+}
+
+.pickupCredential {
   display: grid;
   gap: var(--space-5);
-  padding: var(--space-6);
+  padding: var(--space-5);
   border: 1px solid var(--line-soft);
   border-radius: var(--radius-lg);
   background: var(--surface);
 }
 
-.statusRow {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-4);
+.pickupCredentialReceived {
+  background: var(--surface-muted);
 }
 
-.meta {
+.credentialHeading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.credentialHeading > div {
   display: grid;
   gap: var(--space-1);
+}
+
+.stepLabel {
+  color: var(--campus);
+  font-size: var(--text-caption);
+  font-weight: 600;
+}
+
+.sectionTitle {
+  font-size: var(--text-title-sm);
+}
+
+.credentialHint {
+  color: var(--ink-tertiary);
+  font-size: var(--text-caption);
+}
+
+.qrTokenGrid {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.8fr) minmax(0, 1fr);
+  gap: var(--space-6);
+  align-items: center;
+}
+
+.qrColumn,
+.tokenColumn {
+  min-width: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.qrColumn {
+  justify-items: center;
+}
+
+.qrColumn > .metaLabel {
+  width: 100%;
+  text-align: center;
+}
+
+.qrImage,
+.qrLoading {
+  width: min(280px, 100%);
+  aspect-ratio: 1;
+  border-radius: var(--radius-md);
+  background: var(--media-paper);
+  box-shadow: inset 0 0 0 1px var(--media-paper-line);
+}
+
+.qrImage {
+  display: block;
+}
+
+.qrLoading {
+  display: grid;
+  place-items: center;
+  padding: var(--space-5);
+  color: var(--ink-tertiary);
+  font-size: var(--text-body-sm);
+  text-align: center;
+}
+
+.tokenColumn {
+  align-content: center;
 }
 
 .metaLabel {
@@ -83,88 +171,104 @@
 .metaValue {
   color: var(--ink);
   font-weight: 600;
+  font-variant-numeric: tabular-nums;
   overflow-wrap: anywhere;
 }
 
-.qrWrap {
-  display: grid;
-  justify-items: center;
-  gap: var(--space-4);
-  padding: var(--space-5);
-  border-radius: var(--radius-lg);
-  background: var(--surface-muted);
-}
-
-.qrImage {
-  width: min(280px, 78vw);
-  aspect-ratio: 1;
-  display: block;
-  border-radius: var(--radius-md);
-  background: white;
-}
-
-.qrLoading {
-  width: min(280px, 78vw);
-  aspect-ratio: 1;
-  display: grid;
-  place-items: center;
-  border-radius: var(--radius-md);
-  background: white;
-  color: var(--ink-tertiary);
-}
-
-.tokenBlock {
-  width: 100%;
-  display: grid;
-  gap: var(--space-2);
-  text-align: center;
-}
-
 .token {
-  padding: var(--space-3) var(--space-4);
+  width: 100%;
+  display: block;
+  padding: var(--space-4);
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   background: var(--surface);
   color: var(--ink);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: var(--text-body);
+  font-family: var(--font-technical);
+  font-size: clamp(1rem, 2vw, 1.25rem);
   font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1.5;
   overflow-wrap: anywhere;
   user-select: all;
 }
 
-.note {
+.tokenInstruction {
+  color: var(--ink-secondary);
+  font-weight: 500;
+}
+
+.securityNote {
   color: var(--ink-tertiary);
   font-size: var(--text-caption);
+  text-wrap: pretty;
 }
 
-.receivedPanel {
-  padding: var(--space-4);
-  border-radius: var(--radius-md);
-  background: var(--success-soft);
-  color: var(--success);
-}
-
-.notReadyPanel {
+.pickupFacts {
   display: grid;
-  gap: var(--space-3);
-  padding: var(--space-5);
-  border-radius: var(--radius-lg);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-5);
+  padding-block: var(--space-4);
+  border-top: 1px solid var(--line-soft);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.pickupFacts > div {
+  min-width: 0;
+  display: grid;
+  gap: var(--space-1);
+}
+
+.receivedNote {
+  padding: var(--space-4);
+  border-left: 3px solid var(--line-strong);
   background: var(--surface-muted);
+  color: var(--ink-secondary);
+}
+
+@media (max-width: 760px) {
+  .header,
+  .credentialHeading {
+    display: grid;
+    align-items: start;
+  }
+
+  .qrTokenGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .qrColumn {
+    justify-items: center;
+  }
+
+  .pickupFacts {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+
+  .pickupFacts > div {
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--line-soft);
+  }
+
+  .pickupFacts > div:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
 }
 
 @media (max-width: 620px) {
   .main,
   .stateWrap {
-    padding-left: var(--space-4);
-    padding-right: var(--space-4);
+    padding-left: var(--page-gutter-compact);
+    padding-right: var(--page-gutter-compact);
   }
 
-  .panel {
+  .pickupCredential {
     padding: var(--space-4);
   }
 
-  .statusRow {
-    display: grid;
+  .qrImage,
+  .qrLoading {
+    width: min(260px, 100%);
   }
 }

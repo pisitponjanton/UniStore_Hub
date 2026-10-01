@@ -3,6 +3,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -54,7 +55,7 @@ describe("CampaignLifecycleActions", () => {
     vi.clearAllMocks();
   });
 
-  it("shows only DRAFT actions, confirms open, and applies Backend-returned status", async () => {
+  it("shows only DRAFT actions, confirms open, and applies the server-returned status", async () => {
     const opened = campaign("OPEN");
     mocks.transition.mockResolvedValue(opened);
     const onCampaignChanged = vi.fn();
@@ -68,21 +69,24 @@ describe("CampaignLifecycleActions", () => {
     );
 
     expect(
-      screen.getByRole("button", { name: "เปิด Campaign" }),
+      screen.getByRole("button", { name: "เปิดรับคำสั่งซื้อ" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "ยกเลิก Campaign" }),
+      screen.getByRole("button", { name: "ยกเลิกแคมเปญ" }),
     ).toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "เริ่มการผลิต" }),
     ).not.toBeInTheDocument();
 
     fireEvent.click(
-      screen.getByRole("button", { name: "เปิด Campaign" }),
+      screen.getByRole("button", { name: "เปิดรับคำสั่งซื้อ" }),
     );
+    const dialog = screen.getByRole("dialog", {
+      name: "ยืนยันการเปิดรับคำสั่งซื้อ",
+    });
     fireEvent.click(
-      screen.getByRole("button", {
-        name: "เปิด Campaign",
+      within(dialog).getByRole("button", {
+        name: "เปิดรับคำสั่งซื้อ",
       }),
     );
 
@@ -94,6 +98,12 @@ describe("CampaignLifecycleActions", () => {
       );
       expect(onCampaignChanged).toHaveBeenCalledWith(opened);
     });
+
+    expect(
+      await screen.findByText(
+        "สถานะเปลี่ยนเป็น “เปิดรับคำสั่งซื้อ” แล้ว",
+      ),
+    ).toBeInTheDocument();
   });
 
   it("surfaces PAYMENT_NOT_REVIEWABLE and refreshes Campaign after the conflict", async () => {
@@ -119,8 +129,11 @@ describe("CampaignLifecycleActions", () => {
     fireEvent.click(
       screen.getByRole("button", { name: "เริ่มการผลิต" }),
     );
+    const dialog = screen.getByRole("dialog", {
+      name: "ยืนยันการเริ่มผลิต",
+    });
     fireEvent.click(
-      screen.getByRole("button", { name: "เริ่มการผลิต" }),
+      within(dialog).getByRole("button", { name: "เริ่มการผลิต" }),
     );
 
     expect(
@@ -151,10 +164,15 @@ describe("CampaignLifecycleActions", () => {
     );
 
     expect(
-      screen.getByText("ไม่มี lifecycle action สำหรับสถานะปัจจุบัน"),
+      screen.getByText("ไม่มีขั้นตอนถัดไปจากสถานะนี้"),
     ).toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: /Campaign|สินค้า|ผลิต/ }),
+      screen.getByText("แคมเปญเสร็จสิ้นแล้ว"),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", {
+        name: /เปิดรับ|ยกเลิก|ผลิต|พร้อมรับ|เสร็จสิ้น/,
+      }),
     ).not.toBeInTheDocument();
   });
 });

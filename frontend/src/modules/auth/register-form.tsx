@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 
-import { Button, TextField } from "@/components";
+import { Button, Notice, TextField } from "@/components";
 import { ApiClientError } from "@/services";
 
 import styles from "./auth-form.module.css";
@@ -16,14 +16,48 @@ import {
 } from "./auth-validation";
 import { getAuthReturnPath } from "./return-route";
 import { authSession } from "./session";
+import { useAuthNavigationContext } from "./use-auth-navigation-context";
+
+function focusFirstInvalidField(errors: AuthFieldErrors) {
+  const id = errors.name
+    ? "register-name"
+    : errors.email
+      ? "register-email"
+      : errors.password
+        ? "register-password"
+        : null;
+
+  if (id) {
+    document.getElementById(id)?.focus();
+  }
+}
 
 export function RegisterForm() {
+  const navigation = useAuthNavigationContext();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fieldErrors, setFieldErrors] = useState<AuthFieldErrors>({});
   const [serverError, setServerError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+
+  function updateName(value: string) {
+    setName(value);
+    setFieldErrors((current) => ({ ...current, name: undefined }));
+    setServerError(null);
+  }
+
+  function updateEmail(value: string) {
+    setEmail(value);
+    setFieldErrors((current) => ({ ...current, email: undefined }));
+    setServerError(null);
+  }
+
+  function updatePassword(value: string) {
+    setPassword(value);
+    setFieldErrors((current) => ({ ...current, password: undefined }));
+    setServerError(null);
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -37,6 +71,7 @@ export function RegisterForm() {
     setServerError(null);
 
     if (hasAuthFieldErrors(nextErrors)) {
+      focusFirstInvalidField(nextErrors);
       return;
     }
 
@@ -71,9 +106,15 @@ export function RegisterForm() {
       <div className={styles.headingGroup}>
         <h2 className={styles.title}>สร้างบัญชี</h2>
         <p className={styles.description}>
-          สมัครบัญชีเพื่อสั่งสินค้า ติดตามคำสั่งซื้อ และรับการแจ้งเตือน
+          สมัครเพื่อสั่งสินค้า ติดตามคำสั่งซื้อ และรับการแจ้งเตือนจากระบบ
         </p>
       </div>
+
+      {navigation.hasReturnContext ? (
+        <Notice tone="info" title="กลับไปทำรายการเดิมต่อได้">
+          หลังสมัครสำเร็จ ระบบจะพาคุณกลับไปยังหน้าที่กำลังใช้งานก่อนหน้านี้
+        </Notice>
+      ) : null}
 
       <form className={styles.form} onSubmit={handleSubmit} noValidate>
         <TextField
@@ -81,9 +122,10 @@ export function RegisterForm() {
           label="ชื่อ"
           autoComplete="name"
           value={name}
-          onChange={(event) => setName(event.target.value)}
+          onChange={(event) => updateName(event.target.value)}
           error={fieldErrors.name}
           disabled={pending}
+          autoFocus
           required
         />
         <TextField
@@ -93,7 +135,7 @@ export function RegisterForm() {
           autoComplete="email"
           inputMode="email"
           value={email}
-          onChange={(event) => setEmail(event.target.value)}
+          onChange={(event) => updateEmail(event.target.value)}
           error={fieldErrors.email}
           disabled={pending}
           required
@@ -103,37 +145,46 @@ export function RegisterForm() {
           label="รหัสผ่าน"
           type="password"
           autoComplete="new-password"
-          hint="ใช้รหัสผ่านขนาด 8–72 ไบต์"
+          hint="ใช้รหัสผ่านขนาด 8 ถึง 72 ไบต์"
           value={password}
-          onChange={(event) => setPassword(event.target.value)}
+          onChange={(event) => updatePassword(event.target.value)}
           error={fieldErrors.password}
           disabled={pending}
           required
         />
 
         {serverError ? (
-          <div className={styles.serverError} role="alert">
+          <Notice tone="danger" role="alert" title="สมัครสมาชิกไม่สำเร็จ">
             {serverError}
-          </div>
+          </Notice>
         ) : null}
 
         <div className={styles.formActions}>
-          <Button type="submit" size="large" pending={pending} pendingLabel="กำลังสร้างบัญชี">
+          <Button
+            type="submit"
+            size="large"
+            pending={pending}
+            pendingLabel="กำลังสร้างบัญชี"
+          >
             สมัครสมาชิก
           </Button>
         </div>
       </form>
 
-      <p className={styles.switchText}>
-        มีบัญชีแล้ว?{" "}
-        <Link href="/login/" className={styles.switchLink}>
-          เข้าสู่ระบบ
-        </Link>
-      </p>
+      <div className={styles.formFooter}>
+        <p className={styles.switchText}>
+          มีบัญชีแล้ว?{" "}
+          <Link href={navigation.loginHref} className={styles.switchLink}>
+            เข้าสู่ระบบ
+          </Link>
+        </p>
 
-      <Link href="/" className={styles.backLink}>
-        กลับหน้าร้านค้า
-      </Link>
+        <Link href={navigation.returnPath} className={styles.backLink}>
+          {navigation.hasReturnContext
+            ? "กลับไปหน้าที่กำลังใช้งาน"
+            : "กลับหน้าร้านค้า"}
+        </Link>
+      </div>
     </div>
   );
 }

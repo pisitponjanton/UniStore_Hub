@@ -5,9 +5,11 @@ import { useEffect, useState } from "react";
 
 import {
   Badge,
+  Button,
   ErrorState,
   ForbiddenState,
   LoadingState,
+  TaskStatus,
   UnauthorizedState,
 } from "@/components";
 import {
@@ -25,6 +27,7 @@ import { formatIsoDateTime, getRequiredQueryId } from "@/utils";
 
 import {
   canViewCustomerPickup,
+  getPickupPresentation,
   getPickupStatusLabel,
 } from "./pickup-helpers";
 import { createPickupQrDataUrl } from "./pickup-qr";
@@ -110,7 +113,6 @@ export function MyPickupView() {
           if (error.code === "ORDER_NOT_READY_FOR_PICKUP") {
             try {
               const order = await orderService.getMyOrder(orderId.value);
-
               setState({ status: "notReady", order });
             } catch {
               setState({ status: "error" });
@@ -169,18 +171,26 @@ export function MyPickupView() {
           </Link>
 
           <header className={styles.header} data-ledger-heading>
-            <span className={styles.eyebrow}>Pickup</span>
             <h1 className={styles.title}>รับสินค้า</h1>
+            <p className={styles.description}>
+              QR และ Token จะพร้อมใช้งานเมื่อคำสั่งซื้อเข้าสู่ขั้นตอนรับสินค้า
+            </p>
           </header>
 
-          <section className={styles.notReadyPanel}>
-            <OrderStatusBadge status={state.order.status} />
-            <strong>คำสั่งซื้อนี้ยังไม่พร้อมรับสินค้า</strong>
-            <p className={styles.description}>
-              ระบบจะแสดง Pickup token และ QR เมื่อ Backend
-              เปลี่ยนคำสั่งซื้อเป็นสถานะ READY_FOR_PICKUP
-            </p>
-          </section>
+          <TaskStatus
+            tone="info"
+            label={<OrderStatusBadge status={state.order.status} />}
+            title="คำสั่งซื้อนี้ยังไม่พร้อมรับสินค้า"
+            description="ยังไม่ต้องเดินทางไปรับสินค้า ระบบจะแสดง QR และ Token เมื่อสถานะคำสั่งซื้อเปลี่ยนเป็นพร้อมรับสินค้า"
+            actions={
+              <Button
+                variant="secondary"
+                onClick={() => window.location.reload()}
+              >
+                ตรวจสอบสถานะล่าสุด
+              </Button>
+            }
+          />
         </main>
       </div>
     );
@@ -191,7 +201,10 @@ export function MyPickupView() {
       <div className={styles.page}>
         <main className={styles.stateWrap}>
           {state.status === "loading" ? (
-            <LoadingState title="กำลังโหลดข้อมูลรับสินค้า" />
+            <LoadingState
+              title="กำลังโหลดข้อมูลรับสินค้า"
+              description="กำลังตรวจสอบสถานะคำสั่งซื้อและข้อมูลรับสินค้าล่าสุด"
+            />
           ) : null}
           {state.status === "invalid" ? (
             <ErrorState
@@ -223,6 +236,7 @@ export function MyPickupView() {
 
   const { order, pickup } = state;
   const received = pickup.status === "RECEIVED";
+  const presentation = getPickupPresentation(pickup.status);
 
   return (
     <div className={styles.page}>
@@ -232,63 +246,115 @@ export function MyPickupView() {
         </Link>
 
         <header className={styles.header} data-ledger-heading>
-          <span className={styles.eyebrow}>Pickup</span>
-          <h1 className={styles.title}>รับสินค้า</h1>
-          <p className={styles.description}>
-            แสดง QR หรือ Pickup token นี้ให้เจ้าหน้าที่เมื่อมารับสินค้า
-          </p>
+          <div>
+            <h1 className={styles.title}>รับสินค้า</h1>
+            <p className={styles.description}>
+              ใช้ QR หรือ Token ด้านล่างกับเจ้าหน้าที่ที่จุดรับสินค้า
+            </p>
+          </div>
+          <Badge tone={received ? "neutral" : "success"}>
+            {getPickupStatusLabel(pickup.status)}
+          </Badge>
         </header>
 
-        <section className={styles.panel}>
-          <div className={styles.statusRow}>
-            <div className={styles.meta}>
-              <span className={styles.metaLabel}>เลขคำสั่งซื้อ</span>
-              <span className={styles.metaValue}>{order.orderId}</span>
-            </div>
-            <Badge tone={received ? "neutral" : "success"}>
-              {getPickupStatusLabel(pickup.status)}
-            </Badge>
-          </div>
+        <TaskStatus
+          tone={presentation.tone}
+          label={<OrderStatusBadge status={order.status} />}
+          title={presentation.title}
+          description={presentation.description}
+          metadata={
+            <span className={styles.orderCode}>คำสั่งซื้อ {order.orderId}</span>
+          }
+        />
 
-          {received ? (
-            <div className={styles.receivedPanel} role="status">
-              รายการนี้รับสินค้าเรียบร้อยแล้ว
-              {pickup.receivedAt
-                ? ` เมื่อ ${formatIsoDateTime(pickup.receivedAt)}`
-                : ""}
-            </div>
-          ) : null}
-
-          <div className={styles.qrWrap}>
-            {qrDataUrl ? (
-              // QR is generated locally from the pickup token only.
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                className={styles.qrImage}
-                src={qrDataUrl}
-                alt="QR สำหรับรับสินค้า"
-              />
-            ) : (
-              <div className={styles.qrLoading} aria-live="polite">
-                {qrError ? "สร้าง QR ไม่สำเร็จ" : "กำลังสร้าง QR"}
-              </div>
-            )}
-
-            <div className={styles.tokenBlock}>
-              <span className={styles.metaLabel}>Pickup token</span>
-              <code className={styles.token}>{pickup.token}</code>
-              <span className={styles.note}>
-                QR นี้เข้ารหัสเฉพาะ Pickup token เท่านั้น
-                ไม่มีข้อมูลคำสั่งซื้อหรือข้อมูลส่วนตัวอื่น
+        <section
+          className={[
+            styles.pickupCredential,
+            received ? styles.pickupCredentialReceived : "",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+          aria-labelledby="pickup-credential-title"
+        >
+          <div className={styles.credentialHeading}>
+            <div>
+              <span className={styles.stepLabel}>
+                {received ? "ข้อมูลการรับสินค้าที่ใช้แล้ว" : "แสดงให้เจ้าหน้าที่"}
               </span>
+              <h2 className={styles.sectionTitle} id="pickup-credential-title">
+                QR และ Pickup Token
+              </h2>
             </div>
+            {!received ? (
+              <span className={styles.credentialHint}>
+                ใช้เพียงอย่างใดอย่างหนึ่ง
+              </span>
+            ) : null}
           </div>
 
-          <div className={styles.meta}>
-            <span className={styles.metaLabel}>สถานะ Pickup</span>
-            <span className={styles.metaValue}>{pickup.status}</span>
+          <div className={styles.qrTokenGrid}>
+            <div className={styles.qrColumn}>
+              <span className={styles.metaLabel}>QR สำหรับรับสินค้า</span>
+              {qrDataUrl ? (
+                // QR is generated locally from the pickup token only.
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  className={styles.qrImage}
+                  src={qrDataUrl}
+                  alt="QR สำหรับรับสินค้า"
+                />
+              ) : (
+                <div className={styles.qrLoading} aria-live="polite">
+                  {qrError
+                    ? "สร้าง QR ไม่สำเร็จ ใช้ Token ด้านข้างแทนได้"
+                    : "กำลังสร้าง QR"}
+                </div>
+              )}
+            </div>
+
+            <div className={styles.tokenColumn}>
+              <span className={styles.metaLabel}>Pickup Token</span>
+              <code className={styles.token}>{pickup.token}</code>
+              <p className={styles.tokenInstruction}>
+                หากสแกน QR ไม่ได้ ให้เจ้าหน้าที่กรอก Token นี้แทน
+              </p>
+              <p className={styles.securityNote}>
+                QR เข้ารหัสเฉพาะ Pickup Token เท่านั้น และ Token ไม่ใช่สิทธิ์ของเจ้าหน้าที่ในการยืนยันการรับสินค้า
+              </p>
+            </div>
           </div>
         </section>
+
+        <section className={styles.pickupFacts} aria-label="ข้อมูลการรับสินค้า">
+          <div>
+            <span className={styles.metaLabel}>สถานะ</span>
+            <strong className={styles.metaValue}>
+              {getPickupStatusLabel(pickup.status)}
+            </strong>
+          </div>
+          <div>
+            <span className={styles.metaLabel}>สร้างเมื่อ</span>
+            <strong className={styles.metaValue}>
+              {formatIsoDateTime(pickup.createdAt)}
+            </strong>
+          </div>
+          <div>
+            <span className={styles.metaLabel}>
+              {received ? "รับสินค้าเมื่อ" : "อัปเดตล่าสุด"}
+            </span>
+            <strong className={styles.metaValue}>
+              {received && pickup.receivedAt
+                ? formatIsoDateTime(pickup.receivedAt)
+                : formatIsoDateTime(pickup.updatedAt)}
+            </strong>
+          </div>
+        </section>
+
+        {received ? (
+          <div className={styles.receivedNote} role="status">
+            รายการนี้รับสินค้าเรียบร้อยแล้ว QR และ Token ด้านบนแสดงไว้เพื่ออ้างอิงเท่านั้น
+          </div>
+        ) : null}
       </main>
     </div>
   );

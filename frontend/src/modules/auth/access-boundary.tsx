@@ -19,10 +19,13 @@ import {
 } from "./access";
 import { authSession } from "./session";
 import { useAuthSession } from "./use-auth-session";
+import { useCurrentLoginHref } from "./use-auth-navigation-context";
 
 function LoginAction() {
+  const href = useCurrentLoginHref();
+
   return (
-    <Link href="/login/">
+    <Link href={href}>
       <Button>เข้าสู่ระบบ</Button>
     </Link>
   );
@@ -53,7 +56,12 @@ export function AuthenticatedBoundary({
   }
 
   if (auth.status === "loading") {
-    return <LoadingState title="กำลังตรวจสอบการเข้าสู่ระบบ" />;
+    return (
+      <LoadingState
+        title="กำลังตรวจสอบบัญชี"
+        description="กำลังตรวจสอบ Session ก่อนเปิดหน้านี้"
+      />
+    );
   }
 
   if (auth.status === "anonymous") {

@@ -119,7 +119,7 @@ describe("OrganizationOrderDetailView", () => {
     );
 
     expect(
-      await screen.findByRole("button", { name: "ยกเลิก Order" }),
+      await screen.findByRole("button", { name: "ยกเลิกคำสั่งซื้อ" }),
     ).toBeInTheDocument();
 
     expect(mocks.getOrganizationOrder).toHaveBeenCalledWith(
@@ -160,7 +160,7 @@ describe("OrganizationOrderDetailView", () => {
     await screen.findByText("Faculty Shirt");
 
     expect(
-      screen.queryByRole("button", { name: "ยกเลิก Order" }),
+      screen.queryByRole("button", { name: "ยกเลิกคำสั่งซื้อ" }),
     ).not.toBeInTheDocument();
   });
 
@@ -180,13 +180,13 @@ describe("OrganizationOrderDetailView", () => {
 
     fireEvent.click(
       await screen.findByRole("button", {
-        name: "ยกเลิก Order",
+        name: "ยกเลิกคำสั่งซื้อ",
       }),
     );
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: "ยืนยันยกเลิก Order",
+        name: "ยืนยันยกเลิกคำสั่งซื้อ",
       }),
     );
 
@@ -196,11 +196,9 @@ describe("OrganizationOrderDetailView", () => {
       ).toHaveBeenCalledWith("org-1", "order-1");
     });
 
+    expect((await screen.findAllByText("ยกเลิก")).length).toBeGreaterThan(0);
     expect(
-      await screen.findByText("ยกเลิก"),
-    ).toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: "ยกเลิก Order" }),
+      screen.queryByRole("button", { name: "ยกเลิกคำสั่งซื้อ" }),
     ).not.toBeInTheDocument();
   });
 });

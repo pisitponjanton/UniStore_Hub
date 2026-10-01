@@ -8,6 +8,7 @@ import {
   ErrorState,
   ForbiddenState,
   LoadingState,
+  Notice,
   TextField,
   UnauthorizedState,
 } from "@/components";
@@ -48,15 +49,15 @@ const EMPTY_FILTERS: ReportFilters = {
 function errorMessage(error: unknown): string {
   if (error instanceof ApiClientError) {
     if (error.code === "CAMPAIGN_NOT_FOUND") {
-      return "ไม่พบ Campaign ที่ระบุในหน่วยงานนี้";
+      return "ไม่พบแคมเปญที่ระบุในหน่วยงานนี้";
     }
 
     if (error.code === "STORE_NOT_FOUND") {
-      return "ไม่พบ Store ที่ระบุในหน่วยงานนี้";
+      return "ไม่พบร้านค้าที่ระบุในหน่วยงานนี้";
     }
 
     if (error.code === "VALIDATION_ERROR") {
-      return "ตัวกรอง Campaign และ Store ไม่สัมพันธ์กัน กรุณาตรวจสอบแล้วลองใหม่";
+      return "ตัวกรองแคมเปญและร้านค้าไม่สัมพันธ์กัน กรุณาตรวจสอบแล้วลองใหม่";
     }
 
     return error.userMessage;
@@ -134,9 +135,7 @@ export function DashboardView({
     return () => controller.abort();
   }, [organizationId]);
 
-  async function loadWithFilters(
-    filters: ReportFilters,
-  ) {
+  async function loadWithFilters(filters: ReportFilters) {
     setFiltering(true);
     setInlineError(null);
 
@@ -203,7 +202,10 @@ export function DashboardView({
       <div className={styles.page}>
         <main className={styles.stateWrap}>
           {state.status === "loading" ? (
-            <LoadingState title="กำลังโหลดแดชบอร์ดหน่วยงาน" />
+            <LoadingState
+              title="กำลังโหลดแดชบอร์ดหน่วยงาน"
+              description="กำลังสรุปข้อมูลร้านค้า สินค้า คำสั่งซื้อ และการชำระเงิน"
+            />
           ) : null}
           {state.status === "unauthorized" ? (
             <UnauthorizedState />
@@ -226,149 +228,152 @@ export function DashboardView({
   const hasFilters =
     Boolean(appliedFilters.campaignId) ||
     Boolean(appliedFilters.storeId);
+  const hasDraftFilters =
+    Boolean(draftCampaignId.trim()) || Boolean(draftStoreId.trim());
 
   return (
     <div className={styles.page}>
       <main className={styles.main}>
         <header className={styles.header}>
           <div className={styles.headerCopy} data-ledger-heading>
-            <span className={styles.eyebrow}>
-              Organization dashboard
-            </span>
-            <h1 className={styles.title}>แดชบอร์ดหน่วยงาน</h1>
+            <h1 className={styles.title}>ภาพรวมหน่วยงาน</h1>
             <p className={styles.description}>
-              ตัวเลขทั้งหมดมาจาก Report endpoint ของ Backend
-              โดยยอดรายได้ใช้ integer satang ที่ API ยืนยันแล้ว
-              และรวมเฉพาะ Order ที่เข้าสู่ paid lifecycle
+              ติดตามรายการที่ต้องดูแล ยอดสั่งซื้อ และสถานะการดำเนินงานของหน่วยงาน
             </p>
           </div>
-
-          <Badge tone="info">Organization Admin</Badge>
+          <Badge tone="info">ผู้ดูแลหน่วยงาน</Badge>
         </header>
 
-        <form
-          className={styles.filterPanel}
-          onSubmit={handleFilter}
-        >
-          <div className={styles.filters}>
-            <TextField
-              id="dashboard-campaign-filter"
-              label="Campaign ID"
-              value={draftCampaignId}
-              onChange={(event) =>
-                setDraftCampaignId(event.target.value)
-              }
-              placeholder="เว้นว่างเพื่อดูทุก Campaign"
-              disabled={filtering}
-            />
+        <section className={styles.priorityMetrics} aria-label="ตัวชี้วัดสำคัญ">
+          <article className={styles.priorityMetric}>
+            <span className={styles.metricLabel}>การชำระเงินรอตรวจสอบ</span>
+            <strong className={styles.priorityValue}>
+              {countLabel(summary.pendingPaymentReviews)}
+            </strong>
+            <span className={styles.metricHint}>รายการที่ควรตรวจสอบต่อ</span>
+          </article>
 
-            <TextField
-              id="dashboard-store-filter"
-              label="Store ID"
-              value={draftStoreId}
-              onChange={(event) =>
-                setDraftStoreId(event.target.value)
-              }
-              placeholder="เว้นว่างเพื่อดูทุก Store"
-              disabled={filtering}
-            />
+          <article className={styles.priorityMetric}>
+            <span className={styles.metricLabel}>คำสั่งซื้อที่ชำระแล้ว</span>
+            <strong className={styles.priorityValue}>
+              {countLabel(summary.paidOrderCount)}
+            </strong>
+            <span className={styles.metricHint}>รวมสถานะหลังชำระเงินแล้ว</span>
+          </article>
+
+          <article className={styles.revenueMetric}>
+            <span className={styles.metricLabel}>รายได้จากคำสั่งซื้อที่ชำระแล้ว</span>
+            <strong className={styles.revenueValue}>
+              {formatSatang(summary.paidRevenueSatang)}
+            </strong>
+            <span className={styles.metricHint}>
+              อ้างอิงยอดที่ระบบบันทึกจากคำสั่งซื้อ
+            </span>
+          </article>
+        </section>
+
+        <section className={styles.reportScope} aria-labelledby="report-filter-title">
+          <div className={styles.reportScopeHeading}>
+            <div>
+              <h2 className={styles.sectionTitle} id="report-filter-title">
+                ขอบเขตรายงาน
+              </h2>
+              <p className={styles.sectionDescription}>
+                ปกติจะแสดงทั้งหน่วยงาน หากต้องการเจาะจงสามารถระบุรหัสร้านค้าหรือแคมเปญ
+              </p>
+            </div>
+            <div className={styles.scopeSummary}>
+              {hasFilters ? (
+                <>
+                  {appliedFilters.storeId ? (
+                    <span>ร้านค้า: {appliedFilters.storeId}</span>
+                  ) : null}
+                  {appliedFilters.campaignId ? (
+                    <span>แคมเปญ: {appliedFilters.campaignId}</span>
+                  ) : null}
+                </>
+              ) : (
+                <span>ทั้งหน่วยงาน</span>
+              )}
+            </div>
           </div>
 
-          <div className={styles.filterActions}>
-            <Button
-              type="submit"
-              pending={filtering}
-              pendingLabel="กำลังโหลด"
-            >
-              ใช้ตัวกรอง
-            </Button>
-            <Button
-              type="button"
-              variant="quiet"
-              disabled={filtering}
-              onClick={handleClear}
-            >
-              ล้างตัวกรอง
-            </Button>
-          </div>
-        </form>
+          <form className={styles.filterPanel} onSubmit={handleFilter}>
+            <div className={styles.filters}>
+              <TextField
+                id="dashboard-campaign-filter"
+                label="รหัสแคมเปญ"
+                value={draftCampaignId}
+                onChange={(event) =>
+                  setDraftCampaignId(event.target.value)
+                }
+                placeholder="เว้นว่างเพื่อรวมทุกแคมเปญ"
+                disabled={filtering}
+              />
 
-        {hasFilters ? (
-          <div className={styles.scope}>
-            ขอบเขตรายงาน:
-            {appliedFilters.storeId
-              ? ` Store ${appliedFilters.storeId}`
-              : ""}
-            {appliedFilters.campaignId
-              ? ` Campaign ${appliedFilters.campaignId}`
-              : ""}
-          </div>
-        ) : (
-          <div className={styles.scope}>
-            ขอบเขตรายงาน: ทั้งหน่วยงาน
-          </div>
-        )}
+              <TextField
+                id="dashboard-store-filter"
+                label="รหัสร้านค้า"
+                value={draftStoreId}
+                onChange={(event) =>
+                  setDraftStoreId(event.target.value)
+                }
+                placeholder="เว้นว่างเพื่อรวมทุกร้านค้า"
+                disabled={filtering}
+              />
+            </div>
+
+            <div className={styles.filterActions}>
+              <Button
+                type="submit"
+                pending={filtering}
+                pendingLabel="กำลังโหลดรายงาน"
+              >
+                ใช้ตัวกรอง
+              </Button>
+              <Button
+                type="button"
+                variant="quiet"
+                disabled={filtering || (!hasDraftFilters && !hasFilters)}
+                onClick={handleClear}
+              >
+                แสดงทั้งหน่วยงาน
+              </Button>
+            </div>
+          </form>
+        </section>
 
         {inlineError ? (
-          <div className={styles.errorBox} role="alert">
+          <Notice tone="danger" role="alert" title="ใช้ตัวกรองไม่สำเร็จ">
             {inlineError}
-          </div>
+          </Notice>
         ) : null}
 
         <section
           className={styles.section}
           aria-labelledby="dashboard-baseline-metrics"
         >
-          <h2
-            className={styles.sectionTitle}
-            id="dashboard-baseline-metrics"
-          >
-            ตัวชี้วัดหลัก
-          </h2>
+          <div className={styles.sectionHeading}>
+            <h2
+              className={styles.sectionTitle}
+              id="dashboard-baseline-metrics"
+            >
+              ข้อมูลในขอบเขตที่เลือก
+            </h2>
+          </div>
 
           <div className={styles.metrics}>
             <article className={styles.metricCard}>
-              <span className={styles.metricLabel}>
-                Store ในขอบเขต
-              </span>
+              <span className={styles.metricLabel}>ร้านค้า</span>
               <strong className={styles.metricValue}>
                 {countLabel(summary.totalStores)}
               </strong>
             </article>
 
             <article className={styles.metricCard}>
-              <span className={styles.metricLabel}>
-                Product ในขอบเขต
-              </span>
+              <span className={styles.metricLabel}>สินค้า</span>
               <strong className={styles.metricValue}>
                 {countLabel(summary.totalProducts)}
-              </strong>
-            </article>
-
-            <article className={styles.metricCard}>
-              <span className={styles.metricLabel}>
-                Payment รอตรวจสอบ
-              </span>
-              <strong className={styles.metricValue}>
-                {countLabel(summary.pendingPaymentReviews)}
-              </strong>
-            </article>
-
-            <article className={styles.metricCard}>
-              <span className={styles.metricLabel}>
-                Order ใน paid lifecycle
-              </span>
-              <strong className={styles.metricValue}>
-                {countLabel(summary.paidOrderCount)}
-              </strong>
-            </article>
-
-            <article className={styles.metricCard}>
-              <span className={styles.metricLabel}>
-                รายได้จาก paid Order
-              </span>
-              <strong className={styles.metricValue}>
-                {formatSatang(summary.paidRevenueSatang)}
               </strong>
             </article>
           </div>
@@ -376,9 +381,12 @@ export function DashboardView({
 
         <section className={styles.statusGrid}>
           <article className={styles.statusPanel}>
-            <h2 className={styles.sectionTitle}>
-              Campaign ตามสถานะ
-            </h2>
+            <div className={styles.statusPanelHeading}>
+              <h2 className={styles.sectionTitle}>
+                แคมเปญตามสถานะ
+              </h2>
+              <span className={styles.sectionMeta}>จำนวนแคมเปญ</span>
+            </div>
             <div className={styles.statusList}>
               {CAMPAIGN_STATUSES.map((status) => (
                 <div className={styles.statusRow} key={status}>
@@ -396,9 +404,12 @@ export function DashboardView({
           </article>
 
           <article className={styles.statusPanel}>
-            <h2 className={styles.sectionTitle}>
-              Order ตามสถานะ
-            </h2>
+            <div className={styles.statusPanelHeading}>
+              <h2 className={styles.sectionTitle}>
+                คำสั่งซื้อตามสถานะ
+              </h2>
+              <span className={styles.sectionMeta}>จำนวนคำสั่งซื้อ</span>
+            </div>
             <div className={styles.statusList}>
               {ORDER_STATUSES.map((status) => (
                 <div className={styles.statusRow} key={status}>

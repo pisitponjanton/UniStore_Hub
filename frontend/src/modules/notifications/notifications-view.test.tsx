@@ -161,4 +161,37 @@ describe("NotificationsView", () => {
       cursor: "opaque-next",
     });
   });
+
+  it("refreshes the current filter without changing pagination semantics", async () => {
+    const first = makeNotification();
+    const refreshed = makeNotification({
+      notificationId: "notification-2",
+      title: "ชำระเงินผ่านแล้ว",
+      type: "PAYMENT_APPROVED",
+      message: "การชำระเงินได้รับการอนุมัติ",
+    });
+
+    mocks.listNotifications
+      .mockResolvedValueOnce({
+        items: [first],
+        nextCursor: null,
+      })
+      .mockResolvedValueOnce({
+        items: [refreshed],
+        nextCursor: null,
+      });
+
+    render(<NotificationsView />);
+
+    await screen.findByText("การชำระเงินถูกปฏิเสธ");
+    fireEvent.click(screen.getByRole("button", { name: "รีเฟรชรายการ" }));
+
+    expect(await screen.findByText("ชำระเงินผ่านแล้ว")).toBeInTheDocument();
+    expect(mocks.listNotifications).toHaveBeenLastCalledWith({
+      filter: "all",
+    });
+    expect(
+      await screen.findByText("อัปเดตรายการแจ้งเตือนล่าสุดแล้ว"),
+    ).toBeInTheDocument();
+  });
 });

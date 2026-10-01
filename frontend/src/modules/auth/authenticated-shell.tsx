@@ -20,7 +20,12 @@ export function AuthenticatedShell({
   const router = useRouter();
 
   if (auth.status === "loading") {
-    return <LoadingState title="กำลังเตรียมพื้นที่ใช้งาน" />;
+    return (
+      <LoadingState
+        title="กำลังเตรียมพื้นที่ใช้งาน"
+        description="กำลังตรวจสอบบัญชีและเมนูที่คุณสามารถเข้าถึงได้"
+      />
+    );
   }
 
   if (auth.status !== "authenticated") {
@@ -43,8 +48,15 @@ export function AuthenticatedShell({
       groups={groups}
       userName={auth.user.name}
       userEmail={auth.user.email}
-      contextLabel={membership ? "หน่วยงานที่เลือก" : undefined}
+      contextLabel={membership ? "หน่วยงานปัจจุบัน" : undefined}
       contextValue={membership?.organizationId}
+      contextMeta={
+        membership
+          ? membership.role === "ORGANIZATION_ADMIN"
+            ? "สิทธิ์: ผู้ดูแลหน่วยงาน"
+            : "สิทธิ์: เจ้าหน้าที่"
+          : undefined
+      }
       showOrganizationSwitcher={auth.memberships.some(
         (item) => item.status === "ACTIVE",
       )}

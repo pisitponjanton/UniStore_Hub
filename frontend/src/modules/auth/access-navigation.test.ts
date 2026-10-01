@@ -16,7 +16,9 @@ import {
 import {
   buildNavigationGroups,
   buildOrganizationNavigation,
+  buildOrganizationNavigationGroups,
   buildPlatformNavigation,
+  isNavigationItemActive,
 } from "./navigation";
 
 const memberships: CurrentMembershipDTO[] = [
@@ -120,6 +122,38 @@ describe("role-aware navigation", () => {
     expect(labels).toContain("ประวัติการทำรายการ");
   });
 
+  it("splits Organization Admin navigation into task-oriented groups without dropping routes", () => {
+    const groups = buildOrganizationNavigationGroups(
+      "org-admin",
+      "ORGANIZATION_ADMIN",
+    );
+
+    expect(groups.map((group) => group.label)).toEqual([
+      "หน่วยงาน",
+      "ร้านค้าและแคมเปญ",
+      "งานปฏิบัติการ",
+      "ตรวจสอบ",
+    ]);
+
+    const labels = groups.flatMap((group) =>
+      group.items.map((item) => item.label),
+    );
+
+    expect(labels).toEqual([
+      "แดชบอร์ด",
+      "ข้อมูลหน่วยงาน",
+      "บุคลากร",
+      "ร้านค้า",
+      "สินค้า",
+      "แคมเปญ",
+      "คำสั่งซื้อ",
+      "ตรวจสอบการชำระเงิน",
+      "รับสินค้า",
+      "สรุปการผลิต",
+      "ประวัติการทำรายการ",
+    ]);
+  });
+
   it("derives Platform Admin navigation only from user.platformRole", () => {
     expect(buildPlatformNavigation(session.user)).toBeNull();
 
@@ -148,8 +182,32 @@ describe("role-aware navigation", () => {
     expect(groups.map((group) => group.label)).toEqual([
       "บัญชีของฉัน",
       "งานของหน่วยงาน",
-      "Platform Admin",
+      "ผู้ดูแลแพลตฟอร์ม",
     ]);
+  });
+
+  it("keeps nested operational detail routes highlighted under their parent item", () => {
+    expect(
+      isNavigationItemActive("/org/orders/view/", {
+        label: "คำสั่งซื้อ",
+        href: "/org/orders/?organizationId=org-admin",
+      }),
+    ).toBe(true);
+
+    expect(
+      isNavigationItemActive("/my/payment/", {
+        label: "คำสั่งซื้อของฉัน",
+        href: "/my/orders/",
+        activePaths: ["/my/order/", "/my/payment/", "/my/pickup/"],
+      }),
+    ).toBe(true);
+
+    expect(
+      isNavigationItemActive("/notifications/", {
+        label: "หน้าร้านค้า",
+        href: "/",
+      }),
+    ).toBe(false);
   });
 });
 

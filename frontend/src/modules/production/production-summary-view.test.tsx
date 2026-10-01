@@ -65,9 +65,7 @@ describe("ProductionSummaryView", () => {
     );
 
     expect(
-      screen.getByText(
-        "ระบุ Campaign ID เพื่อโหลดสรุปการผลิตจาก Backend",
-      ),
+      screen.getByText("ระบุ Campaign ID ด้านบนเพื่อดูจำนวนสินค้าที่ต้องผลิต"),
     ).toBeInTheDocument();
     expect(mocks.getSummary).not.toHaveBeenCalled();
   });
@@ -116,7 +114,7 @@ describe("ProductionSummaryView", () => {
       await screen.findByText("ยังไม่มีรายการที่ต้องผลิต"),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/Payment APPROVED/),
+      screen.getByText(/เข้าเงื่อนไขสำหรับสรุปงานผลิต/),
     ).toBeInTheDocument();
   });
 

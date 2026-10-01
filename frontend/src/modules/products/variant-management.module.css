@@ -13,12 +13,14 @@
 }
 
 .headerCopy {
+  max-width: 700px;
   display: grid;
   gap: var(--space-1);
 }
 
 .title {
   font-size: var(--text-title-sm);
+  line-height: 1.3;
 }
 
 .description {
@@ -26,90 +28,169 @@
   font-size: var(--text-body-sm);
 }
 
-.form {
-  display: grid;
-  gap: var(--space-3);
-  padding: var(--space-4);
-  border-radius: var(--radius-md);
+.headerStats {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  color: var(--ink-tertiary);
+  font-size: var(--text-caption);
+}
+
+.headerStats span {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-pill);
   background: var(--surface-muted);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(260px, 0.62fr);
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.variantList {
+  min-width: 0;
 }
 
 .list {
   display: grid;
-  gap: var(--space-3);
-}
-
-.card {
-  display: grid;
-  gap: var(--space-3);
-  padding: var(--space-4);
-  border: 1px solid var(--line-soft);
-  border-radius: var(--radius-md);
+  border-top: 1px solid var(--line-soft);
+  border-bottom: 1px solid var(--line-soft);
   background: var(--surface);
 }
 
-.cardHeader {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-3);
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-4);
+  align-items: center;
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--line-soft);
 }
 
-.cardCopy {
+.row:last-child {
+  border-bottom: 0;
+}
+
+.rowEditing {
+  background: var(--surface-muted);
+  box-shadow: inset 3px 0 0 var(--campus);
+}
+
+.rowMain {
   min-width: 0;
   display: grid;
   gap: var(--space-1);
 }
 
+.rowHeading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
 .name {
-  font-weight: 600;
   color: var(--ink);
+  font-weight: 600;
+  overflow-wrap: anywhere;
 }
 
 .price {
   color: var(--ink-secondary);
+  font-size: var(--text-title-sm);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
-.meta {
-  color: var(--ink-tertiary);
-  font-size: var(--text-caption);
-  overflow-wrap: anywhere;
-}
-
-.actions {
+.actions,
+.editActions {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
 }
 
 .editForm {
+  grid-column: 1 / -1;
   display: grid;
+  grid-template-columns: repeat(2, minmax(180px, 1fr));
   gap: var(--space-3);
   padding-top: var(--space-3);
   border-top: 1px solid var(--line-soft);
 }
 
-.error {
-  padding: var(--space-3);
-  border-radius: var(--radius-md);
-  background: var(--danger-soft);
-  color: var(--danger);
+.editActions {
+  grid-column: 1 / -1;
 }
 
-.notice {
-  padding: var(--space-3);
+.createForm {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--line-soft);
   border-radius: var(--radius-md);
-  background: var(--success-soft);
-  color: var(--success);
+  background: var(--surface-muted);
+}
+
+.createHeading {
+  display: grid;
+  gap: 2px;
+}
+
+.createHeading strong {
+  color: var(--ink);
+  font-size: var(--text-title-sm);
+  font-weight: 600;
+}
+
+.kicker {
+  color: var(--campus);
+  font-size: var(--text-caption);
+  font-weight: 600;
+}
+
+.createForm button {
+  width: 100%;
+}
+
+@media (max-width: 880px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .createForm {
+    max-width: 560px;
+  }
 }
 
 @media (max-width: 640px) {
   .header,
-  .cardHeader {
+  .row {
     display: grid;
   }
 
-  .actions button {
+  .headerStats {
+    justify-content: flex-start;
+  }
+
+  .row {
+    grid-template-columns: 1fr;
+  }
+
+  .editForm {
+    grid-template-columns: 1fr;
+  }
+
+  .actions,
+  .editActions {
+    display: grid;
+  }
+
+  .actions button,
+  .editActions button {
     width: 100%;
   }
 }

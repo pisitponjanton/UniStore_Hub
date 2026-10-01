@@ -11,6 +11,7 @@ import {
   ErrorState,
   ForbiddenState,
   LoadingState,
+  Notice,
   SelectField,
   TextareaField,
   TextField,
@@ -588,106 +589,163 @@ export function OrganizationPaymentsView({
     Boolean(appliedFilters.status) ||
     Boolean(appliedFilters.campaignId) ||
     Boolean(appliedFilters.orderId);
+  const pendingReviewCount = state.payments.filter(
+    (payment) => payment.status === "PENDING_REVIEW",
+  ).length;
+  const approvedCount = state.payments.filter(
+    (payment) => payment.status === "APPROVED",
+  ).length;
+  const rejectedCount = state.payments.filter(
+    (payment) => payment.status === "REJECTED",
+  ).length;
 
   return (
     <div className={styles.page}>
       <main className={styles.main}>
         <header className={styles.header}>
           <div className={styles.headerCopy} data-ledger-heading>
-            <span className={styles.eyebrow}>Payment review</span>
-            <h1 className={styles.title}>
-              ตรวจสอบการชำระเงิน
-            </h1>
+            <h1 className={styles.title}>ตรวจสอบการชำระเงิน</h1>
             <p className={styles.description}>
-              Staff และ Organization Admin ตรวจสอบสลิปผ่าน
-              Private Pre-signed URL และตัดสินผลผ่าน Backend
-              โดยสถานะ Payment และ Order จาก API เป็นข้อมูลอ้างอิงหลัก
+              เปิดหลักฐานการชำระเงิน เทียบกับคำสั่งซื้อ แล้วอนุมัติหรือปฏิเสธพร้อมเหตุผลจากคิวเดียว
             </p>
           </div>
-
-          <Badge tone="info">
-            {state.payments.length} รายการในหน้าปัจจุบัน
-          </Badge>
         </header>
 
-        <form
-          className={styles.filterPanel}
-          onSubmit={applyFilters}
-        >
-          <div className={styles.filters}>
-            <SelectField
-              id="payment-review-status"
-              label="สถานะ Payment"
-              value={draftStatus}
-              onChange={(event) =>
-                setDraftStatus(
-                  event.target.value as PaymentStatus | "",
-                )
-              }
-              disabled={filtering}
-            >
-              <option value="">ทุกสถานะ</option>
-              {PAYMENT_STATUSES.map((status) => (
-                <option key={status} value={status}>
-                  {paymentStatusLabel(status)}
-                </option>
-              ))}
-            </SelectField>
+        <section className={styles.summaryStrip} aria-label="สรุปคิวชำระเงินที่โหลด">
+          <div>
+            <span className={styles.summaryLabel}>รายการที่โหลด</span>
+            <strong>{state.payments.length}</strong>
+          </div>
+          <div>
+            <span className={styles.summaryLabel}>รอตรวจสอบ</span>
+            <strong>{pendingReviewCount}</strong>
+          </div>
+          <div>
+            <span className={styles.summaryLabel}>อนุมัติแล้ว</span>
+            <strong>{approvedCount}</strong>
+          </div>
+          <div>
+            <span className={styles.summaryLabel}>ปฏิเสธแล้ว</span>
+            <strong>{rejectedCount}</strong>
+          </div>
+        </section>
 
-            <TextField
-              id="payment-review-campaign"
-              label="Campaign ID"
-              value={draftCampaignId}
-              onChange={(event) =>
-                setDraftCampaignId(event.target.value)
-              }
-              placeholder="กรองด้วย Campaign ID"
-              disabled={filtering}
-            />
-
-            <TextField
-              id="payment-review-order"
-              label="Order ID"
-              value={draftOrderId}
-              onChange={(event) =>
-                setDraftOrderId(event.target.value)
-              }
-              placeholder="กรองด้วย Order ID"
-              disabled={filtering}
-            />
+        <section className={styles.filterPanel} aria-labelledby="payment-filter-title">
+          <div className={styles.filterHeading}>
+            <div>
+              <h2 className={styles.sectionTitle} id="payment-filter-title">
+                ค้นหาคิวตรวจสอบ
+              </h2>
+              <p className={styles.sectionDescription}>
+                กรองด้วยสถานะ รหัสแคมเปญ หรือรหัสคำสั่งซื้อ
+              </p>
+            </div>
+            <div className={styles.appliedFilters} role="group" aria-label="ตัวกรองที่ใช้อยู่">
+              {hasFilters ? (
+                <>
+                  {appliedFilters.status ? (
+                    <span>
+                      สถานะ: {paymentStatusLabel(appliedFilters.status)}
+                    </span>
+                  ) : null}
+                  {appliedFilters.campaignId ? (
+                    <span>Campaign: {appliedFilters.campaignId}</span>
+                  ) : null}
+                  {appliedFilters.orderId ? (
+                    <span>Order: {appliedFilters.orderId}</span>
+                  ) : null}
+                </>
+              ) : (
+                <span>แสดงทุกการชำระเงิน</span>
+              )}
+            </div>
           </div>
 
-          <div className={styles.filterActions}>
-            <Button
-              type="submit"
-              pending={filtering}
-              pendingLabel="กำลังค้นหา"
-            >
-              ค้นหา / กรอง
-            </Button>
-            <Button
-              type="button"
-              variant="quiet"
-              disabled={filtering}
-              onClick={() => {
-                void clearFilters();
-              }}
-            >
-              ล้างตัวกรอง
-            </Button>
-          </div>
-        </form>
+          <form
+            className={styles.filterForm}
+            onSubmit={applyFilters}
+          >
+            <div className={styles.filters}>
+              <SelectField
+                id="payment-review-status"
+                label="สถานะ Payment"
+                value={draftStatus}
+                onChange={(event) =>
+                  setDraftStatus(
+                    event.target.value as PaymentStatus | "",
+                  )
+                }
+                disabled={filtering}
+              >
+                <option value="">ทุกสถานะ</option>
+                {PAYMENT_STATUSES.map((status) => (
+                  <option key={status} value={status}>
+                    {paymentStatusLabel(status)}
+                  </option>
+                ))}
+              </SelectField>
+
+              <TextField
+                id="payment-review-campaign"
+                label="Campaign ID"
+                value={draftCampaignId}
+                onChange={(event) =>
+                  setDraftCampaignId(event.target.value)
+                }
+                placeholder="เช่น campaign-..."
+                disabled={filtering}
+              />
+
+              <TextField
+                id="payment-review-order"
+                label="Order ID"
+                value={draftOrderId}
+                onChange={(event) =>
+                  setDraftOrderId(event.target.value)
+                }
+                placeholder="เช่น order-..."
+                disabled={filtering}
+              />
+            </div>
+
+            <div className={styles.filterActions}>
+              <Button
+                type="submit"
+                pending={filtering}
+                pendingLabel="กำลังค้นหา"
+              >
+                ใช้ตัวกรอง
+              </Button>
+              <Button
+                type="button"
+                variant="quiet"
+                disabled={
+                  filtering ||
+                  (!hasFilters &&
+                    !draftCampaignId.trim() &&
+                    !draftOrderId.trim() &&
+                    !draftStatus)
+                }
+                onClick={() => {
+                  void clearFilters();
+                }}
+              >
+                แสดงทั้งหมด
+              </Button>
+            </div>
+          </form>
+        </section>
 
         {inlineError ? (
-          <div className={styles.inlineError} role="alert">
+          <Notice tone="danger" role="alert" title="ดำเนินการไม่สำเร็จ">
             {inlineError}
-          </div>
+          </Notice>
         ) : null}
 
         {notice ? (
-          <div className={styles.notice} role="status">
+          <Notice tone="success" role="status" title="อัปเดตแล้ว">
             {notice}
-          </div>
+          </Notice>
         ) : null}
 
         <div className={styles.layout}>
@@ -695,75 +753,73 @@ export function OrganizationPaymentsView({
             className={styles.section}
             aria-labelledby="payment-review-list"
           >
-            <h2
-              className={styles.sectionTitle}
-              id="payment-review-list"
-            >
-              คิว Payment
-            </h2>
+            <div className={styles.sectionHeading}>
+              <div>
+                <h2
+                  className={styles.sectionTitle}
+                  id="payment-review-list"
+                >
+                  คิวการชำระเงิน
+                </h2>
+                <p className={styles.sectionDescription}>
+                  เลือกรายการเพื่อโหลดข้อมูลล่าสุดของ Payment และ Order ก่อนตัดสินผล
+                </p>
+              </div>
+              <span className={styles.sectionMeta}>
+                {state.payments.length.toLocaleString("th-TH")} รายการ
+              </span>
+            </div>
 
             {state.payments.length === 0 ? (
               <EmptyState
                 title="ไม่พบรายการชำระเงิน"
                 description={
                   hasFilters
-                    ? "ไม่มี Payment ที่ตรงกับตัวกรองปัจจุบัน"
-                    : "หน่วยงานนี้ยังไม่มี Payment"
+                    ? "ไม่มีรายการที่ตรงกับตัวกรองปัจจุบัน"
+                    : "หน่วยงานนี้ยังไม่มีรายการชำระเงิน"
                 }
               />
             ) : (
               <div className={styles.list}>
-                {state.payments.map((payment) => (
-                  <article
-                    className={styles.card}
-                    key={payment.paymentId}
-                  >
-                    <div className={styles.cardCopy}>
-                      <h3 className={styles.cardTitle}>
-                        Payment {payment.paymentId}
-                      </h3>
-                      <div className={styles.metaGrid}>
-                        <div className={styles.metaItem}>
-                          <span className={styles.metaLabel}>
-                            Order ID
-                          </span>
-                          <span className={styles.metaValue}>
-                            {payment.orderId}
-                          </span>
+                {state.payments.map((payment) => {
+                  const isSelected =
+                    selected?.payment.paymentId === payment.paymentId;
+
+                  return (
+                    <article
+                      className={[
+                        styles.row,
+                        isSelected ? styles.rowSelected : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ")}
+                      key={payment.paymentId}
+                      aria-current={isSelected ? "true" : undefined}
+                    >
+                      <div className={styles.rowMain}>
+                        <div className={styles.rowHeading}>
+                          <h3 className={styles.cardTitle}>
+                            Payment {payment.paymentId}
+                          </h3>
+                          <Badge
+                            tone={paymentStatusTone(payment.status)}
+                          >
+                            {paymentStatusLabel(payment.status)}
+                          </Badge>
                         </div>
-                        <div className={styles.metaItem}>
-                          <span className={styles.metaLabel}>
-                            Customer ID
+                        <div className={styles.metaRow}>
+                          <span className={styles.meta}>
+                            Order: {payment.orderId}
                           </span>
-                          <span className={styles.metaValue}>
-                            {payment.customerId}
+                          <span className={styles.meta}>
+                            Customer: {payment.customerId}
                           </span>
-                        </div>
-                        <div className={styles.metaItem}>
-                          <span className={styles.metaLabel}>
-                            ส่งเมื่อ
-                          </span>
-                          <span className={styles.metaValue}>
-                            {formatIsoDateTime(payment.createdAt)}
-                          </span>
-                        </div>
-                        <div className={styles.metaItem}>
-                          <span className={styles.metaLabel}>
-                            อัปเดตล่าสุด
-                          </span>
-                          <span className={styles.metaValue}>
-                            {formatIsoDateTime(payment.updatedAt)}
+                          <span className={styles.meta}>
+                            ส่งเมื่อ {formatIsoDateTime(payment.createdAt)}
                           </span>
                         </div>
                       </div>
-                    </div>
 
-                    <div className={styles.cardAside}>
-                      <Badge
-                        tone={paymentStatusTone(payment.status)}
-                      >
-                        {paymentStatusLabel(payment.status)}
-                      </Badge>
                       <div className={styles.cardActions}>
                         <Button
                           variant="secondary"
@@ -776,12 +832,12 @@ export function OrganizationPaymentsView({
                             void selectPayment(payment);
                           }}
                         >
-                          ตรวจสอบ
+                          {isSelected ? "กำลังตรวจสอบ" : "ตรวจสอบ"}
                         </Button>
                       </div>
-                    </div>
-                  </article>
-                ))}
+                    </article>
+                  );
+                })}
               </div>
             )}
 
@@ -790,7 +846,7 @@ export function OrganizationPaymentsView({
                 <Button
                   variant="secondary"
                   pending={loadingMore}
-                  pendingLabel="กำลังโหลด"
+                  pendingLabel="กำลังโหลดเพิ่มเติม"
                   onClick={() => {
                     void loadMore();
                   }}
@@ -801,16 +857,14 @@ export function OrganizationPaymentsView({
             ) : null}
           </section>
 
-          <aside aria-label="รายละเอียด Payment">
+          <aside aria-label="รายละเอียดการชำระเงิน">
             {selected ? (
               <div className={styles.detailPanel}>
                 <div className={styles.detailHeader}>
                   <div className={styles.detailCopy}>
-                    <span className={styles.eyebrow}>
-                      Payment detail
-                    </span>
+                    <span className={styles.detailLabel}>รายการที่กำลังตรวจสอบ</span>
                     <h2 className={styles.detailTitle}>
-                      {selected.payment.paymentId}
+                      Payment {selected.payment.paymentId}
                     </h2>
                     <span className={styles.detailCode}>
                       Order {selected.payment.orderId}
@@ -828,6 +882,21 @@ export function OrganizationPaymentsView({
                   </Badge>
                 </div>
 
+                <div className={styles.reviewSnapshot}>
+                  <div>
+                    <span className={styles.metaLabel}>ยอดคำสั่งซื้อ</span>
+                    <strong className={styles.amount}>
+                      {formatSatang(selected.order.total)}
+                    </strong>
+                  </div>
+                  <div>
+                    <span className={styles.metaLabel}>สถานะ Order</span>
+                    <OrderStatusBadge
+                      status={selected.order.status}
+                    />
+                  </div>
+                </div>
+
                 <div className={styles.metaGrid}>
                   <div className={styles.metaItem}>
                     <span className={styles.metaLabel}>
@@ -835,6 +904,14 @@ export function OrganizationPaymentsView({
                     </span>
                     <span className={styles.metaValue}>
                       {selected.payment.customerId}
+                    </span>
+                  </div>
+                  <div className={styles.metaItem}>
+                    <span className={styles.metaLabel}>
+                      Campaign ID
+                    </span>
+                    <span className={styles.metaValue}>
+                      {selected.order.campaignId}
                     </span>
                   </div>
                   <div className={styles.metaItem}>
@@ -850,92 +927,70 @@ export function OrganizationPaymentsView({
                       เวลาตรวจสอบ
                     </span>
                     <span className={styles.metaValue}>
-                      {formatIsoDateTime(
-                        selected.payment.reviewedAt,
-                      )}
+                      {selected.payment.reviewedAt
+                        ? formatIsoDateTime(selected.payment.reviewedAt)
+                        : "ยังไม่ตรวจสอบ"}
                     </span>
-                  </div>
-                  <div className={styles.metaItem}>
-                    <span className={styles.metaLabel}>
-                      อัปเดต Payment
-                    </span>
-                    <span className={styles.metaValue}>
-                      {formatIsoDateTime(
-                        selected.payment.updatedAt,
-                      )}
-                    </span>
-                  </div>
-                </div>
-
-                <div className={styles.orderPanel}>
-                  <div className={styles.detailHeader}>
-                    <h3 className={styles.sectionTitle}>
-                      Order ที่เกี่ยวข้อง
-                    </h3>
-                    <OrderStatusBadge
-                      status={selected.order.status}
-                    />
-                  </div>
-                  <div className={styles.orderSummary}>
-                    <div className={styles.metaItem}>
-                      <span className={styles.metaLabel}>
-                        Campaign ID
-                      </span>
-                      <span className={styles.metaValue}>
-                        {selected.order.campaignId}
-                      </span>
-                    </div>
-                    <div className={styles.metaItem}>
-                      <span className={styles.metaLabel}>
-                        ยอดรวม
-                      </span>
-                      <span className={styles.amount}>
-                        {formatSatang(selected.order.total)}
-                      </span>
-                    </div>
                   </div>
                 </div>
 
                 {selected.payment.status === "REJECTED" ? (
-                  <div className={styles.rejectBox}>
-                    <strong>เหตุผลที่ปฏิเสธ</strong>
-                    <span>
-                      {selected.payment.rejectReason ??
-                        "Backend ไม่ได้ส่งเหตุผลกลับมา"}
-                    </span>
-                  </div>
+                  <Notice
+                    tone="danger"
+                    title="เหตุผลที่ปฏิเสธ"
+                  >
+                    {selected.payment.rejectReason ??
+                      "ไม่พบเหตุผลที่บันทึกไว้"}
+                  </Notice>
                 ) : null}
 
-                {selected.payment.status !== "PENDING_REVIEW" ? (
-                  <div className={styles.reviewedBox}>
-                    Payment นี้ผ่านการตัดสินผลแล้ว
-                    จึงไม่มี action อนุมัติหรือปฏิเสธซ้ำ
-                  </div>
-                ) : null}
+                {selected.payment.status === "PENDING_REVIEW" ? (
+                  <Notice
+                    tone="warning"
+                    title="ตรวจหลักฐานก่อนตัดสินผล"
+                  >
+                    เทียบยอดและข้อมูลในสลิปกับคำสั่งซื้อก่อนอนุมัติ หากปฏิเสธควรระบุเหตุผลที่ลูกค้านำไปแก้ไขได้
+                  </Notice>
+                ) : (
+                  <Notice
+                    tone="neutral"
+                    title="รายการนี้ตัดสินผลแล้ว"
+                  >
+                    การชำระเงินนี้ไม่มี action อนุมัติหรือปฏิเสธซ้ำ
+                  </Notice>
+                )}
 
-                <div className={styles.downloadBox}>
-                  <strong>สลิปการชำระเงิน</strong>
-                  <span>
-                    ไฟล์เป็น private object ต้องขอ Pre-signed
-                    download URL จาก Backend ก่อนเปิดดู
-                  </span>
+                <section
+                  className={styles.slipPanel}
+                  aria-labelledby="payment-slip-title"
+                >
+                  <div className={styles.panelHeading}>
+                    <div>
+                      <h3 className={styles.panelTitle} id="payment-slip-title">
+                        หลักฐานการชำระเงิน
+                      </h3>
+                      <p className={styles.panelDescription}>
+                        ลิงก์สำหรับดูสลิปเป็นลิงก์ชั่วคราวและจะหมดอายุ
+                      </p>
+                    </div>
+                  </div>
 
                   <div className={styles.downloadActions}>
                     <Button
                       variant="secondary"
                       pending={downloadPending}
-                      pendingLabel="กำลังขอลิงก์"
+                      pendingLabel="กำลังเตรียมลิงก์"
                       disabled={reviewPending !== null}
                       onClick={() => {
                         void requestSlipDownload();
                       }}
                     >
-                      ขอลิงก์ดูสลิป
+                      เปิดสลิป
                     </Button>
                   </div>
 
                   {download ? (
-                    <>
+                    <div className={styles.downloadReady}>
                       <a
                         className={styles.temporaryLink}
                         href={download.url}
@@ -944,8 +999,8 @@ export function OrganizationPaymentsView({
                       >
                         เปิดสลิปในแท็บใหม่
                       </a>
-                      <span className={styles.metaLabel}>
-                        ลิงก์ชั่วคราวหมดอายุในประมาณ{" "}
+                      <span className={styles.meta}>
+                        ลิงก์หมดอายุในประมาณ{" "}
                         {Math.max(
                           1,
                           Math.round(
@@ -954,42 +1009,61 @@ export function OrganizationPaymentsView({
                         )}{" "}
                         นาที
                       </span>
-                    </>
+                    </div>
                   ) : null}
-                </div>
+                </section>
 
                 {selected.payment.status ===
                 "PENDING_REVIEW" ? (
-                  <div className={styles.reviewActions}>
-                    <ConfirmDialog
-                      trigger={
-                        <Button
-                          disabled={reviewPending !== null}
+                  <section
+                    className={styles.decisionPanel}
+                    aria-labelledby="payment-decision-title"
+                  >
+                    <div className={styles.panelHeading}>
+                      <div>
+                        <h3
+                          className={styles.panelTitle}
+                          id="payment-decision-title"
                         >
-                          อนุมัติ
-                        </Button>
-                      }
-                      title="ยืนยันการอนุมัติการชำระเงิน"
-                      description="Backend จะตรวจ Campaign และ Payment state อีกครั้งก่อนอัปเดต Payment และ Order"
-                      confirmLabel="ยืนยันอนุมัติ"
-                      pending={reviewPending === "approve"}
-                      onConfirm={() => {
-                        void handleApprove();
-                      }}
-                    />
+                          ตัดสินผลการชำระเงิน
+                        </h3>
+                        <p className={styles.panelDescription}>
+                          การอนุมัติหรือปฏิเสธจะอัปเดตทั้ง Payment และสถานะ Order ที่เกี่ยวข้องตามกฎของระบบ
+                        </p>
+                      </div>
+                    </div>
 
-                    <Button
-                      variant="danger"
-                      disabled={reviewPending !== null}
-                      onClick={() => {
-                        setRejectReason("");
-                        setRejectReasonError(undefined);
-                        setRejectOpen(true);
-                      }}
-                    >
-                      ปฏิเสธ
-                    </Button>
-                  </div>
+                    <div className={styles.reviewActions}>
+                      <ConfirmDialog
+                        trigger={
+                          <Button
+                            disabled={reviewPending !== null}
+                          >
+                            อนุมัติการชำระเงิน
+                          </Button>
+                        }
+                        title="ยืนยันการอนุมัติการชำระเงิน"
+                        description="ระบบจะตรวจสถานะแคมเปญและการชำระเงินอีกครั้งก่อนอัปเดตผล"
+                        confirmLabel="ยืนยันอนุมัติ"
+                        pending={reviewPending === "approve"}
+                        onConfirm={() => {
+                          void handleApprove();
+                        }}
+                      />
+
+                      <Button
+                        variant="danger"
+                        disabled={reviewPending !== null}
+                        onClick={() => {
+                          setRejectReason("");
+                          setRejectReasonError(undefined);
+                          setRejectOpen(true);
+                        }}
+                      >
+                        ปฏิเสธการชำระเงิน
+                      </Button>
+                    </div>
+                  </section>
                 ) : null}
 
                 <Dialog
@@ -1003,7 +1077,7 @@ export function OrganizationPaymentsView({
                     }
                   }}
                   title="ปฏิเสธการชำระเงิน"
-                  description="ระบุเหตุผลที่ลูกค้าสามารถใช้แก้ไขและส่งสลิปใหม่ได้"
+                  description="ระบุเหตุผลให้ชัดเจนเพื่อให้ลูกค้าทราบว่าต้องแก้ไขอะไร ก่อนส่งหลักฐานใหม่"
                   footer={
                     <div className={styles.dialogActions}>
                       <Button
@@ -1038,15 +1112,17 @@ export function OrganizationPaymentsView({
                       error={rejectReasonError}
                       required
                       disabled={reviewPending === "reject"}
-                      placeholder="เช่น ยอดเงินในสลิปไม่ตรงกับยอด Order"
+                      placeholder="เช่น ยอดเงินในสลิปไม่ตรงกับยอดคำสั่งซื้อ"
                     />
                   </div>
                 </Dialog>
               </div>
             ) : (
               <div className={styles.emptyDetail}>
-                เลือก Payment จากคิวเพื่อดู Order,
-                เปิดสลิปแบบมีสิทธิ์ และดำเนินการตรวจสอบ
+                <strong>เลือก Payment เพื่อเริ่มตรวจสอบ</strong>
+                <span>
+                  ระบบจะโหลด Payment และ Order ล่าสุดก่อนแสดงสลิปและ action ตัดสินผล
+                </span>
               </div>
             )}
           </aside>

@@ -73,7 +73,7 @@ describe("OrganizationSettingsView", () => {
     });
 
     expect(
-      await screen.findByText("บันทึกข้อมูลหน่วยงานแล้ว"),
+      await screen.findByText("ข้อมูลหน่วยงานถูกอัปเดตเรียบร้อย"),
     ).toBeInTheDocument();
     expect(screen.getByText("รออนุมัติ")).toBeInTheDocument();
   });

@@ -9,6 +9,7 @@ import {
   EmptyState,
   ErrorState,
   LoadingState,
+  Notice,
   TextareaField,
   TextField,
 } from "@/components";
@@ -296,7 +297,10 @@ export function StoreManagementView({
       <div className={styles.page}>
         <main className={styles.stateWrap}>
           {state.status === "loading" ? (
-            <LoadingState title="กำลังโหลดร้านค้า" />
+            <LoadingState
+              title="กำลังโหลดร้านค้า"
+              description="กำลังดึงร้านค้าและสถานะล่าสุดของหน่วยงาน"
+            />
           ) : (
             <ErrorState
               title="ไม่สามารถโหลดร้านค้าได้"
@@ -308,38 +312,69 @@ export function StoreManagementView({
     );
   }
 
+  const activeCount = state.stores.filter(
+    (store) => store.status === "ACTIVE",
+  ).length;
+  const inactiveCount = state.stores.length - activeCount;
+  const editDirty =
+    selectedStore !== null &&
+    (editName !== selectedStore.name ||
+      editDescription !== selectedStore.description);
+
   return (
     <div className={styles.page}>
       <main className={styles.main}>
         <header className={styles.header}>
           <div className={styles.headerCopy} data-ledger-heading>
-            <span className={styles.eyebrow}>Store management</span>
             <h1 className={styles.title}>ร้านค้า</h1>
             <p className={styles.description}>
-              จัดการร้านค้าภายในหน่วยงาน หน้านี้ใช้เฉพาะ Organization management API
-              ส่วนลูกค้าใช้งานผ่าน Storefront API แยกต่างหาก
+              จัดการพื้นที่ขายภายในหน่วยงาน และกำหนดว่าร้านค้าใดพร้อมใช้งาน
             </p>
           </div>
-          <Badge tone="info">{state.stores.length} ร้านค้า</Badge>
         </header>
 
-        {inlineError ? (
-          <div className={styles.error} role="alert">
-            {inlineError}
+        <section className={styles.summaryStrip} aria-label="สรุปร้านค้า">
+          <div>
+            <span className={styles.summaryLabel}>ร้านค้าทั้งหมด</span>
+            <strong>{state.stores.length}</strong>
           </div>
+          <div>
+            <span className={styles.summaryLabel}>เปิดใช้งาน</span>
+            <strong>{activeCount}</strong>
+          </div>
+          <div>
+            <span className={styles.summaryLabel}>ปิดใช้งาน</span>
+            <strong>{inactiveCount}</strong>
+          </div>
+        </section>
+
+        {inlineError ? (
+          <Notice tone="danger" role="alert" title="ดำเนินการไม่สำเร็จ">
+            {inlineError}
+          </Notice>
         ) : null}
 
         {notice ? (
-          <div className={styles.notice} role="status">
+          <Notice tone="success" role="status" title="อัปเดตแล้ว">
             {notice}
-          </div>
+          </Notice>
         ) : null}
 
         <div className={styles.grid}>
           <section className={styles.section} aria-labelledby="store-list">
-            <h2 className={styles.sectionTitle} id="store-list">
-              ร้านค้าในหน่วยงาน
-            </h2>
+            <div className={styles.sectionHeading}>
+              <div>
+                <h2 className={styles.sectionTitle} id="store-list">
+                  ร้านค้าในหน่วยงาน
+                </h2>
+                <p className={styles.sectionDescription}>
+                  ร้านค้าที่ปิดใช้งานจะไม่พร้อมสำหรับการใช้งานตามสถานะปัจจุบัน
+                </p>
+              </div>
+              <span className={styles.sectionMeta}>
+                {state.stores.length.toLocaleString("th-TH")} รายการ
+              </span>
+            </div>
 
             {state.stores.length === 0 ? (
               <EmptyState
@@ -356,23 +391,32 @@ export function StoreManagementView({
                     changingStatus ||
                     savingStoreId === store.storeId;
                   const nextStatus = toggledStoreStatus(store.status);
+                  const selected = selectedStore?.storeId === store.storeId;
 
                   return (
-                    <article className={styles.card} key={store.storeId}>
-                      <div className={styles.cardHeader}>
-                        <div className={styles.cardCopy}>
+                    <article
+                      className={[
+                        styles.row,
+                        selected ? styles.rowSelected : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ")}
+                      key={store.storeId}
+                      aria-current={selected ? "true" : undefined}
+                    >
+                      <div className={styles.rowMain}>
+                        <div className={styles.rowHeading}>
                           <h3 className={styles.cardTitle}>{store.name}</h3>
-                          <p className={styles.cardDescription}>
-                            {store.description || "ไม่มีคำอธิบาย"}
-                          </p>
-                          <span className={styles.meta}>
-                            อัปเดตล่าสุด {formatIsoDateTime(store.updatedAt)}
-                          </span>
+                          <Badge tone={statusTone(store.status)}>
+                            {storeStatusLabel(store.status)}
+                          </Badge>
                         </div>
-
-                        <Badge tone={statusTone(store.status)}>
-                          {storeStatusLabel(store.status)}
-                        </Badge>
+                        <p className={styles.cardDescription}>
+                          {store.description || "ยังไม่มีคำอธิบายร้านค้า"}
+                        </p>
+                        <span className={styles.meta}>
+                          อัปเดตล่าสุด {formatIsoDateTime(store.updatedAt)}
+                        </span>
                       </div>
 
                       <div className={styles.cardActions}>
@@ -385,7 +429,7 @@ export function StoreManagementView({
                             void handleEdit(store);
                           }}
                         >
-                          แก้ไขข้อมูล
+                          {selected ? "กำลังแก้ไข" : "แก้ไขข้อมูล"}
                         </Button>
 
                         <ConfirmDialog
@@ -411,7 +455,7 @@ export function StoreManagementView({
                           description={
                             nextStatus === "ACTIVE"
                               ? `เปิดใช้งานร้านค้า ${store.name} ใช่หรือไม่`
-                              : `ปิดใช้งานร้านค้า ${store.name} ใช่หรือไม่ การเปลี่ยนแปลงนี้อาจมีผลต่อการแสดงร้านค้าในหน้าลูกค้า`
+                              : `ปิดใช้งานร้านค้า ${store.name} ใช่หรือไม่ สถานะนี้อาจทำให้ร้านค้าไม่พร้อมแสดงในหน้าลูกค้า`
                           }
                           confirmLabel={
                             nextStatus === "ACTIVE"
@@ -432,103 +476,116 @@ export function StoreManagementView({
             )}
           </section>
 
-          <div className={styles.section}>
-            <section className={styles.panel}>
-              <div>
-                <h2 className={styles.sectionTitle}>สร้างร้านค้าใหม่</h2>
-                <p className={styles.description}>
-                  ร้านค้าที่สร้างใหม่จะเริ่มต้นเป็น ACTIVE ตาม Backend contract
-                </p>
+          <aside className={styles.panel}>
+            <div className={styles.panelHeading}>
+              <span className={styles.panelKicker}>เพิ่มพื้นที่ขาย</span>
+              <h2 className={styles.sectionTitle}>สร้างร้านค้าใหม่</h2>
+              <p className={styles.sectionDescription}>
+                ร้านค้าใหม่จะพร้อมใช้งานทันทีหลังสร้างสำเร็จ
+              </p>
+            </div>
+
+            <form className={styles.form} onSubmit={handleCreate}>
+              <TextField
+                id="store-create-name"
+                label="ชื่อร้านค้า"
+                value={createName}
+                onChange={(event) => {
+                  setCreateName(event.target.value);
+                  setCreateNameError(undefined);
+                  setInlineError(null);
+                }}
+                error={createNameError}
+                required
+                disabled={creating}
+              />
+
+              <TextareaField
+                id="store-create-description"
+                label="คำอธิบาย"
+                value={createDescription}
+                onChange={(event) => {
+                  setCreateDescription(event.target.value);
+                  setInlineError(null);
+                }}
+                disabled={creating}
+              />
+
+              <Button
+                type="submit"
+                size="large"
+                pending={creating}
+                pendingLabel="กำลังสร้างร้านค้า"
+              >
+                สร้างร้านค้า
+              </Button>
+            </form>
+          </aside>
+        </div>
+
+        {selectedStore ? (
+          <section className={styles.editPanel} aria-labelledby="store-edit-title">
+            <div className={styles.editHeader}>
+              <div className={styles.editMeta}>
+                <div className={styles.editTitleRow}>
+                  <h2 className={styles.sectionTitle} id="store-edit-title">
+                    แก้ไข {selectedStore.name}
+                  </h2>
+                  <Badge tone={statusTone(selectedStore.status)}>
+                    {storeStatusLabel(selectedStore.status)}
+                  </Badge>
+                </div>
+                <span className={styles.meta}>
+                  รหัสร้านค้า: {selectedStore.storeId}
+                </span>
               </div>
+              <Button
+                variant="quiet"
+                size="small"
+                onClick={() => setSelectedStore(null)}
+              >
+                ปิดส่วนแก้ไข
+              </Button>
+            </div>
 
-              <form className={styles.form} onSubmit={handleCreate}>
-                <TextField
-                  id="store-create-name"
-                  label="ชื่อร้านค้า"
-                  value={createName}
-                  onChange={(event) => {
-                    setCreateName(event.target.value);
-                    setCreateNameError(undefined);
-                  }}
-                  error={createNameError}
-                  required
-                  disabled={creating}
-                />
+            <form className={styles.editForm} onSubmit={handleSaveEdit}>
+              <TextField
+                id="store-edit-name"
+                label="ชื่อร้านค้า"
+                value={editName}
+                onChange={(event) => {
+                  setEditName(event.target.value);
+                  setEditNameError(undefined);
+                }}
+                error={editNameError}
+                required
+                disabled={savingStoreId === selectedStore.storeId}
+              />
 
-                <TextareaField
-                  id="store-create-description"
-                  label="คำอธิบาย"
-                  value={createDescription}
-                  onChange={(event) =>
-                    setCreateDescription(event.target.value)
-                  }
-                  disabled={creating}
-                />
+              <TextareaField
+                id="store-edit-description"
+                label="คำอธิบาย"
+                value={editDescription}
+                onChange={(event) => setEditDescription(event.target.value)}
+                disabled={savingStoreId === selectedStore.storeId}
+              />
 
+              <div className={styles.editActions}>
                 <Button
                   type="submit"
-                  pending={creating}
-                  pendingLabel="กำลังสร้าง"
+                  pending={savingStoreId === selectedStore.storeId}
+                  pendingLabel="กำลังบันทึก"
+                  disabled={!editDirty}
                 >
-                  สร้างร้านค้า
+                  บันทึกข้อมูล
                 </Button>
-              </form>
-            </section>
-
-            {selectedStore ? (
-              <section className={styles.panel}>
-                <div className={styles.editHeader}>
-                  <div className={styles.editMeta}>
-                    <h2 className={styles.sectionTitle}>แก้ไขร้านค้า</h2>
-                    <span className={styles.meta}>
-                      Store ID: {selectedStore.storeId}
-                    </span>
-                  </div>
-                  <Button
-                    variant="quiet"
-                    size="small"
-                    onClick={() => setSelectedStore(null)}
-                  >
-                    ปิด
-                  </Button>
-                </div>
-
-                <form className={styles.form} onSubmit={handleSaveEdit}>
-                  <TextField
-                    id="store-edit-name"
-                    label="ชื่อร้านค้า"
-                    value={editName}
-                    onChange={(event) => {
-                      setEditName(event.target.value);
-                      setEditNameError(undefined);
-                    }}
-                    error={editNameError}
-                    required
-                    disabled={savingStoreId === selectedStore.storeId}
-                  />
-
-                  <TextareaField
-                    id="store-edit-description"
-                    label="คำอธิบาย"
-                    value={editDescription}
-                    onChange={(event) =>
-                      setEditDescription(event.target.value)
-                    }
-                    disabled={savingStoreId === selectedStore.storeId}
-                  />
-
-                  <Button
-                    type="submit"
-                    pending={savingStoreId === selectedStore.storeId}
-                    pendingLabel="กำลังบันทึก"
-                  >
-                    บันทึกข้อมูล
-                  </Button>
-                </form>
-              </section>
-            ) : null}
-          </div>
-        </div>
+                {!editDirty ? (
+                  <span className={styles.meta}>ยังไม่มีข้อมูลที่เปลี่ยนแปลง</span>
+                ) : null}
+              </div>
+            </form>
+          </section>
+        ) : null}
       </main>
     </div>
   );

@@ -92,7 +92,7 @@ describe("CampaignManagementView", () => {
     await screen.findByText("Faculty Shirt Pre-order");
 
     fireEvent.change(
-      screen.getByLabelText(/ชื่อ Campaign/, {
+      screen.getByLabelText(/ชื่อแคมเปญ/, {
         selector: "#campaign-create-name",
       }),
       {
@@ -101,7 +101,7 @@ describe("CampaignManagementView", () => {
     );
 
     fireEvent.click(
-      screen.getByRole("button", { name: "สร้าง Campaign" }),
+      screen.getByRole("button", { name: "สร้างแคมเปญ" }),
     );
 
     await waitFor(() => {
@@ -117,7 +117,7 @@ describe("CampaignManagementView", () => {
 
     expect(
       await screen.findByText(
-        "สร้าง Campaign New Campaign เป็น DRAFT แล้ว",
+        "สร้างแคมเปญ New Campaign เป็นฉบับร่างแล้ว",
       ),
     ).toBeInTheDocument();
   });
@@ -141,7 +141,7 @@ describe("CampaignManagementView", () => {
     await screen.findByText("Faculty Shirt Pre-order");
 
     fireEvent.click(
-      screen.getByRole("button", { name: "ดู / แก้ไข" }),
+      screen.getByRole("button", { name: "ดูและแก้ไข" }),
     );
 
     expect(mocks.get).toHaveBeenCalledWith(
@@ -155,7 +155,7 @@ describe("CampaignManagementView", () => {
     });
 
     fireEvent.click(
-      screen.getByRole("button", { name: "บันทึก DRAFT" }),
+      screen.getByRole("button", { name: "บันทึกฉบับร่าง" }),
     );
 
     await waitFor(() => {
@@ -175,7 +175,7 @@ describe("CampaignManagementView", () => {
 
     expect(
       await screen.findByText(
-        "บันทึก Campaign Updated Campaign แล้ว",
+        "บันทึกแคมเปญ Updated Campaign แล้ว",
       ),
     ).toBeInTheDocument();
   });
@@ -205,13 +205,16 @@ describe("CampaignManagementView", () => {
 
     expect(
       await screen.findByText(
-        /Campaign นี้ไม่ใช่ DRAFT แล้ว/,
+        /หลังออกจากฉบับร่าง ข้อมูลแผนจะแสดงแบบอ่านอย่างเดียว/,
       ),
     ).toBeInTheDocument();
 
     expect(
-      screen.queryByRole("button", { name: "บันทึก DRAFT" }),
+      screen.queryByRole("button", { name: "บันทึกฉบับร่าง" }),
     ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "ปิดรับคำสั่งซื้อ" }),
+    ).toBeInTheDocument();
     expect(mocks.update).not.toHaveBeenCalled();
   });
 });

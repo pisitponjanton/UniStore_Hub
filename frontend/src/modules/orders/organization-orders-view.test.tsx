@@ -89,7 +89,7 @@ describe("OrganizationOrdersView", () => {
       target: { value: "PAYMENT_REJECTED" },
     });
     fireEvent.click(
-      screen.getByRole("button", { name: "ค้นหา / กรอง" }),
+      screen.getByRole("button", { name: "ใช้ตัวกรอง" }),
     );
 
     await waitFor(() => {

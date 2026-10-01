@@ -1,0 +1,234 @@
+.actionBar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.actionBarEnd {
+  justify-content: flex-end;
+}
+
+.filterToolbar {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.filterToolbarHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.filterToolbarTitle {
+  color: var(--ink);
+  font-size: var(--text-body);
+  font-weight: 600;
+}
+
+.filterToolbarSummary {
+  color: var(--ink-tertiary);
+  font-size: var(--text-caption);
+}
+
+.filterToolbarBody {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.filterToolbarControls {
+  min-width: 0;
+  flex: 1 1 520px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+  gap: var(--space-3);
+}
+
+.filterToolbarActions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.notice {
+  display: grid;
+  grid-template-columns: 3px minmax(0, 1fr);
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--ink-secondary);
+}
+
+.noticeMarker {
+  width: 3px;
+  min-height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--ink-tertiary);
+}
+
+.noticeContent {
+  min-width: 0;
+  display: grid;
+  gap: var(--space-1);
+}
+
+.noticeTitle {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.noticeBody {
+  color: inherit;
+  font-size: var(--text-body-sm);
+}
+
+.notice[data-tone="info"] {
+  color: var(--info);
+  background: var(--info-soft);
+}
+
+.notice[data-tone="success"] {
+  color: var(--success);
+  background: var(--success-soft);
+}
+
+.notice[data-tone="warning"] {
+  color: var(--warning);
+  background: var(--warning-soft);
+}
+
+.notice[data-tone="danger"] {
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.notice[data-tone="info"] .noticeMarker {
+  background: var(--info);
+}
+
+.notice[data-tone="success"] .noticeMarker {
+  background: var(--success);
+}
+
+.notice[data-tone="warning"] .noticeMarker {
+  background: var(--warning);
+}
+
+.notice[data-tone="danger"] .noticeMarker {
+  background: var(--danger);
+}
+
+.taskStatus {
+  display: grid;
+  grid-template-columns: 3px minmax(0, 1fr) auto;
+  gap: var(--space-4);
+  align-items: start;
+  padding: var(--space-4) 0;
+  border-top: 1px solid var(--line-soft);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.taskStatusMarker {
+  width: 3px;
+  min-height: 56px;
+  border-radius: var(--radius-pill);
+  background: var(--campus);
+}
+
+.taskStatusContent {
+  min-width: 0;
+  display: grid;
+  gap: var(--space-1);
+}
+
+.taskStatusLabel {
+  color: var(--ink-tertiary);
+  font-size: var(--text-caption);
+  font-weight: 600;
+}
+
+.taskStatusTitle {
+  color: var(--ink);
+  font-size: var(--text-title-sm);
+  font-weight: 600;
+}
+
+.taskStatusDescription {
+  max-width: var(--content-reading);
+  color: var(--ink-secondary);
+}
+
+.taskStatusMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  color: var(--ink-tertiary);
+  font-size: var(--text-caption);
+}
+
+.taskStatusActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.taskStatus[data-tone="info"] .taskStatusMarker {
+  background: var(--info);
+}
+
+.taskStatus[data-tone="success"] .taskStatusMarker {
+  background: var(--success);
+}
+
+.taskStatus[data-tone="warning"] .taskStatusMarker {
+  background: var(--warning);
+}
+
+.taskStatus[data-tone="danger"] .taskStatusMarker {
+  background: var(--danger);
+}
+
+@media (max-width: 720px) {
+  .filterToolbarBody,
+  .filterToolbarHeader {
+    display: grid;
+  }
+
+  .filterToolbarControls {
+    grid-template-columns: 1fr;
+  }
+
+  .filterToolbarActions,
+  .actionBar,
+  .taskStatusActions {
+    display: grid;
+    width: 100%;
+  }
+
+  .filterToolbarActions > *,
+  .actionBar > *,
+  .taskStatusActions > * {
+    width: 100%;
+  }
+
+  .taskStatus {
+    grid-template-columns: 3px minmax(0, 1fr);
+  }
+
+  .taskStatusActions {
+    grid-column: 2;
+    justify-content: stretch;
+  }
+}

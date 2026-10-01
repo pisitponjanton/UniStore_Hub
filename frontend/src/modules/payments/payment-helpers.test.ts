@@ -4,6 +4,9 @@ import type { OrderStatus } from "@/types";
 
 import {
   canSubmitPaymentSlip,
+  formatUploadFileSize,
+  getPaymentStatePresentation,
+  getPaymentStatusLabel,
   myPaymentHref,
   paymentOrderStateMessage,
 } from "./payment-helpers";
@@ -33,7 +36,7 @@ describe("customer payment helpers", () => {
     );
   });
 
-  it("presents payment-related order states without inventing a separate customer Payment DTO", () => {
+  it("presents payment-related order states without changing their contract", () => {
     expect(paymentOrderStateMessage("PAYMENT_REVIEW")).toContain(
       "รอเจ้าหน้าที่ตรวจสอบ",
     );
@@ -43,5 +46,30 @@ describe("customer payment helpers", () => {
     expect(paymentOrderStateMessage("PAID")).toContain(
       "ผ่านการอนุมัติ",
     );
+
+    expect(getPaymentStatePresentation("PENDING_PAYMENT")).toMatchObject({
+      title: "ยังไม่ได้ส่งหลักฐาน",
+      tone: "warning",
+    });
+    expect(getPaymentStatePresentation("PAYMENT_REJECTED")).toMatchObject({
+      title: "ต้องส่งหลักฐานใหม่",
+      tone: "danger",
+    });
+    expect(getPaymentStatePresentation("READY_FOR_PICKUP")).toMatchObject({
+      title: "ชำระเงินผ่านแล้ว",
+      tone: "success",
+    });
+  });
+
+  it("maps canonical Payment statuses to customer-facing labels", () => {
+    expect(getPaymentStatusLabel("PENDING_REVIEW")).toBe("รอตรวจสอบ");
+    expect(getPaymentStatusLabel("APPROVED")).toBe("อนุมัติแล้ว");
+    expect(getPaymentStatusLabel("REJECTED")).toBe("ไม่ผ่านการตรวจสอบ");
+  });
+
+  it("formats selected upload sizes for readable file confirmation", () => {
+    expect(formatUploadFileSize(512)).toBe("512 B");
+    expect(formatUploadFileSize(2048)).toBe("2.0 KiB");
+    expect(formatUploadFileSize(2 * 1024 * 1024)).toBe("2.00 MiB");
   });
 });

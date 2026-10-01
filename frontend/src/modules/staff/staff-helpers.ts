@@ -46,6 +46,6 @@ export function isFinalActiveAdmin(
 
 export function staffRoleLabel(role: MembershipRole): string {
   return role === "ORGANIZATION_ADMIN"
-    ? "Organization Admin"
-    : "Staff";
+    ? "ผู้ดูแลหน่วยงาน"
+    : "เจ้าหน้าที่";
 }

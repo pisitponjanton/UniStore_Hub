@@ -70,10 +70,10 @@
 }
 
 .buttonSmall {
-  min-height: 36px;
+  min-height: var(--control-height);
   padding-inline: var(--space-3);
   border-radius: var(--radius-sm);
-  font-size: var(--text-caption);
+  font-size: var(--text-body-sm);
 }
 
 .buttonLarge {
@@ -117,7 +117,7 @@
 }
 
 .fieldControl:hover:not(:disabled) {
-  border-color: var(--line-strong);
+  border-color: var(--ink-secondary);
 }
 
 .fieldControl:disabled {
@@ -152,9 +152,9 @@
   width: fit-content;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-2);
   min-height: 24px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 2px 9px;
   font-size: var(--text-caption);
   font-weight: 600;
@@ -200,6 +200,35 @@
   border-radius: var(--radius-lg);
 }
 
+.cardMuted {
+  background: var(--surface-muted);
+}
+
+.cardFlat {
+  background: transparent;
+  border-color: transparent;
+  border-radius: 0;
+}
+
+.cardActions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.cardCompact .cardHeader {
+  padding: var(--space-4) var(--space-4) var(--space-2);
+}
+
+.cardCompact .cardBody {
+  padding: var(--space-3) var(--space-4) var(--space-4);
+}
+
+.cardCompact .cardFooter {
+  padding: var(--space-2) var(--space-4) var(--space-4);
+}
+
 .cardHeader {
   display: flex;
   align-items: flex-start;
@@ -234,7 +263,7 @@
   position: fixed;
   inset: 0;
   z-index: 50;
-  background: rgba(9, 16, 18, 0.42);
+  background: var(--overlay-scrim);
   backdrop-filter: blur(2px);
   animation: fadeIn var(--motion-standard) var(--motion-ease-out);
 }
@@ -244,22 +273,23 @@
   z-index: 51;
   top: 50%;
   left: 50%;
-  width: min(calc(100vw - 32px), 520px);
-  max-height: min(86dvh, 720px);
-  overflow: auto;
-  overscroll-behavior: contain;
-  scrollbar-gutter: stable;
+  width: min(calc(100vw - 32px), 560px);
+  max-height: min(88dvh, 760px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   transform: translate(-50%, -50%);
   background: var(--surface-raised);
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
-  padding: var(--space-6);
   animation: dialogIn var(--motion-standard) var(--motion-ease-out);
 }
 
 .dialogHeader {
   display: grid;
   gap: var(--space-2);
+  padding: var(--space-6) calc(var(--space-6) + 40px) var(--space-4) var(--space-6);
+  border-bottom: 1px solid var(--line-soft);
 }
 
 .dialogTitle {
@@ -271,7 +301,11 @@
 }
 
 .dialogBody {
-  margin-top: var(--space-5);
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  padding: var(--space-5) var(--space-6);
 }
 
 .dialogFooter {
@@ -279,7 +313,8 @@
   justify-content: flex-end;
   flex-wrap: wrap;
   gap: var(--space-3);
-  margin-top: var(--space-6);
+  padding: var(--space-4) var(--space-6) var(--space-6);
+  border-top: 1px solid var(--line-soft);
 }
 
 .dialogClose {
@@ -321,7 +356,7 @@
   left: 1px;
   width: 16px;
   height: 2px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: currentColor;
 }
 
@@ -383,8 +418,19 @@
   background: var(--surface-raised);
 }
 
+.tableBodyRow[data-selected="true"] {
+  background: var(--campus-soft);
+  box-shadow: inset 3px 0 0 var(--campus);
+}
+
+.tableCompact .tableHeaderCell,
+.tableCompact .tableCell {
+  padding-top: var(--space-2);
+  padding-bottom: var(--space-2);
+}
+
 .statePanel {
-  min-height: 168px;
+  min-height: 152px;
   display: grid;
   place-items: center;
   padding: var(--space-8) var(--space-5);
@@ -401,12 +447,33 @@
   gap: var(--space-3);
 }
 
-.stateEyebrow {
+.stateLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
   color: var(--ink-tertiary);
   font-size: var(--text-caption);
   font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+}
+
+.stateDot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-pill);
+  background: currentColor;
+}
+
+.statePanel[data-state-kind="error"] .stateLabel,
+.statePanel[data-state-kind="forbidden"] .stateLabel {
+  color: var(--danger);
+}
+
+.statePanel[data-state-kind="unauthorized"] .stateLabel {
+  color: var(--warning);
+}
+
+.statePanel[data-state-kind="empty"] .stateLabel {
+  color: var(--ink-tertiary);
 }
 
 .stateTitle {
@@ -437,7 +504,7 @@
 .pageShell {
   width: min(100%, var(--content-max));
   margin-inline: auto;
-  padding: var(--space-8) var(--space-6) var(--space-12);
+  padding: var(--page-block-start) var(--page-gutter) var(--page-block-end);
 }
 
 .pageHeader {
@@ -445,7 +512,15 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-6);
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-5);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.pageHeaderCustomer {
   margin-bottom: var(--space-8);
+  padding-bottom: 0;
+  border-bottom: 0;
 }
 
 .pageHeadingGroup {
@@ -458,8 +533,6 @@
   color: var(--campus);
   font-size: var(--text-caption);
   font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
 }
 
 .pageTitleRow {
@@ -470,10 +543,10 @@
 
 .ledgerMarker {
   flex: 0 0 auto;
-  width: 4px;
+  width: 3px;
   height: 28px;
   margin-top: 2px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--campus);
 }
 
@@ -482,8 +555,16 @@
 }
 
 .pageDescription {
-  max-width: 720px;
+  max-width: var(--content-reading);
   color: var(--ink-secondary);
+  font-size: var(--text-body);
+}
+
+.pageHeaderCustomer .pageTitle {
+  font-size: var(--text-display);
+}
+
+.pageHeaderCustomer .pageDescription {
   font-size: var(--text-body-lg);
 }
 
@@ -510,7 +591,7 @@
 
 @media (max-width: 720px) {
   .pageShell {
-    padding: var(--space-6) var(--space-4) var(--space-10);
+    padding: var(--space-6) var(--page-gutter-compact) var(--space-10);
   }
 
   .pageHeader {
@@ -527,12 +608,17 @@
     flex: 1 1 auto;
   }
 
-  .dialogContent {
-    padding: var(--space-5);
+  .dialogHeader {
+    padding: var(--space-5) calc(var(--space-5) + 40px) var(--space-4) var(--space-5);
+  }
+
+  .dialogBody {
+    padding: var(--space-4) var(--space-5);
   }
 
   .dialogFooter {
     display: grid;
+    padding: var(--space-4) var(--space-5) var(--space-5);
   }
 }
 

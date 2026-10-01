@@ -8,6 +8,8 @@ import {
   ErrorState,
   ForbiddenState,
   LoadingState,
+  Notice,
+  TaskStatus,
   UnauthorizedState,
 } from "@/components";
 import {
@@ -22,6 +24,7 @@ import {
 import { ApiClientError } from "@/services";
 import type { OrderDTO, PaymentDTO } from "@/types";
 import {
+  formatIsoDateTime,
   formatSatang,
   getRequiredQueryId,
   validateUploadCandidate,
@@ -30,7 +33,9 @@ import {
 import { DirectUploadError, putFileToPresignedUrl } from "./direct-upload";
 import {
   canSubmitPaymentSlip,
-  paymentOrderStateMessage,
+  formatUploadFileSize,
+  getPaymentStatePresentation,
+  getPaymentStatusLabel,
 } from "./payment-helpers";
 import styles from "./payment-view.module.css";
 import { paymentService } from "./payment-service";
@@ -51,19 +56,47 @@ type SubmitStage =
   | "submitting"
   | "refreshing";
 
-function stageLabel(stage: SubmitStage): string | null {
-  switch (stage) {
-    case "signing":
-      return "กำลังขอลิงก์อัปโหลดใหม่จาก Backend";
-    case "uploading":
-      return "กำลังอัปโหลดหลักฐานไปยังพื้นที่จัดเก็บโดยตรง";
-    case "submitting":
-      return "กำลังส่งข้อมูลหลักฐานให้ Backend";
-    case "refreshing":
-      return "กำลังอัปเดตสถานะคำสั่งซื้อ";
-    case "idle":
-      return null;
+const stageSequence: Array<Exclude<SubmitStage, "idle">> = [
+  "signing",
+  "uploading",
+  "submitting",
+  "refreshing",
+];
+
+const stageCopy: Record<
+  Exclude<SubmitStage, "idle">,
+  { label: string; description: string }
+> = {
+  signing: {
+    label: "เตรียมการอัปโหลด",
+    description: "กำลังขอลิงก์อัปโหลดที่ใช้ได้กับคำสั่งซื้อนี้",
+  },
+  uploading: {
+    label: "อัปโหลดหลักฐาน",
+    description: "กำลังส่งไฟล์หลักฐานไปยังพื้นที่จัดเก็บ",
+  },
+  submitting: {
+    label: "ส่งหลักฐานเข้าตรวจสอบ",
+    description: "กำลังแจ้งระบบให้ใช้ไฟล์ที่อัปโหลดสำหรับคำสั่งซื้อนี้",
+  },
+  refreshing: {
+    label: "ตรวจสอบสถานะล่าสุด",
+    description: "กำลังโหลดสถานะคำสั่งซื้อและการชำระเงินหลังส่งหลักฐาน",
+  },
+};
+
+function getStageState(
+  item: Exclude<SubmitStage, "idle">,
+  current: Exclude<SubmitStage, "idle">,
+): "done" | "current" | "upcoming" {
+  const itemIndex = stageSequence.indexOf(item);
+  const currentIndex = stageSequence.indexOf(current);
+
+  if (itemIndex < currentIndex) {
+    return "done";
   }
+
+  return itemIndex === currentIndex ? "current" : "upcoming";
 }
 
 export function MyPaymentView() {
@@ -198,10 +231,7 @@ export function MyPaymentView() {
       return;
     }
 
-    const validation = validateUploadCandidate(
-      selectedFile,
-      "paymentSlip",
-    );
+    const validation = validateUploadCandidate(selectedFile, "paymentSlip");
 
     if (!validation.ok) {
       handleFileChange(selectedFile);
@@ -251,7 +281,7 @@ export function MyPaymentView() {
       if (error instanceof DirectUploadError) {
         setServerError(
           error.status === 403
-            ? "ลิงก์อัปโหลดหมดอายุหรือไม่สามารถใช้งานได้ กรุณากดส่งใหม่ ระบบจะขอลิงก์ใหม่ให้อัตโนมัติ"
+            ? "ลิงก์อัปโหลดหมดอายุหรือใช้ไม่ได้ กรุณากดส่งอีกครั้ง ระบบจะขอลิงก์ใหม่ให้อัตโนมัติ"
             : "อัปโหลดหลักฐานไม่สำเร็จ กรุณาลองส่งใหม่อีกครั้ง",
         );
       } else if (
@@ -259,7 +289,7 @@ export function MyPaymentView() {
         error.code === "PAYMENT_NOT_REVIEWABLE"
       ) {
         setServerError(
-          "ไม่สามารถส่งหลักฐานในสถานะแคมเปญปัจจุบันได้ กรุณาตรวจสอบคำสั่งซื้ออีกครั้ง",
+          "ไม่สามารถส่งหลักฐานในสถานะแคมเปญปัจจุบันได้ กรุณากลับไปตรวจสอบคำสั่งซื้อ",
         );
       } else {
         setServerError(
@@ -278,7 +308,10 @@ export function MyPaymentView() {
       <div className={styles.page}>
         <main className={styles.stateWrap}>
           {state.status === "loading" ? (
-            <LoadingState title="กำลังโหลดข้อมูลการชำระเงิน" />
+            <LoadingState
+              title="กำลังโหลดข้อมูลการชำระเงิน"
+              description="กำลังตรวจสอบคำสั่งซื้อและสถานะหลักฐานล่าสุด"
+            />
           ) : null}
           {state.status === "invalid" ? (
             <ErrorState
@@ -310,7 +343,8 @@ export function MyPaymentView() {
 
   const { order } = state;
   const canSubmit = canSubmitPaymentSlip(order.status);
-  const currentStageLabel = stageLabel(stage);
+  const paymentState = getPaymentStatePresentation(order.status);
+  const activeStage = stage === "idle" ? null : stage;
 
   return (
     <div className={styles.page}>
@@ -320,57 +354,88 @@ export function MyPaymentView() {
         </Link>
 
         <header className={styles.header} data-ledger-heading>
-          <span className={styles.eyebrow}>Payment</span>
-          <h1 className={styles.title}>การชำระเงิน</h1>
-          <p className={styles.description}>
-            อัปโหลดหลักฐานโดยตรงไปยังพื้นที่จัดเก็บผ่านลิงก์ที่ Backend ออกให้
-            จากนั้นระบบจะส่งเฉพาะ object key กลับไปยืนยัน
-          </p>
+          <div>
+            <h1 className={styles.title}>การชำระเงิน</h1>
+            <p className={styles.description}>
+              ตรวจสอบยอด เลือกหลักฐาน และติดตามผลการตรวจสอบจากหน้านี้
+            </p>
+          </div>
+          <div className={styles.headerAmount}>
+            <span className={styles.metaLabel}>ยอดที่ต้องชำระ</span>
+            <strong className={styles.amount}>{formatSatang(order.total)}</strong>
+          </div>
         </header>
 
-        <section className={styles.panel}>
-          <div className={styles.statusRow}>
-            <div className={styles.meta}>
-              <span className={styles.metaLabel}>เลขคำสั่งซื้อ</span>
-              <span className={styles.metaValue}>{order.orderId}</span>
-            </div>
-            <OrderStatusBadge status={order.status} />
+        <TaskStatus
+          tone={paymentState.tone}
+          label={<OrderStatusBadge status={order.status} />}
+          title={paymentState.title}
+          description={paymentState.description}
+          metadata={
+            <span className={styles.orderCode}>
+              คำสั่งซื้อ {order.orderId}
+            </span>
+          }
+        />
+
+        <section className={styles.paymentFacts} aria-label="ข้อมูลการชำระเงิน">
+          <div>
+            <span className={styles.metaLabel}>ยอดคำสั่งซื้อ</span>
+            <strong className={styles.metaValue}>
+              {formatSatang(order.total)}
+            </strong>
           </div>
-
-          <div className={styles.meta}>
-            <span className={styles.metaLabel}>ยอดรวม</span>
-            <span className={styles.amount}>{formatSatang(order.total)}</span>
+          <div>
+            <span className={styles.metaLabel}>สถานะหลักฐาน</span>
+            <strong className={styles.metaValue}>
+              {latestPayment
+                ? getPaymentStatusLabel(latestPayment.status)
+                : "ยังไม่ได้ส่ง"}
+            </strong>
           </div>
-
-          <div className={styles.notice} role="status">
-            {paymentOrderStateMessage(order.status)}
+          <div>
+            <span className={styles.metaLabel}>อัปเดตล่าสุด</span>
+            <strong className={styles.metaValue}>
+              {latestPayment
+                ? formatIsoDateTime(latestPayment.updatedAt)
+                : formatIsoDateTime(order.updatedAt)}
+            </strong>
           </div>
-
-          {latestPayment ? (
-            <div className={styles.meta}>
-              <span className={styles.metaLabel}>สถานะ Payment ปัจจุบัน</span>
-              <span className={styles.metaValue}>
-                {latestPayment.status}
-              </span>
-            </div>
-          ) : null}
-
-          {order.status === "PAYMENT_REJECTED" && latestPayment ? (
-            <div className={styles.rejectedNotice} role="alert">
-              <strong>การชำระเงินถูกปฏิเสธ</strong>
-              <div>
-                เหตุผล: {latestPayment.rejectReason}
-              </div>
-              <div>
-                สามารถเลือกหลักฐานใหม่และส่งซ้ำได้ โดยระบบจะใช้ Payment
-                record เดิมและล้างข้อมูลการตรวจครั้งก่อนหลังส่งใหม่
-              </div>
-            </div>
-          ) : null}
         </section>
 
+        {order.status === "PAYMENT_REJECTED" && latestPayment ? (
+          <Notice
+            tone="danger"
+            role="alert"
+            title="เหตุผลที่หลักฐานไม่ผ่านการตรวจสอบ"
+          >
+            <strong className={styles.rejectReason}>
+              {latestPayment.rejectReason || "ไม่พบเหตุผลจากระบบ"}
+            </strong>
+            <span className={styles.rejectHelp}>
+              เลือกหลักฐานใหม่ด้านล่างแล้วส่งอีกครั้ง ระบบจะใช้รายการชำระเงินเดิมและนำหลักฐานใหม่เข้าสู่การตรวจสอบ
+            </span>
+          </Notice>
+        ) : null}
+
         {canSubmit ? (
-          <section className={styles.panel}>
+          <section className={styles.uploadSection} aria-labelledby="payment-upload-title">
+            <div className={styles.sectionHeading}>
+              <div>
+                <span className={styles.stepLabel}>
+                  {order.status === "PAYMENT_REJECTED"
+                    ? "ส่งหลักฐานใหม่"
+                    : "ส่งหลักฐาน"}
+                </span>
+                <h2 className={styles.sectionTitle} id="payment-upload-title">
+                  เลือกไฟล์หลักฐานการชำระเงิน
+                </h2>
+              </div>
+              <p className={styles.sectionDescription}>
+                รองรับ JPEG, PNG หรือ WebP ขนาดไม่เกิน 10 MiB
+              </p>
+            </div>
+
             <form className={styles.uploadForm} onSubmit={handleSubmit}>
               <div className={styles.fileField}>
                 <label className={styles.fileLabel} htmlFor="payment-slip">
@@ -393,11 +458,8 @@ export function MyPaymentView() {
                       : "payment-slip-hint"
                   }
                 />
-                <span
-                  className={styles.fileHint}
-                  id="payment-slip-hint"
-                >
-                  JPEG, PNG หรือ WebP ขนาดไม่เกิน 10 MiB
+                <span className={styles.fileHint} id="payment-slip-hint">
+                  เลือกรูปที่เห็นยอด วันเวลา และรายละเอียดการชำระเงินชัดเจน
                 </span>
                 {fileError ? (
                   <span
@@ -410,17 +472,59 @@ export function MyPaymentView() {
                 ) : null}
               </div>
 
-              {currentStageLabel ? (
-                <div className={styles.progress} aria-live="polite">
-                  <strong>กำลังดำเนินการ</strong>
-                  <span>{currentStageLabel}</span>
+              {selectedFile ? (
+                <div className={styles.selectedFile} aria-live="polite">
+                  <div>
+                    <span className={styles.selectedFileLabel}>
+                      ไฟล์ที่เลือก
+                    </span>
+                    <strong className={styles.selectedFileName}>
+                      {selectedFile.name}
+                    </strong>
+                  </div>
+                  <span className={styles.selectedFileSize}>
+                    {formatUploadFileSize(selectedFile.size)}
+                  </span>
+                </div>
+              ) : (
+                <div className={styles.noFileState}>
+                  ยังไม่ได้เลือกไฟล์หลักฐาน
+                </div>
+              )}
+
+              {activeStage ? (
+                <div
+                  className={styles.progressPanel}
+                  role="status"
+                  aria-live="polite"
+                  aria-label="ความคืบหน้าการส่งหลักฐาน"
+                >
+                  <div className={styles.progressCurrent}>
+                    <strong>{stageCopy[activeStage].label}</strong>
+                    <span>{stageCopy[activeStage].description}</span>
+                  </div>
+                  <ol className={styles.progressSteps}>
+                    {stageSequence.map((item) => {
+                      const itemState = getStageState(item, activeStage);
+                      return (
+                        <li
+                          key={item}
+                          className={styles.progressStep}
+                          data-state={itemState}
+                        >
+                          <span className={styles.progressMarker} aria-hidden="true" />
+                          <span>{stageCopy[item].label}</span>
+                        </li>
+                      );
+                    })}
+                  </ol>
                 </div>
               ) : null}
 
               {serverError ? (
-                <div className={styles.serverError} role="alert">
+                <Notice tone="danger" role="alert" title="ส่งหลักฐานไม่สำเร็จ">
                   {serverError}
-                </div>
+                </Notice>
               ) : null}
 
               <div className={styles.actions}>
@@ -435,15 +539,41 @@ export function MyPaymentView() {
                     ? "ส่งหลักฐานใหม่"
                     : "ส่งหลักฐานการชำระเงิน"}
                 </Button>
+                <span className={styles.submitHint}>
+                  หลังส่งสำเร็จ สถานะจะเปลี่ยนเป็นรอตรวจสอบ
+                </span>
               </div>
             </form>
           </section>
         ) : null}
 
+        {!canSubmit && latestPayment ? (
+          <section className={styles.reviewSummary} aria-label="สถานะหลักฐานล่าสุด">
+            <div className={styles.sectionHeading}>
+              <div>
+                <span className={styles.stepLabel}>หลักฐานล่าสุด</span>
+                <h2 className={styles.sectionTitle}>
+                  {getPaymentStatusLabel(latestPayment.status)}
+                </h2>
+              </div>
+              <span className={styles.paymentId}>
+                {latestPayment.paymentId}
+              </span>
+            </div>
+            <p className={styles.reviewDescription}>
+              {latestPayment.status === "PENDING_REVIEW"
+                ? "ระบบได้รับหลักฐานแล้ว ขณะนี้กำลังรอเจ้าหน้าที่ตรวจสอบ"
+                : latestPayment.status === "APPROVED"
+                  ? "หลักฐานได้รับการอนุมัติแล้ว ไม่ต้องส่งหลักฐานเพิ่มเติม"
+                  : "หลักฐานล่าสุดไม่ผ่านการตรวจสอบ"}
+            </p>
+          </section>
+        ) : null}
+
         {serverError && !canSubmit ? (
-          <div className={styles.serverError} role="alert">
+          <Notice tone="danger" role="alert" title="ไม่สามารถดำเนินการได้">
             {serverError}
-          </div>
+          </Notice>
         ) : null}
       </main>
     </div>

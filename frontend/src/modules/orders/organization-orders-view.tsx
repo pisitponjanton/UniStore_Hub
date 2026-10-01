@@ -3,12 +3,12 @@
 import { useEffect, useState, type FormEvent } from "react";
 
 import {
-  Badge,
   Button,
   EmptyState,
   ErrorState,
   ForbiddenState,
   LoadingState,
+  Notice,
   SelectField,
   TextField,
   UnauthorizedState,
@@ -272,168 +272,227 @@ export function OrganizationOrdersView({
       </div>
     );
   }
-
   const hasFilters =
     Boolean(appliedFilters.campaignId) ||
     Boolean(appliedFilters.customerId) ||
     Boolean(appliedFilters.status);
+  const paymentReviewCount = state.orders.filter(
+    (order) => order.status === "PAYMENT_REVIEW",
+  ).length;
+  const paymentActionCount = state.orders.filter(
+    (order) =>
+      order.status === "PENDING_PAYMENT" ||
+      order.status === "PAYMENT_REJECTED",
+  ).length;
+  const fulfillmentCount = state.orders.filter((order) =>
+    [
+      "CONFIRMED",
+      "IN_PRODUCTION",
+      "READY_FOR_PICKUP",
+    ].includes(order.status),
+  ).length;
 
   return (
     <div className={styles.page}>
       <main className={styles.main}>
         <header className={styles.header}>
           <div className={styles.headerCopy} data-ledger-heading>
-            <span className={styles.eyebrow}>Organization orders</span>
             <h1 className={styles.title}>คำสั่งซื้อของหน่วยงาน</h1>
             <p className={styles.description}>
-              Staff และ Organization Admin สามารถค้นหาและดู Order
-              ภายในหน่วยงานได้ โดยใช้เฉพาะตัวกรองที่ Backend รองรับ:
-              Campaign, Customer ID และสถานะ
+              ค้นหาและติดตามคำสั่งซื้อตามแคมเปญ ลูกค้า และสถานะ เพื่อไปยังรายการที่ต้องดำเนินการต่อได้เร็วขึ้น
             </p>
           </div>
-
-          <Badge tone="info">
-            {state.orders.length} รายการในหน้าปัจจุบัน
-          </Badge>
         </header>
 
-        <form className={styles.filterPanel} onSubmit={applyFilters}>
-          <div className={styles.filters}>
-            <TextField
-              id="organization-orders-campaign"
-              label="Campaign ID"
-              value={draftCampaignId}
-              onChange={(event) =>
-                setDraftCampaignId(event.target.value)
-              }
-              placeholder="กรองด้วย Campaign ID"
-              disabled={filtering}
-            />
+        <section className={styles.summaryStrip} aria-label="สรุปคำสั่งซื้อที่โหลด">
+          <div>
+            <span className={styles.summaryLabel}>รายการที่โหลด</span>
+            <strong>{state.orders.length}</strong>
+          </div>
+          <div>
+            <span className={styles.summaryLabel}>รอตรวจการชำระเงิน</span>
+            <strong>{paymentReviewCount}</strong>
+          </div>
+          <div>
+            <span className={styles.summaryLabel}>รอชำระหรือแก้ไขการชำระ</span>
+            <strong>{paymentActionCount}</strong>
+          </div>
+          <div>
+            <span className={styles.summaryLabel}>กำลังดำเนินการหลังยืนยัน</span>
+            <strong>{fulfillmentCount}</strong>
+          </div>
+        </section>
 
-            <TextField
-              id="organization-orders-customer"
-              label="Customer ID"
-              value={draftCustomerId}
-              onChange={(event) =>
-                setDraftCustomerId(event.target.value)
-              }
-              placeholder="กรองด้วย Customer ID"
-              disabled={filtering}
-            />
-
-            <SelectField
-              id="organization-orders-status"
-              label="สถานะ Order"
-              value={draftStatus}
-              onChange={(event) =>
-                setDraftStatus(
-                  event.target.value as OrderStatus | "",
-                )
-              }
-              disabled={filtering}
-            >
-              <option value="">ทุกสถานะ</option>
-              {ORDER_STATUSES.map((status) => (
-                <option key={status} value={status}>
-                  {getOrderStatusLabel(status)}
-                </option>
-              ))}
-            </SelectField>
+        <section className={styles.filterPanel} aria-labelledby="order-filter-title">
+          <div className={styles.filterHeading}>
+            <div>
+              <h2 className={styles.sectionTitle} id="order-filter-title">
+                ค้นหาและกรอง
+              </h2>
+              <p className={styles.sectionDescription}>
+                ใช้รหัสแคมเปญ รหัสลูกค้า หรือสถานะร่วมกันได้
+              </p>
+            </div>
+            <div className={styles.appliedFilters} role="group" aria-label="ตัวกรองที่ใช้อยู่">
+              {hasFilters ? (
+                <>
+                  {appliedFilters.campaignId ? (
+                    <span>Campaign: {appliedFilters.campaignId}</span>
+                  ) : null}
+                  {appliedFilters.customerId ? (
+                    <span>Customer: {appliedFilters.customerId}</span>
+                  ) : null}
+                  {appliedFilters.status ? (
+                    <span>
+                      สถานะ: {getOrderStatusLabel(appliedFilters.status)}
+                    </span>
+                  ) : null}
+                </>
+              ) : (
+                <span>แสดงทุกคำสั่งซื้อ</span>
+              )}
+            </div>
           </div>
 
-          <div className={styles.filterActions}>
-            <Button
-              type="submit"
-              pending={filtering}
-              pendingLabel="กำลังค้นหา"
-            >
-              ค้นหา / กรอง
-            </Button>
-            <Button
-              type="button"
-              variant="quiet"
-              disabled={filtering}
-              onClick={() => {
-                void clearFilters();
-              }}
-            >
-              ล้างตัวกรอง
-            </Button>
-          </div>
-        </form>
+          <form className={styles.filterForm} onSubmit={applyFilters}>
+            <div className={styles.filters}>
+              <TextField
+                id="organization-orders-campaign"
+                label="Campaign ID"
+                value={draftCampaignId}
+                onChange={(event) =>
+                  setDraftCampaignId(event.target.value)
+                }
+                placeholder="เช่น campaign-..."
+                disabled={filtering}
+              />
+
+              <TextField
+                id="organization-orders-customer"
+                label="Customer ID"
+                value={draftCustomerId}
+                onChange={(event) =>
+                  setDraftCustomerId(event.target.value)
+                }
+                placeholder="เช่น customer-..."
+                disabled={filtering}
+              />
+
+              <SelectField
+                id="organization-orders-status"
+                label="สถานะ Order"
+                value={draftStatus}
+                onChange={(event) =>
+                  setDraftStatus(
+                    event.target.value as OrderStatus | "",
+                  )
+                }
+                disabled={filtering}
+              >
+                <option value="">ทุกสถานะ</option>
+                {ORDER_STATUSES.map((status) => (
+                  <option key={status} value={status}>
+                    {getOrderStatusLabel(status)}
+                  </option>
+                ))}
+              </SelectField>
+            </div>
+
+            <div className={styles.filterActions}>
+              <Button
+                type="submit"
+                pending={filtering}
+                pendingLabel="กำลังค้นหา"
+              >
+                ใช้ตัวกรอง
+              </Button>
+              <Button
+                type="button"
+                variant="quiet"
+                disabled={
+                  filtering ||
+                  (!hasFilters &&
+                    !draftCampaignId.trim() &&
+                    !draftCustomerId.trim() &&
+                    !draftStatus)
+                }
+                onClick={() => {
+                  void clearFilters();
+                }}
+              >
+                แสดงทั้งหมด
+              </Button>
+            </div>
+          </form>
+        </section>
 
         {inlineError ? (
-          <div className={styles.inlineError} role="alert">
+          <Notice tone="danger" role="alert" title="โหลดรายการไม่สำเร็จ">
             {inlineError}
-          </div>
+          </Notice>
         ) : null}
 
         <section className={styles.section} aria-labelledby="orders-list">
-          <h2 className={styles.sectionTitle} id="orders-list">
-            รายการ Order
-          </h2>
+          <div className={styles.sectionHeading}>
+            <div>
+              <h2 className={styles.sectionTitle} id="orders-list">
+                รายการคำสั่งซื้อ
+              </h2>
+              <p className={styles.sectionDescription}>
+                สถานะและยอดรวมในแต่ละรายการเป็นข้อมูลล่าสุดที่โหลดจากระบบ
+              </p>
+            </div>
+            <span className={styles.sectionMeta}>
+              {state.orders.length.toLocaleString("th-TH")} รายการ
+            </span>
+          </div>
 
           {state.orders.length === 0 ? (
             <EmptyState
               title="ไม่พบคำสั่งซื้อ"
               description={
                 hasFilters
-                  ? "ไม่มี Order ที่ตรงกับตัวกรองปัจจุบัน"
-                  : "หน่วยงานนี้ยังไม่มี Order"
+                  ? "ไม่มีคำสั่งซื้อที่ตรงกับตัวกรองปัจจุบัน"
+                  : "หน่วยงานนี้ยังไม่มีคำสั่งซื้อ"
               }
             />
           ) : (
             <div className={styles.list}>
               {state.orders.map((order) => (
-                <article className={styles.card} key={order.orderId}>
-                  <div className={styles.cardCopy}>
-                    <h3 className={styles.cardTitle}>
-                      Order {order.orderId}
-                    </h3>
-                    <div className={styles.metaGrid}>
-                      <div className={styles.metaItem}>
-                        <span className={styles.metaLabel}>
-                          Customer ID
-                        </span>
-                        <span className={styles.metaValue}>
-                          {order.customerId}
-                        </span>
-                      </div>
-                      <div className={styles.metaItem}>
-                        <span className={styles.metaLabel}>
-                          Campaign ID
-                        </span>
-                        <span className={styles.metaValue}>
-                          {order.campaignId}
-                        </span>
-                      </div>
-                      <div className={styles.metaItem}>
-                        <span className={styles.metaLabel}>
-                          สร้างเมื่อ
-                        </span>
-                        <span className={styles.metaValue}>
-                          {formatIsoDateTime(order.createdAt)}
-                        </span>
-                      </div>
+                <article className={styles.row} key={order.orderId}>
+                  <div className={styles.rowMain}>
+                    <div className={styles.rowHeading}>
+                      <h3 className={styles.cardTitle}>
+                        Order {order.orderId}
+                      </h3>
+                      <OrderStatusBadge status={order.status} />
+                    </div>
+                    <div className={styles.metaRow}>
+                      <span className={styles.meta}>
+                        Customer: {order.customerId}
+                      </span>
+                      <span className={styles.meta}>
+                        Campaign: {order.campaignId}
+                      </span>
+                      <span className={styles.meta}>
+                        สร้างเมื่อ {formatIsoDateTime(order.createdAt)}
+                      </span>
                     </div>
                   </div>
 
-                  <div className={styles.cardAside}>
-                    <OrderStatusBadge status={order.status} />
+                  <div className={styles.rowAside}>
                     <span className={styles.total}>
                       {formatSatang(order.total)}
                     </span>
-                    <div className={styles.cardActions}>
-                      <a
-                        className={styles.detailLink}
-                        href={organizationOrderHref(
-                          organizationId,
-                          order.orderId,
-                        )}
-                      >
-                        ดูรายละเอียด
-                      </a>
-                    </div>
+                    <a
+                      className={styles.detailLink}
+                      href={organizationOrderHref(
+                        organizationId,
+                        order.orderId,
+                      )}
+                    >
+                      ดูรายละเอียด
+                    </a>
                   </div>
                 </article>
               ))}
@@ -445,7 +504,7 @@ export function OrganizationOrdersView({
               <Button
                 variant="secondary"
                 pending={loadingMore}
-                pendingLabel="กำลังโหลด"
+                pendingLabel="กำลังโหลดเพิ่มเติม"
                 onClick={() => {
                   void loadMore();
                 }}

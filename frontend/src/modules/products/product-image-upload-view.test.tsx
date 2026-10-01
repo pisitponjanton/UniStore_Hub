@@ -223,7 +223,7 @@ describe("ProductImageUploadView", () => {
 
     expect(
       await screen.findByText(
-        "ลิงก์อัปโหลดหมดอายุหรือถูกปฏิเสธ กรุณากดอัปโหลดอีกครั้งเพื่อขอ Pre-signed URL ใหม่",
+        "ลิงก์อัปโหลดหมดอายุหรือถูกปฏิเสธ กรุณากดอัปโหลดอีกครั้งเพื่อสร้างลิงก์ใหม่",
       ),
     ).toBeInTheDocument();
 

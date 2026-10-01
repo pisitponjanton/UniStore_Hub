@@ -91,22 +91,22 @@ export function CampaignView() {
           {state.status === "invalid" ? (
             <ErrorState
               title="ลิงก์แคมเปญไม่สมบูรณ์"
-              description="ลิงก์นี้ต้องมี organizationId และ campaignId ที่ถูกต้อง"
-              actions={<Link href="/">กลับหน้าร้าน</Link>}
+              description="ลิงก์แคมเปญนี้ไม่ครบถ้วน กรุณากลับไปเลือกร้านค้าใหม่"
+              actions={<Link href="/">กลับไปเลือกร้านค้า</Link>}
             />
           ) : null}
           {state.status === "notFound" ? (
             <ErrorState
               title="ไม่พบแคมเปญ"
-              description="แคมเปญนี้อาจไม่เปิดให้ลูกค้าเข้าชมหรือไม่มีอยู่ในระบบ"
-              actions={<Link href="/">กลับหน้าร้าน</Link>}
+              description="แคมเปญนี้อาจปิดการเข้าชมหรือไม่มีอยู่ในระบบ"
+              actions={<Link href="/">กลับไปเลือกร้านค้า</Link>}
             />
           ) : null}
           {state.status === "error" ? (
             <ErrorState
               title="ไม่สามารถโหลดแคมเปญได้"
               description="กรุณาลองโหลดหน้านี้ใหม่อีกครั้ง"
-              actions={<Link href="/">กลับหน้าร้าน</Link>}
+              actions={<Link href="/">กลับไปเลือกร้านค้า</Link>}
             />
           ) : null}
         </main>
@@ -125,39 +125,45 @@ export function CampaignView() {
           href={storeHref(store.organizationId, store.storeId)}
           className={styles.backLink}
         >
-          กลับไปที่ {store.name}
+          {store.name}
         </Link>
 
         <section className={styles.hero}>
           <div className={styles.heroCopy}>
-            <span className={styles.eyebrow}>Campaign</span>
+            <span className={styles.eyebrow}>แคมเปญจาก {store.name}</span>
             <div>
               <CampaignStatusBadge status={campaign.status} />
             </div>
             <h1 className={styles.title}>{campaign.name}</h1>
             <p className={styles.description}>
-              สินค้าในแคมเปญนี้มาจากร้าน {store.name}
-              และสถานะแคมเปญเป็นข้อมูลที่ Backend ยืนยัน
+              ตรวจสอบช่วงเวลาและสถานะของแคมเปญก่อนเลือกสินค้าที่ต้องการสั่งซื้อ
             </p>
           </div>
 
-          <div className={styles.heroMeta}>
-            <span className={styles.metaLabel}>ร้านค้า</span>
-            <span className={styles.metaValue}>{store.name}</span>
+          <div className={styles.heroMeta} role="group" aria-label="สรุปแคมเปญ">
+            <div>
+              <span className={styles.metaLabel}>สินค้าในแคมเปญ</span>
+              <strong className={styles.metaValue} data-numeric>
+                {products.length}
+              </strong>
+            </div>
+            <div>
+              <span className={styles.metaLabel}>ร้านค้า</span>
+              <strong className={styles.metaValue}>{store.name}</strong>
+            </div>
           </div>
         </section>
 
         <section className={styles.section} aria-labelledby="schedule-heading">
           <div className={styles.sectionHeader}>
             <div>
-              <span className={styles.eyebrow}>Schedule</span>
+              <span className={styles.eyebrow}>กำหนดการ</span>
               <h2 className={styles.sectionTitle} id="schedule-heading">
-                กำหนดการ
+                ช่วงเวลาสำคัญ
               </h2>
             </div>
             <p className={styles.sectionDescription}>
-              วันเวลานี้เป็นค่าที่วางแผนไว้ในแคมเปญ
-              Frontend ไม่เปลี่ยนสถานะโดยอัตโนมัติตามนาฬิกา
+              ใช้ช่วงเวลานี้ประกอบการวางแผนสั่งซื้อ ชำระเงิน และรับสินค้า
             </p>
           </div>
 
@@ -192,14 +198,13 @@ export function CampaignView() {
         <section className={styles.section} aria-labelledby="campaign-products">
           <div className={styles.sectionHeader}>
             <div>
-              <span className={styles.eyebrow}>Products</span>
+              <span className={styles.eyebrow}>เลือกสินค้า</span>
               <h2 className={styles.sectionTitle} id="campaign-products">
                 สินค้าสำหรับแคมเปญนี้
               </h2>
             </div>
             <p className={styles.sectionDescription}>
-              ตามสัญญาระบบ แคมเปญใช้สินค้าจากร้านเดียวกัน
-              เลือกสินค้าเพื่อดูตัวเลือกและเข้าสู่ขั้นตอนสั่งซื้อ
+              เลือกสินค้าเพื่อดูตัวเลือก ราคา และเริ่มขั้นตอนสั่งซื้อ
             </p>
           </div>
 
@@ -216,7 +221,7 @@ export function CampaignView() {
             </div>
           ) : (
             <div className={styles.emptyBox}>
-              ยังไม่มีสินค้าที่เปิดให้ลูกค้าเข้าชมในร้านนี้
+              ยังไม่มีสินค้าที่เปิดให้เข้าชมในแคมเปญนี้
             </div>
           )}
         </section>

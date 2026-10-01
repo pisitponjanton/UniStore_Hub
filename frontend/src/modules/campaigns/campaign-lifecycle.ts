@@ -12,18 +12,18 @@ export interface CampaignLifecycleActionMeta {
 
 const OPEN: CampaignLifecycleActionMeta = {
   action: "open",
-  label: "เปิด Campaign",
-  title: "ยืนยันการเปิด Campaign",
+  label: "เปิดรับคำสั่งซื้อ",
+  title: "ยืนยันการเปิดรับคำสั่งซื้อ",
   description:
-    "เปิดรับคำสั่งซื้อสำหรับ Campaign นี้ใช่หรือไม่ สถานะจะเปลี่ยนจาก DRAFT เป็น OPEN ผ่าน Backend",
+    "เมื่อยืนยัน แคมเปญจะเปลี่ยนจากฉบับร่างเป็นเปิดรับคำสั่งซื้อ กรุณาตรวจสอบร้านค้า ชื่อ และช่วงเวลาวางแผนก่อนดำเนินการ",
 };
 
 const CLOSE: CampaignLifecycleActionMeta = {
   action: "close",
   label: "ปิดรับคำสั่งซื้อ",
-  title: "ยืนยันการปิด Campaign",
+  title: "ยืนยันการปิดรับคำสั่งซื้อ",
   description:
-    "ปิดรับคำสั่งซื้อสำหรับ Campaign นี้ใช่หรือไม่ Backend จะจัดการ Order ที่เกี่ยวข้องตามกฎของ Campaign",
+    "เมื่อยืนยัน แคมเปญจะหยุดรับคำสั่งซื้อใหม่ แต่รายการเดิมยังคงดำเนินต่อไปตามกฎของระบบ",
 };
 
 const START_PRODUCTION: CampaignLifecycleActionMeta = {
@@ -31,31 +31,31 @@ const START_PRODUCTION: CampaignLifecycleActionMeta = {
   label: "เริ่มการผลิต",
   title: "ยืนยันการเริ่มผลิต",
   description:
-    "เริ่มการผลิตสำหรับ Campaign นี้ใช่หรือไม่ หากยังมี Payment อยู่ระหว่างตรวจสอบ Backend จะไม่อนุญาตให้ดำเนินการ",
+    "ระบบจะเริ่มขั้นตอนการผลิตได้เมื่อไม่มีคำสั่งซื้อที่ยังค้างการตรวจสอบการชำระเงิน",
 };
 
 const READY_FOR_PICKUP: CampaignLifecycleActionMeta = {
   action: "ready-for-pickup",
-  label: "พร้อมรับสินค้า",
+  label: "แจ้งพร้อมรับสินค้า",
   title: "ยืนยันว่าพร้อมรับสินค้า",
   description:
-    "เปลี่ยน Campaign เป็นพร้อมรับสินค้าใช่หรือไม่ Backend จะสร้างหรือเตรียม Pickup ตามข้อมูล Order ที่เกี่ยวข้อง",
+    "ยืนยันเมื่อสินค้าพร้อมสำหรับการรับ ระบบจะดำเนินข้อมูลการรับสินค้าของคำสั่งซื้อที่เกี่ยวข้องต่อ",
 };
 
 const COMPLETE: CampaignLifecycleActionMeta = {
   action: "complete",
-  label: "ปิด Campaign เป็นเสร็จสิ้น",
-  title: "ยืนยันการเสร็จสิ้น Campaign",
+  label: "ปิดแคมเปญเป็นเสร็จสิ้น",
+  title: "ยืนยันการเสร็จสิ้นแคมเปญ",
   description:
-    "ทำเครื่องหมาย Campaign ว่าเสร็จสิ้นใช่หรือไม่ Backend จะปฏิเสธหากยังมี Order ที่ยังไม่ครบเงื่อนไข",
+    "ใช้เมื่อการรับสินค้าและงานที่เกี่ยวข้องครบเงื่อนไขแล้ว ระบบจะตรวจสอบเงื่อนไขอีกครั้งก่อนเปลี่ยนสถานะ",
 };
 
 const CANCEL: CampaignLifecycleActionMeta = {
   action: "cancel",
-  label: "ยกเลิก Campaign",
-  title: "ยืนยันการยกเลิก Campaign",
+  label: "ยกเลิกแคมเปญ",
+  title: "ยืนยันการยกเลิกแคมเปญ",
   description:
-    "ยกเลิก Campaign นี้ใช่หรือไม่ การยกเลิกทำได้เฉพาะ DRAFT, OPEN หรือ CLOSED และ Backend จะตรวจว่าไม่มี Order ที่บล็อกการยกเลิก",
+    "การยกเลิกทำได้เฉพาะฉบับร่าง เปิดรับคำสั่งซื้อ หรือปิดรับคำสั่งซื้อ และระบบจะปฏิเสธหากมีคำสั่งซื้อที่ไม่อนุญาตให้ยกเลิก",
   danger: true,
 };
 

@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { EmptyState, ErrorState, LoadingState } from "@/components";
-import { useAuthSession } from "@/modules/auth";
 
+import { StorefrontHeader } from "./storefront-header";
 import styles from "./storefront-landing.module.css";
 import {
   storefrontService,
@@ -28,7 +28,6 @@ function storeHref(organizationId: string, storeId: string): string {
 }
 
 export function StorefrontLanding() {
-  const auth = useAuthSession();
   const [state, setState] = useState<LandingState>({ status: "loading" });
 
   useEffect(() => {
@@ -57,71 +56,72 @@ export function StorefrontLanding() {
     return () => controller.abort();
   }, []);
 
+  const summary = useMemo(() => {
+    if (state.status !== "success") {
+      return null;
+    }
+
+    return {
+      organizationCount: state.data.length,
+      storeCount: state.data.reduce(
+        (total, organization) => total + organization.stores.length,
+        0,
+      ),
+    };
+  }, [state]);
+
   return (
     <div className={styles.page}>
-      <header className={styles.header}>
-        <div className={styles.headerInner}>
-          <Link href="/" className={styles.brand}>
-            <span className={styles.brandMark} aria-hidden="true" />
-            <span>UniStore Hub</span>
-          </Link>
-
-          <nav className={styles.headerActions} aria-label="บัญชีผู้ใช้">
-            {auth.status === "authenticated" ? (
-              <>
-                <Link href="/my/orders/" className={styles.headerLink}>
-                  คำสั่งซื้อของฉัน
-                </Link>
-                <Link href="/notifications/" className={styles.headerPrimary}>
-                  การแจ้งเตือน
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link href="/login/" className={styles.headerLink}>
-                  เข้าสู่ระบบ
-                </Link>
-                <Link href="/register/" className={styles.headerPrimary}>
-                  สมัครสมาชิก
-                </Link>
-              </>
-            )}
-          </nav>
-        </div>
-      </header>
+      <StorefrontHeader />
 
       <main>
         <section className={styles.hero}>
           <div className={styles.heroCopy}>
-            <span className={styles.eyebrow}>University storefront</span>
-            <h1 className={styles.heroTitle}>UniStore Hub</h1>
+            <span className={styles.contextLabel}>ร้านค้าในมหาวิทยาลัย</span>
+            <h1 className={styles.heroTitle}>
+              เลือกร้าน เลือกสินค้า แล้วติดตามคำสั่งซื้อจากที่เดียว
+            </h1>
             <p className={styles.heroDescription}>
-              รวมร้านค้าและพรีออเดอร์จากหน่วยงานในมหาวิทยาลัย
-              เพื่อให้ค้นหาร้าน เลือกสินค้า และติดตามคำสั่งซื้อได้จากที่เดียว
+              UniStore Hub รวมร้านค้าและแคมเปญพรีออเดอร์จากหน่วยงาน
+              ให้ค้นหาสินค้าและเริ่มสั่งซื้อได้ง่ายขึ้น
             </p>
+
+            {summary ? (
+              <div className={styles.heroSummary} role="group" aria-label="สรุปร้านค้าที่เปิดให้เข้าชม">
+                <div>
+                  <strong data-numeric>{summary.organizationCount}</strong>
+                  <span>หน่วยงาน</span>
+                </div>
+                <div>
+                  <strong data-numeric>{summary.storeCount}</strong>
+                  <span>ร้านค้า</span>
+                </div>
+              </div>
+            ) : null}
           </div>
 
           <aside className={styles.heroAside}>
-            <span className={styles.heroAsideTitle}>
-              ร้านค้าที่เปิดใช้งานเท่านั้น
-            </span>
-            <p className={styles.heroAsideText}>
-              หน้านี้อ่านข้อมูลสาธารณะจาก Storefront API เท่านั้น
-              การสั่งซื้อจะขอให้เข้าสู่ระบบเมื่อจำเป็น
-            </p>
+            <span className={styles.heroAsideMarker} aria-hidden="true" />
+            <div>
+              <strong>เริ่มจากร้านค้าที่ต้องการ</strong>
+              <p>
+                เลือกร้านเพื่อดูสินค้าและแคมเปญที่กำลังเปิดให้เข้าชม
+                จากนั้นระบบจะแจ้งขั้นตอนถัดไปตามสถานะจริงของรายการ
+              </p>
+            </div>
           </aside>
         </section>
 
         <section className={styles.catalog} aria-labelledby="storefront-heading">
           <div className={styles.catalogHeader}>
             <div>
-              <span className={styles.eyebrow}>Browse</span>
+              <span className={styles.contextLabel}>เลือกจากหน่วยงาน</span>
               <h2 className={styles.catalogTitle} id="storefront-heading">
-                ร้านค้าจากหน่วยงาน
+                ร้านค้าที่เปิดให้เข้าชม
               </h2>
             </div>
             <p className={styles.catalogDescription}>
-              เลือกหน่วยงานและร้านค้าเพื่อดูสินค้าและแคมเปญที่เปิดให้ลูกค้าเข้าถึง
+              ร้านค้าถูกจัดกลุ่มตามหน่วยงาน เพื่อให้หาแหล่งสินค้าได้เร็วขึ้น
             </p>
           </div>
 
@@ -133,9 +133,14 @@ export function StorefrontLanding() {
                   key={organization.organizationId}
                 >
                   <div className={styles.organizationInfo}>
-                    <h3 className={styles.organizationName}>
-                      {organization.name}
-                    </h3>
+                    <div className={styles.organizationHeading}>
+                      <h3 className={styles.organizationName}>
+                        {organization.name}
+                      </h3>
+                      <span className={styles.storeCount} data-numeric>
+                        {stores.length} ร้าน
+                      </span>
+                    </div>
                     {organization.description ? (
                       <p className={styles.organizationDescription}>
                         {organization.description}
@@ -144,7 +149,7 @@ export function StorefrontLanding() {
                   </div>
 
                   {stores.length > 0 ? (
-                    <div className={styles.storeGrid}>
+                    <div className={styles.storeList}>
                       {stores.map((store) => (
                         <Link
                           key={store.storeId}
@@ -152,23 +157,27 @@ export function StorefrontLanding() {
                             organization.organizationId,
                             store.storeId,
                           )}
-                          className={styles.storeCard}
+                          className={styles.storeRow}
                         >
-                          <div>
+                          <div className={styles.storeRowCopy}>
                             <h4 className={styles.storeName}>{store.name}</h4>
                             {store.description ? (
                               <p className={styles.storeDescription}>
                                 {store.description}
                               </p>
-                            ) : null}
+                            ) : (
+                              <p className={styles.storeDescription}>
+                                ดูสินค้าและแคมเปญของร้านนี้
+                              </p>
+                            )}
                           </div>
-                          <span className={styles.storeAction}>ดูร้านค้า</span>
+                          <span className={styles.storeAction}>เปิดร้าน</span>
                         </Link>
                       ))}
                     </div>
                   ) : (
                     <div className={styles.noStores}>
-                      หน่วยงานนี้ยังไม่มีร้านค้าที่เปิดใช้งาน
+                      หน่วยงานนี้ยังไม่มีร้านค้าที่เปิดให้เข้าชม
                     </div>
                   )}
                 </section>
@@ -181,7 +190,7 @@ export function StorefrontLanding() {
           <div className={styles.stateWrap}>
             <LoadingState
               title="กำลังโหลดร้านค้า"
-              description="กำลังดึงหน่วยงานและร้านค้าที่เปิดให้เข้าชม"
+              description="กำลังเตรียมรายการหน่วยงานและร้านค้าที่เปิดให้เข้าชม"
             />
           </div>
         ) : null}
@@ -190,7 +199,7 @@ export function StorefrontLanding() {
           <div className={styles.stateWrap}>
             <EmptyState
               title="ยังไม่มีร้านค้าที่เปิดให้เข้าชม"
-              description="เมื่อมีหน่วยงานและร้านค้าที่เปิดใช้งาน รายการจะปรากฏที่หน้านี้"
+              description="เมื่อมีร้านค้าที่พร้อมให้ลูกค้าเข้าชม รายการจะปรากฏที่หน้านี้"
             />
           </div>
         ) : null}
@@ -198,7 +207,7 @@ export function StorefrontLanding() {
         {state.status === "error" ? (
           <div className={styles.stateWrap}>
             <ErrorState
-              title="ไม่สามารถโหลดหน้าร้านค้าได้"
+              title="ไม่สามารถโหลดร้านค้าได้"
               description="กรุณาตรวจสอบการเชื่อมต่อแล้วลองโหลดหน้านี้ใหม่"
             />
           </div>

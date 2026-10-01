@@ -10,6 +10,7 @@ import {
   ErrorState,
   ForbiddenState,
   LoadingState,
+  Notice,
   UnauthorizedState,
 } from "@/components";
 import {
@@ -213,7 +214,10 @@ export function PlatformOrganizationsView() {
       <div className={styles.page}>
         <main className={styles.stateWrap}>
           {state.status === "loading" ? (
-            <LoadingState title="กำลังโหลดหน่วยงานทั้งหมด" />
+            <LoadingState
+              title="กำลังโหลดหน่วยงานทั้งหมด"
+              description="กำลังดึงสถานะล่าสุดจาก Platform"
+            />
           ) : null}
           {state.status === "unauthorized" ? (
             <UnauthorizedState />
@@ -232,168 +236,240 @@ export function PlatformOrganizationsView() {
     );
   }
 
+  const pendingCount = state.organizations.filter(
+    (organization) => organization.status === "PENDING",
+  ).length;
+
   return (
     <div className={styles.page}>
       <main className={styles.main}>
         <header className={styles.header}>
           <div className={styles.headerCopy} data-ledger-heading>
-            <span className={styles.eyebrow}>Platform admin</span>
-            <h1 className={styles.title}>หน่วยงานทั้งหมด</h1>
+            <h1 className={styles.title}>จัดการหน่วยงาน</h1>
             <p className={styles.description}>
-              จัดการสถานะหน่วยงานผ่าน /platform/* เท่านั้น
-              โดยอนุมัติได้เฉพาะ PENDING และระงับได้เมื่อยังไม่เป็น
-              SUSPENDED ตาม Backend contract
+              ตรวจสถานะของแต่ละหน่วยงานก่อนอนุมัติหรือระงับ
+              โดยทุกการเปลี่ยนสถานะต้องผ่าน action ระดับ Platform
             </p>
           </div>
 
-          <Badge tone="neutral">
-            {state.organizations.length} หน่วยงาน
-          </Badge>
+          <div className={styles.headerCount}>
+            <strong>{state.organizations.length.toLocaleString("th-TH")}</strong>
+            <span>หน่วยงานที่โหลด</span>
+          </div>
         </header>
 
+        <section
+          className={styles.priorityStrip}
+          aria-label="สรุปหน่วยงานที่ต้องดูแล"
+        >
+          <article className={styles.priorityItem}>
+            <span className={styles.metricLabel}>รออนุมัติ</span>
+            <strong className={styles.priorityValue}>
+              {pendingCount.toLocaleString("th-TH")}
+            </strong>
+            <span className={styles.metricHint}>
+              ตรวจข้อมูลหน่วยงานก่อนเลือกอนุมัติหรือระงับ
+            </span>
+          </article>
+
+          <article className={styles.priorityItem}>
+            <span className={styles.metricLabel}>รายการที่โหลด</span>
+            <strong className={styles.priorityValue}>
+              {state.organizations.length.toLocaleString("th-TH")}
+            </strong>
+            <span className={styles.metricHint}>
+              จำนวนรายการที่ตอบกลับจาก Platform ในครั้งนี้
+            </span>
+          </article>
+        </section>
+
         {notice ? (
-          <div className={styles.notice} role="status">
+          <Notice tone="success" role="status" title="อัปเดตสถานะแล้ว">
             {notice}
-          </div>
+          </Notice>
         ) : null}
 
         {inlineError ? (
-          <div className={styles.errorBox} role="alert">
+          <Notice tone="danger" role="alert" title="เปลี่ยนสถานะไม่สำเร็จ">
             {inlineError}
-          </div>
+          </Notice>
         ) : null}
 
-        {state.organizations.length === 0 ? (
-          <EmptyState
-            title="ยังไม่มีหน่วยงาน"
-            description="Platform ยังไม่มี Organization ในระบบ"
-          />
-        ) : (
-          <section
-            className={styles.organizationList}
-            aria-label="รายการหน่วยงานทั้งหมด"
-          >
-            {state.organizations.map((organization) => {
-              const isPending =
-                pending?.organizationId ===
-                organization.organizationId;
+        <Notice tone="warning" title="ตรวจสอบก่อนเปลี่ยนสถานะ">
+          อนุมัติได้เฉพาะหน่วยงานที่อยู่สถานะรออนุมัติ
+          ส่วนการระงับจะเปลี่ยนสถานะหน่วยงานเป็น SUSPENDED ตามผลจากระบบ
+        </Notice>
 
-              return (
-                <article
-                  className={styles.organizationCard}
-                  key={organization.organizationId}
-                >
-                  <div className={styles.organizationCopy}>
-                    <h2 className={styles.organizationName}>
-                      {organization.name}
-                    </h2>
-                    <p className={styles.description}>
-                      {organization.description ||
-                        "ไม่มีคำอธิบายหน่วยงาน"}
-                    </p>
+        <section
+          className={styles.section}
+          aria-labelledby="platform-organizations-title"
+        >
+          <div className={styles.sectionHeading}>
+            <div>
+              <h2
+                className={styles.sectionTitle}
+                id="platform-organizations-title"
+              >
+                หน่วยงานทั้งหมด
+              </h2>
+              <p className={styles.sectionDescription}>
+                สถานะปัจจุบันเป็นตัวกำหนด action ที่เปิดให้ทำในแต่ละรายการ
+              </p>
+            </div>
+          </div>
 
-                    <div className={styles.metaGrid}>
-                      <div className={styles.metaItem}>
-                        <span className={styles.metaLabel}>
-                          Organization ID
-                        </span>
-                        <span className={styles.code}>
-                          {organization.organizationId}
-                        </span>
-                      </div>
-                      <div className={styles.metaItem}>
-                        <span className={styles.metaLabel}>
-                          Created by
-                        </span>
-                        <span className={styles.code}>
-                          {organization.createdBy}
-                        </span>
-                      </div>
-                      <div className={styles.metaItem}>
-                        <span className={styles.metaLabel}>
-                          อัปเดตล่าสุด
-                        </span>
-                        <span className={styles.metaValue}>
-                          {formatIsoDateTime(
-                            organization.updatedAt,
+          {state.organizations.length === 0 ? (
+            <EmptyState
+              title="ยังไม่มีหน่วยงาน"
+              description="Platform ยังไม่มี Organization ในระบบ"
+            />
+          ) : (
+            <div
+              className={styles.organizationList}
+              aria-label="รายการหน่วยงานทั้งหมด"
+            >
+              {state.organizations.map((organization) => {
+                const isPending =
+                  pending?.organizationId ===
+                  organization.organizationId;
+                const canApprove = canApproveOrganization(
+                  organization.status,
+                );
+                const canSuspend = canSuspendOrganization(
+                  organization.status,
+                );
+
+                return (
+                  <article
+                    className={styles.organizationRow}
+                    key={organization.organizationId}
+                  >
+                    <div className={styles.organizationMain}>
+                      <div className={styles.organizationHeading}>
+                        <div className={styles.organizationCopy}>
+                          <h3 className={styles.organizationName}>
+                            {organization.name}
+                          </h3>
+                          <p className={styles.description}>
+                            {organization.description ||
+                              "ไม่มีคำอธิบายหน่วยงาน"}
+                          </p>
+                        </div>
+
+                        <Badge
+                          tone={platformOrganizationStatusTone(
+                            organization.status,
                           )}
-                        </span>
+                        >
+                          {platformOrganizationStatusLabel(
+                            organization.status,
+                          )}
+                        </Badge>
+                      </div>
+
+                      <div className={styles.metaGrid}>
+                        <div className={styles.metaItem}>
+                          <span className={styles.metaLabel}>
+                            Organization ID
+                          </span>
+                          <span className={styles.code}>
+                            {organization.organizationId}
+                          </span>
+                        </div>
+                        <div className={styles.metaItem}>
+                          <span className={styles.metaLabel}>
+                            Created by
+                          </span>
+                          <span className={styles.code}>
+                            {organization.createdBy}
+                          </span>
+                        </div>
+                        <div className={styles.metaItem}>
+                          <span className={styles.metaLabel}>
+                            อัปเดตล่าสุด
+                          </span>
+                          <span className={styles.metaValue}>
+                            {formatIsoDateTime(
+                              organization.updatedAt,
+                            )}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div className={styles.cardAside}>
-                    <Badge
-                      tone={platformOrganizationStatusTone(
-                        organization.status,
-                      )}
+                    <div
+                      className={styles.organizationActions}
+                      role="group"
+                      aria-label={`จัดการ ${organization.name}`}
                     >
-                      {platformOrganizationStatusLabel(
-                        organization.status,
+                      <span className={styles.actionLabel}>
+                        Action ที่ใช้ได้
+                      </span>
+
+                      {canApprove || canSuspend ? (
+                        <div className={styles.actions}>
+                          {canApprove ? (
+                            <ConfirmDialog
+                              trigger={
+                                <Button disabled={pending !== null}>
+                                  อนุมัติ
+                                </Button>
+                              }
+                              title={`อนุมัติ ${organization.name}?`}
+                              description="ระบบจะเปลี่ยนสถานะหน่วยงานจาก PENDING เป็น ACTIVE และบันทึกผลการดำเนินการ"
+                              confirmLabel="ยืนยันอนุมัติ"
+                              pending={
+                                isPending &&
+                                pending?.action === "approve"
+                              }
+                              onConfirm={() => {
+                                void runAction(
+                                  organization,
+                                  "approve",
+                                );
+                              }}
+                            />
+                          ) : null}
+
+                          {canSuspend ? (
+                            <ConfirmDialog
+                              trigger={
+                                <Button
+                                  variant="danger"
+                                  disabled={pending !== null}
+                                >
+                                  ระงับหน่วยงาน
+                                </Button>
+                              }
+                              title={`ระงับ ${organization.name}?`}
+                              description="ระบบจะเปลี่ยนสถานะหน่วยงานเป็น SUSPENDED และบันทึกผลการดำเนินการ"
+                              confirmLabel="ยืนยันระงับ"
+                              pending={
+                                isPending &&
+                                pending?.action === "suspend"
+                              }
+                              danger
+                              onConfirm={() => {
+                                void runAction(
+                                  organization,
+                                  "suspend",
+                                );
+                              }}
+                            />
+                          ) : null}
+                        </div>
+                      ) : (
+                        <span className={styles.noAction}>
+                          ไม่มี action เพิ่มเติมในสถานะนี้
+                        </span>
                       )}
-                    </Badge>
-
-                    <div className={styles.actions}>
-                      {canApproveOrganization(
-                        organization.status,
-                      ) ? (
-                        <ConfirmDialog
-                          trigger={
-                            <Button disabled={pending !== null}>
-                              อนุมัติ
-                            </Button>
-                          }
-                          title="ยืนยันการอนุมัติหน่วยงาน"
-                          description="Backend จะเปลี่ยนสถานะ Organization จาก PENDING เป็น ACTIVE และบันทึก Audit Log"
-                          confirmLabel="ยืนยันอนุมัติ"
-                          pending={
-                            isPending &&
-                            pending?.action === "approve"
-                          }
-                          onConfirm={() => {
-                            void runAction(
-                              organization,
-                              "approve",
-                            );
-                          }}
-                        />
-                      ) : null}
-
-                      {canSuspendOrganization(
-                        organization.status,
-                      ) ? (
-                        <ConfirmDialog
-                          trigger={
-                            <Button
-                              variant="danger"
-                              disabled={pending !== null}
-                            >
-                              ระงับหน่วยงาน
-                            </Button>
-                          }
-                          title="ยืนยันการระงับหน่วยงาน"
-                          description="Backend จะเปลี่ยน Organization เป็น SUSPENDED และบันทึก Audit Log"
-                          confirmLabel="ยืนยันระงับ"
-                          pending={
-                            isPending &&
-                            pending?.action === "suspend"
-                          }
-                          danger
-                          onConfirm={() => {
-                            void runAction(
-                              organization,
-                              "suspend",
-                            );
-                          }}
-                        />
-                      ) : null}
                     </div>
-                  </div>
-                </article>
-              );
-            })}
-          </section>
-        )}
+                  </article>
+                );
+              })}
+            </div>
+          )}
+        </section>
       </main>
     </div>
   );

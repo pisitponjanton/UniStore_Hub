@@ -6,12 +6,17 @@ import { useEffect, useMemo, useState } from "react";
 import {
   ErrorState,
   LoadingState,
+  Notice,
   SelectField,
   TextField,
 } from "@/components";
 import { useAuthSession } from "@/modules/auth";
 import { ApiClientError } from "@/services";
-import { formatSatang, getRequiredQueryId, parseRequiredQueryId } from "@/utils";
+import {
+  formatSatang,
+  getRequiredQueryId,
+  parseRequiredQueryId,
+} from "@/utils";
 
 import {
   buildOrderEntryHref,
@@ -23,6 +28,7 @@ import {
 import {
   CampaignStatusBadge,
   campaignHref,
+  campaignStatusLabel,
   storeHref,
 } from "./storefront-presenters";
 import { StorefrontHeader } from "./storefront-header";
@@ -168,22 +174,22 @@ export function ProductView() {
           {state.status === "invalid" ? (
             <ErrorState
               title="ลิงก์สินค้าไม่สมบูรณ์"
-              description="ลิงก์นี้ต้องมี organizationId และ productId ที่ถูกต้อง"
-              actions={<Link href="/">กลับหน้าร้าน</Link>}
+              description="ลิงก์สินค้านี้ไม่ครบถ้วน กรุณากลับไปเลือกร้านค้าใหม่"
+              actions={<Link href="/">กลับไปเลือกร้านค้า</Link>}
             />
           ) : null}
           {state.status === "notFound" ? (
             <ErrorState
               title="ไม่พบสินค้า"
-              description="สินค้านี้อาจไม่เปิดให้ลูกค้าเข้าชมหรือไม่มีอยู่ในระบบ"
-              actions={<Link href="/">กลับหน้าร้าน</Link>}
+              description="สินค้านี้อาจปิดการเข้าชมหรือไม่มีอยู่ในระบบ"
+              actions={<Link href="/">กลับไปเลือกร้านค้า</Link>}
             />
           ) : null}
           {state.status === "error" ? (
             <ErrorState
               title="ไม่สามารถโหลดสินค้าได้"
               description="กรุณาลองโหลดหน้านี้ใหม่อีกครั้ง"
-              actions={<Link href="/">กลับหน้าร้าน</Link>}
+              actions={<Link href="/">กลับไปเลือกร้านค้า</Link>}
             />
           ) : null}
         </main>
@@ -218,7 +224,7 @@ export function ProductView() {
           href={storeHref(store.organizationId, store.storeId)}
           className={styles.backLink}
         >
-          กลับไปที่ {store.name}
+          {store.name}
         </Link>
 
         <section className={styles.productDetail}>
@@ -240,88 +246,102 @@ export function ProductView() {
 
           <div className={styles.productDetailBody}>
             <div className={styles.heroCopy}>
-              <span className={styles.eyebrow}>Product</span>
+              <span className={styles.eyebrow}>สินค้าในร้าน {store.name}</span>
               <h1 className={styles.title}>{product.name}</h1>
               {product.description ? (
                 <p className={styles.description}>
                   {product.description}
                 </p>
-              ) : null}
+              ) : (
+                <p className={styles.description}>
+                  เลือกตัวเลือกสินค้า แคมเปญ และจำนวนเพื่อดูยอดประมาณการก่อนสั่งซื้อ
+                </p>
+              )}
             </div>
 
             {variants.length > 0 ? (
               <div className={styles.selectionPanel}>
-                <SelectField
-                  id="product-variant"
-                  label="ตัวเลือกสินค้า"
-                  value={selectedVariantId}
-                  onChange={(event) =>
-                    setSelectedVariantId(event.target.value)
-                  }
-                  required
-                >
-                  {variants.map((variant) => (
-                    <option
-                      key={variant.variantId}
-                      value={variant.variantId}
-                    >
-                      {variant.name} — {formatSatang(variant.price)}
-                    </option>
-                  ))}
-                </SelectField>
+                <div className={styles.selectionHeading}>
+                  <div>
+                    <span className={styles.eyebrow}>เตรียมคำสั่งซื้อ</span>
+                    <h2 className={styles.selectionTitle}>
+                      เลือกรายละเอียดที่ต้องการ
+                    </h2>
+                  </div>
+                  <span className={styles.selectionStep}>1 รายการสินค้า</span>
+                </div>
 
-                <SelectField
-                  id="product-campaign"
-                  label="แคมเปญ"
-                  value={selectedCampaignId}
-                  onChange={(event) =>
-                    setSelectedCampaignId(event.target.value)
-                  }
-                  hint="การสั่งซื้อทำได้เมื่อ Backend ระบุสถานะแคมเปญเป็น OPEN"
-                >
-                  <option value="">เลือกแคมเปญ</option>
-                  {campaigns.map((campaign) => (
-                    <option
-                      key={campaign.campaignId}
-                      value={campaign.campaignId}
-                    >
-                      {campaign.name} — {campaign.status}
-                    </option>
-                  ))}
-                </SelectField>
+                <div className={styles.selectionFields}>
+                  <SelectField
+                    id="product-variant"
+                    label="ตัวเลือกสินค้า"
+                    value={selectedVariantId}
+                    onChange={(event) =>
+                      setSelectedVariantId(event.target.value)
+                    }
+                    required
+                  >
+                    {variants.map((variant) => (
+                      <option
+                        key={variant.variantId}
+                        value={variant.variantId}
+                      >
+                        {variant.name} ({formatSatang(variant.price)})
+                      </option>
+                    ))}
+                  </SelectField>
 
-                <TextField
-                  id="product-quantity"
-                  label="จำนวน"
-                  type="number"
-                  min="1"
-                  step="1"
-                  inputMode="numeric"
-                  value={quantityInput}
-                  onChange={(event) =>
-                    setQuantityInput(event.target.value)
-                  }
-                  error={
-                    selection?.quantity === null
-                      ? "จำนวนต้องเป็นจำนวนเต็มตั้งแต่ 1 ขึ้นไป"
-                      : undefined
-                  }
-                  required
-                />
+                  <SelectField
+                    id="product-campaign"
+                    label="แคมเปญ"
+                    value={selectedCampaignId}
+                    onChange={(event) =>
+                      setSelectedCampaignId(event.target.value)
+                    }
+                    hint="เริ่มสั่งซื้อได้เมื่อแคมเปญอยู่ในสถานะเปิดรับคำสั่งซื้อ"
+                  >
+                    <option value="">เลือกแคมเปญ</option>
+                    {campaigns.map((campaign) => (
+                      <option
+                        key={campaign.campaignId}
+                        value={campaign.campaignId}
+                      >
+                        {campaign.name} ({campaignStatusLabel(campaign.status)})
+                      </option>
+                    ))}
+                  </SelectField>
+
+                  <TextField
+                    id="product-quantity"
+                    label="จำนวน"
+                    type="number"
+                    min="1"
+                    step="1"
+                    inputMode="numeric"
+                    value={quantityInput}
+                    onChange={(event) =>
+                      setQuantityInput(event.target.value)
+                    }
+                    error={
+                      selection?.quantity === null
+                        ? "จำนวนต้องเป็นจำนวนเต็มตั้งแต่ 1 ขึ้นไป"
+                        : undefined
+                    }
+                    required
+                  />
+                </div>
 
                 <div className={styles.estimatePanel}>
-                  <span className={styles.metaLabel}>
-                    ราคาประมาณการ
-                  </span>
-                  <strong className={styles.estimateValue}>
+                  <span className={styles.metaLabel}>ยอดประมาณการ</span>
+                  <strong className={styles.estimateValue} data-numeric>
                     {selection?.estimate !== null &&
                     selection?.estimate !== undefined
                       ? formatSatang(selection.estimate)
-                      : "—"}
+                      : "ยังไม่คำนวณ"}
                   </strong>
                   <p className={styles.estimateNote}>
-                    ราคานี้เป็นเพียงค่าประมาณจากตัวเลือกและจำนวนที่เลือก
-                    ยอดจาก Backend หลังสร้างคำสั่งซื้อเป็นค่าที่ใช้จริง
+                    ยอดนี้คำนวณจากตัวเลือกและจำนวนที่เลือก
+                    ยอดหลังสร้างคำสั่งซื้อเป็นยอดที่ใช้ดำเนินการจริง
                   </p>
                 </div>
 
@@ -329,9 +349,7 @@ export function ProductView() {
                   <div className={styles.campaignContext}>
                     <div className={styles.cardHeader}>
                       <div>
-                        <span className={styles.metaLabel}>
-                          แคมเปญที่เลือก
-                        </span>
+                        <span className={styles.metaLabel}>แคมเปญที่เลือก</span>
                         <div className={styles.metaValue}>
                           {selection.campaign.name}
                         </div>
@@ -353,43 +371,52 @@ export function ProductView() {
                 ) : null}
 
                 {requestedCampaignMissing ? (
-                  <p className={styles.selectionNotice} role="status">
+                  <Notice tone="warning" title="ต้องเลือกแคมเปญใหม่">
                     ไม่พบแคมเปญจากลิงก์เดิมสำหรับร้านนี้
-                    กรุณาเลือกแคมเปญใหม่ก่อนสั่งซื้อ
-                  </p>
+                    กรุณาเลือกแคมเปญที่ต้องการก่อนสั่งซื้อ
+                  </Notice>
                 ) : null}
 
-                {orderHref ? (
-                  auth.status === "authenticated" ? (
-                    <Link
-                      href={orderHref}
-                      className={styles.primaryAction}
-                    >
-                      ดำเนินการสั่งซื้อ
-                    </Link>
-                  ) : auth.status === "anonymous" ? (
-                    <Link
-                      href={loginHref(orderHref)}
-                      className={styles.primaryAction}
-                    >
-                      เข้าสู่ระบบเพื่อสั่งซื้อ
-                    </Link>
+                <div className={styles.purchaseArea}>
+                  {orderHref ? (
+                    auth.status === "authenticated" ? (
+                      <Link
+                        href={orderHref}
+                        className={styles.primaryAction}
+                      >
+                        ดำเนินการสั่งซื้อ
+                      </Link>
+                    ) : auth.status === "anonymous" ? (
+                      <Link
+                        href={loginHref(orderHref)}
+                        className={styles.primaryAction}
+                      >
+                        เข้าสู่ระบบเพื่อสั่งซื้อ
+                      </Link>
+                    ) : (
+                      <span
+                        className={styles.disabledAction}
+                        aria-live="polite"
+                      >
+                        กำลังตรวจสอบบัญชี
+                      </span>
+                    )
                   ) : (
-                    <span
-                      className={styles.disabledAction}
-                      aria-live="polite"
+                    <Notice
+                      tone={
+                        selection?.campaign &&
+                        selection.campaign.status !== "OPEN"
+                          ? "warning"
+                          : "neutral"
+                      }
                     >
-                      กำลังตรวจสอบบัญชี
-                    </span>
-                  )
-                ) : (
-                  <div className={styles.selectionNotice} role="status">
-                    {selection?.campaign &&
-                    selection.campaign.status !== "OPEN"
-                      ? "แคมเปญที่เลือกยังไม่อยู่ในสถานะ OPEN จึงยังเริ่มสั่งซื้อไม่ได้"
-                      : "เลือกตัวเลือกสินค้า แคมเปญที่เปิดรับ และจำนวนที่ถูกต้องเพื่อดำเนินการต่อ"}
-                  </div>
-                )}
+                      {selection?.campaign &&
+                      selection.campaign.status !== "OPEN"
+                        ? "แคมเปญที่เลือกยังไม่เปิดรับคำสั่งซื้อ"
+                        : "เลือกตัวเลือกสินค้า แคมเปญที่เปิดรับ และจำนวนที่ถูกต้องเพื่อดำเนินการต่อ"}
+                    </Notice>
+                  )}
+                </div>
               </div>
             ) : (
               <div className={styles.emptyBox}>

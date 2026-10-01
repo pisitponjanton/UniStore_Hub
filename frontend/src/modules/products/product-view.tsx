@@ -9,6 +9,7 @@ import {
   EmptyState,
   ErrorState,
   LoadingState,
+  Notice,
   SelectField,
   TextareaField,
   TextField,
@@ -444,7 +445,10 @@ export function ProductManagementView({
       <div className={styles.page}>
         <main className={styles.stateWrap}>
           {state.status === "loading" ? (
-            <LoadingState title="กำลังโหลดสินค้า" />
+            <LoadingState
+              title="กำลังโหลดสินค้า"
+              description="กำลังดึงรายการสินค้า ร้านค้า และข้อมูลที่ใช้จัดการ"
+            />
           ) : (
             <ErrorState
               title="ไม่สามารถโหลดสินค้าได้"
@@ -456,38 +460,73 @@ export function ProductManagementView({
     );
   }
 
+  const activeProducts = state.products.filter(
+    (product) => product.status === "ACTIVE",
+  ).length;
+  const inactiveProducts = state.products.length - activeProducts;
+  const selectedStoreName = filterStoreId
+    ? storeNames.get(filterStoreId) ?? filterStoreId
+    : "ทุกร้านค้า";
+  const editDirty =
+    selectedProduct !== null &&
+    (editName !== selectedProduct.name ||
+      editDescription !== selectedProduct.description);
+
   return (
     <div className={styles.page}>
       <main className={styles.main}>
         <header className={styles.header}>
           <div className={styles.headerCopy} data-ledger-heading>
-            <span className={styles.eyebrow}>Product management</span>
-            <h1 className={styles.title}>สินค้า</h1>
+            <h1 className={styles.title}>สินค้าและตัวเลือก</h1>
             <p className={styles.description}>
-              จัดการข้อมูลสินค้าของหน่วยงาน แยก Variant และ Product Image
-              ไปยังขั้นตอนถัดไปตาม contract
+              จัดการสินค้า รูปสินค้า ตัวเลือก และราคาที่ใช้ในแต่ละร้านค้า
             </p>
           </div>
-          <Badge tone="info">{state.products.length} รายการในหน้าปัจจุบัน</Badge>
         </header>
 
-        {inlineError ? (
-          <div className={styles.error} role="alert">
-            {inlineError}
+        <section className={styles.summaryStrip} aria-label="สรุปรายการสินค้าที่โหลด">
+          <div>
+            <span className={styles.summaryLabel}>รายการที่โหลด</span>
+            <strong>{state.products.length}</strong>
           </div>
+          <div>
+            <span className={styles.summaryLabel}>เปิดใช้งาน</span>
+            <strong>{activeProducts}</strong>
+          </div>
+          <div>
+            <span className={styles.summaryLabel}>ปิดใช้งาน</span>
+            <strong>{inactiveProducts}</strong>
+          </div>
+          <div>
+            <span className={styles.summaryLabel}>ขอบเขต</span>
+            <strong className={styles.summaryText}>{selectedStoreName}</strong>
+          </div>
+        </section>
+
+        {inlineError ? (
+          <Notice tone="danger" role="alert" title="ดำเนินการไม่สำเร็จ">
+            {inlineError}
+          </Notice>
         ) : null}
 
         {notice ? (
-          <div className={styles.notice} role="status">
+          <Notice tone="success" role="status" title="อัปเดตแล้ว">
             {notice}
-          </div>
+          </Notice>
         ) : null}
 
         <div className={styles.grid}>
           <section className={styles.section} aria-labelledby="product-list">
-            <h2 className={styles.sectionTitle} id="product-list">
-              รายการสินค้า
-            </h2>
+            <div className={styles.sectionHeading}>
+              <div>
+                <h2 className={styles.sectionTitle} id="product-list">
+                  รายการสินค้า
+                </h2>
+                <p className={styles.sectionDescription}>
+                  เลือกสินค้าเพื่อแก้ไขข้อมูล รูป และตัวเลือกด้านล่าง
+                </p>
+              </div>
+            </div>
 
             <div className={styles.toolbar}>
               <SelectField
@@ -520,12 +559,15 @@ export function ProductManagementView({
                   void replaceProductList("");
                 }}
               >
-                ล้างตัวกรอง
+                แสดงทุกร้านค้า
               </Button>
             </div>
 
             {listLoading ? (
-              <LoadingState title="กำลังโหลดรายการสินค้า" />
+              <LoadingState
+                title="กำลังโหลดรายการสินค้า"
+                description="กำลังใช้ขอบเขตร้านค้าที่เลือก"
+              />
             ) : state.products.length === 0 ? (
               <EmptyState
                 title="ไม่พบสินค้า"
@@ -545,36 +587,48 @@ export function ProductManagementView({
                   const deactivating =
                     deactivatingProductId === product.productId;
                   const busy = loading || saving || deactivating;
+                  const selected =
+                    selectedProduct?.productId === product.productId;
 
                   return (
                     <article
-                      className={styles.card}
+                      className={[
+                        styles.row,
+                        selected ? styles.rowSelected : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ")}
                       key={product.productId}
+                      aria-current={selected ? "true" : undefined}
                     >
-                      <div className={styles.cardHeader}>
-                        <div className={styles.cardCopy}>
+                      <div className={styles.rowMain}>
+                        <div className={styles.rowHeading}>
                           <h3 className={styles.cardTitle}>
                             {product.name}
                           </h3>
-                          <p className={styles.cardDescription}>
-                            {product.description || "ไม่มีคำอธิบาย"}
-                          </p>
-                          <div className={styles.metaRow}>
-                            <span className={styles.meta}>
-                              ร้านค้า:{" "}
-                              {storeNames.get(product.storeId) ??
-                                product.storeId}
-                            </span>
-                            <span className={styles.meta}>
-                              อัปเดตล่าสุด{" "}
-                              {formatIsoDateTime(product.updatedAt)}
-                            </span>
-                          </div>
+                          <Badge tone={statusTone(product.status)}>
+                            {productStatusLabel(product.status)}
+                          </Badge>
                         </div>
-
-                        <Badge tone={statusTone(product.status)}>
-                          {productStatusLabel(product.status)}
-                        </Badge>
+                        <p className={styles.cardDescription}>
+                          {product.description || "ยังไม่มีคำอธิบายสินค้า"}
+                        </p>
+                        <div className={styles.metaRow}>
+                          <span className={styles.meta}>
+                            ร้านค้า:{" "}
+                            {storeNames.get(product.storeId) ??
+                              product.storeId}
+                          </span>
+                          <span className={styles.meta}>
+                            ตัวเลือก {product.variants?.length ?? 0} รายการ
+                          </span>
+                          <span className={styles.meta}>
+                            {product.imageKey ? "มีรูปสินค้า" : "ยังไม่มีรูปสินค้า"}
+                          </span>
+                          <span className={styles.meta}>
+                            อัปเดต {formatIsoDateTime(product.updatedAt)}
+                          </span>
+                        </div>
                       </div>
 
                       <div className={styles.cardActions}>
@@ -587,7 +641,7 @@ export function ProductManagementView({
                             void handleEdit(product);
                           }}
                         >
-                          แก้ไขข้อมูล
+                          {selected ? "กำลังแก้ไข" : "แก้ไขข้อมูล"}
                         </Button>
 
                         {product.status === "ACTIVE" ? (
@@ -601,7 +655,7 @@ export function ProductManagementView({
                               </Button>
                             }
                             title="ยืนยันการปิดใช้งานสินค้า"
-                            description={`ปิดใช้งานสินค้า ${product.name} ใช่หรือไม่ การลบใน MVP เป็น soft deactivate และไม่ลบประวัติ Order เดิม`}
+                            description={`ปิดใช้งานสินค้า ${product.name} ใช่หรือไม่ ข้อมูลคำสั่งซื้อเดิมจะยังคงอยู่`}
                             confirmLabel="ปิดใช้งานสินค้า"
                             danger
                             pending={deactivating}
@@ -622,7 +676,7 @@ export function ProductManagementView({
                 <Button
                   variant="secondary"
                   pending={loadingMore}
-                  pendingLabel="กำลังโหลด"
+                  pendingLabel="กำลังโหลดเพิ่มเติม"
                   onClick={handleLoadMore}
                 >
                   โหลดเพิ่มเติม
@@ -631,104 +685,132 @@ export function ProductManagementView({
             ) : null}
           </section>
 
-          <div className={styles.side}>
-            <section className={styles.panel}>
-              <div>
-                <h2 className={styles.sectionTitle}>สร้างสินค้าใหม่</h2>
-                <p className={styles.description}>
-                  สินค้าต้องผูกกับ Store ที่มีอยู่ในหน่วยงาน
-                  และ Backend จะกำหนดสถานะเริ่มต้นเป็น ACTIVE
-                </p>
-              </div>
+          <aside className={styles.panel}>
+            <div className={styles.panelHeading}>
+              <span className={styles.panelKicker}>เพิ่มรายการขาย</span>
+              <h2 className={styles.sectionTitle}>สร้างสินค้าใหม่</h2>
+              <p className={styles.sectionDescription}>
+                เลือกร้านค้าและเพิ่มข้อมูลพื้นฐานก่อน จากนั้นจึงเพิ่มรูปและตัวเลือกสินค้า
+              </p>
+            </div>
 
-              <form className={styles.form} onSubmit={handleCreate}>
-                <SelectField
-                  id="product-create-store"
-                  label="ร้านค้า"
-                  value={createStoreId}
-                  onChange={(event) => {
-                    setCreateStoreId(event.target.value);
-                    setCreateStoreError(undefined);
-                  }}
-                  error={createStoreError}
-                  required
-                  disabled={creating || state.stores.length === 0}
-                >
-                  <option value="">เลือกร้านค้า</option>
-                  {state.stores.map((store) => (
-                    <option key={store.storeId} value={store.storeId}>
-                      {store.name}
-                      {store.status === "INACTIVE"
-                        ? " (ปิดใช้งาน)"
-                        : ""}
-                    </option>
-                  ))}
-                </SelectField>
+            {state.stores.length === 0 ? (
+              <Notice tone="warning" title="ยังสร้างสินค้าไม่ได้">
+                ต้องมีร้านค้าในหน่วยงานอย่างน้อยหนึ่งร้านก่อน
+              </Notice>
+            ) : null}
 
-                <TextField
-                  id="product-create-name"
-                  label="ชื่อสินค้า"
-                  value={createName}
-                  onChange={(event) => {
-                    setCreateName(event.target.value);
-                    setCreateNameError(undefined);
-                  }}
-                  error={createNameError}
-                  required
-                  disabled={creating}
-                />
+            <form className={styles.form} onSubmit={handleCreate}>
+              <SelectField
+                id="product-create-store"
+                label="ร้านค้า"
+                value={createStoreId}
+                onChange={(event) => {
+                  setCreateStoreId(event.target.value);
+                  setCreateStoreError(undefined);
+                }}
+                error={createStoreError}
+                required
+                disabled={creating || state.stores.length === 0}
+              >
+                <option value="">เลือกร้านค้า</option>
+                {state.stores.map((store) => (
+                  <option key={store.storeId} value={store.storeId}>
+                    {store.name}
+                    {store.status === "INACTIVE"
+                      ? " (ปิดใช้งาน)"
+                      : ""}
+                  </option>
+                ))}
+              </SelectField>
 
-                <TextareaField
-                  id="product-create-description"
-                  label="คำอธิบาย"
-                  value={createDescription}
-                  onChange={(event) =>
-                    setCreateDescription(event.target.value)
-                  }
-                  disabled={creating}
-                />
+              <TextField
+                id="product-create-name"
+                label="ชื่อสินค้า"
+                value={createName}
+                onChange={(event) => {
+                  setCreateName(event.target.value);
+                  setCreateNameError(undefined);
+                }}
+                error={createNameError}
+                required
+                disabled={creating}
+              />
 
-                <Button
-                  type="submit"
-                  pending={creating}
-                  pendingLabel="กำลังสร้าง"
-                  disabled={state.stores.length === 0}
-                >
-                  สร้างสินค้า
-                </Button>
-              </form>
-            </section>
+              <TextareaField
+                id="product-create-description"
+                label="คำอธิบาย"
+                value={createDescription}
+                onChange={(event) =>
+                  setCreateDescription(event.target.value)
+                }
+                disabled={creating}
+              />
 
-            {selectedProduct ? (
-              <section className={styles.panel}>
-                <div className={styles.editHeader}>
-                  <div className={styles.editMeta}>
-                    <h2 className={styles.sectionTitle}>แก้ไขสินค้า</h2>
-                    <span className={styles.meta}>
-                      Product ID: {selectedProduct.productId}
-                    </span>
-                    <span className={styles.meta}>
-                      ร้านค้า:{" "}
-                      {storeNames.get(selectedProduct.storeId) ??
-                        selectedProduct.storeId}
-                    </span>
-                  </div>
-                  <Button
-                    variant="quiet"
-                    size="small"
-                    onClick={() => setSelectedProduct(null)}
-                  >
-                    ปิด
-                  </Button>
+              <Button
+                type="submit"
+                size="large"
+                pending={creating}
+                pendingLabel="กำลังสร้างสินค้า"
+                disabled={state.stores.length === 0}
+              >
+                สร้างสินค้า
+              </Button>
+            </form>
+          </aside>
+        </div>
+
+        {selectedProduct ? (
+          <section
+            className={styles.editor}
+            aria-labelledby="product-editor-title"
+          >
+            <div className={styles.editorHeader}>
+              <div className={styles.editorIdentity}>
+                <div className={styles.editorTitleRow}>
+                  <h2 className={styles.sectionTitle} id="product-editor-title">
+                    จัดการ {selectedProduct.name}
+                  </h2>
+                  <Badge tone={statusTone(selectedProduct.status)}>
+                    {productStatusLabel(selectedProduct.status)}
+                  </Badge>
                 </div>
+                <div className={styles.metaRow}>
+                  <span className={styles.meta}>
+                    ร้านค้า:{" "}
+                    {storeNames.get(selectedProduct.storeId) ??
+                      selectedProduct.storeId}
+                  </span>
+                  <span className={styles.meta}>
+                    รหัสสินค้า: {selectedProduct.productId}
+                  </span>
+                </div>
+              </div>
+              <Button
+                variant="quiet"
+                size="small"
+                onClick={() => setSelectedProduct(null)}
+              >
+                ปิดส่วนแก้ไข
+              </Button>
+            </div>
 
-                {selectedProduct.status === "INACTIVE" ? (
-                  <div className={styles.inactiveNote}>
-                    สินค้านี้ถูกปิดใช้งานแล้ว
-                    หน้านี้ยังแสดงและแก้ไขข้อมูลข้อความตาม contract
-                    แต่ไม่มี action สำหรับสร้างสถานะใหม่แทน Backend
-                  </div>
-                ) : null}
+            {selectedProduct.status === "INACTIVE" ? (
+              <Notice tone="neutral" title="สินค้านี้ปิดใช้งานอยู่">
+                ยังสามารถตรวจสอบและแก้ไขข้อมูลที่รองรับได้ แต่ไม่มีการเปิดใช้งานกลับจากขั้นตอนลบสินค้าในหน้านี้
+              </Notice>
+            ) : null}
+
+            <div className={styles.editorGrid}>
+              <section className={styles.editorSection} aria-labelledby="product-basic-title">
+                <div className={styles.editorSectionHeading}>
+                  <h3 className={styles.editorSectionTitle} id="product-basic-title">
+                    ข้อมูลสินค้า
+                  </h3>
+                  <span className={styles.meta}>
+                    อัปเดตล่าสุด {formatIsoDateTime(selectedProduct.updatedAt)}
+                  </span>
+                </div>
 
                 <form className={styles.form} onSubmit={handleSaveEdit}>
                   <TextField
@@ -758,17 +840,27 @@ export function ProductManagementView({
                     }
                   />
 
-                  <Button
-                    type="submit"
-                    pending={
-                      savingProductId === selectedProduct.productId
-                    }
-                    pendingLabel="กำลังบันทึก"
-                  >
-                    บันทึกข้อมูล
-                  </Button>
+                  <div className={styles.editorActions}>
+                    <Button
+                      type="submit"
+                      pending={
+                        savingProductId === selectedProduct.productId
+                      }
+                      pendingLabel="กำลังบันทึก"
+                      disabled={!editDirty}
+                    >
+                      บันทึกข้อมูล
+                    </Button>
+                    {!editDirty ? (
+                      <span className={styles.meta}>
+                        ยังไม่มีข้อมูลที่เปลี่ยนแปลง
+                      </span>
+                    ) : null}
+                  </div>
                 </form>
+              </section>
 
+              <section className={styles.editorSection}>
                 <ProductImageUploadView
                   organizationId={organizationId}
                   product={selectedProduct}
@@ -788,30 +880,30 @@ export function ProductManagementView({
                     );
                   }}
                 />
-
-                <VariantManagement
-                  organizationId={organizationId}
-                  product={selectedProduct}
-                  onProductRefreshed={(refreshed) => {
-                    setSelectedProduct(refreshed);
-                    setState((current) =>
-                      current.status === "success"
-                        ? {
-                            ...current,
-                            products: current.products.map((product) =>
-                              product.productId === refreshed.productId
-                                ? refreshed
-                                : product,
-                            ),
-                          }
-                        : current,
-                    );
-                  }}
-                />
               </section>
-            ) : null}
-          </div>
-        </div>
+            </div>
+
+            <VariantManagement
+              organizationId={organizationId}
+              product={selectedProduct}
+              onProductRefreshed={(refreshed) => {
+                setSelectedProduct(refreshed);
+                setState((current) =>
+                  current.status === "success"
+                    ? {
+                        ...current,
+                        products: current.products.map((product) =>
+                          product.productId === refreshed.productId
+                            ? refreshed
+                            : product,
+                        ),
+                      }
+                    : current,
+                );
+              }}
+            />
+          </section>
+        ) : null}
       </main>
     </div>
   );

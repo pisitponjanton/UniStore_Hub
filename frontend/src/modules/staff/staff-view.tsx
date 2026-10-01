@@ -9,6 +9,7 @@ import {
   EmptyState,
   ErrorState,
   LoadingState,
+  Notice,
   SelectField,
   TextField,
 } from "@/components";
@@ -40,7 +41,7 @@ type StaffState =
 function membershipStatusLabel(
   status: OrganizationMemberDTO["status"],
 ): string {
-  return status === "ACTIVE" ? "ใช้งาน" : "ไม่ใช้งาน";
+  return status === "ACTIVE" ? "ใช้งานอยู่" : "ไม่ใช้งาน";
 }
 
 function membershipStatusTone(
@@ -56,7 +57,7 @@ function operationErrorMessage(error: unknown): string {
     }
 
     if (error.code === "LAST_ORGANIZATION_ADMIN") {
-      return "ไม่สามารถเปลี่ยนหรือลบ Organization Admin คนสุดท้ายได้";
+      return "ไม่สามารถเปลี่ยนหรือลบผู้ดูแลหน่วยงานคนสุดท้ายได้";
     }
 
     if (error.code === "MEMBER_NOT_FOUND") {
@@ -134,6 +135,13 @@ export function StaffView({
     state.status === "success" ? state.members : [];
 
   const adminCount = activeAdminCount(members);
+  const activeMembers = members.filter(
+    (member) => member.status === "ACTIVE",
+  );
+  const activeStaffCount = activeMembers.filter(
+    (member) => member.role === "STAFF",
+  ).length;
+  const inactiveCount = members.length - activeMembers.length;
 
   async function handleAdd(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -225,7 +233,7 @@ export function StaffView({
     try {
       await staffService.remove(organizationId, member.userId);
       await refreshMembers();
-      setNotice(`ลบ ${member.user.name} ออกจากหน่วยงานแล้ว`);
+      setNotice(`นำ ${member.user.name} ออกจากหน่วยงานแล้ว`);
       await authSession.restore();
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
@@ -244,7 +252,10 @@ export function StaffView({
       <div className={styles.page}>
         <main className={styles.stateWrap}>
           {state.status === "loading" ? (
-            <LoadingState title="กำลังโหลดรายชื่อบุคลากร" />
+            <LoadingState
+              title="กำลังโหลดรายชื่อบุคลากร"
+              description="กำลังดึงสมาชิกและบทบาทล่าสุดของหน่วยงาน"
+            />
           ) : (
             <ErrorState
               title="ไม่สามารถโหลดรายชื่อบุคลากรได้"
@@ -261,35 +272,59 @@ export function StaffView({
       <main className={styles.main}>
         <header className={styles.header}>
           <div className={styles.headerCopy} data-ledger-heading>
-            <span className={styles.eyebrow}>Staff management</span>
-            <h1 className={styles.title}>บุคลากร</h1>
+            <h1 className={styles.title}>บุคลากรและสิทธิ์</h1>
             <p className={styles.description}>
-              เพิ่มผู้ใช้ที่มีบัญชีอยู่แล้ว เปลี่ยนบทบาท และนำสมาชิกออกจากหน่วยงาน
-              โดย Backend เป็นผู้ตรวจสอบกฎ Organization Admin คนสุดท้าย
+              เพิ่มผู้ใช้ที่มีบัญชีอยู่แล้ว กำหนดบทบาท และจัดการสมาชิกของหน่วยงาน
             </p>
           </div>
-          <Badge tone="info">
-            Admin ที่ใช้งานอยู่ {adminCount} คน
-          </Badge>
         </header>
 
-        {inlineError ? (
-          <div className={styles.inlineError} role="alert">
-            {inlineError}
+        <section className={styles.summaryStrip} aria-label="สรุปบุคลากร">
+          <div>
+            <span className={styles.summaryLabel}>สมาชิกที่ใช้งาน</span>
+            <strong>{activeMembers.length}</strong>
           </div>
+          <div>
+            <span className={styles.summaryLabel}>ผู้ดูแลหน่วยงาน</span>
+            <strong>{adminCount}</strong>
+          </div>
+          <div>
+            <span className={styles.summaryLabel}>เจ้าหน้าที่</span>
+            <strong>{activeStaffCount}</strong>
+          </div>
+          <div>
+            <span className={styles.summaryLabel}>ไม่ใช้งาน</span>
+            <strong>{inactiveCount}</strong>
+          </div>
+        </section>
+
+        {inlineError ? (
+          <Notice tone="danger" role="alert" title="ดำเนินการไม่สำเร็จ">
+            {inlineError}
+          </Notice>
         ) : null}
 
         {notice ? (
-          <div className={styles.notice} role="status">
+          <Notice tone="success" role="status" title="อัปเดตแล้ว">
             {notice}
-          </div>
+          </Notice>
         ) : null}
 
         <div className={styles.grid}>
-          <section className={styles.memberList} aria-labelledby="member-list">
-            <h2 className={styles.sectionTitle} id="member-list">
-              สมาชิกในหน่วยงาน
-            </h2>
+          <section className={styles.memberSection} aria-labelledby="member-list">
+            <div className={styles.sectionHeading}>
+              <div>
+                <h2 className={styles.sectionTitle} id="member-list">
+                  สมาชิกในหน่วยงาน
+                </h2>
+                <p className={styles.sectionDescription}>
+                  การเปลี่ยนบทบาทและการนำออกต้องยืนยันก่อนทุกครั้ง
+                </p>
+              </div>
+              <span className={styles.sectionMeta}>
+                {members.length.toLocaleString("th-TH")} รายการ
+              </span>
+            </div>
 
             {members.length === 0 ? (
               <EmptyState
@@ -297,127 +332,138 @@ export function StaffView({
                 description="เพิ่มสมาชิกด้วยอีเมลจากแบบฟอร์มด้านข้าง"
               />
             ) : (
-              members.map((member) => {
-                const finalAdmin = isFinalActiveAdmin(member, members);
-                const draftRole =
-                  roleDrafts[member.userId] ?? member.role;
-                const pending = operationId === member.userId;
-                const inactive = member.status !== "ACTIVE";
+              <div className={styles.memberList}>
+                {members.map((member) => {
+                  const finalAdmin = isFinalActiveAdmin(member, members);
+                  const draftRole =
+                    roleDrafts[member.userId] ?? member.role;
+                  const pending = operationId === member.userId;
+                  const inactive = member.status !== "ACTIVE";
+                  const roleChanged = draftRole !== member.role;
 
-                return (
-                  <article
-                    className={styles.memberCard}
-                    key={member.userId}
-                  >
-                    <div className={styles.memberHeader}>
-                      <div className={styles.memberIdentity}>
-                        <h3 className={styles.memberName}>
-                          {member.user.name}
-                        </h3>
-                        <span className={styles.memberEmail}>
-                          {member.user.email}
-                        </span>
-                        <span className={styles.meta}>
-                          User ID: {member.userId}
-                        </span>
-                      </div>
+                  return (
+                    <article
+                      className={[
+                        styles.memberCard,
+                        inactive ? styles.memberCardInactive : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ")}
+                      key={member.userId}
+                    >
+                      <div className={styles.memberHeader}>
+                        <div className={styles.memberIdentity}>
+                          <h3 className={styles.memberName}>
+                            {member.user.name}
+                          </h3>
+                          <span className={styles.memberEmail}>
+                            {member.user.email}
+                          </span>
+                        </div>
 
-                      <div className={styles.badges}>
-                        <Badge
-                          tone={
-                            member.role === "ORGANIZATION_ADMIN"
-                              ? "info"
-                              : "neutral"
-                          }
-                        >
-                          {staffRoleLabel(member.role)}
-                        </Badge>
-                        <Badge tone={membershipStatusTone(member.status)}>
-                          {membershipStatusLabel(member.status)}
-                        </Badge>
-                      </div>
-                    </div>
-
-                    {finalAdmin ? (
-                      <div className={styles.finalAdmin}>
-                        สมาชิกคนนี้เป็น Organization Admin ที่ใช้งานอยู่คนสุดท้าย
-                        จึงไม่สามารถลดสิทธิ์หรือนำออกได้
-                      </div>
-                    ) : null}
-
-                    <div className={styles.memberActions}>
-                      <SelectField
-                        id={`role-${member.userId}`}
-                        label="บทบาท"
-                        value={draftRole}
-                        onChange={(event) =>
-                          setRoleDrafts((current) => ({
-                            ...current,
-                            [member.userId]:
-                              event.target.value as MembershipRole,
-                          }))
-                        }
-                        disabled={inactive || pending}
-                      >
-                        <option value="STAFF">Staff</option>
-                        <option value="ORGANIZATION_ADMIN">
-                          Organization Admin
-                        </option>
-                      </SelectField>
-
-                      <ConfirmDialog
-                        trigger={
-                          <Button
-                            variant="secondary"
-                            disabled={
-                              inactive ||
-                              pending ||
-                              draftRole === member.role ||
-                              (finalAdmin && draftRole === "STAFF")
+                        <div className={styles.badges}>
+                          <Badge
+                            tone={
+                              member.role === "ORGANIZATION_ADMIN"
+                                ? "info"
+                                : "neutral"
                             }
                           >
-                            บันทึกบทบาท
-                          </Button>
-                        }
-                        title="ยืนยันการเปลี่ยนบทบาท"
-                        description={`เปลี่ยนบทบาทของ ${member.user.name} จาก ${staffRoleLabel(member.role)} เป็น ${staffRoleLabel(draftRole)} ใช่หรือไม่`}
-                        confirmLabel="ยืนยันการเปลี่ยน"
-                        pending={pending}
-                        onConfirm={() => {
-                          void handleRoleChange(member);
-                        }}
-                      />
+                            {staffRoleLabel(member.role)}
+                          </Badge>
+                          <Badge tone={membershipStatusTone(member.status)}>
+                            {membershipStatusLabel(member.status)}
+                          </Badge>
+                        </div>
+                      </div>
 
-                      <ConfirmDialog
-                        trigger={
-                          <Button
-                            variant="danger"
-                            disabled={inactive || pending || finalAdmin}
-                          >
-                            นำออก
-                          </Button>
-                        }
-                        title="ยืนยันการนำสมาชิกออก"
-                        description={`นำ ${member.user.name} ออกจากหน่วยงานใช่หรือไม่`}
-                        confirmLabel="นำออกจากหน่วยงาน"
-                        danger
-                        pending={pending}
-                        onConfirm={() => {
-                          void handleRemove(member);
-                        }}
-                      />
-                    </div>
-                  </article>
-                );
-              })
+                      {finalAdmin ? (
+                        <div className={styles.finalAdmin}>
+                          สมาชิกคนนี้เป็นผู้ดูแลหน่วยงานที่ใช้งานอยู่คนสุดท้าย จึงไม่สามารถลดสิทธิ์หรือนำออกได้
+                        </div>
+                      ) : null}
+
+                      {inactive ? (
+                        <div className={styles.inactiveNote}>
+                          สมาชิกนี้ไม่ได้อยู่ในสถานะใช้งาน จึงไม่สามารถแก้บทบาทหรือนำออกจากหน้านี้ได้
+                        </div>
+                      ) : null}
+
+                      <div className={styles.memberActions}>
+                        <SelectField
+                          id={`role-${member.userId}`}
+                          label="บทบาท"
+                          value={draftRole}
+                          onChange={(event) =>
+                            setRoleDrafts((current) => ({
+                              ...current,
+                              [member.userId]:
+                                event.target.value as MembershipRole,
+                            }))
+                          }
+                          disabled={inactive || pending}
+                        >
+                          <option value="STAFF">เจ้าหน้าที่</option>
+                          <option value="ORGANIZATION_ADMIN">
+                            ผู้ดูแลหน่วยงาน
+                          </option>
+                        </SelectField>
+
+                        <ConfirmDialog
+                          trigger={
+                            <Button
+                              variant="secondary"
+                              disabled={
+                                inactive ||
+                                pending ||
+                                !roleChanged ||
+                                (finalAdmin && draftRole === "STAFF")
+                              }
+                            >
+                              บันทึกบทบาท
+                            </Button>
+                          }
+                          title="ยืนยันการเปลี่ยนบทบาท"
+                          description={`เปลี่ยนบทบาทของ ${member.user.name} จาก ${staffRoleLabel(member.role)} เป็น ${staffRoleLabel(draftRole)} ใช่หรือไม่`}
+                          confirmLabel="ยืนยันการเปลี่ยน"
+                          pending={pending}
+                          onConfirm={() => {
+                            void handleRoleChange(member);
+                          }}
+                        />
+
+                        <ConfirmDialog
+                          trigger={
+                            <Button
+                              variant="danger"
+                              disabled={inactive || pending || finalAdmin}
+                            >
+                              นำออก
+                            </Button>
+                          }
+                          title="ยืนยันการนำสมาชิกออก"
+                          description={`นำ ${member.user.name} ออกจากหน่วยงานใช่หรือไม่`}
+                          confirmLabel="นำออกจากหน่วยงาน"
+                          danger
+                          pending={pending}
+                          onConfirm={() => {
+                            void handleRemove(member);
+                          }}
+                        />
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
             )}
           </section>
 
           <aside className={styles.panel}>
-            <div>
+            <div className={styles.panelHeading}>
+              <span className={styles.panelKicker}>เพิ่มสิทธิ์ให้ผู้ใช้</span>
               <h2 className={styles.sectionTitle}>เพิ่มสมาชิก</h2>
-              <p className={styles.description}>
-                เพิ่มได้เฉพาะอีเมลของผู้ใช้ที่มีบัญชี UniStore Hub อยู่แล้ว
+              <p className={styles.sectionDescription}>
+                ใช้อีเมลของผู้ใช้ที่สมัครบัญชี UniStore Hub แล้ว
               </p>
             </div>
 
@@ -430,6 +476,7 @@ export function StaffView({
                 onChange={(event) => {
                   setEmail(event.target.value);
                   setEmailError(undefined);
+                  setInlineError(null);
                 }}
                 error={emailError}
                 autoComplete="email"
@@ -439,23 +486,33 @@ export function StaffView({
 
               <SelectField
                 id="staff-role"
-                label="บทบาท"
+                label="บทบาทเริ่มต้น"
                 value={addRole}
                 onChange={(event) =>
                   setAddRole(event.target.value as MembershipRole)
                 }
                 disabled={adding}
               >
-                <option value="STAFF">Staff</option>
+                <option value="STAFF">เจ้าหน้าที่</option>
                 <option value="ORGANIZATION_ADMIN">
-                  Organization Admin
+                  ผู้ดูแลหน่วยงาน
                 </option>
               </SelectField>
 
+              <div className={styles.roleHelp}>
+                <strong>{staffRoleLabel(addRole)}</strong>
+                <span>
+                  {addRole === "ORGANIZATION_ADMIN"
+                    ? "จัดการข้อมูลหน่วยงาน บุคลากร และงานสำหรับผู้ดูแลได้"
+                    : "เข้าถึงงานปฏิบัติการตามสิทธิ์ของเจ้าหน้าที่"}
+                </span>
+              </div>
+
               <Button
                 type="submit"
+                size="large"
                 pending={adding}
-                pendingLabel="กำลังเพิ่ม"
+                pendingLabel="กำลังเพิ่มสมาชิก"
               >
                 เพิ่มสมาชิก
               </Button>

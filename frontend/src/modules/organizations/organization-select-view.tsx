@@ -9,6 +9,7 @@ import {
   EmptyState,
   ErrorState,
   LoadingState,
+  Notice,
   TextareaField,
   TextField,
 } from "@/components";
@@ -40,9 +41,9 @@ function organizationStatusLabel(status: OrganizationDTO["status"]) {
     case "PENDING":
       return "รออนุมัติ";
     case "ACTIVE":
-      return "ใช้งาน";
+      return "พร้อมใช้งาน";
     case "SUSPENDED":
-      return "ระงับ";
+      return "ถูกระงับ";
   }
 }
 
@@ -57,6 +58,14 @@ function organizationStatusTone(
     case "SUSPENDED":
       return "danger";
   }
+}
+
+function membershipRoleLabel(
+  role: "STAFF" | "ORGANIZATION_ADMIN",
+): string {
+  return role === "ORGANIZATION_ADMIN"
+    ? "ผู้ดูแลหน่วยงาน"
+    : "เจ้าหน้าที่";
 }
 
 export function OrganizationSelectView() {
@@ -198,24 +207,43 @@ export function OrganizationSelectView() {
       <main className={styles.main}>
         <header className={styles.header}>
           <div className={styles.headerCopy} data-ledger-heading>
-            <span className={styles.eyebrow}>Organization context</span>
             <h1 className={styles.title}>เลือกหน่วยงาน</h1>
             <p className={styles.description}>
-              เลือกเฉพาะหน่วยงานที่บัญชีนี้มี Active membership
-              ข้อมูล organizationId ใน URL ใช้เพื่อการนำทางเท่านั้น
-              Backend ยังคงตรวจสิทธิ์ทุกคำขอ
+              เลือกพื้นที่ทำงานตามสิทธิ์ของบัญชี หรือสร้างหน่วยงานใหม่สำหรับงานที่คุณดูแล
             </p>
           </div>
+          {loadState.status === "success" ? (
+            <div className={styles.headerSummary}>
+              <strong>{accessible.length}</strong>
+              <span>หน่วยงานที่เข้าถึงได้</span>
+            </div>
+          ) : null}
         </header>
+
+        {submitError ? (
+          <Notice tone="danger" role="alert" title="ดำเนินการไม่สำเร็จ">
+            {submitError}
+          </Notice>
+        ) : null}
 
         <div className={styles.grid}>
           <section className={styles.section} aria-labelledby="organizations">
-            <h2 className={styles.sectionTitle} id="organizations">
-              หน่วยงานที่เข้าถึงได้
-            </h2>
+            <div className={styles.sectionHeading}>
+              <div>
+                <h2 className={styles.sectionTitle} id="organizations">
+                  หน่วยงานของคุณ
+                </h2>
+                <p className={styles.sectionDescription}>
+                  บทบาทที่แสดงเป็นสิทธิ์ปัจจุบันของบัญชีในแต่ละหน่วยงาน
+                </p>
+              </div>
+            </div>
 
             {loadState.status === "loading" ? (
-              <LoadingState title="กำลังโหลดหน่วยงาน" />
+              <LoadingState
+                title="กำลังโหลดหน่วยงาน"
+                description="กำลังตรวจสอบหน่วยงานและสิทธิ์ที่บัญชีนี้เข้าถึงได้"
+              />
             ) : null}
 
             {loadState.status === "error" ? (
@@ -228,7 +256,7 @@ export function OrganizationSelectView() {
             {loadState.status === "success" && accessible.length === 0 ? (
               <EmptyState
                 title="ยังไม่มีหน่วยงานที่เข้าถึงได้"
-                description="คุณสามารถสร้างหน่วยงานใหม่ได้จากแบบฟอร์มด้านข้าง"
+                description="หากต้องการเริ่มพื้นที่ใหม่ สามารถสร้างหน่วยงานได้จากแบบฟอร์มด้านข้าง"
               />
             ) : null}
 
@@ -240,29 +268,34 @@ export function OrganizationSelectView() {
                     key={organization.organizationId}
                   >
                     <div className={styles.cardCopy}>
-                      <h3 className={styles.cardTitle}>
-                        {organization.name}
-                      </h3>
-                      <p className={styles.cardDescription}>
-                        {organization.description || "ไม่มีคำอธิบาย"}
-                      </p>
-                      <div className={styles.metaRow}>
-                        <Badge
-                          tone={organizationStatusTone(organization.status)}
-                        >
-                          {organizationStatusLabel(organization.status)}
-                        </Badge>
-                        <span className={styles.meta}>
-                          {membership.role === "ORGANIZATION_ADMIN"
-                            ? "Organization Admin"
-                            : "Staff"}
-                        </span>
+                      <div className={styles.cardHeading}>
+                        <h3 className={styles.cardTitle}>
+                          {organization.name}
+                        </h3>
+                        <div className={styles.metaRow}>
+                          <Badge
+                            tone={organizationStatusTone(organization.status)}
+                          >
+                            {organizationStatusLabel(organization.status)}
+                          </Badge>
+                          <Badge
+                            tone={
+                              membership.role === "ORGANIZATION_ADMIN"
+                                ? "info"
+                                : "neutral"
+                            }
+                          >
+                            {membershipRoleLabel(membership.role)}
+                          </Badge>
+                        </div>
                       </div>
+                      <p className={styles.cardDescription}>
+                        {organization.description || "ยังไม่มีคำอธิบายหน่วยงาน"}
+                      </p>
                     </div>
 
                     <div className={styles.cardActions}>
                       <Button
-                        variant="secondary"
                         onClick={() =>
                           handleSelect(
                             organization.organizationId,
@@ -270,7 +303,7 @@ export function OrganizationSelectView() {
                           )
                         }
                       >
-                        เลือกหน่วยงาน
+                        เข้าใช้งาน
                       </Button>
                     </div>
                   </article>
@@ -280,11 +313,11 @@ export function OrganizationSelectView() {
           </section>
 
           <aside className={styles.panel}>
-            <div>
-              <h2 className={styles.sectionTitle}>สร้างหน่วยงานใหม่</h2>
-              <p className={styles.description}>
-                ผู้สร้างจะได้รับสิทธิ์ ORGANIZATION_ADMIN
-                และหน่วยงานใหม่เริ่มต้นในสถานะ PENDING
+            <div className={styles.panelHeading}>
+              <span className={styles.panelKicker}>เริ่มพื้นที่ใหม่</span>
+              <h2 className={styles.sectionTitle}>สร้างหน่วยงาน</h2>
+              <p className={styles.sectionDescription}>
+                คุณจะเป็นผู้ดูแลหน่วยงาน และหน่วยงานใหม่จะเริ่มในสถานะรออนุมัติ
               </p>
             </div>
 
@@ -296,6 +329,7 @@ export function OrganizationSelectView() {
                 onChange={(event) => {
                   setName(event.target.value);
                   setNameError(undefined);
+                  setSubmitError(null);
                 }}
                 error={nameError}
                 required
@@ -306,20 +340,18 @@ export function OrganizationSelectView() {
                 id="organization-description"
                 label="คำอธิบาย"
                 value={description}
-                onChange={(event) => setDescription(event.target.value)}
+                onChange={(event) => {
+                  setDescription(event.target.value);
+                  setSubmitError(null);
+                }}
                 disabled={creating}
               />
 
-              {submitError ? (
-                <div className={styles.error} role="alert">
-                  {submitError}
-                </div>
-              ) : null}
-
               <Button
                 type="submit"
+                size="large"
                 pending={creating}
-                pendingLabel="กำลังสร้าง"
+                pendingLabel="กำลังสร้างหน่วยงาน"
               >
                 สร้างหน่วยงาน
               </Button>

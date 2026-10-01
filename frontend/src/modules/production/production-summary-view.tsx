@@ -7,12 +7,12 @@ import {
 } from "react";
 
 import {
-  Badge,
   Button,
   EmptyState,
   ErrorState,
   ForbiddenState,
   LoadingState,
+  Notice,
   TextField,
   UnauthorizedState,
 } from "@/components";
@@ -45,7 +45,7 @@ type SummaryState =
 function loadErrorMessage(error: unknown): string {
   if (error instanceof ApiClientError) {
     if (error.code === "CAMPAIGN_NOT_FOUND") {
-      return "ไม่พบ Campaign นี้ในหน่วยงาน";
+      return "ไม่พบแคมเปญนี้ในหน่วยงาน";
     }
 
     return error.userMessage;
@@ -151,9 +151,7 @@ export function ProductionSummaryView({
     return () => controller.abort();
   }, [initialCampaignId, organizationId]);
 
-  async function loadSummary(
-    nextCampaignId: string,
-  ) {
+  async function loadSummary(nextCampaignId: string) {
     setState({
       status: "loading",
       campaignId: nextCampaignId,
@@ -257,83 +255,112 @@ export function ProductionSummaryView({
         ? state.campaignId
         : null;
 
+  const totalVariants =
+    state.status === "success"
+      ? state.summary.products.reduce(
+          (total, product) => total + product.variants.length,
+          0,
+        )
+      : 0;
+  const totalQuantity =
+    state.status === "success"
+      ? state.summary.products.reduce(
+          (productTotal, product) =>
+            productTotal +
+            product.variants.reduce(
+              (variantTotal, variant) =>
+                variantTotal + variant.quantity,
+              0,
+            ),
+          0,
+        )
+      : 0;
+
   return (
     <div className={styles.page}>
       <main className={styles.main}>
         <header className={styles.header}>
           <div className={styles.headerCopy} data-ledger-heading>
-            <span className={styles.eyebrow}>
-              Production summary
-            </span>
-            <h1 className={styles.title}>สรุปการผลิต</h1>
+            <h1 className={styles.title}>สรุปงานผลิต</h1>
             <p className={styles.description}>
-              แสดงยอดผลิตที่ Backend สรุปจาก Order ที่ผ่านการชำระเงิน
-              และอยู่ใน paid lifecycle ของ Campaign เท่านั้น
-              หน้านี้ไม่คำนวณยอดใหม่จาก Order cache ฝั่ง Browser
+              เลือกแคมเปญเพื่อดูจำนวนสินค้าที่ต้องเตรียม แยกตามสินค้าและตัวเลือก โดยใช้สรุปที่ระบบส่งกลับโดยตรง
             </p>
           </div>
-
-          <Badge tone="info">Organization Admin</Badge>
         </header>
 
-        <form
+        <section
           className={styles.campaignPanel}
-          onSubmit={handleSubmit}
+          aria-labelledby="production-campaign-title"
         >
-          <TextField
-            id="production-campaign-id"
-            label="Campaign ID"
-            value={campaignId}
-            onChange={(event) => {
-              setCampaignId(event.target.value);
-              setCampaignError(undefined);
-            }}
-            error={campaignError}
-            hint="ระบุ Campaign ที่ต้องการดู Production Summary"
-            placeholder="เช่น campaign-123"
-            disabled={state.status === "loading"}
-            required
-          />
-
-          <div className={styles.campaignActions}>
-            <Button
-              type="submit"
-              pending={state.status === "loading"}
-              pendingLabel="กำลังโหลดสรุป"
-            >
-              โหลดสรุปการผลิต
-            </Button>
+          <div className={styles.panelHeading}>
+            <div>
+              <h2
+                className={styles.sectionTitle}
+                id="production-campaign-title"
+              >
+                เลือกแคมเปญ
+              </h2>
+              <p className={styles.sectionDescription}>
+                Production Summary ต้องระบุ Campaign ID ก่อนโหลดข้อมูล
+              </p>
+            </div>
+            {loadedCampaignId ? (
+              <span className={styles.contextCode}>
+                {loadedCampaignId}
+              </span>
+            ) : null}
           </div>
-        </form>
 
-        {loadedCampaignId ? (
-          <div className={styles.context}>
-            <span>Campaign ที่กำลังแสดง:</span>
-            <span className={styles.contextCode}>
-              {loadedCampaignId}
-            </span>
-          </div>
-        ) : null}
+          <form className={styles.campaignForm} onSubmit={handleSubmit}>
+            <TextField
+              id="production-campaign-id"
+              label="Campaign ID"
+              value={campaignId}
+              onChange={(event) => {
+                setCampaignId(event.target.value);
+                setCampaignError(undefined);
+              }}
+              error={campaignError}
+              hint="ระบุแคมเปญที่ต้องการดูยอดผลิต"
+              placeholder="เช่น campaign-123"
+              disabled={state.status === "loading"}
+              required
+            />
+
+            <div className={styles.campaignActions}>
+              <Button
+                type="submit"
+                pending={state.status === "loading"}
+                pendingLabel="กำลังโหลดสรุป"
+              >
+                โหลดสรุปการผลิต
+              </Button>
+            </div>
+          </form>
+        </section>
 
         {inlineError ? (
-          <div className={styles.errorBox} role="alert">
+          <Notice tone="danger" role="alert" title="โหลดสรุปไม่สำเร็จ">
             {inlineError}
-          </div>
+          </Notice>
         ) : null}
 
         {state.status === "idle" ? (
-          <div className={styles.infoBox}>
-            ระบุ Campaign ID เพื่อโหลดสรุปการผลิตจาก Backend
-          </div>
+          <Notice tone="neutral" title="ยังไม่ได้เลือกแคมเปญ">
+            ระบุ Campaign ID ด้านบนเพื่อดูจำนวนสินค้าที่ต้องผลิต
+          </Notice>
         ) : null}
 
         {state.status === "loading" ? (
-          <LoadingState title="กำลังโหลดสรุปการผลิต" />
+          <LoadingState
+            title="กำลังโหลดสรุปการผลิต"
+            description="กำลังเตรียมจำนวนสินค้าและตัวเลือกของแคมเปญ"
+          />
         ) : null}
 
         {state.status === "notFound" ? (
           <ErrorState
-            title="ไม่พบ Campaign"
+            title="ไม่พบแคมเปญ"
             description="ตรวจสอบ Campaign ID แล้วลองใหม่อีกครั้ง"
           />
         ) : null}
@@ -341,90 +368,118 @@ export function ProductionSummaryView({
         {state.status === "error" ? (
           <ErrorState
             title="ไม่สามารถโหลดสรุปการผลิตได้"
-            description="ข้อมูลเดิมจะไม่ถูกนำมาคำนวณทดแทน กรุณาลองโหลดจาก Backend ใหม่"
+            description="กรุณาลองโหลดข้อมูลของแคมเปญนี้ใหม่อีกครั้ง"
           />
         ) : null}
 
         {state.status === "success" ? (
-          <section
-            className={styles.section}
-            aria-labelledby="production-summary-products"
-          >
-            <div className={styles.sectionHeader}>
+          <>
+            <section
+              className={styles.summaryStrip}
+              aria-label="สรุปจำนวนที่ต้องผลิต"
+            >
               <div>
-                <h2
-                  className={styles.sectionTitle}
-                  id="production-summary-products"
-                >
-                  Product / Variant ที่ต้องผลิต
-                </h2>
-                <p className={styles.description}>
-                  ปริมาณด้านล่างมาจาก Production Summary endpoint
-                  โดยตรง
-                </p>
+                <span className={styles.summaryLabel}>สินค้า</span>
+                <strong>{state.summary.products.length}</strong>
+              </div>
+              <div>
+                <span className={styles.summaryLabel}>ตัวเลือกสินค้า</span>
+                <strong>{totalVariants}</strong>
+              </div>
+              <div>
+                <span className={styles.summaryLabel}>
+                  จำนวนรวมที่ต้องผลิต
+                </span>
+                <strong>{totalQuantity.toLocaleString("th-TH")}</strong>
+              </div>
+            </section>
+
+            <section
+              className={styles.section}
+              aria-labelledby="production-summary-products"
+            >
+              <div className={styles.sectionHeader}>
+                <div>
+                  <h2
+                    className={styles.sectionTitle}
+                    id="production-summary-products"
+                  >
+                    รายการผลิตตามสินค้า
+                  </h2>
+                  <p className={styles.sectionDescription}>
+                    ใช้จำนวนในรายการนี้เป็นข้อมูลอ้างอิงสำหรับเตรียมงานผลิตของแคมเปญที่เลือก
+                  </p>
+                </div>
               </div>
 
-              <Badge tone="neutral">
-                {state.summary.products.length} Product
-              </Badge>
-            </div>
+              {state.summary.products.length === 0 ? (
+                <EmptyState
+                  title="ยังไม่มีรายการที่ต้องผลิต"
+                  description="แคมเปญนี้ยังไม่มีคำสั่งซื้อที่เข้าเงื่อนไขสำหรับสรุปงานผลิต"
+                />
+              ) : (
+                <div className={styles.productList}>
+                  {state.summary.products.map((product) => {
+                    const productQuantity = product.variants.reduce(
+                      (total, variant) => total + variant.quantity,
+                      0,
+                    );
 
-            {state.summary.products.length === 0 ? (
-              <EmptyState
-                title="ยังไม่มีรายการที่ต้องผลิต"
-                description="Campaign นี้ยังไม่มี Order ที่มี Payment APPROVED และอยู่ในสถานะ PAID, CONFIRMED, IN_PRODUCTION, READY_FOR_PICKUP หรือ RECEIVED"
-              />
-            ) : (
-              <div className={styles.productList}>
-                {state.summary.products.map((product) => (
-                  <article
-                    className={styles.productCard}
-                    key={product.productId}
-                  >
-                    <div className={styles.productHeader}>
-                      <div className={styles.productCopy}>
-                        <h3 className={styles.productName}>
-                          {product.productName}
-                        </h3>
-                        <span className={styles.productId}>
-                          Product ID: {product.productId}
-                        </span>
-                      </div>
-
-                      <Badge tone="neutral">
-                        {product.variants.length} Variant
-                      </Badge>
-                    </div>
-
-                    <div className={styles.variantList}>
-                      {product.variants.map((variant) => (
-                        <div
-                          className={styles.variantRow}
-                          key={variant.variantId}
-                        >
-                          <div className={styles.variantCopy}>
-                            <span className={styles.variantName}>
-                              {variant.variantName}
-                            </span>
-                            <span className={styles.variantId}>
-                              Variant ID: {variant.variantId}
+                    return (
+                      <article
+                        className={styles.productGroup}
+                        key={product.productId}
+                      >
+                        <div className={styles.productHeader}>
+                          <div className={styles.productCopy}>
+                            <h3 className={styles.productName}>
+                              {product.productName}
+                            </h3>
+                            <span className={styles.productId}>
+                              Product ID: {product.productId}
                             </span>
                           </div>
-
-                          <div className={styles.quantity}>
-                            <span className={styles.quantityLabel}>
-                              จำนวนที่ต้องผลิต
-                            </span>
-                            {variant.quantity.toLocaleString("th-TH")}
+                          <div className={styles.productTotal}>
+                            <span>รวม</span>
+                            <strong>
+                              {productQuantity.toLocaleString("th-TH")}
+                            </strong>
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  </article>
-                ))}
-              </div>
-            )}
-          </section>
+
+                        <div className={styles.variantList}>
+                          {product.variants.map((variant) => (
+                            <div
+                              className={styles.variantRow}
+                              key={variant.variantId}
+                            >
+                              <div className={styles.variantCopy}>
+                                <span className={styles.variantName}>
+                                  {variant.variantName}
+                                </span>
+                                <span className={styles.variantId}>
+                                  Variant ID: {variant.variantId}
+                                </span>
+                              </div>
+
+                              <div className={styles.quantity}>
+                                <span className={styles.quantityLabel}>
+                                  จำนวนที่ต้องผลิต
+                                </span>
+                                <strong>
+                                  {variant.quantity.toLocaleString("th-TH")}
+                                </strong>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              )}
+            </section>
+          </>
         ) : null}
       </main>
     </div>

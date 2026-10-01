@@ -8,6 +8,7 @@ import {
   ErrorState,
   ForbiddenState,
   LoadingState,
+  Notice,
   UnauthorizedState,
 } from "@/components";
 import {
@@ -26,7 +27,10 @@ import {
 } from "./organization-order-helpers";
 import styles from "./organization-orders.module.css";
 import { orderService } from "./order-service";
-import { OrderStatusBadge } from "./order-status";
+import {
+  getOrderStatusLabel,
+  OrderStatusBadge,
+} from "./order-status";
 
 type DetailState =
   | { status: "loading" }
@@ -150,7 +154,7 @@ export function OrganizationOrderDetailView({
         error.kind === "conflict"
       ) {
         setActionError(
-          "สถานะ Order เปลี่ยนไปแล้วหรือไม่อยู่ในสถานะที่ยกเลิกได้ ระบบกำลังแสดงข้อมูลล่าสุดจาก Backend",
+          "สถานะคำสั่งซื้อเปลี่ยนไปแล้ว หรือไม่อยู่ในสถานะที่ยกเลิกได้ จึงโหลดข้อมูลล่าสุดมาให้ตรวจสอบอีกครั้ง",
         );
 
         try {
@@ -170,7 +174,7 @@ export function OrganizationOrderDetailView({
         setActionError(
           error instanceof ApiClientError
             ? error.userMessage
-            : "ไม่สามารถยกเลิก Order ได้ กรุณาลองใหม่อีกครั้ง",
+            : "ไม่สามารถยกเลิกคำสั่งซื้อได้ กรุณาลองใหม่อีกครั้ง",
         );
       }
     } finally {
@@ -183,15 +187,18 @@ export function OrganizationOrderDetailView({
       <div className={styles.page}>
         <main className={styles.stateWrap}>
           {state.status === "loading" ? (
-            <LoadingState title="กำลังโหลดรายละเอียด Order" />
+            <LoadingState
+              title="กำลังโหลดรายละเอียดคำสั่งซื้อ"
+              description="กำลังดึงสถานะ รายการสินค้า และยอดล่าสุด"
+            />
           ) : null}
           {state.status === "notFound" ? (
             <ErrorState
-              title="ไม่พบ Order"
-              description="Order นี้ไม่มีอยู่ในหน่วยงาน หรือไม่สามารถเข้าถึงได้"
+              title="ไม่พบคำสั่งซื้อ"
+              description="คำสั่งซื้อนี้ไม่มีอยู่ในหน่วยงาน หรือไม่สามารถเข้าถึงได้"
               actions={
                 <a href={organizationOrdersHref(organizationId)}>
-                  กลับรายการ Order
+                  กลับรายการคำสั่งซื้อ
                 </a>
               }
             />
@@ -204,11 +211,11 @@ export function OrganizationOrderDetailView({
           ) : null}
           {state.status === "error" ? (
             <ErrorState
-              title="ไม่สามารถโหลด Order ได้"
+              title="ไม่สามารถโหลดคำสั่งซื้อได้"
               description="กรุณาลองโหลดหน้านี้ใหม่อีกครั้ง"
               actions={
                 <a href={organizationOrdersHref(organizationId)}>
-                  กลับรายการ Order
+                  กลับรายการคำสั่งซื้อ
                 </a>
               }
             />
@@ -229,20 +236,15 @@ export function OrganizationOrderDetailView({
           href={organizationOrdersHref(organizationId)}
           className={styles.backLink}
         >
-          กลับรายการ Order
+          กลับรายการคำสั่งซื้อ
         </a>
 
         <section className={styles.detailHero}>
           <div className={styles.detailTop}>
             <div className={styles.detailTitleGroup} data-ledger-heading>
-              <span className={styles.eyebrow}>
-                Organization order
-              </span>
-              <h1 className={styles.title}>
-                รายละเอียดคำสั่งซื้อ
-              </h1>
+              <h1 className={styles.title}>รายละเอียดคำสั่งซื้อ</h1>
               <span className={styles.orderCode}>
-                {order.orderId}
+                Order {order.orderId}
               </span>
             </div>
 
@@ -251,19 +253,15 @@ export function OrganizationOrderDetailView({
 
           <div className={styles.summaryGrid}>
             <div className={styles.summaryCell}>
-              <span className={styles.summaryLabel}>
-                Customer ID
-              </span>
+              <span className={styles.summaryLabel}>สถานะปัจจุบัน</span>
               <span className={styles.summaryValue}>
-                {order.customerId}
+                {getOrderStatusLabel(order.status)}
               </span>
             </div>
             <div className={styles.summaryCell}>
-              <span className={styles.summaryLabel}>
-                Campaign ID
-              </span>
+              <span className={styles.summaryLabel}>ยอดรวม</span>
               <span className={styles.summaryValue}>
-                {order.campaignId}
+                {formatSatang(order.total)}
               </span>
             </div>
             <div className={styles.summaryCell}>
@@ -281,18 +279,43 @@ export function OrganizationOrderDetailView({
               </span>
             </div>
           </div>
+
+          <div className={styles.metaRow}>
+            <span className={styles.meta}>
+              Customer: {order.customerId}
+            </span>
+            <span className={styles.meta}>
+              Campaign: {order.campaignId}
+            </span>
+          </div>
         </section>
+
+        {actionError ? (
+          <Notice tone="danger" role="alert" title="ดำเนินการไม่สำเร็จ">
+            {actionError}
+          </Notice>
+        ) : null}
 
         <section
           className={styles.itemsPanel}
           aria-labelledby="organization-order-items"
         >
-          <h2
-            className={styles.sectionTitle}
-            id="organization-order-items"
-          >
-            รายการสินค้า
-          </h2>
+          <div className={styles.sectionHeading}>
+            <div>
+              <h2
+                className={styles.sectionTitle}
+                id="organization-order-items"
+              >
+                รายการสินค้า
+              </h2>
+              <p className={styles.sectionDescription}>
+                ราคาต่อชิ้นและยอดรายการเป็น snapshot ที่บันทึกไว้กับคำสั่งซื้อนี้
+              </p>
+            </div>
+            <span className={styles.sectionMeta}>
+              {order.items.length.toLocaleString("th-TH")} รายการ
+            </span>
+          </div>
 
           <div className={styles.itemList}>
             {order.items.map((item) => (
@@ -308,8 +331,7 @@ export function OrganizationOrderDetailView({
                     {item.variantName}
                   </div>
                   <div className={styles.itemMeta}>
-                    {formatSatang(item.unitPrice)} ×{" "}
-                    {item.quantity}
+                    {formatSatang(item.unitPrice)} × {item.quantity}
                   </div>
                 </div>
                 <div className={styles.itemTotal}>
@@ -333,23 +355,16 @@ export function OrganizationOrderDetailView({
             </span>
           </div>
           <div className={styles.totalRow}>
-            <strong>ยอดรวมที่ Backend ยืนยัน</strong>
+            <strong>ยอดรวมที่ยืนยันแล้ว</strong>
             <span className={styles.totalValue}>
               {formatSatang(order.total)}
             </span>
           </div>
         </section>
 
-        {actionError ? (
-          <div className={styles.inlineError} role="alert">
-            {actionError}
-          </div>
-        ) : null}
-
         {isAdmin && !canCancel ? (
           <div className={styles.adminNote}>
-            Organization Admin สามารถยกเลิก Order ได้เฉพาะสถานะ
-            PENDING_PAYMENT หรือ PAYMENT_REJECTED ตาม Backend contract
+            ผู้ดูแลหน่วยงานยกเลิกคำสั่งซื้อได้เฉพาะสถานะ “รอชำระเงิน” หรือ “การชำระเงินถูกปฏิเสธ” เท่านั้น
           </div>
         ) : null}
 
@@ -358,12 +373,12 @@ export function OrganizationOrderDetailView({
             <ConfirmDialog
               trigger={
                 <Button variant="danger">
-                  ยกเลิก Order
+                  ยกเลิกคำสั่งซื้อ
                 </Button>
               }
-              title="ยืนยันการยกเลิก Order"
-              description="Order จะเปลี่ยนเป็น CANCELLED เมื่อ Backend ยืนยัน และ action นี้มีให้เฉพาะ Organization Admin"
-              confirmLabel="ยืนยันยกเลิก Order"
+              title="ยืนยันการยกเลิกคำสั่งซื้อ"
+              description="การยกเลิกจะเปลี่ยนสถานะคำสั่งซื้อเป็นยกเลิกเมื่อระบบยืนยัน และทำได้เฉพาะผู้ดูแลหน่วยงานในสถานะที่รองรับ"
+              confirmLabel="ยืนยันยกเลิกคำสั่งซื้อ"
               cancelLabel="กลับ"
               pending={cancelPending}
               danger

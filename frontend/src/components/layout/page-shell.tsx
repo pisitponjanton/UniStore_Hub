@@ -22,6 +22,7 @@ export interface PageHeaderProps {
   description?: ReactNode;
   metadata?: ReactNode;
   actions?: ReactNode;
+  variant?: "operational" | "customer";
 }
 
 export function PageHeader({
@@ -30,9 +31,17 @@ export function PageHeader({
   description,
   metadata,
   actions,
+  variant = "operational",
 }: PageHeaderProps) {
+  const classes = [
+    styles.pageHeader,
+    variant === "customer" ? styles.pageHeaderCustomer : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
-    <header className={styles.pageHeader}>
+    <header className={classes}>
       <div className={styles.pageHeadingGroup}>
         {eyebrow ? <div className={styles.pageEyebrow}>{eyebrow}</div> : null}
         <div className={styles.pageTitleRow}>

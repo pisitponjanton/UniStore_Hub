@@ -6,15 +6,15 @@
 .main {
   width: min(100%, var(--content-max));
   margin-inline: auto;
-  padding: var(--space-8) var(--space-6) var(--space-16);
+  padding: var(--page-block-start) var(--page-gutter) var(--page-block-end);
   display: grid;
   gap: var(--space-6);
 }
 
 .stateWrap {
-  width: min(100%, 860px);
+  width: min(100%, var(--content-narrow));
   margin-inline: auto;
-  padding: var(--space-12) var(--space-6);
+  padding: var(--space-12) var(--page-gutter);
 }
 
 .header {
@@ -27,65 +27,116 @@
 }
 
 .headerCopy {
+  max-width: 760px;
   display: grid;
   gap: var(--space-2);
 }
 
-.eyebrow {
-  color: var(--campus);
-  font-size: var(--text-caption);
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
 .title {
-  font-size: clamp(2rem, 4vw, 3rem);
-  line-height: 1.1;
+  font-size: var(--text-heading);
+  line-height: 1.2;
+  text-wrap: balance;
 }
 
-.description {
-  max-width: 760px;
+.description,
+.sectionDescription {
   color: var(--ink-secondary);
+  text-wrap: pretty;
+}
+
+.summaryStrip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-top: 1px solid var(--line-soft);
+  border-bottom: 1px solid var(--line-soft);
+  background: var(--surface);
+}
+
+.summaryStrip > div {
+  min-width: 0;
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-4) var(--space-5);
+  border-right: 1px solid var(--line-soft);
+}
+
+.summaryStrip > div:last-child {
+  border-right: 0;
+}
+
+.summaryStrip strong {
+  color: var(--ink);
+  font-size: var(--text-title);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+.summaryLabel {
+  color: var(--ink-tertiary);
+  font-size: var(--text-caption);
 }
 
 .grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.6fr) minmax(300px, 0.7fr);
+  grid-template-columns: minmax(0, 1.6fr) minmax(300px, 0.68fr);
   gap: var(--space-6);
   align-items: start;
 }
 
-.panel {
+.memberSection {
+  min-width: 0;
   display: grid;
   gap: var(--space-4);
-  padding: var(--space-5);
-  border: 1px solid var(--line-soft);
-  border-radius: var(--radius-lg);
-  background: var(--surface);
 }
 
-.form {
-  display: grid;
+.sectionHeading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
   gap: var(--space-4);
+}
+
+.sectionHeading > div {
+  min-width: 0;
+  display: grid;
+  gap: var(--space-1);
 }
 
 .sectionTitle {
   font-size: var(--text-title-sm);
+  line-height: 1.3;
+}
+
+.sectionDescription,
+.sectionMeta {
+  font-size: var(--text-body-sm);
+}
+
+.sectionMeta {
+  flex: 0 0 auto;
+  color: var(--ink-tertiary);
 }
 
 .memberList {
   display: grid;
-  gap: var(--space-3);
+  border-top: 1px solid var(--line-soft);
+  border-bottom: 1px solid var(--line-soft);
+  background: var(--surface);
 }
 
 .memberCard {
   display: grid;
   gap: var(--space-4);
   padding: var(--space-5);
-  border: 1px solid var(--line-soft);
-  border-radius: var(--radius-lg);
-  background: var(--surface);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.memberCard:last-child {
+  border-bottom: 0;
+}
+
+.memberCardInactive {
+  background: var(--surface-muted);
 }
 
 .memberHeader {
@@ -98,7 +149,7 @@
 .memberIdentity {
   min-width: 0;
   display: grid;
-  gap: var(--space-1);
+  gap: 2px;
 }
 
 .memberName {
@@ -107,45 +158,90 @@
   overflow-wrap: anywhere;
 }
 
-.memberEmail,
-.meta {
-  color: var(--ink-tertiary);
-  font-size: var(--text-caption);
+.memberEmail {
+  color: var(--ink-secondary);
+  font-size: var(--text-body-sm);
   overflow-wrap: anywhere;
 }
 
 .badges {
   display: flex;
   flex-wrap: wrap;
+  justify-content: flex-end;
   gap: var(--space-2);
 }
 
 .memberActions {
   display: grid;
-  grid-template-columns: minmax(180px, 1fr) auto auto;
+  grid-template-columns: minmax(190px, 1fr) auto auto;
   gap: var(--space-3);
   align-items: end;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--line-soft);
 }
 
-.inlineError {
+.finalAdmin,
+.inactiveNote {
   padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-md);
-  background: var(--danger-soft);
-  color: var(--danger);
-}
-
-.notice {
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-md);
-  background: var(--success-soft);
-  color: var(--success);
-}
-
-.finalAdmin {
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-md);
+  border-left: 3px solid var(--warning);
   background: var(--warning-soft);
   color: var(--warning);
+  font-size: var(--text-body-sm);
+}
+
+.inactiveNote {
+  border-left-color: var(--line-strong);
+  background: var(--surface-muted);
+  color: var(--ink-secondary);
+}
+
+.panel {
+  position: sticky;
+  top: 88px;
+  display: grid;
+  gap: var(--space-5);
+  padding: var(--space-5);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.panelHeading {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.panelKicker {
+  color: var(--campus);
+  font-size: var(--text-caption);
+  font-weight: 600;
+}
+
+.form {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.form button {
+  width: 100%;
+}
+
+.roleHelp {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--surface-muted);
+}
+
+.roleHelp strong {
+  color: var(--ink);
+  font-size: var(--text-body-sm);
+  font-weight: 600;
+}
+
+.roleHelp span {
+  color: var(--ink-secondary);
   font-size: var(--text-caption);
 }
 
@@ -153,13 +249,35 @@
   .grid {
     grid-template-columns: 1fr;
   }
+
+  .panel {
+    position: static;
+    max-width: 640px;
+  }
 }
 
 @media (max-width: 760px) {
+  .summaryStrip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .summaryStrip > div:nth-child(2) {
+    border-right: 0;
+  }
+
+  .summaryStrip > div:nth-child(-n + 2) {
+    border-bottom: 1px solid var(--line-soft);
+  }
+
   .header,
-  .memberHeader {
+  .memberHeader,
+  .sectionHeading {
     display: grid;
     align-items: start;
+  }
+
+  .badges {
+    justify-content: flex-start;
   }
 
   .memberActions {
@@ -174,8 +292,22 @@
 @media (max-width: 620px) {
   .main,
   .stateWrap {
-    padding-left: var(--space-4);
-    padding-right: var(--space-4);
+    padding-left: var(--page-gutter-compact);
+    padding-right: var(--page-gutter-compact);
+  }
+
+  .summaryStrip {
+    grid-template-columns: 1fr;
+  }
+
+  .summaryStrip > div,
+  .summaryStrip > div:nth-child(2) {
+    border-right: 0;
+    border-bottom: 1px solid var(--line-soft);
+  }
+
+  .summaryStrip > div:last-child {
+    border-bottom: 0;
   }
 
   .panel,

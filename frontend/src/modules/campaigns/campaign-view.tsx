@@ -8,6 +8,7 @@ import {
   EmptyState,
   ErrorState,
   LoadingState,
+  Notice,
   SelectField,
   TextField,
 } from "@/components";
@@ -78,7 +79,7 @@ function statusTone(
 function operationErrorMessage(error: unknown): string {
   if (error instanceof ApiClientError) {
     if (error.code === "CAMPAIGN_NOT_FOUND") {
-      return "ไม่พบ Campaign นี้แล้ว กรุณารีเฟรชรายการ";
+      return "ไม่พบแคมเปญนี้แล้ว กรุณารีเฟรชรายการ";
     }
 
     if (error.code === "STORE_NOT_FOUND") {
@@ -86,7 +87,7 @@ function operationErrorMessage(error: unknown): string {
     }
 
     if (error.code === "INVALID_STATUS_TRANSITION") {
-      return "Campaign นี้ไม่อยู่ในสถานะ DRAFT แล้ว จึงไม่สามารถแก้ไขข้อมูลได้";
+      return "แคมเปญนี้ไม่ได้อยู่ในสถานะฉบับร่างแล้ว จึงไม่สามารถแก้ไขข้อมูลได้";
     }
 
     return error.userMessage;
@@ -120,6 +121,26 @@ function DateField({
       error={error}
       disabled={disabled}
     />
+  );
+}
+
+function scheduleValue(value: string | null): string {
+  return value ? formatIsoDateTime(value) : "ยังไม่กำหนด";
+}
+
+function formChanged(
+  values: CampaignFormValues,
+  campaign: CampaignDTO,
+): boolean {
+  const original = campaignToFormValues(campaign);
+
+  return (
+    values.storeId !== original.storeId ||
+    values.name !== original.name ||
+    values.openAt !== original.openAt ||
+    values.closeAt !== original.closeAt ||
+    values.paymentDeadline !== original.paymentDeadline ||
+    values.pickupAt !== original.pickupAt
   );
 }
 
@@ -236,6 +257,7 @@ export function CampaignManagementView({
       ...current,
       [field]: undefined,
     }));
+    setInlineError(null);
   }
 
   function updateEditField(
@@ -250,6 +272,7 @@ export function CampaignManagementView({
       ...current,
       [field]: undefined,
     }));
+    setInlineError(null);
   }
 
   async function replaceList(
@@ -364,7 +387,7 @@ export function CampaignManagementView({
         storeId: current.storeId,
       }));
       setCreateErrors({});
-      setNotice(`สร้าง Campaign ${created.name} เป็น DRAFT แล้ว`);
+      setNotice(`สร้างแคมเปญ ${created.name} เป็นฉบับร่างแล้ว`);
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();
@@ -452,7 +475,7 @@ export function CampaignManagementView({
           : current,
       );
 
-      setNotice(`บันทึก Campaign ${updated.name} แล้ว`);
+      setNotice(`บันทึกแคมเปญ ${updated.name} แล้ว`);
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();
@@ -486,10 +509,13 @@ export function CampaignManagementView({
       <div className={styles.page}>
         <main className={styles.stateWrap}>
           {state.status === "loading" ? (
-            <LoadingState title="กำลังโหลด Campaign" />
+            <LoadingState
+              title="กำลังโหลดแคมเปญ"
+              description="กำลังดึงรายการ ร้านค้า และสถานะล่าสุด"
+            />
           ) : (
             <ErrorState
-              title="ไม่สามารถโหลด Campaign ได้"
+              title="ไม่สามารถโหลดแคมเปญได้"
               description="กรุณาลองโหลดหน้านี้ใหม่อีกครั้ง"
             />
           )}
@@ -498,46 +524,89 @@ export function CampaignManagementView({
     );
   }
 
+  const draftCount = state.campaigns.filter(
+    (campaign) => campaign.status === "DRAFT",
+  ).length;
+  const inProgressCount = state.campaigns.filter((campaign) =>
+    ["OPEN", "CLOSED", "PRODUCING", "READY_FOR_PICKUP"].includes(
+      campaign.status,
+    ),
+  ).length;
+  const finishedCount = state.campaigns.filter((campaign) =>
+    ["COMPLETED", "CANCELLED"].includes(campaign.status),
+  ).length;
+  const hasFilters = Boolean(filterStoreId || filterStatus);
+  const selectedDirty =
+    selectedCampaign?.status === "DRAFT" &&
+    formChanged(editValues, selectedCampaign);
+
   return (
     <div className={styles.page}>
       <main className={styles.main}>
         <header className={styles.header}>
           <div className={styles.headerCopy} data-ledger-heading>
-            <span className={styles.eyebrow}>Campaign management</span>
-            <h1 className={styles.title}>Campaign</h1>
+            <h1 className={styles.title}>แคมเปญ</h1>
             <p className={styles.description}>
-              จัดการรายการ สร้าง และแก้ไข Campaign ที่ยังเป็น DRAFT
-              วันเวลาที่กำหนดเป็นข้อมูลวางแผนเท่านั้น
-              Frontend จะไม่เปลี่ยนสถานะ Campaign ตามนาฬิกาอัตโนมัติ
+              วางแผนช่วงเวลา เปิดหรือปิดรับคำสั่งซื้อ และเดินสถานะแคมเปญตามขั้นตอนของงาน
             </p>
           </div>
-          <Badge tone="info">
-            {state.campaigns.length} รายการในหน้าปัจจุบัน
-          </Badge>
         </header>
 
-        {inlineError ? (
-          <div className={styles.error} role="alert">
-            {inlineError}
+        <section className={styles.summaryStrip} aria-label="สรุปแคมเปญที่โหลด">
+          <div>
+            <span className={styles.summaryLabel}>รายการที่โหลด</span>
+            <strong>{state.campaigns.length}</strong>
           </div>
+          <div>
+            <span className={styles.summaryLabel}>ฉบับร่าง</span>
+            <strong>{draftCount}</strong>
+          </div>
+          <div>
+            <span className={styles.summaryLabel}>กำลังดำเนินงาน</span>
+            <strong>{inProgressCount}</strong>
+          </div>
+          <div>
+            <span className={styles.summaryLabel}>สิ้นสุดแล้ว</span>
+            <strong>{finishedCount}</strong>
+          </div>
+        </section>
+
+        <Notice tone="info" title="วันเวลาเป็นข้อมูลวางแผน">
+          การถึงวันเวลาเปิด ปิด ชำระเงิน หรือรับสินค้า จะไม่เปลี่ยนสถานะแคมเปญอัตโนมัติ การเปลี่ยนสถานะเกิดขึ้นเมื่อผู้ดูแลสั่งดำเนินการและระบบยืนยันเท่านั้น
+        </Notice>
+
+        {inlineError ? (
+          <Notice tone="danger" role="alert" title="ดำเนินการไม่สำเร็จ">
+            {inlineError}
+          </Notice>
         ) : null}
 
         {notice ? (
-          <div className={styles.notice} role="status">
+          <Notice tone="success" role="status" title="อัปเดตแล้ว">
             {notice}
-          </div>
+          </Notice>
         ) : null}
 
         <div className={styles.grid}>
           <section className={styles.section} aria-labelledby="campaign-list">
-            <h2 className={styles.sectionTitle} id="campaign-list">
-              รายการ Campaign
-            </h2>
+            <div className={styles.sectionHeading}>
+              <div>
+                <h2 className={styles.sectionTitle} id="campaign-list">
+                  รายการแคมเปญ
+                </h2>
+                <p className={styles.sectionDescription}>
+                  เลือกรายการเพื่อดูรายละเอียด แก้ไขฉบับร่าง หรือดำเนินสถานะถัดไป
+                </p>
+              </div>
+              <span className={styles.sectionMeta}>
+                {hasFilters ? "กำลังใช้ตัวกรอง" : "ทุกขอบเขตที่โหลด"}
+              </span>
+            </div>
 
             <div className={styles.toolbar}>
               <SelectField
                 id="campaign-store-filter"
-                label="กรองตามร้านค้า"
+                label="ร้านค้า"
                 value={filterStoreId}
                 disabled={listLoading}
                 onChange={(event) => {
@@ -559,7 +628,7 @@ export function CampaignManagementView({
 
               <SelectField
                 id="campaign-status-filter"
-                label="กรองตามสถานะ"
+                label="สถานะ"
                 value={filterStatus}
                 disabled={listLoading}
                 onChange={(event) => {
@@ -580,38 +649,60 @@ export function CampaignManagementView({
 
               <Button
                 variant="quiet"
-                disabled={
-                  (!filterStoreId && !filterStatus) || listLoading
-                }
+                disabled={!hasFilters || listLoading}
                 onClick={() => {
                   setFilterStoreId("");
                   setFilterStatus("");
                   void replaceList("", "");
                 }}
               >
-                ล้างตัวกรอง
+                แสดงทั้งหมด
               </Button>
             </div>
 
             {listLoading ? (
-              <LoadingState title="กำลังโหลดรายการ Campaign" />
+              <LoadingState
+                title="กำลังโหลดรายการแคมเปญ"
+                description="กำลังใช้ตัวกรองที่เลือก"
+              />
             ) : state.campaigns.length === 0 ? (
               <EmptyState
-                title="ไม่พบ Campaign"
-                description="ยังไม่มี Campaign ที่ตรงกับตัวกรองนี้"
+                title="ไม่พบแคมเปญ"
+                description={
+                  hasFilters
+                    ? "ไม่มีแคมเปญที่ตรงกับตัวกรองนี้"
+                    : "สร้างแคมเปญแรกจากแบบฟอร์มด้านข้าง"
+                }
               />
             ) : (
               <div className={styles.list}>
-                {state.campaigns.map((campaign) => (
-                  <article
-                    className={styles.card}
-                    key={campaign.campaignId}
-                  >
-                    <div className={styles.cardHeader}>
-                      <div className={styles.cardCopy}>
-                        <h3 className={styles.cardTitle}>
-                          {campaign.name}
-                        </h3>
+                {state.campaigns.map((campaign) => {
+                  const selected =
+                    selectedCampaign?.campaignId === campaign.campaignId;
+                  const loading =
+                    loadingCampaignId === campaign.campaignId;
+
+                  return (
+                    <article
+                      className={[
+                        styles.row,
+                        selected ? styles.rowSelected : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ")}
+                      key={campaign.campaignId}
+                      aria-current={selected ? "true" : undefined}
+                    >
+                      <div className={styles.rowMain}>
+                        <div className={styles.rowHeading}>
+                          <h3 className={styles.cardTitle}>
+                            {campaign.name}
+                          </h3>
+                          <Badge tone={statusTone(campaign.status)}>
+                            {campaignStatusLabel(campaign.status)}
+                          </Badge>
+                        </div>
+
                         <div className={styles.metaRow}>
                           <span className={styles.meta}>
                             ร้านค้า:{" "}
@@ -619,40 +710,34 @@ export function CampaignManagementView({
                               campaign.storeId}
                           </span>
                           <span className={styles.meta}>
-                            เปิดตามแผน{" "}
-                            {formatIsoDateTime(campaign.openAt)}
+                            เปิดตามแผน: {scheduleValue(campaign.openAt)}
                           </span>
                           <span className={styles.meta}>
-                            ปิดตามแผน{" "}
-                            {formatIsoDateTime(campaign.closeAt)}
+                            ปิดตามแผน: {scheduleValue(campaign.closeAt)}
                           </span>
                         </div>
                       </div>
 
-                      <Badge tone={statusTone(campaign.status)}>
-                        {campaignStatusLabel(campaign.status)}
-                      </Badge>
-                    </div>
-
-                    <div className={styles.actions}>
-                      <Button
-                        variant="secondary"
-                        pending={
-                          loadingCampaignId === campaign.campaignId
-                        }
-                        pendingLabel="กำลังโหลด"
-                        disabled={savingCampaignId !== null}
-                        onClick={() => {
-                          void handleSelect(campaign);
-                        }}
-                      >
-                        {campaign.status === "DRAFT"
-                          ? "ดู / แก้ไข"
-                          : "ดูรายละเอียด"}
-                      </Button>
-                    </div>
-                  </article>
-                ))}
+                      <div className={styles.actions}>
+                        <Button
+                          variant="secondary"
+                          pending={loading}
+                          pendingLabel="กำลังโหลด"
+                          disabled={savingCampaignId !== null}
+                          onClick={() => {
+                            void handleSelect(campaign);
+                          }}
+                        >
+                          {selected
+                            ? "กำลังดูรายละเอียด"
+                            : campaign.status === "DRAFT"
+                              ? "ดูและแก้ไข"
+                              : "ดูรายละเอียด"}
+                        </Button>
+                      </div>
+                    </article>
+                  );
+                })}
               </div>
             )}
 
@@ -661,7 +746,7 @@ export function CampaignManagementView({
                 <Button
                   variant="secondary"
                   pending={loadingMore}
-                  pendingLabel="กำลังโหลด"
+                  pendingLabel="กำลังโหลดเพิ่มเติม"
                   onClick={handleLoadMore}
                 >
                   โหลดเพิ่มเติม
@@ -670,124 +755,165 @@ export function CampaignManagementView({
             ) : null}
           </section>
 
-          <div className={styles.side}>
-            <section className={styles.panel}>
-              <div>
-                <h2 className={styles.sectionTitle}>
-                  สร้าง Campaign ใหม่
-                </h2>
-                <p className={styles.description}>
-                  Campaign ใหม่จะเริ่มต้นเป็น DRAFT
-                  และวันเวลาทั้งหมดเป็น planning fields
-                </p>
+          <aside className={styles.panel}>
+            <div className={styles.panelHeading}>
+              <span className={styles.panelKicker}>เริ่มรอบการขายใหม่</span>
+              <h2 className={styles.sectionTitle}>สร้างแคมเปญ</h2>
+              <p className={styles.sectionDescription}>
+                แคมเปญใหม่จะเริ่มเป็นฉบับร่าง และยังไม่เปิดรับคำสั่งซื้อจนกว่าจะสั่งเปิด
+              </p>
+            </div>
+
+            {state.stores.length === 0 ? (
+              <Notice tone="warning" title="ยังสร้างแคมเปญไม่ได้">
+                ต้องมีร้านค้าในหน่วยงานอย่างน้อยหนึ่งร้านก่อน
+              </Notice>
+            ) : null}
+
+            <form className={styles.form} onSubmit={handleCreate}>
+              <SelectField
+                id="campaign-create-store"
+                label="ร้านค้า"
+                value={createValues.storeId}
+                onChange={(event) =>
+                  updateCreateField("storeId", event.target.value)
+                }
+                error={createErrors.storeId}
+                required
+                disabled={creating || state.stores.length === 0}
+              >
+                <option value="">เลือกร้านค้า</option>
+                {state.stores.map((store) => (
+                  <option key={store.storeId} value={store.storeId}>
+                    {store.name}
+                    {store.status === "INACTIVE"
+                      ? " (ปิดใช้งาน)"
+                      : ""}
+                  </option>
+                ))}
+              </SelectField>
+
+              <TextField
+                id="campaign-create-name"
+                label="ชื่อแคมเปญ"
+                value={createValues.name}
+                onChange={(event) =>
+                  updateCreateField("name", event.target.value)
+                }
+                error={createErrors.name}
+                required
+                disabled={creating}
+              />
+
+              <div className={styles.dateGrid}>
+                <DateField
+                  id="campaign-create-open"
+                  label="เปิดตามแผน"
+                  value={createValues.openAt}
+                  error={createErrors.openAt}
+                  disabled={creating}
+                  onChange={(value) =>
+                    updateCreateField("openAt", value)
+                  }
+                />
+                <DateField
+                  id="campaign-create-close"
+                  label="ปิดตามแผน"
+                  value={createValues.closeAt}
+                  error={createErrors.closeAt}
+                  disabled={creating}
+                  onChange={(value) =>
+                    updateCreateField("closeAt", value)
+                  }
+                />
+                <DateField
+                  id="campaign-create-payment"
+                  label="กำหนดชำระเงิน"
+                  value={createValues.paymentDeadline}
+                  error={createErrors.paymentDeadline}
+                  disabled={creating}
+                  onChange={(value) =>
+                    updateCreateField("paymentDeadline", value)
+                  }
+                />
+                <DateField
+                  id="campaign-create-pickup"
+                  label="วันรับสินค้า"
+                  value={createValues.pickupAt}
+                  error={createErrors.pickupAt}
+                  disabled={creating}
+                  onChange={(value) =>
+                    updateCreateField("pickupAt", value)
+                  }
+                />
               </div>
 
-              <form className={styles.form} onSubmit={handleCreate}>
-                <SelectField
-                  id="campaign-create-store"
-                  label="ร้านค้า"
-                  value={createValues.storeId}
-                  onChange={(event) =>
-                    updateCreateField("storeId", event.target.value)
-                  }
-                  error={createErrors.storeId}
-                  required
-                  disabled={creating || state.stores.length === 0}
-                >
-                  <option value="">เลือกร้านค้า</option>
-                  {state.stores.map((store) => (
-                    <option key={store.storeId} value={store.storeId}>
-                      {store.name}
-                      {store.status === "INACTIVE"
-                        ? " (ปิดใช้งาน)"
-                        : ""}
-                    </option>
-                  ))}
-                </SelectField>
+              <Button
+                type="submit"
+                size="large"
+                pending={creating}
+                pendingLabel="กำลังสร้างแคมเปญ"
+                disabled={state.stores.length === 0}
+              >
+                สร้างแคมเปญ
+              </Button>
+            </form>
+          </aside>
+        </div>
 
-                <TextField
-                  id="campaign-create-name"
-                  label="ชื่อ Campaign"
-                  value={createValues.name}
-                  onChange={(event) =>
-                    updateCreateField("name", event.target.value)
-                  }
-                  error={createErrors.name}
-                  required
-                  disabled={creating}
-                />
-
-                <div className={styles.dateGrid}>
-                  <DateField
-                    id="campaign-create-open"
-                    label="วันเวลาเปิดตามแผน"
-                    value={createValues.openAt}
-                    error={createErrors.openAt}
-                    disabled={creating}
-                    onChange={(value) =>
-                      updateCreateField("openAt", value)
-                    }
-                  />
-                  <DateField
-                    id="campaign-create-close"
-                    label="วันเวลาปิดตามแผน"
-                    value={createValues.closeAt}
-                    error={createErrors.closeAt}
-                    disabled={creating}
-                    onChange={(value) =>
-                      updateCreateField("closeAt", value)
-                    }
-                  />
-                  <DateField
-                    id="campaign-create-payment"
-                    label="กำหนดชำระเงิน"
-                    value={createValues.paymentDeadline}
-                    error={createErrors.paymentDeadline}
-                    disabled={creating}
-                    onChange={(value) =>
-                      updateCreateField("paymentDeadline", value)
-                    }
-                  />
-                  <DateField
-                    id="campaign-create-pickup"
-                    label="วันเวลารับสินค้า"
-                    value={createValues.pickupAt}
-                    error={createErrors.pickupAt}
-                    disabled={creating}
-                    onChange={(value) =>
-                      updateCreateField("pickupAt", value)
-                    }
-                  />
-                </div>
-
-                <Button
-                  type="submit"
-                  pending={creating}
-                  pendingLabel="กำลังสร้าง"
-                  disabled={state.stores.length === 0}
-                >
-                  สร้าง Campaign
-                </Button>
-              </form>
-            </section>
-
-            {selectedCampaign ? (
-              <section className={styles.panel}>
-                <div className={styles.detailHeader}>
-                  <div className={styles.detailMeta}>
-                    <h2 className={styles.sectionTitle}>
-                      รายละเอียด Campaign
-                    </h2>
-                    <span className={styles.meta}>
-                      Campaign ID: {selectedCampaign.campaignId}
-                    </span>
-                  </div>
+        {selectedCampaign ? (
+          <section
+            className={styles.detailPanel}
+            aria-labelledby="campaign-detail-title"
+          >
+            <div className={styles.detailHeader}>
+              <div className={styles.detailMeta}>
+                <div className={styles.detailTitleRow}>
+                  <h2
+                    className={styles.sectionTitle}
+                    id="campaign-detail-title"
+                  >
+                    {selectedCampaign.name}
+                  </h2>
                   <Badge tone={statusTone(selectedCampaign.status)}>
                     {campaignStatusLabel(selectedCampaign.status)}
                   </Badge>
                 </div>
+                <div className={styles.metaRow}>
+                  <span className={styles.meta}>
+                    ร้านค้า:{" "}
+                    {storeNames.get(selectedCampaign.storeId) ??
+                      selectedCampaign.storeId}
+                  </span>
+                  <span className={styles.meta}>
+                    รหัสแคมเปญ: {selectedCampaign.campaignId}
+                  </span>
+                  <span className={styles.meta}>
+                    อัปเดตล่าสุด {formatIsoDateTime(selectedCampaign.updatedAt)}
+                  </span>
+                </div>
+              </div>
+              <Button
+                variant="quiet"
+                size="small"
+                onClick={() => setSelectedCampaign(null)}
+              >
+                ปิดรายละเอียด
+              </Button>
+            </div>
 
-                {selectedCampaign.status === "DRAFT" ? (
+            {selectedCampaign.status === "DRAFT" ? (
+              <div className={styles.detailGrid}>
+                <section className={styles.detailSection}>
+                  <div className={styles.detailSectionHeading}>
+                    <h3 className={styles.detailSectionTitle}>
+                      ข้อมูลฉบับร่าง
+                    </h3>
+                    <p className={styles.sectionDescription}>
+                      แก้ไขร้านค้า ชื่อ และช่วงเวลาวางแผนได้ก่อนเปิดรับคำสั่งซื้อ
+                    </p>
+                  </div>
+
                   <form className={styles.form} onSubmit={handleSave}>
                     <SelectField
                       id="campaign-edit-store"
@@ -802,8 +928,7 @@ export function CampaignManagementView({
                       error={editErrors.storeId}
                       required
                       disabled={
-                        savingCampaignId ===
-                        selectedCampaign.campaignId
+                        savingCampaignId === selectedCampaign.campaignId
                       }
                     >
                       {state.stores.map((store) => (
@@ -821,31 +946,26 @@ export function CampaignManagementView({
 
                     <TextField
                       id="campaign-edit-name"
-                      label="ชื่อ Campaign"
+                      label="ชื่อแคมเปญ"
                       value={editValues.name}
                       onChange={(event) =>
-                        updateEditField(
-                          "name",
-                          event.target.value,
-                        )
+                        updateEditField("name", event.target.value)
                       }
                       error={editErrors.name}
                       required
                       disabled={
-                        savingCampaignId ===
-                        selectedCampaign.campaignId
+                        savingCampaignId === selectedCampaign.campaignId
                       }
                     />
 
                     <div className={styles.dateGrid}>
                       <DateField
                         id="campaign-edit-open"
-                        label="วันเวลาเปิดตามแผน"
+                        label="เปิดตามแผน"
                         value={editValues.openAt}
                         error={editErrors.openAt}
                         disabled={
-                          savingCampaignId ===
-                          selectedCampaign.campaignId
+                          savingCampaignId === selectedCampaign.campaignId
                         }
                         onChange={(value) =>
                           updateEditField("openAt", value)
@@ -853,12 +973,11 @@ export function CampaignManagementView({
                       />
                       <DateField
                         id="campaign-edit-close"
-                        label="วันเวลาปิดตามแผน"
+                        label="ปิดตามแผน"
                         value={editValues.closeAt}
                         error={editErrors.closeAt}
                         disabled={
-                          savingCampaignId ===
-                          selectedCampaign.campaignId
+                          savingCampaignId === selectedCampaign.campaignId
                         }
                         onChange={(value) =>
                           updateEditField("closeAt", value)
@@ -870,24 +989,19 @@ export function CampaignManagementView({
                         value={editValues.paymentDeadline}
                         error={editErrors.paymentDeadline}
                         disabled={
-                          savingCampaignId ===
-                          selectedCampaign.campaignId
+                          savingCampaignId === selectedCampaign.campaignId
                         }
                         onChange={(value) =>
-                          updateEditField(
-                            "paymentDeadline",
-                            value,
-                          )
+                          updateEditField("paymentDeadline", value)
                         }
                       />
                       <DateField
                         id="campaign-edit-pickup"
-                        label="วันเวลารับสินค้า"
+                        label="วันรับสินค้า"
                         value={editValues.pickupAt}
                         error={editErrors.pickupAt}
                         disabled={
-                          savingCampaignId ===
-                          selectedCampaign.campaignId
+                          savingCampaignId === selectedCampaign.campaignId
                         }
                         onChange={(value) =>
                           updateEditField("pickupAt", value)
@@ -895,119 +1009,141 @@ export function CampaignManagementView({
                       />
                     </div>
 
-                    <div className={styles.actions}>
+                    <div className={styles.editActions}>
                       <Button
                         type="submit"
                         pending={
-                          savingCampaignId ===
-                          selectedCampaign.campaignId
+                          savingCampaignId === selectedCampaign.campaignId
                         }
                         pendingLabel="กำลังบันทึก"
+                        disabled={!selectedDirty}
                       >
-                        บันทึก DRAFT
+                        บันทึกฉบับร่าง
                       </Button>
-                      <Button
-                        type="button"
-                        variant="quiet"
-                        disabled={savingCampaignId !== null}
-                        onClick={() =>
-                          setSelectedCampaign(null)
-                        }
-                      >
-                        ปิด
-                      </Button>
+                      {!selectedDirty ? (
+                        <span className={styles.meta}>
+                          ยังไม่มีข้อมูลที่เปลี่ยนแปลง
+                        </span>
+                      ) : null}
                     </div>
                   </form>
-                ) : (
-                  <>
-                    <div className={styles.readOnly}>
-                      Campaign นี้ไม่ใช่ DRAFT แล้ว
-                      จึงแสดงข้อมูลแบบอ่านอย่างเดียวใน Phase นี้
-                      การเปลี่ยนสถานะจะทำผ่าน lifecycle actions
-                      ของ Backend ใน Phase ถัดไป
+                </section>
+
+                <section className={styles.detailSection}>
+                  <div className={styles.detailSectionHeading}>
+                    <h3 className={styles.detailSectionTitle}>
+                      ขั้นตอนถัดไป
+                    </h3>
+                    <p className={styles.sectionDescription}>
+                      ตรวจสอบข้อมูลให้เรียบร้อยก่อนเปิดรับคำสั่งซื้อ
+                    </p>
+                  </div>
+
+                  <CampaignLifecycleActions
+                    organizationId={organizationId}
+                    campaign={selectedCampaign}
+                    onCampaignChanged={(updated) => {
+                      setSelectedCampaign(updated);
+                      setEditValues(campaignToFormValues(updated));
+                      setState((current) =>
+                        current.status === "success"
+                          ? {
+                              ...current,
+                              campaigns: current.campaigns.map((campaign) =>
+                                campaign.campaignId === updated.campaignId
+                                  ? updated
+                                  : campaign,
+                              ),
+                            }
+                          : current,
+                      );
+                    }}
+                  />
+                </section>
+              </div>
+            ) : (
+              <div className={styles.detailGrid}>
+                <section className={styles.detailSection}>
+                  <div className={styles.detailSectionHeading}>
+                    <h3 className={styles.detailSectionTitle}>
+                      กำหนดการ
+                    </h3>
+                    <p className={styles.sectionDescription}>
+                      หลังออกจากฉบับร่าง ข้อมูลแผนจะแสดงแบบอ่านอย่างเดียว
+                    </p>
+                  </div>
+
+                  <div className={styles.scheduleGrid}>
+                    <div className={styles.scheduleItem}>
+                      <span className={styles.scheduleLabel}>
+                        เปิดตามแผน
+                      </span>
+                      <span className={styles.scheduleValue}>
+                        {scheduleValue(selectedCampaign.openAt)}
+                      </span>
                     </div>
-
-                    <div className={styles.scheduleGrid}>
-                      <div className={styles.scheduleItem}>
-                        <span className={styles.scheduleLabel}>
-                          ร้านค้า
-                        </span>
-                        <span className={styles.scheduleValue}>
-                          {storeNames.get(selectedCampaign.storeId) ??
-                            selectedCampaign.storeId}
-                        </span>
-                      </div>
-                      <div className={styles.scheduleItem}>
-                        <span className={styles.scheduleLabel}>
-                          วันเวลาเปิดตามแผน
-                        </span>
-                        <span className={styles.scheduleValue}>
-                          {formatIsoDateTime(selectedCampaign.openAt)}
-                        </span>
-                      </div>
-                      <div className={styles.scheduleItem}>
-                        <span className={styles.scheduleLabel}>
-                          วันเวลาปิดตามแผน
-                        </span>
-                        <span className={styles.scheduleValue}>
-                          {formatIsoDateTime(selectedCampaign.closeAt)}
-                        </span>
-                      </div>
-                      <div className={styles.scheduleItem}>
-                        <span className={styles.scheduleLabel}>
-                          กำหนดชำระเงิน
-                        </span>
-                        <span className={styles.scheduleValue}>
-                          {formatIsoDateTime(
-                            selectedCampaign.paymentDeadline,
-                          )}
-                        </span>
-                      </div>
-                      <div className={styles.scheduleItem}>
-                        <span className={styles.scheduleLabel}>
-                          วันเวลารับสินค้า
-                        </span>
-                        <span className={styles.scheduleValue}>
-                          {formatIsoDateTime(
-                            selectedCampaign.pickupAt,
-                          )}
-                        </span>
-                      </div>
+                    <div className={styles.scheduleItem}>
+                      <span className={styles.scheduleLabel}>
+                        ปิดตามแผน
+                      </span>
+                      <span className={styles.scheduleValue}>
+                        {scheduleValue(selectedCampaign.closeAt)}
+                      </span>
                     </div>
+                    <div className={styles.scheduleItem}>
+                      <span className={styles.scheduleLabel}>
+                        กำหนดชำระเงิน
+                      </span>
+                      <span className={styles.scheduleValue}>
+                        {scheduleValue(selectedCampaign.paymentDeadline)}
+                      </span>
+                    </div>
+                    <div className={styles.scheduleItem}>
+                      <span className={styles.scheduleLabel}>
+                        วันรับสินค้า
+                      </span>
+                      <span className={styles.scheduleValue}>
+                        {scheduleValue(selectedCampaign.pickupAt)}
+                      </span>
+                    </div>
+                  </div>
+                </section>
 
-                    <Button
-                      variant="quiet"
-                      onClick={() => setSelectedCampaign(null)}
-                    >
-                      ปิดรายละเอียด
-                    </Button>
-                  </>
-                )}
+                <section className={styles.detailSection}>
+                  <div className={styles.detailSectionHeading}>
+                    <h3 className={styles.detailSectionTitle}>
+                      การดำเนินสถานะ
+                    </h3>
+                    <p className={styles.sectionDescription}>
+                      แสดงเฉพาะการดำเนินการที่รองรับจากสถานะปัจจุบัน
+                    </p>
+                  </div>
 
-                <CampaignLifecycleActions
-                  organizationId={organizationId}
-                  campaign={selectedCampaign}
-                  onCampaignChanged={(updated) => {
-                    setSelectedCampaign(updated);
-                    setEditValues(campaignToFormValues(updated));
-                    setState((current) =>
-                      current.status === "success"
-                        ? {
-                            ...current,
-                            campaigns: current.campaigns.map((campaign) =>
-                              campaign.campaignId === updated.campaignId
-                                ? updated
-                                : campaign,
-                            ),
-                          }
-                        : current,
-                    );
-                  }}
-                />
-              </section>
-            ) : null}
-          </div>
-        </div>
+                  <CampaignLifecycleActions
+                    organizationId={organizationId}
+                    campaign={selectedCampaign}
+                    onCampaignChanged={(updated) => {
+                      setSelectedCampaign(updated);
+                      setEditValues(campaignToFormValues(updated));
+                      setState((current) =>
+                        current.status === "success"
+                          ? {
+                              ...current,
+                              campaigns: current.campaigns.map((campaign) =>
+                                campaign.campaignId === updated.campaignId
+                                  ? updated
+                                  : campaign,
+                              ),
+                            }
+                          : current,
+                      );
+                    }}
+                  />
+                </section>
+              </div>
+            )}
+          </section>
+        ) : null}
       </main>
     </div>
   );

@@ -4,11 +4,14 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import {
+  ActionBar,
   Button,
   ConfirmDialog,
   ErrorState,
   ForbiddenState,
   LoadingState,
+  Notice,
+  TaskStatus,
   UnauthorizedState,
 } from "@/components";
 import {
@@ -27,8 +30,15 @@ import {
 
 import styles from "./order-tracking.module.css";
 import { orderService } from "./order-service";
-import { canCustomerCancelOrder } from "./order-tracking-helpers";
-import { OrderStatusBadge } from "./order-status";
+import {
+  canCustomerCancelOrder,
+  getCustomerOrderGuidance,
+  getOrderJourneySteps,
+} from "./order-tracking-helpers";
+import {
+  getOrderStatusTone,
+  OrderStatusBadge,
+} from "./order-status";
 
 type OrderDetailState =
   | { status: "loading" }
@@ -159,7 +169,10 @@ export function MyOrderView() {
       <div className={styles.page}>
         <main className={styles.stateWrap}>
           {state.status === "loading" ? (
-            <LoadingState title="กำลังโหลดรายละเอียดคำสั่งซื้อ" />
+            <LoadingState
+              title="กำลังโหลดรายละเอียดคำสั่งซื้อ"
+              description="กำลังดึงสถานะและยอดล่าสุดของคำสั่งซื้อ"
+            />
           ) : null}
           {state.status === "invalid" ? (
             <ErrorState
@@ -191,6 +204,27 @@ export function MyOrderView() {
 
   const { order } = state;
   const cancellable = canCustomerCancelOrder(order.status);
+  const guidance = getCustomerOrderGuidance(order.status);
+  const journey = getOrderJourneySteps(order.status);
+
+  const primaryAction =
+    guidance.action === "PAYMENT" ? (
+      <Link
+        href={myPaymentHref(order.orderId)}
+        className={styles.primaryActionLink}
+      >
+        {order.status === "PAYMENT_REJECTED"
+          ? "เปิดการชำระเงินและส่งใหม่"
+          : "ไปชำระเงิน"}
+      </Link>
+    ) : guidance.action === "PICKUP" ? (
+      <Link
+        href={myPickupHref(order.orderId)}
+        className={styles.primaryActionLink}
+      >
+        เปิดข้อมูลรับสินค้า
+      </Link>
+    ) : undefined;
 
   return (
     <div className={styles.page}>
@@ -199,55 +233,112 @@ export function MyOrderView() {
           กลับรายการคำสั่งซื้อ
         </Link>
 
-        <section className={styles.detailHero}>
-          <div className={styles.detailTop}>
-            <div className={styles.detailTitleGroup} data-ledger-heading>
-              <span className={styles.eyebrow}>Order detail</span>
-              <h1 className={styles.title}>รายละเอียดคำสั่งซื้อ</h1>
-              <span className={styles.orderCode}>{order.orderId}</span>
-            </div>
-            <OrderStatusBadge status={order.status} />
+        <header className={styles.detailHeading} data-ledger-heading>
+          <div>
+            <h1 className={styles.title}>รายละเอียดคำสั่งซื้อ</h1>
+            <p className={styles.orderCode}>{order.orderId}</p>
           </div>
+          <div className={styles.detailAmount}>
+            <span className={styles.summaryLabel}>ยอดรวม</span>
+            <strong className={styles.totalValue}>
+              {formatSatang(order.total)}
+            </strong>
+          </div>
+        </header>
 
-          <div className={styles.summaryGrid}>
-            <div className={styles.summaryCell}>
-              <span className={styles.summaryLabel}>ยอดรวม</span>
-              <span className={styles.summaryValue}>
-                {formatSatang(order.total)}
+        <TaskStatus
+          tone={getOrderStatusTone(order.status)}
+          label={<OrderStatusBadge status={order.status} />}
+          title={guidance.title}
+          description={guidance.description}
+          metadata={
+            <span>
+              อัปเดตล่าสุด {formatIsoDateTime(order.updatedAt)}
+            </span>
+          }
+          actions={primaryAction}
+        />
+
+        {journey.length > 0 ? (
+          <section className={styles.journeySection} aria-labelledby="order-journey">
+            <div className={styles.sectionHeading}>
+              <h2 className={styles.sectionTitle} id="order-journey">
+                ขั้นตอนคำสั่งซื้อ
+              </h2>
+              <span className={styles.sectionMeta}>
+                สถานะจะอัปเดตตามการชำระเงิน การผลิต และการรับสินค้า
               </span>
             </div>
-            <div className={styles.summaryCell}>
-              <span className={styles.summaryLabel}>สร้างเมื่อ</span>
-              <span className={styles.summaryValue}>
-                {formatIsoDateTime(order.createdAt)}
-              </span>
-            </div>
-            <div className={styles.summaryCell}>
-              <span className={styles.summaryLabel}>อัปเดตล่าสุด</span>
-              <span className={styles.summaryValue}>
-                {formatIsoDateTime(order.updatedAt)}
-              </span>
-            </div>
+
+            <ol className={styles.journeyList}>
+              {journey.map((step) => (
+                <li
+                  className={styles.journeyStep}
+                  data-state={step.state}
+                  key={step.key}
+                >
+                  <span className={styles.journeyMarker} aria-hidden="true" />
+                  <div>
+                    <strong>{step.label}</strong>
+                    <span className={styles.journeyStateLabel}>
+                      {step.state === "done"
+                        ? "เสร็จแล้ว"
+                        : step.state === "current"
+                          ? "ขั้นตอนปัจจุบัน"
+                          : "ถัดไป"}
+                    </span>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </section>
+        ) : null}
+
+        <section className={styles.orderFacts} aria-label="ข้อมูลคำสั่งซื้อ">
+          <div>
+            <span className={styles.summaryLabel}>สร้างเมื่อ</span>
+            <span className={styles.summaryValue}>
+              {formatIsoDateTime(order.createdAt)}
+            </span>
+          </div>
+          <div>
+            <span className={styles.summaryLabel}>จำนวนรายการ</span>
+            <span className={styles.summaryValue}>{order.items.length}</span>
+          </div>
+          <div>
+            <span className={styles.summaryLabel}>สถานะปัจจุบัน</span>
+            <span className={styles.summaryValue}>{guidance.title}</span>
           </div>
         </section>
 
         <section className={styles.section} aria-labelledby="order-items">
-          <h2 className={styles.sectionTitle} id="order-items">
-            รายการสินค้า
-          </h2>
+          <div className={styles.sectionHeading}>
+            <h2 className={styles.sectionTitle} id="order-items">
+              รายการสินค้า
+            </h2>
+            <span className={styles.sectionMeta}>
+              ราคาในรายการเป็นราคาที่บันทึกไว้ตอนสร้างคำสั่งซื้อ
+            </span>
+          </div>
 
           <div className={styles.itemList}>
             {order.items.map((item) => (
-              <article className={styles.itemCard} key={item.orderItemId}>
-                <div>
+              <article className={styles.itemRow} key={item.orderItemId}>
+                <div className={styles.itemPrimary}>
                   <div className={styles.itemName}>{item.productName}</div>
                   <div className={styles.itemVariant}>{item.variantName}</div>
-                  <div className={styles.itemMeta}>
-                    {formatSatang(item.unitPrice)} × {item.quantity}
-                  </div>
+                </div>
+                <div className={styles.itemQuantity}>
+                  <span className={styles.summaryLabel}>จำนวน</span>
+                  <strong>{item.quantity}</strong>
+                </div>
+                <div className={styles.itemPrice}>
+                  <span className={styles.summaryLabel}>ราคา/ชิ้น</span>
+                  <span>{formatSatang(item.unitPrice)}</span>
                 </div>
                 <div className={styles.itemTotal}>
-                  {formatSatang(item.totalPrice)}
+                  <span className={styles.summaryLabel}>รวม</span>
+                  <strong>{formatSatang(item.totalPrice)}</strong>
                 </div>
               </article>
             ))}
@@ -261,8 +352,8 @@ export function MyOrderView() {
               {formatSatang(order.subtotal)}
             </span>
           </div>
-          <div className={styles.totalRow}>
-            <strong>ยอดรวมที่ Backend ยืนยัน</strong>
+          <div className={styles.totalRowPrimary}>
+            <strong>ยอดรวม</strong>
             <span className={styles.totalValue}>
               {formatSatang(order.total)}
             </span>
@@ -270,40 +361,47 @@ export function MyOrderView() {
         </section>
 
         {actionError ? (
-          <div className={styles.serverError} role="alert">
+          <Notice tone="danger" role="alert" title="ดำเนินการไม่สำเร็จ">
             {actionError}
-          </div>
+          </Notice>
         ) : null}
 
-        <div className={styles.actionBar}>
-          {order.status !== "CANCELLED" ? (
-            <Link href={myPaymentHref(order.orderId)}>
-              <Button variant="secondary">ดูการชำระเงิน</Button>
+        <ActionBar className={styles.orderActions}>
+          {guidance.action !== "PAYMENT" && order.status !== "CANCELLED" ? (
+            <Link
+              href={myPaymentHref(order.orderId)}
+              className={styles.secondaryActionLink}
+            >
+              ดูการชำระเงิน
             </Link>
           ) : null}
-          {order.status === "READY_FOR_PICKUP" ||
-          order.status === "RECEIVED" ? (
-            <Link href={myPickupHref(order.orderId)}>
-              <Button variant="secondary">ดูข้อมูลรับสินค้า</Button>
+
+          {guidance.action !== "PICKUP" &&
+          (order.status === "READY_FOR_PICKUP" ||
+            order.status === "RECEIVED") ? (
+            <Link
+              href={myPickupHref(order.orderId)}
+              className={styles.secondaryActionLink}
+            >
+              ดูข้อมูลรับสินค้า
             </Link>
           ) : null}
+
           {cancellable ? (
-            <ConfirmDialog
-              trigger={
-                <Button variant="danger">
-                  ยกเลิกคำสั่งซื้อ
-                </Button>
-              }
-              title="ยืนยันการยกเลิกคำสั่งซื้อ"
-              description="คำสั่งซื้อจะถูกเปลี่ยนเป็นสถานะ CANCELLED เมื่อ Backend ยืนยันการดำเนินการ"
-              confirmLabel="ยืนยันยกเลิก"
-              cancelLabel="กลับ"
-              pending={cancelPending}
-              danger
-              onConfirm={handleCancel}
-            />
+            <div className={styles.destructiveAction}>
+              <ConfirmDialog
+                trigger={<Button variant="danger">ยกเลิกคำสั่งซื้อ</Button>}
+                title="ยืนยันการยกเลิกคำสั่งซื้อ"
+                description="ยกเลิกได้เฉพาะก่อนการชำระเงินได้รับอนุมัติ เมื่อยืนยันแล้วคำสั่งซื้อจะเปลี่ยนเป็นสถานะยกเลิก"
+                confirmLabel="ยืนยันยกเลิก"
+                cancelLabel="กลับ"
+                pending={cancelPending}
+                danger
+                onConfirm={handleCancel}
+              />
+            </div>
           ) : null}
-        </div>
+        </ActionBar>
       </main>
     </div>
   );

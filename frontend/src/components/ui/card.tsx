@@ -2,24 +2,44 @@ import type { HTMLAttributes, ReactNode } from "react";
 
 import styles from "./primitives.module.css";
 
+type CardSurface = "default" | "muted" | "flat";
+type CardDensity = "comfortable" | "compact";
+
 export interface CardProps extends Omit<HTMLAttributes<HTMLElement>, "title"> {
   heading?: ReactNode;
   description?: ReactNode;
   actions?: ReactNode;
   footer?: ReactNode;
+  surface?: CardSurface;
+  density?: CardDensity;
   children: ReactNode;
 }
+
+const surfaceClass: Record<CardSurface, string> = {
+  default: "",
+  muted: styles.cardMuted,
+  flat: styles.cardFlat,
+};
 
 export function Card({
   heading,
   description,
   actions,
   footer,
+  surface = "default",
+  density = "comfortable",
   className,
   children,
   ...props
 }: CardProps) {
-  const classes = [styles.card, className].filter(Boolean).join(" ");
+  const classes = [
+    styles.card,
+    surfaceClass[surface],
+    density === "compact" ? styles.cardCompact : "",
+    className,
+  ]
+    .filter(Boolean)
+    .join(" ");
   const hasHeader = heading || description || actions;
 
   return (
@@ -32,7 +52,7 @@ export function Card({
               <p className={styles.cardDescription}>{description}</p>
             ) : null}
           </div>
-          {actions}
+          {actions ? <div className={styles.cardActions}>{actions}</div> : null}
         </header>
       ) : null}
       <div className={styles.cardBody}>{children}</div>

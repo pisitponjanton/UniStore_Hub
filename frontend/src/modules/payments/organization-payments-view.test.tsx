@@ -128,7 +128,7 @@ describe("OrganizationPaymentsView", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: "ขอลิงก์ดูสลิป",
+        name: "เปิดสลิป",
       }),
     );
 
@@ -180,7 +180,7 @@ describe("OrganizationPaymentsView", () => {
     await screen.findByText("Order order-1");
 
     fireEvent.click(
-      screen.getByRole("button", { name: "อนุมัติ" }),
+      screen.getByRole("button", { name: "อนุมัติการชำระเงิน" }),
     );
     fireEvent.click(
       screen.getByRole("button", {
@@ -207,7 +207,7 @@ describe("OrganizationPaymentsView", () => {
       ),
     ).toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "อนุมัติ" }),
+      screen.queryByRole("button", { name: "อนุมัติการชำระเงิน" }),
     ).not.toBeInTheDocument();
   });
 
@@ -243,7 +243,7 @@ describe("OrganizationPaymentsView", () => {
     await screen.findByText("Order order-1");
 
     fireEvent.click(
-      screen.getByRole("button", { name: "ปฏิเสธ" }),
+      screen.getByRole("button", { name: "ปฏิเสธการชำระเงิน" }),
     );
     fireEvent.click(
       screen.getByRole("button", {

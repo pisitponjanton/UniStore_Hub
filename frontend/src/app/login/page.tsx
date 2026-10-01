@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { AuthPageFrame, LoginForm } from "@/modules/auth";
+import { AuthEntryState, AuthPageFrame, LoginForm } from "@/modules/auth";
 
 export const metadata: Metadata = {
   title: "เข้าสู่ระบบ | UniStore Hub",
@@ -9,11 +9,12 @@ export const metadata: Metadata = {
 export default function LoginPage() {
   return (
     <AuthPageFrame
-      eyebrow="Account access"
-      introTitle="จัดการการสั่งซื้อและงานของหน่วยงานจากบัญชีเดียว"
-      introDescription="เข้าสู่ระบบเพื่อดูคำสั่งซื้อของคุณ หรือทำงานในหน่วยงานตามสิทธิ์ที่ Backend ยืนยันให้บัญชีนี้"
+      introTitle="กลับมาทำรายการต่อใน UniStore Hub"
+      introDescription="เข้าสู่ระบบเพื่อดูคำสั่งซื้อ การแจ้งเตือน และพื้นที่หน่วยงานที่บัญชีของคุณมีสิทธิ์ใช้งาน"
     >
-      <LoginForm />
+      <AuthEntryState>
+        <LoginForm />
+      </AuthEntryState>
     </AuthPageFrame>
   );
 }

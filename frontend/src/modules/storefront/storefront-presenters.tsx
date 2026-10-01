@@ -33,6 +33,10 @@ const campaignTone: Record<
   CANCELLED: "danger",
 };
 
+export function campaignStatusLabel(status: CampaignStatus): string {
+  return campaignLabel[status];
+}
+
 export function CampaignStatusBadge({
   status,
 }: {
@@ -116,7 +120,7 @@ export function CampaignCard({
         </div>
       </div>
 
-      <span className={styles.cardAction}>ดูแคมเปญ</span>
+      <span className={styles.cardAction}>ดูรายละเอียดแคมเปญ</span>
     </Link>
   );
 }
@@ -174,8 +178,10 @@ export function ProductCard({
         ) : null}
       </div>
 
-      {price ? <div className={styles.price}>เริ่มต้น {price}</div> : null}
-      <span className={styles.cardAction}>ดูสินค้า</span>
+      <div className={styles.productFooter}>
+        {price ? <div className={styles.price}>เริ่มต้น {price}</div> : <span />}
+        <span className={styles.cardAction}>ดูสินค้า</span>
+      </div>
     </Link>
   );
 }

@@ -7,6 +7,7 @@ import {
   Button,
   ConfirmDialog,
   EmptyState,
+  Notice,
   TextField,
 } from "@/components";
 import {
@@ -30,7 +31,7 @@ import styles from "./variant-management.module.css";
 function operationErrorMessage(error: unknown): string {
   if (error instanceof ApiClientError) {
     if (error.code === "VARIANT_NOT_FOUND") {
-      return "ไม่พบ Variant นี้แล้ว กรุณาโหลดข้อมูลสินค้าใหม่";
+      return "ไม่พบตัวเลือกนี้แล้ว กรุณาโหลดข้อมูลสินค้าใหม่";
     }
 
     if (error.code === "PRODUCT_NOT_FOUND") {
@@ -81,6 +82,9 @@ export function VariantManagement({
   const [notice, setNotice] = useState<string | null>(null);
 
   const variants = product.variants ?? [];
+  const activeCount = variants.filter(
+    (variant) => variant.status === "ACTIVE",
+  ).length;
 
   async function refreshProduct() {
     const refreshed = await productService.get(
@@ -125,7 +129,7 @@ export function VariantManagement({
       setCreateName("");
       setCreatePrice("");
       setNotice(
-        `สร้าง Variant ${created.name} ราคา ${formatSatang(created.price)} แล้ว`,
+        `สร้างตัวเลือก ${created.name} ราคา ${formatSatang(created.price)} แล้ว`,
       );
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
@@ -183,7 +187,7 @@ export function VariantManagement({
       await refreshProduct();
       setEditingVariant(null);
       setNotice(
-        `บันทึก Variant ${updated.name} ราคา ${formatSatang(updated.price)} แล้ว`,
+        `บันทึกตัวเลือก ${updated.name} ราคา ${formatSatang(updated.price)} แล้ว`,
       );
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
@@ -223,7 +227,7 @@ export function VariantManagement({
         setEditingVariant(null);
       }
 
-      setNotice(`ปิดใช้งาน Variant ${variant.name} แล้ว`);
+      setNotice(`ปิดใช้งานตัวเลือก ${variant.name} แล้ว`);
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();
@@ -237,198 +241,213 @@ export function VariantManagement({
   }
 
   return (
-    <div className={styles.root}>
+    <section className={styles.root} aria-labelledby={`variant-title-${product.productId}`}>
       <div className={styles.header}>
         <div className={styles.headerCopy}>
-          <h3 className={styles.title}>Variants</h3>
+          <h3 className={styles.title} id={`variant-title-${product.productId}`}>
+            ตัวเลือกสินค้าและราคา
+          </h3>
           <p className={styles.description}>
-            ราคาในแบบฟอร์มใช้หน่วยบาท (THB)
-            และจะถูกแปลงเป็น integer satang ก่อนส่ง API
+            เพิ่มขนาด สี หรือรูปแบบที่ลูกค้าเลือกได้ โดยกรอกราคาเป็นหน่วยบาท
           </p>
         </div>
-        <Badge tone="info">{variants.length} Variant</Badge>
+        <div className={styles.headerStats}>
+          <span>{activeCount} ใช้งาน</span>
+          <span>{variants.length} ทั้งหมด</span>
+        </div>
       </div>
 
       {error ? (
-        <div className={styles.error} role="alert">
+        <Notice tone="danger" role="alert" title="ดำเนินการไม่สำเร็จ">
           {error}
-        </div>
+        </Notice>
       ) : null}
 
       {notice ? (
-        <div className={styles.notice} role="status">
+        <Notice tone="success" role="status" title="อัปเดตแล้ว">
           {notice}
-        </div>
+        </Notice>
       ) : null}
 
-      <form className={styles.form} onSubmit={handleCreate}>
-        <strong>เพิ่ม Variant</strong>
-        <TextField
-          id={`variant-create-name-${product.productId}`}
-          label="ชื่อ Variant"
-          value={createName}
-          onChange={(event) => {
-            setCreateName(event.target.value);
-            setCreateNameError(undefined);
-          }}
-          error={createNameError}
-          required
-          disabled={creating}
-        />
-        <TextField
-          id={`variant-create-price-${product.productId}`}
-          label="ราคา (บาท)"
-          inputMode="decimal"
-          placeholder="250.00"
-          value={createPrice}
-          onChange={(event) => {
-            setCreatePrice(event.target.value);
-            setCreatePriceError(undefined);
-          }}
-          error={createPriceError}
-          hint="รองรับทศนิยมไม่เกิน 2 ตำแหน่ง"
-          required
-          disabled={creating}
-        />
-        <Button
-          type="submit"
-          pending={creating}
-          pendingLabel="กำลังเพิ่ม"
-        >
-          เพิ่ม Variant
-        </Button>
-      </form>
+      <div className={styles.layout}>
+        <div className={styles.variantList}>
+          {variants.length === 0 ? (
+            <EmptyState
+              title="ยังไม่มีตัวเลือกสินค้า"
+              description="เพิ่มตัวเลือกแรกเพื่อกำหนดรูปแบบและราคาที่ลูกค้าจะเลือก"
+            />
+          ) : (
+            <div className={styles.list}>
+              {variants.map((variant) => {
+                const saving =
+                  savingVariantId === variant.variantId;
+                const deactivating =
+                  deactivatingVariantId === variant.variantId;
+                const busy = saving || deactivating;
+                const editing =
+                  editingVariant?.variantId === variant.variantId;
 
-      {variants.length === 0 ? (
-        <EmptyState
-          title="ยังไม่มี Variant"
-          description="เพิ่ม Variant แรกเพื่อกำหนดตัวเลือกและราคาของสินค้า"
-        />
-      ) : (
-        <div className={styles.list}>
-          {variants.map((variant) => {
-            const saving =
-              savingVariantId === variant.variantId;
-            const deactivating =
-              deactivatingVariantId === variant.variantId;
-            const busy = saving || deactivating;
-
-            return (
-              <article
-                className={styles.card}
-                key={variant.variantId}
-              >
-                <div className={styles.cardHeader}>
-                  <div className={styles.cardCopy}>
-                    <span className={styles.name}>
-                      {variant.name}
-                    </span>
-                    <span className={styles.price}>
-                      {formatSatang(variant.price)}
-                    </span>
-                    <span className={styles.meta}>
-                      Variant ID: {variant.variantId}
-                    </span>
-                  </div>
-                  <Badge
-                    tone={
-                      variant.status === "ACTIVE"
-                        ? "success"
-                        : "neutral"
-                    }
+                return (
+                  <article
+                    className={[
+                      styles.row,
+                      editing ? styles.rowEditing : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                    key={variant.variantId}
                   >
-                    {variantStatusLabel(variant.status)}
-                  </Badge>
-                </div>
-
-                <div className={styles.actions}>
-                  <Button
-                    variant="secondary"
-                    disabled={busy}
-                    onClick={() => openEdit(variant)}
-                  >
-                    แก้ไข Variant
-                  </Button>
-
-                  {variant.status === "ACTIVE" ? (
-                    <ConfirmDialog
-                      trigger={
-                        <Button
-                          variant="danger"
-                          disabled={busy}
+                    <div className={styles.rowMain}>
+                      <div className={styles.rowHeading}>
+                        <span className={styles.name}>
+                          {variant.name}
+                        </span>
+                        <Badge
+                          tone={
+                            variant.status === "ACTIVE"
+                              ? "success"
+                              : "neutral"
+                          }
                         >
-                          ปิดใช้งาน
-                        </Button>
-                      }
-                      title="ยืนยันการปิดใช้งาน Variant"
-                      description={`ปิดใช้งาน Variant ${variant.name} ใช่หรือไม่ การลบใน MVP เป็น soft deactivate และไม่เปลี่ยน historical OrderItem snapshots`}
-                      confirmLabel="ปิดใช้งาน Variant"
-                      danger
-                      pending={deactivating}
-                      onConfirm={() => {
-                        void handleDeactivate(variant);
-                      }}
-                    />
-                  ) : null}
-                </div>
-
-                {editingVariant?.variantId ===
-                variant.variantId ? (
-                  <form
-                    className={styles.editForm}
-                    onSubmit={handleSave}
-                  >
-                    <TextField
-                      id={`variant-edit-name-${variant.variantId}`}
-                      label="ชื่อ Variant"
-                      value={editName}
-                      onChange={(event) => {
-                        setEditName(event.target.value);
-                        setEditNameError(undefined);
-                      }}
-                      error={editNameError}
-                      required
-                      disabled={saving}
-                    />
-                    <TextField
-                      id={`variant-edit-price-${variant.variantId}`}
-                      label="ราคา (บาท)"
-                      inputMode="decimal"
-                      value={editPrice}
-                      onChange={(event) => {
-                        setEditPrice(event.target.value);
-                        setEditPriceError(undefined);
-                      }}
-                      error={editPriceError}
-                      hint="ระบบจะ normalize เป็น integer satang ก่อนส่ง"
-                      required
-                      disabled={saving}
-                    />
+                          {variantStatusLabel(variant.status)}
+                        </Badge>
+                      </div>
+                      <span className={styles.price}>
+                        {formatSatang(variant.price)}
+                      </span>
+                    </div>
 
                     <div className={styles.actions}>
                       <Button
-                        type="submit"
-                        pending={saving}
-                        pendingLabel="กำลังบันทึก"
+                        variant="secondary"
+                        disabled={busy}
+                        onClick={() => openEdit(variant)}
                       >
-                        บันทึก Variant
+                        {editing ? "กำลังแก้ไข" : "แก้ไขตัวเลือก"}
                       </Button>
-                      <Button
-                        type="button"
-                        variant="quiet"
-                        disabled={saving}
-                        onClick={() => setEditingVariant(null)}
-                      >
-                        ยกเลิก
-                      </Button>
+
+                      {variant.status === "ACTIVE" ? (
+                        <ConfirmDialog
+                          trigger={
+                            <Button
+                              variant="danger"
+                              disabled={busy}
+                            >
+                              ปิดใช้งาน
+                            </Button>
+                          }
+                          title="ยืนยันการปิดใช้งานตัวเลือก"
+                          description={`ปิดใช้งานตัวเลือก ${variant.name} ใช่หรือไม่ ข้อมูลในคำสั่งซื้อเดิมจะยังคงอยู่`}
+                          confirmLabel="ปิดใช้งานตัวเลือก"
+                          danger
+                          pending={deactivating}
+                          onConfirm={() => {
+                            void handleDeactivate(variant);
+                          }}
+                        />
+                      ) : null}
                     </div>
-                  </form>
-                ) : null}
-              </article>
-            );
-          })}
+
+                    {editing ? (
+                      <form
+                        className={styles.editForm}
+                        onSubmit={handleSave}
+                      >
+                        <TextField
+                          id={`variant-edit-name-${variant.variantId}`}
+                          label="ชื่อตัวเลือก"
+                          value={editName}
+                          onChange={(event) => {
+                            setEditName(event.target.value);
+                            setEditNameError(undefined);
+                          }}
+                          error={editNameError}
+                          required
+                          disabled={saving}
+                        />
+                        <TextField
+                          id={`variant-edit-price-${variant.variantId}`}
+                          label="ราคา (บาท)"
+                          inputMode="decimal"
+                          value={editPrice}
+                          onChange={(event) => {
+                            setEditPrice(event.target.value);
+                            setEditPriceError(undefined);
+                          }}
+                          error={editPriceError}
+                          hint="ใส่ทศนิยมได้ไม่เกิน 2 ตำแหน่ง"
+                          required
+                          disabled={saving}
+                        />
+
+                        <div className={styles.editActions}>
+                          <Button
+                            type="submit"
+                            pending={saving}
+                            pendingLabel="กำลังบันทึก"
+                          >
+                            บันทึกตัวเลือก
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="quiet"
+                            disabled={saving}
+                            onClick={() => setEditingVariant(null)}
+                          >
+                            ยกเลิก
+                          </Button>
+                        </div>
+                      </form>
+                    ) : null}
+                  </article>
+                );
+              })}
+            </div>
+          )}
         </div>
-      )}
-    </div>
+
+        <form className={styles.createForm} onSubmit={handleCreate}>
+          <div className={styles.createHeading}>
+            <span className={styles.kicker}>เพิ่มตัวเลือก</span>
+            <strong>ตัวเลือกใหม่</strong>
+          </div>
+          <TextField
+            id={`variant-create-name-${product.productId}`}
+            label="ชื่อตัวเลือก"
+            value={createName}
+            onChange={(event) => {
+              setCreateName(event.target.value);
+              setCreateNameError(undefined);
+            }}
+            error={createNameError}
+            placeholder="เช่น Size M"
+            required
+            disabled={creating}
+          />
+          <TextField
+            id={`variant-create-price-${product.productId}`}
+            label="ราคา (บาท)"
+            inputMode="decimal"
+            placeholder="250.00"
+            value={createPrice}
+            onChange={(event) => {
+              setCreatePrice(event.target.value);
+              setCreatePriceError(undefined);
+            }}
+            error={createPriceError}
+            hint="ใส่ทศนิยมได้ไม่เกิน 2 ตำแหน่ง"
+            required
+            disabled={creating}
+          />
+          <Button
+            type="submit"
+            pending={creating}
+            pendingLabel="กำลังเพิ่มตัวเลือก"
+          >
+            เพิ่มตัวเลือก
+          </Button>
+        </form>
+      </div>
+    </section>
   );
 }

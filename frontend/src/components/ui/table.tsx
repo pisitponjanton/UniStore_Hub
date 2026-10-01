@@ -9,10 +9,23 @@ import styles from "./primitives.module.css";
 
 export interface TableProps extends TableHTMLAttributes<HTMLTableElement> {
   caption?: string;
+  density?: "comfortable" | "compact";
 }
 
-export function Table({ caption, className, children, ...props }: TableProps) {
-  const classes = [styles.table, className].filter(Boolean).join(" ");
+export function Table({
+  caption,
+  density = "comfortable",
+  className,
+  children,
+  ...props
+}: TableProps) {
+  const classes = [
+    styles.table,
+    density === "compact" ? styles.tableCompact : "",
+    className,
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <div
@@ -20,13 +33,15 @@ export function Table({ caption, className, children, ...props }: TableProps) {
       role="region"
       aria-label={
         caption
-          ? `${caption} — เลื่อนแนวนอนได้เมื่อหน้าจอแคบ`
-          : "ตารางข้อมูล — เลื่อนแนวนอนได้เมื่อหน้าจอแคบ"
+          ? `${caption}. เลื่อนแนวนอนได้เมื่อหน้าจอแคบ`
+          : "ตารางข้อมูล เลื่อนแนวนอนได้เมื่อหน้าจอแคบ"
       }
       tabIndex={0}
     >
       <table className={classes} {...props}>
-        {caption ? <caption className={styles.tableCaption}>{caption}</caption> : null}
+        {caption ? (
+          <caption className={styles.tableCaption}>{caption}</caption>
+        ) : null}
         {children}
       </table>
     </div>
@@ -42,9 +57,26 @@ export function TableBody(props: HTMLAttributes<HTMLTableSectionElement>) {
   return <tbody {...props} />;
 }
 
-export function TableRow(props: HTMLAttributes<HTMLTableRowElement>) {
-  const classes = [styles.tableBodyRow, props.className].filter(Boolean).join(" ");
-  return <tr {...props} className={classes} />;
+export interface TableRowProps
+  extends HTMLAttributes<HTMLTableRowElement> {
+  selected?: boolean;
+}
+
+export function TableRow({
+  selected = false,
+  className,
+  ...props
+}: TableRowProps) {
+  const classes = [styles.tableBodyRow, className].filter(Boolean).join(" ");
+
+  return (
+    <tr
+      {...props}
+      className={classes}
+      data-selected={selected || undefined}
+      aria-selected={selected || undefined}
+    />
+  );
 }
 
 export function TableHeaderCell(props: ThHTMLAttributes<HTMLTableCellElement>) {

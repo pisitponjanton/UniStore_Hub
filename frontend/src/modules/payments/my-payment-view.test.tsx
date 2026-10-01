@@ -116,10 +116,8 @@ describe("MyPaymentView", () => {
         exact: false,
       }),
     ).toBeInTheDocument();
-    expect(
-      screen.getByText("สถานะ Payment ปัจจุบัน"),
-    ).toBeInTheDocument();
-    expect(screen.getByText("REJECTED")).toBeInTheDocument();
+    expect(screen.getByText("สถานะหลักฐาน")).toBeInTheDocument();
+    expect(screen.getByText("ไม่ผ่านการตรวจสอบ")).toBeInTheDocument();
 
     expect(mocks.getMyOrder).toHaveBeenCalledWith(
       "order-1",

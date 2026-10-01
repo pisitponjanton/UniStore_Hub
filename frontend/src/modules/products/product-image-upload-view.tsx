@@ -2,7 +2,7 @@
 
 import { useState, type ChangeEvent } from "react";
 
-import { Badge, Button } from "@/components";
+import { Badge, Button, Notice } from "@/components";
 import {
   authSession,
   isDefinitiveSessionFailure,
@@ -41,6 +41,21 @@ function validationMessage(
   return reason === "UNSUPPORTED_TYPE"
     ? "รองรับเฉพาะ JPEG, PNG และ WebP"
     : "รูปสินค้าต้องมีขนาดไม่เกิน 5 MiB";
+}
+
+function stageLabel(stage: UploadStage): string {
+  switch (stage) {
+    case "signing":
+      return "กำลังเตรียมการอัปโหลด";
+    case "uploading":
+      return "กำลังอัปโหลดไฟล์";
+    case "persisting":
+      return "กำลังบันทึกรูปสินค้า";
+    case "refreshing":
+      return "กำลังตรวจสอบข้อมูลล่าสุด";
+    case "idle":
+      return "";
+  }
 }
 
 export function ProductImageUploadView({
@@ -152,7 +167,7 @@ export function ProductImageUploadView({
         error.status === 403
       ) {
         setServerError(
-          "ลิงก์อัปโหลดหมดอายุหรือถูกปฏิเสธ กรุณากดอัปโหลดอีกครั้งเพื่อขอ Pre-signed URL ใหม่",
+          "ลิงก์อัปโหลดหมดอายุหรือถูกปฏิเสธ กรุณากดอัปโหลดอีกครั้งเพื่อสร้างลิงก์ใหม่",
         );
         return;
       }
@@ -173,76 +188,94 @@ export function ProductImageUploadView({
   return (
     <div className={styles.root}>
       <div className={styles.header}>
-        <h3 className={styles.title}>รูปสินค้า</h3>
-        <p className={styles.description}>
-          รองรับ JPEG, PNG และ WebP ไม่เกิน 5 MiB
-          ระบบจะอัปโหลดไฟล์ตรงไป S3 ด้วย Pre-signed URL
-          แล้วบันทึกเฉพาะ objectKey ผ่าน Backend
-        </p>
-      </div>
-
-      <div className={styles.current}>
-        <span className={styles.meta}>สถานะรูปปัจจุบัน</span>
+        <div className={styles.headerCopy}>
+          <h3 className={styles.title}>รูปสินค้า</h3>
+          <p className={styles.description}>
+            ใช้ไฟล์ JPEG, PNG หรือ WebP ขนาดไม่เกิน 5 MiB
+          </p>
+        </div>
         <Badge tone={product.imageKey ? "success" : "neutral"}>
           {product.imageKey ? "มีรูปสินค้าแล้ว" : "ยังไม่มีรูปสินค้า"}
         </Badge>
       </div>
 
-      <label
-        className={styles.fileLabel}
-        htmlFor={`product-image-${product.productId}`}
-      >
-        เลือกรูปสินค้า
-      </label>
-      <input
-        className={styles.fileInput}
-        id={`product-image-${product.productId}`}
-        type="file"
-        accept="image/jpeg,image/png,image/webp"
-        disabled={pending}
-        aria-invalid={fileError ? true : undefined}
-        aria-describedby={
-          fileError
-            ? `product-image-${product.productId}-hint product-image-${product.productId}-error`
-            : `product-image-${product.productId}-hint`
-        }
-        onChange={handleFileChange}
-      />
-      <span
-        className={styles.fileHint}
-        id={`product-image-${product.productId}-hint`}
-      >
-        เลือกไฟล์ JPEG, PNG หรือ WebP ขนาดไม่เกิน 5 MiB
-      </span>
+      <div className={styles.uploadField}>
+        <label
+          className={styles.fileLabel}
+          htmlFor={`product-image-${product.productId}`}
+        >
+          เลือกรูปสินค้า
+        </label>
+        <input
+          className={styles.fileInput}
+          id={`product-image-${product.productId}`}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          disabled={pending}
+          aria-invalid={fileError ? true : undefined}
+          aria-describedby={
+            fileError
+              ? `product-image-${product.productId}-hint product-image-${product.productId}-error`
+              : `product-image-${product.productId}-hint`
+          }
+          onChange={handleFileChange}
+        />
+        <span
+          className={styles.fileHint}
+          id={`product-image-${product.productId}-hint`}
+        >
+          การอัปโหลดรูปใหม่จะใช้รูปนี้เป็นรูปปัจจุบันของสินค้า
+        </span>
+      </div>
 
       {file ? (
         <div className={styles.selected}>
-          <span className={styles.fileName}>{file.name}</span>
+          <div className={styles.selectedCopy}>
+            <span className={styles.selectedLabel}>ไฟล์ที่เลือก</span>
+            <span className={styles.fileName}>{file.name}</span>
+          </div>
           <span className={styles.meta}>
-            {file.type} · {formatBytes(file.size)}
+            {file.type} ขนาด {formatBytes(file.size)}
           </span>
         </div>
       ) : null}
 
       {fileError ? (
-        <div
-          className={styles.error}
-          id={`product-image-${product.productId}-error`}
+        <Notice
+          tone="danger"
           role="alert"
+          title="ไฟล์นี้ใช้ไม่ได้"
         >
-          {fileError}
-        </div>
+          <span id={`product-image-${product.productId}-error`}>
+            {fileError}
+          </span>
+        </Notice>
       ) : null}
 
       {serverError ? (
-        <div className={styles.error} role="alert">
+        <Notice
+          tone="danger"
+          role="alert"
+          title="อัปโหลดไม่สำเร็จ"
+        >
           {serverError}
-        </div>
+        </Notice>
       ) : null}
 
       {notice ? (
-        <div className={styles.notice} role="status">
+        <Notice
+          tone="success"
+          role="status"
+          title="อัปโหลดสำเร็จ"
+        >
           {notice}
+        </Notice>
+      ) : null}
+
+      {pending ? (
+        <div className={styles.progress} role="status" aria-live="polite">
+          <span className={styles.progressDot} aria-hidden="true" />
+          <span>{stageLabel(stage)}</span>
         </div>
       ) : null}
 
@@ -250,15 +283,7 @@ export function ProductImageUploadView({
         <Button
           type="button"
           pending={pending}
-          pendingLabel={
-            stage === "signing"
-              ? "กำลังขอลิงก์อัปโหลด"
-              : stage === "uploading"
-                ? "กำลังอัปโหลด"
-                : stage === "persisting"
-                  ? "กำลังบันทึกรูป"
-                  : "กำลังรีเฟรชข้อมูล"
-          }
+          pendingLabel={stageLabel(stage)}
           disabled={!file || !contentType || pending}
           onClick={() => {
             void handleUpload();

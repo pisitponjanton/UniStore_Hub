@@ -7,6 +7,7 @@ import {
   ErrorState,
   ForbiddenState,
   LoadingState,
+  Notice,
   UnauthorizedState,
 } from "@/components";
 import {
@@ -22,7 +23,9 @@ import {
 
 import {
   platformOrganizationStatusLabel,
+  platformOrganizationStatusTone,
   platformUserStatusLabel,
+  platformUserStatusTone,
 } from "./platform-admin-helpers";
 import { platformAdminService } from "./platform-admin-service";
 import styles from "./platform-admin.module.css";
@@ -38,6 +41,12 @@ function count(value: number | undefined): string {
   return (value ?? 0).toLocaleString("th-TH");
 }
 
+function sumCounts(values: Record<string, number | undefined>): number {
+  return Object.values(values).reduce<number>(
+    (total, value) => total + (value ?? 0),
+    0,
+  );
+}
 export function PlatformSummaryView() {
   const [state, setState] = useState<SummaryState>({
     status: "loading",
@@ -95,7 +104,10 @@ export function PlatformSummaryView() {
       <div className={styles.page}>
         <main className={styles.stateWrap}>
           {state.status === "loading" ? (
-            <LoadingState title="กำลังโหลดภาพรวม Platform" />
+            <LoadingState
+              title="กำลังโหลดภาพรวม Platform"
+              description="กำลังสรุปสถานะหน่วยงานและผู้ใช้"
+            />
           ) : null}
           {state.status === "unauthorized" ? (
             <UnauthorizedState />
@@ -114,49 +126,104 @@ export function PlatformSummaryView() {
     );
   }
 
+  const organizationTotal = sumCounts(
+    state.summary.organizationsByStatus,
+  );
+  const userTotal = sumCounts(state.summary.usersByStatus);
+  const pendingOrganizations =
+    state.summary.organizationsByStatus.PENDING ?? 0;
+
   return (
     <div className={styles.page}>
       <main className={styles.main}>
         <header className={styles.header}>
           <div className={styles.headerCopy} data-ledger-heading>
-            <span className={styles.eyebrow}>Platform admin</span>
-            <h1 className={styles.title}>ภาพรวมระบบ</h1>
+            <h1 className={styles.title}>ภาพรวม Platform</h1>
             <p className={styles.description}>
-              ภาพรวมนี้ใช้ข้อมูลจาก /platform/summary โดยตรง
-              และสิทธิ์ Platform Admin มาจาก persisted User.platformRole
-              ไม่ได้อนุมานจากสมาชิกของหน่วยงาน
+              ตรวจสถานะหน่วยงานและผู้ใช้จากข้อมูลระดับ Platform
+              เพื่อเห็นงานที่ต้องตัดสินใจก่อนเข้าไปจัดการรายละเอียด
             </p>
           </div>
 
-          <Badge tone="info">PLATFORM_ADMIN</Badge>
+          <Badge tone="info">Platform Admin</Badge>
         </header>
+
+        <Notice tone="neutral" title="ขอบเขตสิทธิ์ Platform">
+          หน้านี้ใช้สิทธิ์จาก User.platformRole = PLATFORM_ADMIN
+          โดยตรง ไม่ได้อนุมานจากบทบาทภายในหน่วยงาน
+        </Notice>
+
+        <section
+          className={styles.priorityStrip}
+          aria-label="ตัวชี้วัด Platform ที่สำคัญ"
+        >
+          <article className={styles.priorityItem}>
+            <span className={styles.metricLabel}>หน่วยงานรออนุมัติ</span>
+            <strong className={styles.priorityValue}>
+              {count(pendingOrganizations)}
+            </strong>
+            <span className={styles.metricHint}>
+              รายการที่ต้องตรวจสอบก่อนอนุมัติหรือระงับ
+            </span>
+          </article>
+
+          <article className={styles.priorityItem}>
+            <span className={styles.metricLabel}>หน่วยงานทั้งหมด</span>
+            <strong className={styles.priorityValue}>
+              {count(organizationTotal)}
+            </strong>
+            <span className={styles.metricHint}>
+              รวมทุกสถานะที่ Platform Summary ส่งกลับ
+            </span>
+          </article>
+
+          <article className={styles.priorityItem}>
+            <span className={styles.metricLabel}>ผู้ใช้ทั้งหมด</span>
+            <strong className={styles.priorityValue}>
+              {count(userTotal)}
+            </strong>
+            <span className={styles.metricHint}>
+              รวมผู้ใช้ทุกสถานะใน Platform Summary
+            </span>
+          </article>
+        </section>
 
         <section
           className={styles.section}
           aria-labelledby="organization-summary"
         >
-          <h2
-            className={styles.sectionTitle}
-            id="organization-summary"
-          >
-            หน่วยงานตามสถานะ
-          </h2>
-
-          <div className={styles.metrics}>
-            {ORGANIZATION_STATUSES.map((status) => (
-              <article
-                className={styles.metricCard}
-                key={status}
+          <div className={styles.sectionHeading}>
+            <div>
+              <h2
+                className={styles.sectionTitle}
+                id="organization-summary"
               >
-                <span className={styles.metricLabel}>
-                  {platformOrganizationStatusLabel(status)}
-                </span>
-                <strong className={styles.metricValue}>
+                หน่วยงานตามสถานะ
+              </h2>
+              <p className={styles.sectionDescription}>
+                ใช้สถานะนี้เพื่อแยกหน่วยงานที่รอการตัดสินใจ อนุมัติแล้ว
+                หรือถูกระงับ
+              </p>
+            </div>
+          </div>
+
+          <div className={styles.statusLedger}>
+            {ORGANIZATION_STATUSES.map((status) => (
+              <div className={styles.statusRow} key={status}>
+                <div className={styles.statusCopy}>
+                  <Badge
+                    tone={platformOrganizationStatusTone(status)}
+                  >
+                    {platformOrganizationStatusLabel(status)}
+                  </Badge>
+                  <span className={styles.code}>{status}</span>
+                </div>
+                <strong className={styles.statusCount}>
                   {count(
                     state.summary.organizationsByStatus[status],
                   )}
                 </strong>
-              </article>
+              </div>
             ))}
           </div>
         </section>
@@ -165,23 +232,30 @@ export function PlatformSummaryView() {
           className={styles.section}
           aria-labelledby="user-summary"
         >
-          <h2 className={styles.sectionTitle} id="user-summary">
-            ผู้ใช้ตามสถานะ
-          </h2>
+          <div className={styles.sectionHeading}>
+            <div>
+              <h2 className={styles.sectionTitle} id="user-summary">
+                ผู้ใช้ตามสถานะ
+              </h2>
+              <p className={styles.sectionDescription}>
+                แสดงสถานะผู้ใช้ตามข้อมูลที่ Platform Summary ส่งกลับ
+              </p>
+            </div>
+          </div>
 
-          <div className={styles.metrics}>
+          <div className={styles.statusLedger}>
             {USER_STATUSES.map((status) => (
-              <article
-                className={styles.metricCard}
-                key={status}
-              >
-                <span className={styles.metricLabel}>
-                  {platformUserStatusLabel(status)}
-                </span>
-                <strong className={styles.metricValue}>
+              <div className={styles.statusRow} key={status}>
+                <div className={styles.statusCopy}>
+                  <Badge tone={platformUserStatusTone(status)}>
+                    {platformUserStatusLabel(status)}
+                  </Badge>
+                  <span className={styles.code}>{status}</span>
+                </div>
+                <strong className={styles.statusCount}>
                   {count(state.summary.usersByStatus[status])}
                 </strong>
-              </article>
+              </div>
             ))}
           </div>
         </section>

@@ -86,19 +86,19 @@ describe("VariantManagement", () => {
       />,
     );
 
-    fireEvent.change(screen.getByLabelText(/ชื่อ Variant/), {
+    fireEvent.change(screen.getByLabelText(/ชื่อตัวเลือก/), {
       target: { value: "  Size L  " },
     });
     fireEvent.change(screen.getByLabelText(/ราคา \(บาท\)/), {
       target: { value: "250.50" },
     });
     fireEvent.click(
-      screen.getByRole("button", { name: "เพิ่ม Variant" }),
+      screen.getByRole("button", { name: "เพิ่มตัวเลือก" }),
     );
 
     expect(
       await screen.findByText(
-        "สร้าง Variant Size L ราคา ฿250.50 แล้ว",
+        "สร้างตัวเลือก Size L ราคา ฿250.50 แล้ว",
       ),
     ).toBeInTheDocument();
 
@@ -139,7 +139,7 @@ describe("VariantManagement", () => {
     );
 
     fireEvent.click(
-      screen.getByRole("button", { name: "แก้ไข Variant" }),
+      screen.getByRole("button", { name: "แก้ไขตัวเลือก" }),
     );
 
     const name = screen.getByDisplayValue("Size M");
@@ -152,7 +152,7 @@ describe("VariantManagement", () => {
       target: { value: "270.50" },
     });
     fireEvent.click(
-      screen.getByRole("button", { name: "บันทึก Variant" }),
+      screen.getByRole("button", { name: "บันทึกตัวเลือก" }),
     );
 
     expect(mocks.updateVariant).toHaveBeenCalledWith(
@@ -166,7 +166,7 @@ describe("VariantManagement", () => {
     );
     expect(
       await screen.findByText(
-        "บันทึก Variant Size XL ราคา ฿270.50 แล้ว",
+        "บันทึกตัวเลือก Size XL ราคา ฿270.50 แล้ว",
       ),
     ).toBeInTheDocument();
   });
@@ -194,13 +194,13 @@ describe("VariantManagement", () => {
 
     expect(
       screen.getByRole("dialog", {
-        name: "ยืนยันการปิดใช้งาน Variant",
+        name: "ยืนยันการปิดใช้งานตัวเลือก",
       }),
     ).toBeInTheDocument();
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: "ปิดใช้งาน Variant",
+        name: "ปิดใช้งานตัวเลือก",
       }),
     );
 
@@ -211,7 +211,7 @@ describe("VariantManagement", () => {
     );
     expect(
       await screen.findByText(
-        "ปิดใช้งาน Variant Size M แล้ว",
+        "ปิดใช้งานตัวเลือก Size M แล้ว",
       ),
     ).toBeInTheDocument();
   });

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Button, ConfirmDialog } from "@/components";
+import { Badge, Button, ConfirmDialog, Notice } from "@/components";
 import {
   authSession,
   isDefinitiveSessionFailure,
@@ -10,6 +10,7 @@ import {
 import { ApiClientError } from "@/services";
 import type { CampaignDTO } from "@/types";
 
+import { campaignStatusLabel } from "./campaign-helpers";
 import { lifecycleActionsForStatus } from "./campaign-lifecycle";
 import { campaignService } from "./campaign-service";
 import styles from "./campaign-lifecycle-actions.module.css";
@@ -21,17 +22,17 @@ function errorMessage(error: unknown): string {
     }
 
     if (error.code === "INVALID_STATUS_TRANSITION") {
-      return "Backend ไม่อนุญาตการเปลี่ยนสถานะนี้ อาจเป็นเพราะ Campaign หรือ Order ที่เกี่ยวข้องมีสถานะเปลี่ยนไปแล้ว";
+      return "สถานะของแคมเปญหรือข้อมูลที่เกี่ยวข้องเปลี่ยนไปแล้ว ระบบจึงไม่อนุญาตการดำเนินการนี้ กรุณาตรวจสอบสถานะล่าสุด";
     }
 
     if (error.code === "CAMPAIGN_NOT_FOUND") {
-      return "ไม่พบ Campaign นี้แล้ว กรุณารีเฟรชรายการ";
+      return "ไม่พบแคมเปญนี้แล้ว กรุณารีเฟรชรายการ";
     }
 
     return error.userMessage;
   }
 
-  return "ไม่สามารถเปลี่ยนสถานะ Campaign ได้ กรุณาลองใหม่อีกครั้ง";
+  return "ไม่สามารถเปลี่ยนสถานะแคมเปญได้ กรุณาลองใหม่อีกครั้ง";
 }
 
 export function CampaignLifecycleActions({
@@ -71,7 +72,7 @@ export function CampaignLifecycleActions({
 
       onCampaignChanged(updated);
       setNotice(
-        `เปลี่ยนสถานะ Campaign เป็น ${updated.status} แล้ว`,
+        `สถานะเปลี่ยนเป็น “${campaignStatusLabel(updated.status)}” แล้ว`,
       );
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
@@ -97,57 +98,93 @@ export function CampaignLifecycleActions({
 
   return (
     <div className={styles.root}>
-      <div className={styles.header}>
-        <h3 className={styles.title}>Lifecycle actions</h3>
-        <p className={styles.description}>
-          สถานะจะเปลี่ยนเฉพาะเมื่อกด action และ Backend อนุมัติ
-          ระบบไม่เปลี่ยนสถานะอัตโนมัติตามเวลาใน planning fields
-        </p>
+      <div className={styles.currentState}>
+        <div>
+          <span className={styles.stateLabel}>สถานะปัจจุบัน</span>
+          <strong>{campaignStatusLabel(campaign.status)}</strong>
+        </div>
+        <Badge
+          tone={
+            campaign.status === "CANCELLED"
+              ? "danger"
+              : campaign.status === "COMPLETED" ||
+                  campaign.status === "READY_FOR_PICKUP"
+                ? "success"
+                : campaign.status === "OPEN"
+                  ? "info"
+                  : campaign.status === "CLOSED" ||
+                      campaign.status === "PRODUCING"
+                    ? "warning"
+                    : "neutral"
+          }
+        >
+          {campaignStatusLabel(campaign.status)}
+        </Badge>
       </div>
 
       {error ? (
-        <div className={styles.error} role="alert">
+        <Notice tone="danger" role="alert" title="เปลี่ยนสถานะไม่สำเร็จ">
           {error}
-        </div>
+        </Notice>
       ) : null}
 
       {notice ? (
-        <div className={styles.notice} role="status">
+        <Notice tone="success" role="status" title="เปลี่ยนสถานะแล้ว">
           {notice}
-        </div>
+        </Notice>
       ) : null}
 
       {actions.length === 0 ? (
-        <span className={styles.none}>
-          ไม่มี lifecycle action สำหรับสถานะปัจจุบัน
-        </span>
+        <div className={styles.none}>
+          <strong>ไม่มีขั้นตอนถัดไปจากสถานะนี้</strong>
+          <span>
+            {campaign.status === "COMPLETED"
+              ? "แคมเปญเสร็จสิ้นแล้ว"
+              : "แคมเปญถูกยกเลิกแล้ว"}
+          </span>
+        </div>
       ) : (
-        <div className={styles.actions}>
-          {actions.map((action) => {
-            const pending = pendingAction === action.action;
+        <div className={styles.actionArea}>
+          <div className={styles.actionCopy}>
+            <strong>การดำเนินการที่ทำได้</strong>
+            <span>
+              ระบบจะแสดงเฉพาะการเปลี่ยนสถานะที่รองรับจากสถานะปัจจุบัน และตรวจสอบเงื่อนไขอีกครั้งเมื่อยืนยัน
+            </span>
+          </div>
 
-            return (
-              <ConfirmDialog
-                key={action.action}
-                trigger={
-                  <Button
-                    variant={action.danger ? "danger" : "secondary"}
-                    disabled={pendingAction !== null}
-                  >
-                    {action.label}
-                  </Button>
-                }
-                title={action.title}
-                description={action.description}
-                confirmLabel={action.label}
-                danger={action.danger}
-                pending={pending}
-                onConfirm={() => {
-                  void handleAction(action);
-                }}
-              />
-            );
-          })}
+          <div className={styles.actions}>
+            {actions.map((action, index) => {
+              const pending = pendingAction === action.action;
+
+              return (
+                <ConfirmDialog
+                  key={action.action}
+                  trigger={
+                    <Button
+                      variant={
+                        action.danger
+                          ? "danger"
+                          : index === 0
+                            ? "primary"
+                            : "secondary"
+                      }
+                      disabled={pendingAction !== null}
+                    >
+                      {action.label}
+                    </Button>
+                  }
+                  title={action.title}
+                  description={action.description}
+                  confirmLabel={action.label}
+                  danger={action.danger}
+                  pending={pending}
+                  onConfirm={() => {
+                    void handleAction(action);
+                  }}
+                />
+              );
+            })}
+          </div>
         </div>
       )}
     </div>

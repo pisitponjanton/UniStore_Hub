@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   canConfirmPickup,
   canViewCustomerPickup,
+  getPickupPresentation,
   getPickupStatusLabel,
   myPickupHref,
   organizationPickupsHref,
@@ -23,9 +24,17 @@ describe("customer pickup helpers", () => {
     expect(canViewCustomerPickup("CANCELLED")).toBe(false);
   });
 
-  it("labels both Pickup states", () => {
+  it("labels both Pickup states and gives customer-facing guidance", () => {
     expect(getPickupStatusLabel("READY")).toBe("พร้อมรับสินค้า");
     expect(getPickupStatusLabel("RECEIVED")).toBe("รับสินค้าแล้ว");
+    expect(getPickupPresentation("READY")).toMatchObject({
+      title: "พร้อมนำ QR หรือ Token ไปรับสินค้า",
+      tone: "success",
+    });
+    expect(getPickupPresentation("RECEIVED")).toMatchObject({
+      title: "รับสินค้าเรียบร้อยแล้ว",
+      tone: "neutral",
+    });
   });
 
   it("builds the organization static query route and confirms only READY pickups", () => {

@@ -13,10 +13,14 @@ const labels: Record<OrderStatus, string> = {
   CANCELLED: "ยกเลิก",
 };
 
-const tones: Record<
-  OrderStatus,
-  "neutral" | "info" | "success" | "warning" | "danger"
-> = {
+export type OrderStatusTone =
+  | "neutral"
+  | "info"
+  | "success"
+  | "warning"
+  | "danger";
+
+const tones: Record<OrderStatus, OrderStatusTone> = {
   PENDING_PAYMENT: "warning",
   PAYMENT_REVIEW: "info",
   PAID: "success",
@@ -30,6 +34,10 @@ const tones: Record<
 
 export function getOrderStatusLabel(status: OrderStatus): string {
   return labels[status];
+}
+
+export function getOrderStatusTone(status: OrderStatus): OrderStatusTone {
+  return tones[status];
 }
 
 export function OrderStatusBadge({ status }: { status: OrderStatus }) {

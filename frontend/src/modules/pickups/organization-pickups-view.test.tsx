@@ -141,7 +141,7 @@ describe("OrganizationPickupsView", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: "ค้นหา / กรอง",
+        name: "ใช้ตัวกรอง",
       }),
     );
 
@@ -269,7 +269,7 @@ describe("OrganizationPickupsView", () => {
 
     expect(
       await screen.findByText(
-        "Pickup นี้ถูกรับสินค้าไปแล้ว ระบบได้โหลดสถานะล่าสุดจาก Backend",
+        "รายการรับสินค้านี้ถูกยืนยันไปแล้ว ระบบได้โหลดสถานะล่าสุดมาให้",
       ),
     ).toBeInTheDocument();
 

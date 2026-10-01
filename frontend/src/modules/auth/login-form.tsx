@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 
-import { Button, TextField } from "@/components";
+import { Button, Notice, TextField } from "@/components";
 import { ApiClientError } from "@/services";
 
 import styles from "./auth-form.module.css";
@@ -16,13 +16,39 @@ import {
 } from "./auth-validation";
 import { getAuthReturnPath } from "./return-route";
 import { authSession } from "./session";
+import { useAuthNavigationContext } from "./use-auth-navigation-context";
+
+function focusFirstInvalidField(errors: AuthFieldErrors) {
+  const id = errors.email
+    ? "login-email"
+    : errors.password
+      ? "login-password"
+      : null;
+
+  if (id) {
+    document.getElementById(id)?.focus();
+  }
+}
 
 export function LoginForm() {
+  const navigation = useAuthNavigationContext();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fieldErrors, setFieldErrors] = useState<AuthFieldErrors>({});
   const [serverError, setServerError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+
+  function updateEmail(value: string) {
+    setEmail(value);
+    setFieldErrors((current) => ({ ...current, email: undefined }));
+    setServerError(null);
+  }
+
+  function updatePassword(value: string) {
+    setPassword(value);
+    setFieldErrors((current) => ({ ...current, password: undefined }));
+    setServerError(null);
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -36,6 +62,7 @@ export function LoginForm() {
     setServerError(null);
 
     if (hasAuthFieldErrors(nextErrors)) {
+      focusFirstInvalidField(nextErrors);
       return;
     }
 
@@ -73,6 +100,12 @@ export function LoginForm() {
         </p>
       </div>
 
+      {navigation.hasReturnContext ? (
+        <Notice tone="info" title="กลับไปทำรายการเดิมต่อได้">
+          หลังเข้าสู่ระบบ ระบบจะพาคุณกลับไปยังหน้าที่กำลังใช้งานก่อนหน้านี้
+        </Notice>
+      ) : null}
+
       <form className={styles.form} onSubmit={handleSubmit} noValidate>
         <TextField
           id="login-email"
@@ -81,9 +114,10 @@ export function LoginForm() {
           autoComplete="email"
           inputMode="email"
           value={email}
-          onChange={(event) => setEmail(event.target.value)}
+          onChange={(event) => updateEmail(event.target.value)}
           error={fieldErrors.email}
           disabled={pending}
+          autoFocus
           required
         />
         <TextField
@@ -92,35 +126,44 @@ export function LoginForm() {
           type="password"
           autoComplete="current-password"
           value={password}
-          onChange={(event) => setPassword(event.target.value)}
+          onChange={(event) => updatePassword(event.target.value)}
           error={fieldErrors.password}
           disabled={pending}
           required
         />
 
         {serverError ? (
-          <div className={styles.serverError} role="alert">
+          <Notice tone="danger" role="alert" title="เข้าสู่ระบบไม่สำเร็จ">
             {serverError}
-          </div>
+          </Notice>
         ) : null}
 
         <div className={styles.formActions}>
-          <Button type="submit" size="large" pending={pending} pendingLabel="กำลังเข้าสู่ระบบ">
+          <Button
+            type="submit"
+            size="large"
+            pending={pending}
+            pendingLabel="กำลังเข้าสู่ระบบ"
+          >
             เข้าสู่ระบบ
           </Button>
         </div>
       </form>
 
-      <p className={styles.switchText}>
-        ยังไม่มีบัญชี?{" "}
-        <Link href="/register/" className={styles.switchLink}>
-          สมัครสมาชิก
-        </Link>
-      </p>
+      <div className={styles.formFooter}>
+        <p className={styles.switchText}>
+          ยังไม่มีบัญชี?{" "}
+          <Link href={navigation.registerHref} className={styles.switchLink}>
+            สมัครสมาชิก
+          </Link>
+        </p>
 
-      <Link href="/" className={styles.backLink}>
-        กลับหน้าร้านค้า
-      </Link>
+        <Link href={navigation.returnPath} className={styles.backLink}>
+          {navigation.hasReturnContext
+            ? "กลับไปหน้าที่กำลังใช้งาน"
+            : "กลับหน้าร้านค้า"}
+        </Link>
+      </div>
     </div>
   );
 }

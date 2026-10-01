@@ -9,6 +9,7 @@ import {
   ErrorState,
   ForbiddenState,
   LoadingState,
+  Notice,
   UnauthorizedState,
 } from "@/components";
 import {
@@ -21,7 +22,10 @@ import { formatIsoDateTime, formatSatang } from "@/utils";
 
 import styles from "./order-tracking.module.css";
 import { orderService } from "./order-service";
-import { myOrderHref } from "./order-tracking-helpers";
+import {
+  getCustomerOrderGuidance,
+  myOrderHref,
+} from "./order-tracking-helpers";
 import { OrderStatusBadge } from "./order-status";
 
 type OrdersState =
@@ -138,13 +142,16 @@ export function MyOrdersView() {
       <div className={styles.page}>
         <main className={styles.stateWrap}>
           {state.status === "loading" ? (
-            <LoadingState title="กำลังโหลดคำสั่งซื้อของคุณ" />
+            <LoadingState
+              title="กำลังโหลดคำสั่งซื้อของคุณ"
+              description="กำลังดึงสถานะล่าสุดของคำสั่งซื้อ"
+            />
           ) : null}
           {state.status === "empty" ? (
             <EmptyState
               title="ยังไม่มีคำสั่งซื้อ"
-              description="เมื่อคุณสั่งสินค้าจาก Storefront คำสั่งซื้อจะปรากฏที่นี่"
-              actions={<Link href="/">กลับไปเลือกสินค้า</Link>}
+              description="เมื่อสั่งสินค้าจากหน้าร้าน คำสั่งซื้อและขั้นตอนถัดไปจะปรากฏที่นี่"
+              actions={<Link href="/">เลือกสินค้า</Link>}
             />
           ) : null}
           {state.status === "unauthorized" ? (
@@ -168,49 +175,55 @@ export function MyOrdersView() {
       <main className={styles.main}>
         <header className={styles.header}>
           <div className={styles.headerCopy} data-ledger-heading>
-            <span className={styles.eyebrow}>My orders</span>
             <h1 className={styles.title}>คำสั่งซื้อของฉัน</h1>
             <p className={styles.description}>
-              ติดตามสถานะและยอดที่ Backend บันทึกไว้สำหรับคำสั่งซื้อของคุณ
+              ดูสถานะล่าสุด ยอดรวม และสิ่งที่ต้องทำต่อของแต่ละคำสั่งซื้อ
             </p>
           </div>
-          <Link href="/" className={styles.detailLink}>
+          <Link href="/" className={styles.headerAction}>
             เลือกสินค้าเพิ่ม
           </Link>
         </header>
 
-        <section className={styles.orderList} aria-label="รายการคำสั่งซื้อ">
-          {state.items.map((order) => (
-            <article className={styles.orderCard} key={order.orderId}>
-              <div className={styles.orderPrimary}>
-                <div className={styles.orderId}>{order.orderId}</div>
-                <OrderStatusBadge status={order.status} />
-                <div className={styles.orderMeta}>
-                  สร้างเมื่อ {formatIsoDateTime(order.createdAt)}
+        <section className={styles.orderLedger} aria-label="รายการคำสั่งซื้อ">
+          {state.items.map((order) => {
+            const guidance = getCustomerOrderGuidance(order.status);
+
+            return (
+              <article className={styles.orderRow} key={order.orderId}>
+                <div className={styles.orderPrimary}>
+                  <div className={styles.orderTopline}>
+                    <OrderStatusBadge status={order.status} />
+                    <span className={styles.orderMeta}>
+                      {formatIsoDateTime(order.createdAt)}
+                    </span>
+                  </div>
+                  <div className={styles.orderId}>{order.orderId}</div>
+                  <p className={styles.orderNextStep}>{guidance.title}</p>
                 </div>
-              </div>
 
-              <div className={styles.orderAmount}>
-                <span className={styles.amountLabel}>ยอดรวม</span>
-                <span className={styles.amountValue}>
-                  {formatSatang(order.total)}
-                </span>
-              </div>
+                <div className={styles.orderAmount}>
+                  <span className={styles.amountLabel}>ยอดรวม</span>
+                  <span className={styles.amountValue}>
+                    {formatSatang(order.total)}
+                  </span>
+                </div>
 
-              <Link
-                href={myOrderHref(order.orderId)}
-                className={styles.detailLink}
-              >
-                ดูรายละเอียด
-              </Link>
-            </article>
-          ))}
+                <Link
+                  href={myOrderHref(order.orderId)}
+                  className={styles.detailLink}
+                >
+                  {guidance.action ? "ดูและดำเนินการ" : "ดูรายละเอียด"}
+                </Link>
+              </article>
+            );
+          })}
         </section>
 
         {loadMoreError ? (
-          <div className={styles.serverError} role="alert">
+          <Notice tone="danger" role="alert" title="โหลดรายการเพิ่มเติมไม่สำเร็จ">
             {loadMoreError}
-          </div>
+          </Notice>
         ) : null}
 
         {state.nextCursor ? (

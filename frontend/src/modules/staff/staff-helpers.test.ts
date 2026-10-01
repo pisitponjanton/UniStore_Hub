@@ -67,10 +67,10 @@ describe("staff helpers", () => {
     expect(isFinalActiveAdmin(finalAdmin, twoAdmins)).toBe(false);
   });
 
-  it("labels canonical organization membership roles", () => {
-    expect(staffRoleLabel("STAFF")).toBe("Staff");
+  it("labels canonical organization membership roles for the Thai UI", () => {
+    expect(staffRoleLabel("STAFF")).toBe("เจ้าหน้าที่");
     expect(staffRoleLabel("ORGANIZATION_ADMIN")).toBe(
-      "Organization Admin",
+      "ผู้ดูแลหน่วยงาน",
     );
   });
 });

@@ -7,6 +7,7 @@ import type {
 export interface NavigationItem {
   label: string;
   href: string;
+  activePaths?: string[];
 }
 
 export interface NavigationGroup {
@@ -14,9 +15,58 @@ export interface NavigationGroup {
   items: NavigationItem[];
 }
 
+function normalizeNavigationPath(path: string): string {
+  if (path === "/") {
+    return "/";
+  }
+
+  return path.replace(/\/+$/, "");
+}
+
+export function isNavigationItemActive(
+  pathname: string,
+  item: NavigationItem,
+): boolean {
+  const currentPath = normalizeNavigationPath(pathname);
+  const hrefPath = item.href.split("?")[0] ?? item.href;
+  const candidates = [hrefPath, ...(item.activePaths ?? [])];
+
+  return candidates.some((candidate) => {
+    const normalizedCandidate = normalizeNavigationPath(candidate);
+
+    if (normalizedCandidate === "/") {
+      return currentPath === "/";
+    }
+
+    return (
+      currentPath === normalizedCandidate ||
+      currentPath.startsWith(`${normalizedCandidate}/`)
+    );
+  });
+}
+
 function withOrganization(path: string, organizationId: string): string {
   const params = new URLSearchParams({ organizationId });
   return `${path}?${params.toString()}`;
+}
+
+function organizationOperationalItems(
+  organizationId: string,
+): NavigationItem[] {
+  return [
+    {
+      label: "คำสั่งซื้อ",
+      href: withOrganization("/org/orders/", organizationId),
+    },
+    {
+      label: "ตรวจสอบการชำระเงิน",
+      href: withOrganization("/org/payments/", organizationId),
+    },
+    {
+      label: "รับสินค้า",
+      href: withOrganization("/org/pickups/", organizationId),
+    },
+  ];
 }
 
 export function getActiveMembership(
@@ -41,7 +91,11 @@ export function buildCustomerNavigation(): NavigationGroup {
     label: "บัญชีของฉัน",
     items: [
       { label: "หน้าร้านค้า", href: "/" },
-      { label: "คำสั่งซื้อของฉัน", href: "/my/orders/" },
+      {
+        label: "คำสั่งซื้อของฉัน",
+        href: "/my/orders/",
+        activePaths: ["/my/order/", "/my/payment/", "/my/pickup/"],
+      },
       { label: "การแจ้งเตือน", href: "/notifications/" },
     ],
   };
@@ -51,20 +105,7 @@ export function buildOrganizationNavigation(
   organizationId: string,
   role: MembershipRole,
 ): NavigationGroup {
-  const operationalItems: NavigationItem[] = [
-    {
-      label: "คำสั่งซื้อ",
-      href: withOrganization("/org/orders/", organizationId),
-    },
-    {
-      label: "ตรวจสอบการชำระเงิน",
-      href: withOrganization("/org/payments/", organizationId),
-    },
-    {
-      label: "รับสินค้า",
-      href: withOrganization("/org/pickups/", organizationId),
-    },
-  ];
+  const operationalItems = organizationOperationalItems(organizationId);
 
   if (role === "STAFF") {
     return {
@@ -113,6 +154,71 @@ export function buildOrganizationNavigation(
   };
 }
 
+export function buildOrganizationNavigationGroups(
+  organizationId: string,
+  role: MembershipRole,
+): NavigationGroup[] {
+  if (role === "STAFF") {
+    return [buildOrganizationNavigation(organizationId, role)];
+  }
+
+  return [
+    {
+      label: "หน่วยงาน",
+      items: [
+        {
+          label: "แดชบอร์ด",
+          href: withOrganization("/org/dashboard/", organizationId),
+        },
+        {
+          label: "ข้อมูลหน่วยงาน",
+          href: withOrganization("/org/settings/", organizationId),
+        },
+        {
+          label: "บุคลากร",
+          href: withOrganization("/org/staff/", organizationId),
+        },
+      ],
+    },
+    {
+      label: "ร้านค้าและแคมเปญ",
+      items: [
+        {
+          label: "ร้านค้า",
+          href: withOrganization("/org/stores/", organizationId),
+        },
+        {
+          label: "สินค้า",
+          href: withOrganization("/org/products/", organizationId),
+        },
+        {
+          label: "แคมเปญ",
+          href: withOrganization("/org/campaigns/", organizationId),
+        },
+      ],
+    },
+    {
+      label: "งานปฏิบัติการ",
+      items: [
+        ...organizationOperationalItems(organizationId),
+        {
+          label: "สรุปการผลิต",
+          href: withOrganization("/org/production/", organizationId),
+        },
+      ],
+    },
+    {
+      label: "ตรวจสอบ",
+      items: [
+        {
+          label: "ประวัติการทำรายการ",
+          href: withOrganization("/org/audit/", organizationId),
+        },
+      ],
+    },
+  ];
+}
+
 export function buildPlatformNavigation(
   user: CurrentUserDTO,
 ): NavigationGroup | null {
@@ -121,7 +227,7 @@ export function buildPlatformNavigation(
   }
 
   return {
-    label: "Platform Admin",
+    label: "ผู้ดูแลแพลตฟอร์ม",
     items: [
       { label: "ภาพรวมระบบ", href: "/platform/summary/" },
       { label: "หน่วยงาน", href: "/platform/organizations/" },
@@ -144,7 +250,7 @@ export function buildNavigationGroups({
 
   if (membership) {
     groups.push(
-      buildOrganizationNavigation(
+      ...buildOrganizationNavigationGroups(
         membership.organizationId,
         membership.role,
       ),

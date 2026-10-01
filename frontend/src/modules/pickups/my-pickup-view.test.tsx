@@ -105,9 +105,7 @@ describe("MyPickupView", () => {
     expect(mocks.createQr).toHaveBeenCalledWith(
       "abcdefghijklmnopqrstuv",
     );
-    expect(
-      screen.getByText("พร้อมรับสินค้า"),
-    ).toBeInTheDocument();
+    expect(screen.getAllByText("พร้อมรับสินค้า").length).toBeGreaterThan(0);
   });
 
   it("renders a safe not-ready state without requesting a Pickup early", async () => {
@@ -146,6 +144,6 @@ describe("MyPickupView", () => {
     expect(
       screen.getByText("abcdefghijklmnopqrstuv"),
     ).toBeInTheDocument();
-    expect(screen.getByText("รับสินค้าแล้ว")).toBeInTheDocument();
+    expect(screen.getAllByText("รับสินค้าแล้ว").length).toBeGreaterThan(0);
   });
 });

@@ -88,26 +88,22 @@ export function StoreView() {
           {state.status === "invalid" ? (
             <ErrorState
               title="ลิงก์ร้านค้าไม่สมบูรณ์"
-              description="ลิงก์นี้ต้องมี organizationId และ storeId ที่ถูกต้อง"
-              actions={
-                <Link href="/">
-                  กลับหน้าร้าน
-                </Link>
-              }
+              description="ลิงก์ร้านค้านี้ไม่ครบถ้วน กรุณากลับไปเลือกร้านค้าใหม่"
+              actions={<Link href="/">กลับไปเลือกร้านค้า</Link>}
             />
           ) : null}
           {state.status === "notFound" ? (
             <ErrorState
               title="ไม่พบร้านค้า"
-              description="ร้านค้านี้อาจไม่เปิดให้เข้าชมหรือไม่มีอยู่ในระบบ"
-              actions={<Link href="/">กลับหน้าร้าน</Link>}
+              description="ร้านค้านี้อาจปิดการเข้าชมหรือไม่มีอยู่ในระบบ"
+              actions={<Link href="/">กลับไปเลือกร้านค้า</Link>}
             />
           ) : null}
           {state.status === "error" ? (
             <ErrorState
               title="ไม่สามารถโหลดร้านค้าได้"
               description="กรุณาลองโหลดหน้านี้ใหม่อีกครั้ง"
-              actions={<Link href="/">กลับหน้าร้าน</Link>}
+              actions={<Link href="/">กลับไปเลือกร้านค้า</Link>}
             />
           ) : null}
         </main>
@@ -123,35 +119,48 @@ export function StoreView() {
 
       <main className={styles.main}>
         <Link href="/" className={styles.backLink}>
-          กลับหน้าร้าน
+          ร้านค้าทั้งหมด
         </Link>
 
         <section className={styles.hero}>
           <div className={styles.heroCopy}>
-            <span className={styles.eyebrow}>Store</span>
+            <span className={styles.eyebrow}>ร้านค้า</span>
             <h1 className={styles.title}>{store.name}</h1>
             {store.description ? (
               <p className={styles.description}>{store.description}</p>
-            ) : null}
+            ) : (
+              <p className={styles.description}>
+                เลือกดูสินค้าและแคมเปญที่ร้านนี้เปิดให้เข้าชม
+              </p>
+            )}
           </div>
 
-          <div className={styles.heroMeta}>
-            <span className={styles.metaLabel}>สถานะร้านค้า</span>
-            <span className={styles.metaValue}>เปิดให้เข้าชม</span>
+          <div className={styles.heroMeta} role="group" aria-label="สรุปร้านค้า">
+            <div>
+              <span className={styles.metaLabel}>แคมเปญ</span>
+              <strong className={styles.metaValue} data-numeric>
+                {campaigns.length}
+              </strong>
+            </div>
+            <div>
+              <span className={styles.metaLabel}>สินค้า</span>
+              <strong className={styles.metaValue} data-numeric>
+                {products.length}
+              </strong>
+            </div>
           </div>
         </section>
 
         <section className={styles.section} aria-labelledby="campaign-heading">
           <div className={styles.sectionHeader}>
             <div>
-              <span className={styles.eyebrow}>Campaigns</span>
+              <span className={styles.eyebrow}>พรีออเดอร์และรอบขาย</span>
               <h2 className={styles.sectionTitle} id="campaign-heading">
                 แคมเปญของร้าน
               </h2>
             </div>
             <p className={styles.sectionDescription}>
-              สถานะแคมเปญและวันเวลาที่แสดงเป็นข้อมูลจากระบบ
-              หน้านี้ไม่เปลี่ยนสถานะตามเวลาของอุปกรณ์เอง
+              ดูสถานะและช่วงเวลาของแต่ละแคมเปญก่อนเลือกสินค้า
             </p>
           </div>
 
@@ -174,13 +183,13 @@ export function StoreView() {
         <section className={styles.section} aria-labelledby="product-heading">
           <div className={styles.sectionHeader}>
             <div>
-              <span className={styles.eyebrow}>Products</span>
+              <span className={styles.eyebrow}>เลือกสินค้า</span>
               <h2 className={styles.sectionTitle} id="product-heading">
                 สินค้าของร้าน
               </h2>
             </div>
             <p className={styles.sectionDescription}>
-              เลือกสินค้าเพื่อดูตัวเลือกและรายละเอียดเพิ่มเติม
+              เปิดสินค้าเพื่อดูตัวเลือก ราคา และแคมเปญที่ใช้สั่งซื้อได้
             </p>
           </div>
 

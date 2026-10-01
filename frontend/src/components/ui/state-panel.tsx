@@ -16,12 +16,11 @@ interface StatePanelProps {
   actions?: ReactNode;
 }
 
-const stateLabel: Record<StateKind, string> = {
-  loading: "Loading",
-  empty: "Empty",
-  error: "Error",
-  unauthorized: "Unauthorized",
-  forbidden: "Forbidden",
+const stateLabel: Record<Exclude<StateKind, "loading">, string> = {
+  empty: "ยังไม่มีข้อมูล",
+  error: "เกิดข้อผิดพลาด",
+  unauthorized: "ต้องเข้าสู่ระบบ",
+  forbidden: "ไม่มีสิทธิ์เข้าถึง",
 };
 
 export function StatePanel({
@@ -33,14 +32,25 @@ export function StatePanel({
   return (
     <section
       className={styles.statePanel}
-      role={kind === "error" ? "alert" : kind === "loading" ? "status" : undefined}
+      data-state-kind={kind}
+      role={
+        kind === "error"
+          ? "alert"
+          : kind === "loading"
+            ? "status"
+            : undefined
+      }
       aria-live={kind === "loading" ? "polite" : undefined}
+      aria-atomic={kind === "loading" ? true : undefined}
     >
       <div className={styles.stateContent}>
         {kind === "loading" ? (
           <span className={styles.spinner} aria-hidden="true" />
         ) : (
-          <span className={styles.stateEyebrow}>{stateLabel[kind]}</span>
+          <span className={styles.stateLabel}>
+            <span className={styles.stateDot} aria-hidden="true" />
+            <span>{stateLabel[kind]}</span>
+          </span>
         )}
         <h2 className={styles.stateTitle}>{title}</h2>
         {description ? (

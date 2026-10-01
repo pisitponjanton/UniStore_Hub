@@ -9,6 +9,7 @@ import {
   ErrorState,
   ForbiddenState,
   LoadingState,
+  Notice,
   TextareaField,
   TextField,
   UnauthorizedState,
@@ -38,9 +39,9 @@ function organizationStatusLabel(status: OrganizationDTO["status"]) {
     case "PENDING":
       return "รออนุมัติ";
     case "ACTIVE":
-      return "ใช้งาน";
+      return "พร้อมใช้งาน";
     case "SUSPENDED":
-      return "ระงับ";
+      return "ถูกระงับ";
   }
 }
 
@@ -187,7 +188,10 @@ export function OrganizationSettingsView({
       <div className={styles.page}>
         <main className={styles.stateWrap}>
           {state.status === "loading" ? (
-            <LoadingState title="กำลังโหลดข้อมูลหน่วยงาน" />
+            <LoadingState
+              title="กำลังโหลดข้อมูลหน่วยงาน"
+              description="กำลังดึงข้อมูลล่าสุดก่อนเปิดการตั้งค่า"
+            />
           ) : null}
           {state.status === "notFound" ? (
             <ErrorState
@@ -211,17 +215,18 @@ export function OrganizationSettingsView({
   }
 
   const { organization } = state;
+  const isDirty =
+    name !== organization.name ||
+    description !== organization.description;
 
   return (
     <div className={styles.page}>
       <main className={styles.main}>
         <header className={styles.header}>
           <div className={styles.headerCopy} data-ledger-heading>
-            <span className={styles.eyebrow}>Organization settings</span>
             <h1 className={styles.title}>ข้อมูลหน่วยงาน</h1>
             <p className={styles.description}>
-              แก้ไขชื่อและคำอธิบายของหน่วยงาน
-              การอนุมัติหรือระงับหน่วยงานเป็นหน้าที่ของ Platform Admin
+              จัดการชื่อและคำอธิบายที่ใช้แสดงหน่วยงานใน UniStore Hub
             </p>
           </div>
           <Badge tone={organizationStatusTone(organization.status)}>
@@ -229,9 +234,9 @@ export function OrganizationSettingsView({
           </Badge>
         </header>
 
-        <section className={styles.detailGrid} aria-label="ข้อมูลหน่วยงาน">
+        <section className={styles.detailGrid} aria-label="ข้อมูลอ้างอิงหน่วยงาน">
           <div className={styles.detailCell}>
-            <span className={styles.detailLabel}>Organization ID</span>
+            <span className={styles.detailLabel}>รหัสหน่วยงาน</span>
             <span className={styles.detailValue}>
               {organization.organizationId}
             </span>
@@ -250,61 +255,87 @@ export function OrganizationSettingsView({
           </div>
         </section>
 
-        <section className={styles.panel}>
-          <form className={styles.form} onSubmit={handleSubmit}>
-            <TextField
-              id="organization-settings-name"
-              label="ชื่อหน่วยงาน"
-              value={name}
-              onChange={(event) => {
-                setName(event.target.value);
-                setNameError(undefined);
-                setSaved(false);
-              }}
-              error={nameError}
-              required
-              disabled={saving}
-            />
-
-            <TextareaField
-              id="organization-settings-description"
-              label="คำอธิบาย"
-              value={description}
-              onChange={(event) => {
-                setDescription(event.target.value);
-                setSaved(false);
-              }}
-              disabled={saving}
-            />
-
-            {saved ? (
-              <div className={styles.notice} role="status">
-                บันทึกข้อมูลหน่วยงานแล้ว
-              </div>
-            ) : null}
-
-            {saveError ? (
-              <div className={styles.error} role="alert">
-                {saveError}
-              </div>
-            ) : null}
-
-            <div className={styles.actions}>
-              <Button
-                type="submit"
-                pending={saving}
-                pendingLabel="กำลังบันทึก"
-              >
-                บันทึกการเปลี่ยนแปลง
-              </Button>
-              <Link href="/org/select/">
-                <Button type="button" variant="secondary">
-                  เปลี่ยนหน่วยงาน
-                </Button>
-              </Link>
+        <div className={styles.settingsGrid}>
+          <section className={styles.panel} aria-labelledby="organization-edit">
+            <div className={styles.panelHeading}>
+              <h2 className={styles.sectionTitle} id="organization-edit">
+                แก้ไขข้อมูลที่แสดง
+              </h2>
+              <p className={styles.sectionDescription}>
+                การเปลี่ยนชื่อหรือคำอธิบายจะมีผลกับหน่วยงานนี้เท่านั้น
+              </p>
             </div>
-          </form>
-        </section>
+
+            <form className={styles.settingsForm} onSubmit={handleSubmit}>
+              <TextField
+                id="organization-settings-name"
+                label="ชื่อหน่วยงาน"
+                value={name}
+                onChange={(event) => {
+                  setName(event.target.value);
+                  setNameError(undefined);
+                  setSaved(false);
+                  setSaveError(null);
+                }}
+                error={nameError}
+                required
+                disabled={saving}
+              />
+
+              <TextareaField
+                id="organization-settings-description"
+                label="คำอธิบาย"
+                value={description}
+                onChange={(event) => {
+                  setDescription(event.target.value);
+                  setSaved(false);
+                  setSaveError(null);
+                }}
+                disabled={saving}
+              />
+
+              {saved ? (
+                <Notice tone="success" role="status" title="บันทึกแล้ว">
+                  ข้อมูลหน่วยงานถูกอัปเดตเรียบร้อย
+                </Notice>
+              ) : null}
+
+              {saveError ? (
+                <Notice tone="danger" role="alert" title="บันทึกไม่สำเร็จ">
+                  {saveError}
+                </Notice>
+              ) : null}
+
+              <div className={styles.actions}>
+                <Button
+                  type="submit"
+                  pending={saving}
+                  pendingLabel="กำลังบันทึก"
+                  disabled={!isDirty}
+                >
+                  บันทึกการเปลี่ยนแปลง
+                </Button>
+                <Link href="/org/select/">
+                  <Button type="button" variant="secondary">
+                    เปลี่ยนหน่วยงาน
+                  </Button>
+                </Link>
+                {!isDirty && !saved ? (
+                  <span className={styles.unsavedHint}>
+                    ยังไม่มีข้อมูลที่เปลี่ยนแปลง
+                  </span>
+                ) : null}
+              </div>
+            </form>
+          </section>
+
+          <aside className={styles.settingsAside}>
+            <strong>สถานะหน่วยงานจัดการจากส่วนกลาง</strong>
+            <p>
+              การอนุมัติหรือระงับหน่วยงานเป็นสิทธิ์ของ Platform Admin หน้านี้จึงแก้ไขได้เฉพาะข้อมูลพื้นฐานของหน่วยงาน
+            </p>
+          </aside>
+        </div>
       </main>
     </div>
   );
