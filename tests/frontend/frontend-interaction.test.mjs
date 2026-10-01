@@ -150,8 +150,8 @@ test('FE-010 remote-data screens expose loading, success, empty, error/retry, un
   await assertFrontendSuiteEvidence(
     'src/components/ui/state-panel.test.tsx',
     [
-      'renders loading as a polite status',
-      'renders an explicit empty state without pretending data exists',
+      'renders loading as a polite atomic status',
+      'renders an explicit empty state without generic English chrome',
       'renders errors with alert semantics',
       'distinguishes unauthorized from forbidden states',
     ],
@@ -338,7 +338,7 @@ test('FE-023 empty states show no fake rows for Orders, Payment review, Notifica
       'src/modules/production/production-summary-view.test.tsx',
     ],
     [
-      'renders an explicit empty state without pretending data exists',
+      'renders an explicit empty state without generic English chrome',
       'shows a meaningful empty state when Backend returns no paid production quantities',
     ],
   );

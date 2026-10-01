@@ -86,7 +86,7 @@ test('DEV-006 AWS client configuration accepts the canonical LocalStack endpoint
 test(
   'DEV-006 Payment Slip uses Backend-authorized pre-sign then Browser-to-LocalStack-S3 PUT with canonical key/MIME/size rules',
   {
-    todo: 'BLOCKED for canonical Dev smoke only: direct Payment Slip pre-signed PUT is requalified PASS on the isolated live Backend + LocalStack flow; localhost:4000 is still occupied by a non-UniStore service, so the canonical :4000 runtime path cannot be exercised here',
+    todo: 'BLOCKED: this narrow smoke does not synthesize a disposable paid Order fixture; the canonical Browser-to-LocalStack pre-signed PUT path is verified by the one-command Dev flow and dedicated file tests',
   },
   () => {},
 );
@@ -177,7 +177,7 @@ test('DEV-009 development mode still requires authentication on protected Organi
 test(
   'DEV-009 Dev Mode enforces tenant membership, RBAC, ownership, Campaign transitions, Payment review rules, and Pickup duplicate protection exactly as production contracts',
   {
-    todo: 'BLOCKED for canonical Dev smoke only: the full business-flow E2E is requalified PASS 5/5 on an isolated UniStore Backend + canonical LocalStack/Worker runtime; localhost:4000 remains occupied by a non-UniStore service, so the canonical :4000 Dev path cannot be exercised here',
+    todo: 'BLOCKED: full multi-role business-flow qualification belongs to the dedicated E2E suite; this smoke keeps the auth/no-bypass boundary only',
   },
   () => {},
 );

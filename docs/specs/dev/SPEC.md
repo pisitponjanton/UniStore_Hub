@@ -38,34 +38,38 @@ local infrastructure adapters/configuration
 PROJECT DECISION:
 
 ~~~text
-Browser
+Browser / Host
 │
 ├── http://localhost:3000
-│   Next.js Dev Server
+│   Docker Compose → Next.js Dev Server
 │
-└── http://localhost:4000
-    Express local HTTP server
-       │
-       ├── LocalStack DynamoDB
-       ├── LocalStack S3
-       └── LocalStack SQS
-                  │
-                  ↓
-             Local Worker Process
-                  │
-                  ↓
-            LocalStack DynamoDB
+├── http://localhost:4000
+│   Docker Compose → Express local HTTP server
+│      │
+│      ├── LocalStack DynamoDB
+│      ├── LocalStack S3
+│      └── LocalStack SQS
+│                 │
+│                 ↓
+│            Local Worker
+│                 │
+│                 ↓
+│           LocalStack DynamoDB
+│
+└── http://localhost:4566
+    Browser-visible LocalStack endpoint for direct S3 transfer
 ~~~
 
-LocalStack endpoint:
+Canonical host-visible LocalStack endpoint:
 
 ~~~text
 http://localhost:4566
 ~~~
 
-Docker is used only for local AWS-compatible dependencies.
+Dev Mode uses Docker Compose for the complete local stack: Frontend, Backend, Notification Worker, LocalStack and one-shot bootstrap/seed services.
 
-Frontend and Backend application processes run locally for fast reload.
+Application containers must still run the same Frontend/Backend source and preserve fast development feedback such as source bind mounts and hot reload where practical.
+
 
 ---
 
@@ -172,18 +176,19 @@ Do not add a dev-only auth bypass.
 
 ## 8. Backend Dev Environment
 
-PROJECT DECISION example:
+PROJECT DECISION example for Backend/Worker containers:
 
 ~~~text
 NODE_ENV=development
 PORT=4000
 AWS_REGION=us-east-1
-AWS_ENDPOINT_URL=http://localhost:4566
+AWS_ENDPOINT_URL=http://localstack:4566
+S3_BROWSER_ENDPOINT_URL=http://localhost:4566
 AWS_ACCESS_KEY_ID=test
 AWS_SECRET_ACCESS_KEY=test
 APP_TABLE_NAME=unistore-hub-dev-local
 FILES_BUCKET_NAME=unistore-hub-files-local
-NOTIFICATION_QUEUE_URL=<created by dev setup>
+NOTIFICATION_QUEUE_URL=<created by Compose bootstrap>
 JWT_SECRET=dev-only-secret-change-me
 JWT_EXPIRES_IN=1d
 CORS_ALLOWED_ORIGINS=http://localhost:3000
@@ -191,8 +196,11 @@ CORS_ALLOWED_ORIGINS=http://localhost:3000
 
 Rules:
 
+- `AWS_ENDPOINT_URL` is the container-internal LocalStack endpoint used for DynamoDB/S3/SQS service calls
+- `S3_BROWSER_ENDPOINT_URL` is local-only and is used when generating browser-facing S3 Pre-signed URLs
+- Browser-facing URLs must remain reachable from the host browser at `localhost:4566`
 - dummy AWS credentials are only for LocalStack
-- production deployment never uses these dummy credentials
+- production deployment never sets LocalStack endpoints or these dummy credentials
 - local JWT secret is for local use only
 - no environment check may bypass authorization
 
@@ -206,7 +214,10 @@ Canonical behavior:
 
 ~~~text
 if AWS_ENDPOINT_URL exists
-→ configure DynamoDB/S3/SQS clients to use local endpoint
+→ configure DynamoDB/S3/SQS service clients to use the internal local endpoint
+
+if S3_BROWSER_ENDPOINT_URL exists in Dev Mode
+→ sign browser-facing S3 URLs against that browser-reachable endpoint
 
 otherwise
 → use normal AWS SDK resolution / Lambda environment
@@ -214,9 +225,9 @@ otherwise
 
 PROJECT DECISION:
 
-For local S3 compatibility, use path-style addressing if required by the chosen LocalStack setup.
+For local S3 compatibility, use path-style addressing when required by LocalStack.
 
-This option stays in infrastructure adapter configuration, not business services.
+The endpoint split belongs in infrastructure adapter/configuration code, not business services. Production AWS must continue to use normal managed AWS endpoints.
 
 ---
 
@@ -341,46 +352,52 @@ A local Worker must not directly call Frontend or skip the queue.
 
 ## 16. Dev Commands
 
-PROJECT DECISION target commands:
+PROJECT DECISION canonical developer command:
 
 ~~~bash
-npm run dev:setup
-npm run dev
-npm run dev:seed
-npm run dev:reset
-npm run dev:down
+docker compose -f docker-compose.dev.yml up --build -d
 ~~~
 
-Root package.json is Integration-owned.
+This command is the required one-command Dev Mode entry point from repository root.
 
-Individual subsystem commands may exist, but these root aliases are the intended developer interface.
+It must orchestrate:
+
+~~~text
+LocalStack
+→ local AWS resource bootstrap
+→ deterministic dev seed
+→ Backend
+→ Notification Worker
+→ Frontend
+~~~
+
+Existing root npm helpers may remain for compatibility, diagnostics, reset, or targeted subsystem development, but they are no longer the canonical startup path.
 
 ---
 
-## 17. npm run dev:setup
+## 17. Compose Bootstrap
 
-Responsibilities:
+The Compose stack must create or verify local resources automatically:
 
 ~~~text
-verify Docker
-→ start LocalStack
+start LocalStack
 → wait until LocalStack is healthy
-→ create DynamoDB table
+→ create/validate DynamoDB table
 → create Files S3 bucket
 → apply S3 CORS
 → create SQS queue
-→ write/display non-secret local resource values
+→ expose required non-secret resource values to application services
 ~~~
 
-Must be idempotent.
+Bootstrap must be idempotent.
 
-Running setup twice must not destroy existing local data.
+Running the canonical Compose command repeatedly must not destroy existing local data.
 
 ---
 
-## 18. npm run dev
+## 18. Compose Application Services
 
-Starts concurrently:
+The Compose stack starts:
 
 ~~~text
 Frontend Next.js dev server
@@ -388,19 +405,21 @@ Backend local Express server
 Local Notification Worker
 ~~~
 
-LocalStack should already be running or dev may call/setup it according to final root script implementation.
+Required host ports remain:
 
-PROJECT DECISION:
+~~~text
+Frontend:   3000
+Backend:    4000
+LocalStack: 4566
+~~~
 
-Prefer one developer command after initial setup.
-
-Exact process runner (shell, concurrently, npm-run-all, etc.) is implementation choice and must not affect application contracts.
+Container-internal service discovery may use Compose service names and must not change browser-visible URLs.
 
 ---
 
-## 19. npm run dev:seed
+## 19. Deterministic Dev Seed
 
-Seeds deterministic local/demo data.
+A one-shot Compose service or equivalent dependency step seeds deterministic local/demo data automatically as part of canonical startup.
 
 Minimum seed intent:
 
@@ -415,15 +434,17 @@ Minimum seed intent:
 
 PROJECT DECISION:
 
+Seed execution must be safe to rerun and must not require a second manual command after `docker compose ... up`.
+
 Seed values must be clearly local/demo credentials and documented in dev-only material.
 
 Never reuse production secrets.
 
 ---
 
-## 20. npm run dev:reset
+## 20. Dev Reset
 
-Destructive local-only command.
+Destructive reset remains a separate local-only action rather than part of normal Compose startup.
 
 Expected flow:
 
@@ -432,25 +453,19 @@ confirm/local-only guard
 → clear local DynamoDB table
 → clear local Files bucket
 → purge/recreate local SQS queue if needed
-→ re-run dev setup
-→ optionally re-run seed according to command definition
+→ recreate bootstrap resources
+→ optionally re-run deterministic seed
 ~~~
 
-Must refuse to target a non-local endpoint.
+Reset tooling must refuse to target a non-local endpoint.
 
 ---
 
 ## 21. Local Safety Guard
 
-Any destructive Dev script must verify:
+Any destructive Dev script or container must verify that it targets the local Compose/LocalStack environment before deleting/resetting resources.
 
-~~~text
-AWS_ENDPOINT_URL points to localhost / LocalStack
-~~~
-
-before deleting/resetting resources.
-
-If not local:
+If the target is not local:
 
 ~~~text
 abort
@@ -460,15 +475,17 @@ Dev reset must never delete Learner Lab resources.
 
 ---
 
-## 22. npm run dev:down
+## 22. Dev Down
 
-Stops local dependency containers/processes.
+Canonical stop command:
 
-PROJECT DECISION:
+~~~bash
+docker compose -f docker-compose.dev.yml down
+~~~
 
-Stopping Dev Mode should not erase local data by default.
+Stopping Dev Mode must not erase persistent local data by default.
 
-A separate reset/clean option handles destructive cleanup.
+A separate reset/clean action handles destructive cleanup.
 
 ---
 
@@ -545,11 +562,20 @@ Local:
 
 ~~~text
 Browser
-→ Local Backend
+→ http://localhost:4000
+→ Backend container
 → authorize
-→ LocalStack S3 Pre-signed URL
-→ Browser ↔ LocalStack S3
+→ generate LocalStack S3 Pre-signed URL for a browser-reachable endpoint
+→ Browser ↔ http://localhost:4566
 ~~~
+
+Container-to-container AWS SDK calls may use an internal Compose endpoint such as:
+
+~~~text
+http://localstack:4566
+~~~
+
+A browser-facing Pre-signed URL must not require the browser to resolve the Docker-only `localstack` hostname.
 
 AWS:
 
@@ -561,7 +587,7 @@ Browser
 → Browser ↔ AWS S3
 ~~~
 
-Business code sees the same object-key contract.
+Business code sees the same object-key and authorization contract; only endpoint configuration differs.
 
 ---
 
@@ -685,13 +711,16 @@ Docker is a Dev Mode dependency, not the production runtime.
 PROJECT DECISION target:
 
 ~~~text
-docker compose
-→ LocalStack only
+docker compose -f docker-compose.dev.yml up --build -d
+→ LocalStack
+→ bootstrap/seed
+→ Backend + Worker
+→ Frontend
 ~~~
 
-Frontend/Backend remain normal host Node processes by default for fast hot reload.
+Docker Compose is the default Dev Mode runtime for the complete local stack.
 
-An optional all-container dev profile may be added later only if it preserves the same contracts.
+Frontend and Backend containers should preserve practical hot reload/source-mount behavior; containerization must not create a second business implementation.
 
 ---
 
@@ -730,37 +759,38 @@ Normal local manual testing follows real business flow.
 
 ## 36. Dev Readiness Check
 
-A developer should be able to:
+A developer should be able to run only:
 
-~~~text
-npm run dev:setup
-npm run dev:seed
-npm run dev
+~~~bash
+docker compose -f docker-compose.dev.yml up --build -d
 ~~~
 
 then verify:
 
 1. Frontend opens at localhost:3000
 2. Backend health succeeds at localhost:4000/health
-3. Register/Login works
-4. seeded Organization/Product/Campaign can be read
-5. Order can be created
-6. Payment Slip uploads through Pre-signed LocalStack S3 URL
-7. Payment review can publish notification event
-8. Local Worker writes Notification
-9. Pickup flow uses same status rules
+3. LocalStack resources were bootstrapped automatically
+4. deterministic demo data was seeded automatically
+5. Register/Login works
+6. seeded Organization/Product/Campaign can be read
+7. Order can be created
+8. Payment Slip uploads through a browser-reachable Pre-signed LocalStack S3 URL
+9. Payment review can publish notification event
+10. Local Worker writes Notification
+11. Pickup flow uses same status rules
 
 ---
 
 ## 37. Dev Reset Verification
 
-After npm run dev:reset:
+After the local reset workflow:
 
-- local AWS endpoint remains localhost
-- local table exists
-- local bucket exists
-- local queue exists
+- every destructive AWS target is verified as LocalStack/Compose-local
+- the local table exists
+- the local bucket exists
+- the local queue exists
 - prior local records/files are removed according to reset semantics
+- deterministic seed may be restored according to reset command definition
 - no AWS Learner Lab resource was touched
 
 ---
@@ -768,9 +798,14 @@ After npm run dev:reset:
 ## 38. Dev Mode Acceptance Criteria
 
 - [ ] Dev Mode is clearly marked as PROJECT DECISION
-- [ ] Frontend runs on localhost:3000
-- [ ] Backend runs same Express app on localhost:4000
-- [ ] LocalStack provides DynamoDB/S3/SQS
+- [ ] canonical startup is `docker compose -f docker-compose.dev.yml up --build -d`
+- [ ] Frontend container is reachable on localhost:3000
+- [ ] Backend container runs the same Express app and is reachable on localhost:4000
+- [ ] LocalStack provides DynamoDB/S3/SQS on localhost:4566
+- [ ] bootstrap is automatic and idempotent
+- [ ] deterministic dev seed is automatic and safe to rerun
+- [ ] Backend/Worker use the Compose-internal LocalStack endpoint
+- [ ] browser-facing S3 Pre-signed URLs use a host-reachable endpoint rather than Docker-only DNS
 - [ ] same Data Spec is used locally
 - [ ] same API Contract is used locally
 - [ ] same JWT/RBAC/tenant rules run locally
@@ -778,10 +813,8 @@ After npm run dev:reset:
 - [ ] Payment Slip remains private in logical access flow
 - [ ] same SQS event payload is used
 - [ ] local Worker uses shared event-processing logic
-- [ ] dev:setup is idempotent
-- [ ] dev:reset has a localhost safety guard
-- [ ] dev:down is non-destructive by default
-- [ ] dev:seed creates useful deterministic demo data
+- [ ] reset has a local-target safety guard
+- [ ] `docker compose -f docker-compose.dev.yml down` is non-destructive by default
 - [ ] no auth/business bypass is introduced
 - [ ] no production application code depends on LocalStack
 - [ ] AWS deployment still uses normal managed AWS endpoints/LabRole
@@ -792,11 +825,12 @@ After npm run dev:reset:
 
 Implementation may still choose, while preserving this contract:
 
-- exact pinned LocalStack version
-- exact Docker Compose filename/location
-- exact concurrent-process runner
+- exact dev Dockerfile structure and image build layering
+- exact source bind-mount / hot-reload mechanics
+- exact Compose bootstrap service implementation
 - exact local test-resource naming
 - exact local seed credentials
-- whether dev:reset automatically reseeds
+- whether reset automatically reseeds
+- exact adapter plumbing for the internal LocalStack endpoint vs `S3_BROWSER_ENDPOINT_URL`
 
 These are local workflow choices and must not alter production contracts.

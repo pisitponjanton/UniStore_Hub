@@ -50,29 +50,37 @@ async function stopChild(child) {
   }
 }
 
-test('DEV-001 root developer interface exposes dev:setup/dev/dev:seed/dev:reset/dev:down', async (t) => {
-  const rootPackagePath = path.join(repoRoot, 'package.json');
-  try {
-    await access(rootPackagePath);
-  } catch {
-    t.todo('BLOCKED: Integration-owned root package.json is not present in this checkout');
-    return;
-  }
+test('DEV-001 canonical root docker-compose.dev.yml exposes the complete one-command Dev stack', async () => {
+  const composeFile = path.join(repoRoot, 'docker-compose.dev.yml');
+  await access(composeFile);
 
-  const pkg = await readJson(rootPackagePath);
-  for (const script of ['dev:setup', 'dev', 'dev:seed', 'dev:reset', 'dev:down']) {
-    assert.equal(
-      typeof pkg.scripts?.[script],
-      'string',
-      `Expected root npm script "${script}"`,
-    );
-    assert.ok(pkg.scripts[script].trim().length > 0);
+  const result = await execFileAsync(
+    'docker',
+    ['compose', '-f', composeFile, 'config', '--services'],
+    { cwd: repoRoot, maxBuffer: 1024 * 1024 },
+  );
+
+  const services = new Set(
+    result.stdout
+      .split(/\r?\n/)
+      .map((value) => value.trim())
+      .filter(Boolean),
+  );
+
+  for (const service of [
+    'localstack',
+    'bootstrap',
+    'seed',
+    'backend',
+    'worker',
+    'frontend',
+  ]) {
+    assert.ok(services.has(service), `Expected Compose service "${service}"`);
   }
 });
 
-test('DEV-001 canonical LocalStack contains the required DynamoDB table, Files bucket, and SQS queue after dev:setup', async (t) => {
-  const composeFile = path.join(repoRoot, 'scripts', 'dev', 'compose.yaml');
-
+test('DEV-001 canonical LocalStack contains the required DynamoDB table, Files bucket, and SQS queue after one-command Compose startup', async (t) => {
+  const composeFile = path.join(repoRoot, 'docker-compose.dev.yml');
   try {
     const ps = await execFileAsync(
       'docker',

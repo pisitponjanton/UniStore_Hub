@@ -361,6 +361,72 @@ test('S3 presigned PUT keeps canonical path and expiry without optional checksum
   }
 });
 
+test('S3 adapter can sign browser URLs with a dedicated endpoint while retaining an internal service client', async () => {
+  const previousAccessKey = process.env.AWS_ACCESS_KEY_ID;
+  const previousSecretKey = process.env.AWS_SECRET_ACCESS_KEY;
+  const previousSessionToken = process.env.AWS_SESSION_TOKEN;
+  process.env.AWS_ACCESS_KEY_ID = 'local-presign-test';
+  process.env.AWS_SECRET_ACCESS_KEY = 'local-presign-test-secret';
+  delete process.env.AWS_SESSION_TOKEN;
+
+  const operationalClient = createFakeClient(() => ({
+    ContentType: 'image/png',
+    ContentLength: 128,
+  }));
+  const presignClient = createS3Client({
+    region: 'us-east-1',
+    endpoint: 'http://localhost:4566',
+  });
+
+  try {
+    const adapter = createS3Adapter({
+      client: operationalClient,
+      presignClient,
+      bucketName: 'private-files-test',
+    });
+    const objectKey =
+      'payments/org-1/order-1/11111111-1111-4111-8111-111111111111';
+    const url = await adapter.createPutUrl({
+      objectKey,
+      contentType: 'image/png',
+    });
+    const parsed = new URL(url);
+
+    assert.equal(parsed.origin, 'http://localhost:4566');
+    assert.equal(
+      parsed.pathname,
+      `/private-files-test/${objectKey}`,
+    );
+
+    await adapter.headObject({ objectKey });
+    assert.equal(operationalClient.commands.length, 1);
+    assert.equal(
+      operationalClient.commands[0].constructor.name,
+      'HeadObjectCommand',
+    );
+  } finally {
+    presignClient.destroy();
+
+    if (previousAccessKey === undefined) {
+      delete process.env.AWS_ACCESS_KEY_ID;
+    } else {
+      process.env.AWS_ACCESS_KEY_ID = previousAccessKey;
+    }
+
+    if (previousSecretKey === undefined) {
+      delete process.env.AWS_SECRET_ACCESS_KEY;
+    } else {
+      process.env.AWS_SECRET_ACCESS_KEY = previousSecretKey;
+    }
+
+    if (previousSessionToken === undefined) {
+      delete process.env.AWS_SESSION_TOKEN;
+    } else {
+      process.env.AWS_SESSION_TOKEN = previousSessionToken;
+    }
+  }
+});
+
 test('DynamoDB repository injects the configured table and exposes no Scan operation', async () => {
   const client = createFakeClient((command) => {
     if (command.constructor.name === 'GetCommand') {

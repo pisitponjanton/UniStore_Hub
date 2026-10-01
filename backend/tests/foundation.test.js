@@ -154,6 +154,8 @@ test('loadConfig supplies safe development defaults without AWS resource names',
       NODE_ENV: 'development',
       PORT: undefined,
       CORS_ALLOWED_ORIGINS: undefined,
+      AWS_ENDPOINT_URL: undefined,
+      S3_BROWSER_ENDPOINT_URL: undefined,
       APP_TABLE_NAME: undefined,
       FILES_BUCKET_NAME: undefined,
       NOTIFICATION_QUEUE_URL: undefined,
@@ -167,11 +169,31 @@ test('loadConfig supplies safe development defaults without AWS resource names',
       assert.equal(config.port, 4000);
       assert.deepEqual(config.corsAllowedOrigins, ['http://localhost:3000']);
       assert.equal(config.awsRegion, process.env.AWS_REGION || 'us-east-1');
+      assert.equal(config.awsEndpointUrl, undefined);
+      assert.equal(config.s3BrowserEndpointUrl, undefined);
       assert.equal(config.appTableName, undefined);
       assert.equal(config.filesBucketName, undefined);
       assert.equal(config.notificationQueueUrl, undefined);
       assert.equal(config.jwtSecret, undefined);
       assert.equal(config.jwtExpiresIn, '1d');
+    },
+  );
+});
+
+test('loadConfig reads separate internal AWS and browser-facing S3 endpoints', () => {
+  withEnvironment(
+    {
+      AWS_ENDPOINT_URL: 'http://localstack:4566',
+      S3_BROWSER_ENDPOINT_URL: 'http://localhost:4566',
+    },
+    () => {
+      const config = loadConfig();
+
+      assert.equal(config.awsEndpointUrl, 'http://localstack:4566');
+      assert.equal(
+        config.s3BrowserEndpointUrl,
+        'http://localhost:4566',
+      );
     },
   );
 });

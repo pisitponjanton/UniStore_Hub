@@ -62,6 +62,7 @@ function loadConfig() {
     ),
     awsRegion: getEnv('AWS_REGION', { defaultValue: 'us-east-1' }),
     awsEndpointUrl: getEnv('AWS_ENDPOINT_URL'),
+    s3BrowserEndpointUrl: getEnv('S3_BROWSER_ENDPOINT_URL'),
     appTableName: getEnv('APP_TABLE_NAME'),
     filesBucketName: getEnv('FILES_BUCKET_NAME'),
     notificationQueueUrl: getEnv('NOTIFICATION_QUEUE_URL'),

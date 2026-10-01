@@ -14,6 +14,7 @@ const { buildAwsClientOptions } = require('./client-options');
 const DEFAULT_PRESIGN_EXPIRES_SECONDS = 900;
 
 let defaultS3Client;
+let defaultPresignS3Client;
 
 function createS3Client(options = {}) {
   const endpoint = options.endpoint ?? config.awsEndpointUrl;
@@ -33,6 +34,23 @@ function getS3Client() {
   return defaultS3Client;
 }
 
+function getPresignS3Client() {
+  if (
+    config.nodeEnv === 'production' ||
+    !config.s3BrowserEndpointUrl
+  ) {
+    return getS3Client();
+  }
+
+  if (!defaultPresignS3Client) {
+    defaultPresignS3Client = createS3Client({
+      endpoint: config.s3BrowserEndpointUrl,
+    });
+  }
+
+  return defaultPresignS3Client;
+}
+
 function requireBucketName(bucketName = config.filesBucketName) {
   if (!bucketName) {
     const error = new Error('FILES_BUCKET_NAME is required for S3 operations');
@@ -45,6 +63,9 @@ function requireBucketName(bucketName = config.filesBucketName) {
 
 function createS3Adapter(options = {}) {
   const client = options.client || getS3Client();
+  const presignClient =
+    options.presignClient ||
+    (options.client ? client : getPresignS3Client());
   const bucketName = requireBucketName(options.bucketName);
 
   return {
@@ -59,7 +80,7 @@ function createS3Adapter(options = {}) {
         ContentType: contentType,
       });
 
-      return getSignedUrl(client, command, {
+      return getSignedUrl(presignClient, command, {
         expiresIn: expiresInSeconds,
       });
     },
@@ -73,7 +94,7 @@ function createS3Adapter(options = {}) {
         Key: objectKey,
       });
 
-      return getSignedUrl(client, command, {
+      return getSignedUrl(presignClient, command, {
         expiresIn: expiresInSeconds,
       });
     },
@@ -93,6 +114,7 @@ module.exports = {
   DEFAULT_PRESIGN_EXPIRES_SECONDS,
   createS3Client,
   getS3Client,
+  getPresignS3Client,
   createS3Adapter,
   requireBucketName,
 };
