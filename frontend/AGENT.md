@@ -38,7 +38,20 @@ Read before implementation:
 3. `../docs/specs/00-shared-contracts.md`
 4. `../docs/api/API_CONTRACT.md`
 5. `../docs/specs/frontend/SPEC.md`
-6. `.agents/skills/interface-design/SKILL.md` for any user-facing UI/design work
+
+For any user-facing UI/UX work, also read:
+
+6. `.agents/skills/interface-design/SKILL.md`
+7. `.interface-design/system.md` when it exists
+
+Then load the task-specific UX/UI skill when applicable:
+
+- UI/UX audit or heuristic review → `.agents/skills/design-review/SKILL.md`
+- redesign/polish of an existing working screen or flow → `.agents/skills/redesign/SKILL.md`
+- visual-direction work or reducing generic/template-like UI → `.agents/skills/frontend-design/SKILL.md`
+- accessibility review or post-redesign QA → `.agents/skills/a11y-audit/SKILL.md`
+
+Each skill may reference additional supporting Markdown under its own directory. Read those dependencies only when that skill requires them; do not make every supporting file global required reading.
 
 Read `../docs/architecture/AWS_ARCHITECTURE.md` only when working on API connectivity, Pre-signed URL flow, or deployment-sensitive behavior.
 
@@ -52,21 +65,85 @@ frontend-report.md
 
 when the file exists. This is the Frontend Agent's local inspection/handoff report for current findings and planned follow-up context. It is gitignored and is not a canonical source of truth. Verify each finding against the current Frontend working tree before planning or implementing, and defer to the canonical project docs/contracts on any conflict.
 
-## UI / UX Skill
+## UI / UX Skills
 
-The Frontend Agent uses the vendored prompt-only skill:
+The Frontend Agent uses vendored Markdown-based UX/UI skills under:
 
 ```text
-.agents/skills/interface-design/SKILL.md
+.agents/skills/
 ```
 
-Upstream: `Dammyjay93/interface-design` (MIT). No runtime UI plugin or application dependency is required.
+Available UX/UI skills:
 
-For Staff, Organization Admin, and Platform Admin surfaces, use the skill with a restrained SaaS direction: simple navigation, clear hierarchy, low cognitive load, compact-but-readable data views, and intentional use of color/depth. Avoid decorative complexity that makes routine operations harder.
+- `interface-design/SKILL.md` — primary product-interface craft, hierarchy, tokens, states, responsive behavior, and design-system consistency
+- `design-review/SKILL.md` — audit/heuristic review before redesign
+- `redesign/SKILL.md` — audit-first redesign of existing working UI while preserving behavior
+- `frontend-design/SKILL.md` — visual direction, typography, composition, and reducing generic/template-like design
+- `a11y-audit/SKILL.md` — WCAG/ARIA accessibility review and post-redesign QA
 
-Project contracts remain authoritative. The design skill may guide presentation and interaction quality, but it must not invent routes, permissions, business rules, API behavior, statuses, or data semantics that conflict with project docs.
+Reference index:
 
-If `.interface-design/system.md` is created later after a reviewed direction is approved, read it before subsequent UI work and keep the saved patterns consistent.
+```text
+.agents/skills/UX-UI-SKILLS.md
+```
+
+### UI / UX Workflow
+
+For substantial redesign work, use this sequence unless the task clearly needs only one step:
+
+```text
+interface-design + .interface-design/system.md
+→ design-review
+→ redesign
+→ frontend-design
+→ a11y-audit
+```
+
+Use the sequence as guidance, not as permission to change unrelated UI or behavior.
+
+Before modifying UI, inspect the current screen/flow and existing shared components first. Reuse the project's existing components, tokens, CSS conventions, and accessibility patterns instead of introducing parallel systems.
+
+For Staff, Organization Admin, and Platform Admin surfaces, keep the direction operational: clear hierarchy, low cognitive load, compact-but-readable data views, obvious primary actions, strong state visibility, and restrained color/depth.
+
+Customer-facing surfaces may be more expressive, but must still feel like the same UniStore Hub system.
+
+### Design-system Authority
+
+`.interface-design/system.md` is the local visual-direction authority once present and reviewed.
+
+Do not create a second design system, theme, token vocabulary, or component family unless the task explicitly requires a reviewed replacement.
+
+When a UX/UI skill recommends something that conflicts with the current system, treat it as a proposal to evaluate, not an automatic override.
+
+### Contract Authority
+
+UX/UI skills are guidance only.
+
+They must not override or invent:
+
+- API routes or request/response shapes
+- roles, permissions, membership rules, or tenant authorization
+- business rules or state transitions
+- authoritative price/payment/pickup behavior
+- static-export routing constraints
+- shared status/error tokens
+- security requirements
+- deployment/environment contracts
+
+If a skill recommendation conflicts with canonical project docs/contracts, the canonical project docs/contracts win.
+
+Do not change business behavior merely to make a redesign easier.
+
+### Markdown-only Skill Installation
+
+The vendored UX/UI skill set is Markdown-only.
+
+If an upstream skill references an executable script that is not installed locally:
+
+- do not fabricate its output
+- do not claim a measured result that was not actually measured
+- use available project/browser/test tooling when possible
+- otherwise report the item as not measured yet
 
 ## Responsibilities
 
@@ -92,6 +169,8 @@ Backend remains authoritative for auth, tenant rules, ownership, price calculati
 Frontend-local tests belong under `frontend/**` and may be changed by this agent.
 
 Cross-system tests under `../tests/**` are read-only for this agent unless Integration explicitly hands them over.
+
+For non-trivial UX/UI changes, verification should include the relevant local tests plus visual/responsive/accessibility checks supported by the available tooling.
 
 ## Shared Contract Rule
 
