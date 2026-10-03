@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
-
 import {
   Button,
   ErrorState,
+  FileField,
   ForbiddenState,
   LoadingState,
   Notice,
@@ -353,19 +353,22 @@ export function MyPaymentView() {
           กลับรายละเอียดคำสั่งซื้อ
         </Link>
 
-        <header className={styles.header} data-ledger-heading>
-          <div>
-            <h1 className={styles.title}>การชำระเงิน</h1>
+        <header className={styles.header}>
+          <div className={styles.headerCopy}>
+            <span className={styles.pageKicker}>ขั้นตอนการชำระเงิน</span>
+            <h1 className={styles.title}>ชำระและส่งหลักฐาน</h1>
             <p className={styles.description}>
-              ตรวจสอบยอด เลือกหลักฐาน และติดตามผลการตรวจสอบจากหน้านี้
+              ตรวจสอบสถานะล่าสุดก่อนทุกครั้ง จากนั้นส่งหลักฐานเฉพาะเมื่อรายการนี้เปิดให้ส่งได้
             </p>
           </div>
           <div className={styles.headerAmount}>
-            <span className={styles.metaLabel}>ยอดที่ต้องชำระ</span>
-            <strong className={styles.amount}>{formatSatang(order.total)}</strong>
+            <span className={styles.metaLabel}>ยอดที่ระบบบันทึก</span>
+            <strong className={styles.amount} data-numeric>
+              {formatSatang(order.total)}
+            </strong>
+            <span className={styles.headerAmountNote}>ชำระตามยอดของคำสั่งซื้อนี้</span>
           </div>
         </header>
-
         <TaskStatus
           tone={paymentState.tone}
           label={<OrderStatusBadge status={order.status} />}
@@ -437,40 +440,18 @@ export function MyPaymentView() {
             </div>
 
             <form className={styles.uploadForm} onSubmit={handleSubmit}>
-              <div className={styles.fileField}>
-                <label className={styles.fileLabel} htmlFor="payment-slip">
-                  หลักฐานการชำระเงิน
-                </label>
-                <input
-                  className={styles.fileInput}
-                  id="payment-slip"
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  onChange={(event) =>
-                    handleFileChange(event.target.files?.[0] ?? null)
-                  }
-                  disabled={stage !== "idle"}
-                  required
-                  aria-invalid={fileError ? true : undefined}
-                  aria-describedby={
-                    fileError
-                      ? "payment-slip-hint payment-slip-error"
-                      : "payment-slip-hint"
-                  }
-                />
-                <span className={styles.fileHint} id="payment-slip-hint">
-                  เลือกรูปที่เห็นยอด วันเวลา และรายละเอียดการชำระเงินชัดเจน
-                </span>
-                {fileError ? (
-                  <span
-                    className={styles.fileError}
-                    id="payment-slip-error"
-                    role="alert"
-                  >
-                    {fileError}
-                  </span>
-                ) : null}
-              </div>
+              <FileField
+                id="payment-slip"
+                label="หลักฐานการชำระเงิน"
+                hint="เลือกรูปที่เห็นยอด วันเวลา และรายละเอียดการชำระเงินชัดเจน"
+                error={fileError ?? undefined}
+                accept="image/jpeg,image/png,image/webp"
+                onChange={(event) =>
+                  handleFileChange(event.target.files?.[0] ?? null)
+                }
+                disabled={stage !== "idle"}
+                required
+              />
 
               {selectedFile ? (
                 <div className={styles.selectedFile} aria-live="polite">

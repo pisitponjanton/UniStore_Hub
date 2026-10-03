@@ -477,6 +477,7 @@ export function ProductManagementView({
       <main className={styles.main}>
         <header className={styles.header}>
           <div className={styles.headerCopy} data-ledger-heading>
+            <span className={styles.pageKicker}>แค็ตตาล็อกของหน่วยงาน</span>
             <h1 className={styles.title}>สินค้าและตัวเลือก</h1>
             <p className={styles.description}>
               จัดการสินค้า รูปสินค้า ตัวเลือก และราคาที่ใช้ในแต่ละร้านค้า

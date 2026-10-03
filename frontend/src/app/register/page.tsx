@@ -9,8 +9,9 @@ export const metadata: Metadata = {
 export default function RegisterPage() {
   return (
     <AuthPageFrame
-      introTitle="สร้างบัญชีสำหรับการสั่งซื้อในมหาวิทยาลัย"
-      introDescription="ใช้บัญชีเดียวเพื่อสั่งสินค้า ติดตามการชำระเงิน และรับสินค้า หากได้รับสิทธิ์จากหน่วยงาน เมนูสำหรับ Staff/Admin จะปรากฏหลังเข้าสู่ระบบ"
+      introKicker="บัญชีสำหรับการซื้อในมหาวิทยาลัย"
+      introTitle="เริ่มสั่งซื้อและติดตามทุกขั้นตอนในที่เดียว"
+      introDescription="สร้างบัญชีเพื่อสั่งสินค้า ติดตามการชำระเงิน และดูข้อมูลรับสินค้า หากหน่วยงานมอบสิทธิ์ให้ พื้นที่สำหรับ Staff/Admin จะปรากฏหลังเข้าสู่ระบบ"
     >
       <AuthEntryState>
         <RegisterForm />

@@ -124,6 +124,9 @@ export function PlatformUsersView() {
   const platformAdminCount = state.users.filter(
     (user) => user.platformRole === "PLATFORM_ADMIN",
   ).length;
+  const activeCount = state.users.filter(
+    (user) => user.status === "ACTIVE",
+  ).length;
   const disabledCount = state.users.filter(
     (user) => user.status === "DISABLED",
   ).length;
@@ -133,6 +136,7 @@ export function PlatformUsersView() {
       <main className={styles.main}>
         <header className={styles.header}>
           <div className={styles.headerCopy} data-ledger-heading>
+            <span className={styles.pageKicker}>ทะเบียนผู้ใช้ระดับ Platform</span>
             <h1 className={styles.title}>ผู้ใช้ระดับ Platform</h1>
             <p className={styles.description}>
               ตรวจสอบสถานะผู้ใช้และ Platform role ที่บันทึกอยู่ในระบบ
@@ -157,6 +161,16 @@ export function PlatformUsersView() {
             </strong>
             <span className={styles.metricHint}>
               ผู้ใช้ที่มี platformRole = PLATFORM_ADMIN
+            </span>
+          </article>
+
+          <article className={styles.priorityItem}>
+            <span className={styles.metricLabel}>ใช้งานอยู่</span>
+            <strong className={styles.priorityValue}>
+              {activeCount.toLocaleString("th-TH")}
+            </strong>
+            <span className={styles.metricHint}>
+              ผู้ใช้ที่มีสถานะ ACTIVE ในรายการที่โหลด
             </span>
           </article>
 

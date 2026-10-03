@@ -239,12 +239,19 @@ export function PlatformOrganizationsView() {
   const pendingCount = state.organizations.filter(
     (organization) => organization.status === "PENDING",
   ).length;
+  const activeCount = state.organizations.filter(
+    (organization) => organization.status === "ACTIVE",
+  ).length;
+  const suspendedCount = state.organizations.filter(
+    (organization) => organization.status === "SUSPENDED",
+  ).length;
 
   return (
     <div className={styles.page}>
       <main className={styles.main}>
         <header className={styles.header}>
           <div className={styles.headerCopy} data-ledger-heading>
+            <span className={styles.pageKicker}>การกำกับดูแลระดับ Platform</span>
             <h1 className={styles.title}>จัดการหน่วยงาน</h1>
             <p className={styles.description}>
               ตรวจสถานะของแต่ละหน่วยงานก่อนอนุมัติหรือระงับ
@@ -262,23 +269,33 @@ export function PlatformOrganizationsView() {
           className={styles.priorityStrip}
           aria-label="สรุปหน่วยงานที่ต้องดูแล"
         >
-          <article className={styles.priorityItem}>
+          <article className={styles.priorityItem} data-attention={pendingCount > 0 || undefined}>
             <span className={styles.metricLabel}>รออนุมัติ</span>
             <strong className={styles.priorityValue}>
               {pendingCount.toLocaleString("th-TH")}
             </strong>
             <span className={styles.metricHint}>
-              ตรวจข้อมูลหน่วยงานก่อนเลือกอนุมัติหรือระงับ
+              รายการที่ต้องตรวจและตัดสินใจจากสถานะ PENDING
             </span>
           </article>
 
           <article className={styles.priorityItem}>
-            <span className={styles.metricLabel}>รายการที่โหลด</span>
+            <span className={styles.metricLabel}>ใช้งานอยู่</span>
             <strong className={styles.priorityValue}>
-              {state.organizations.length.toLocaleString("th-TH")}
+              {activeCount.toLocaleString("th-TH")}
             </strong>
             <span className={styles.metricHint}>
-              จำนวนรายการที่ตอบกลับจาก Platform ในครั้งนี้
+              หน่วยงานที่อยู่ในสถานะ ACTIVE
+            </span>
+          </article>
+
+          <article className={styles.priorityItem}>
+            <span className={styles.metricLabel}>ถูกระงับ</span>
+            <strong className={styles.priorityValue}>
+              {suspendedCount.toLocaleString("th-TH")}
+            </strong>
+            <span className={styles.metricHint}>
+              หน่วยงานที่อยู่ในสถานะ SUSPENDED
             </span>
           </article>
         </section>
@@ -342,6 +359,7 @@ export function PlatformOrganizationsView() {
                 return (
                   <article
                     className={styles.organizationRow}
+                    data-attention={organization.status === "PENDING" || undefined}
                     key={organization.organizationId}
                   >
                     <div className={styles.organizationMain}>

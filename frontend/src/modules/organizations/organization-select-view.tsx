@@ -205,17 +205,20 @@ export function OrganizationSelectView() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <header className={styles.header}>
-          <div className={styles.headerCopy} data-ledger-heading>
-            <h1 className={styles.title}>เลือกหน่วยงาน</h1>
+        <header className={styles.workspaceHeader}>
+          <div className={styles.headerCopy}>
+            <span className={styles.pageKicker}>เลือกขอบเขตงาน</span>
+            <h1 className={styles.title}>เลือกหน่วยงานที่จะทำงาน</h1>
             <p className={styles.description}>
-              เลือกพื้นที่ทำงานตามสิทธิ์ของบัญชี หรือสร้างหน่วยงานใหม่สำหรับงานที่คุณดูแล
+              สิทธิ์ของบัญชีอาจต่างกันในแต่ละหน่วยงาน เลือกพื้นที่ให้ถูกก่อนเริ่มงานเพื่อให้เมนูและข้อมูลอยู่ในบริบทเดียวกัน
             </p>
           </div>
+
           {loadState.status === "success" ? (
-            <div className={styles.headerSummary}>
-              <strong>{accessible.length}</strong>
-              <span>หน่วยงานที่เข้าถึงได้</span>
+            <div className={styles.headerSummary} aria-label="จำนวนหน่วยงานที่เข้าถึงได้">
+              <span className={styles.headerSummaryLabel}>เข้าถึงได้</span>
+              <strong data-numeric>{accessible.length}</strong>
+              <span>หน่วยงาน</span>
             </div>
           ) : null}
         </header>
@@ -226,17 +229,21 @@ export function OrganizationSelectView() {
           </Notice>
         ) : null}
 
-        <div className={styles.grid}>
-          <section className={styles.section} aria-labelledby="organizations">
+        <div className={styles.workspaceGrid}>
+          <section
+            className={styles.organizationSection}
+            aria-labelledby="organizations"
+          >
             <div className={styles.sectionHeading}>
               <div>
+                <span className={styles.sectionKicker}>พื้นที่ที่มีสิทธิ์</span>
                 <h2 className={styles.sectionTitle} id="organizations">
                   หน่วยงานของคุณ
                 </h2>
-                <p className={styles.sectionDescription}>
-                  บทบาทที่แสดงเป็นสิทธิ์ปัจจุบันของบัญชีในแต่ละหน่วยงาน
-                </p>
               </div>
+              <p className={styles.sectionDescription}>
+                สถานะหน่วยงานและบทบาทด้านล่างเป็นข้อมูลปัจจุบันของบัญชี
+              </p>
             </div>
 
             {loadState.status === "loading" ? (
@@ -261,15 +268,19 @@ export function OrganizationSelectView() {
             ) : null}
 
             {loadState.status === "success" && accessible.length > 0 ? (
-              <div className={styles.list}>
-                {accessible.map(({ organization, membership }) => (
+              <div className={styles.organizationList}>
+                {accessible.map(({ organization, membership }, index) => (
                   <article
-                    className={styles.card}
+                    className={styles.organizationRow}
                     key={organization.organizationId}
                   >
-                    <div className={styles.cardCopy}>
-                      <div className={styles.cardHeading}>
-                        <h3 className={styles.cardTitle}>
+                    <span className={styles.organizationIndex} data-numeric>
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+
+                    <div className={styles.organizationCopy}>
+                      <div className={styles.organizationHeading}>
+                        <h3 className={styles.organizationName}>
                           {organization.name}
                         </h3>
                         <div className={styles.metaRow}>
@@ -289,12 +300,18 @@ export function OrganizationSelectView() {
                           </Badge>
                         </div>
                       </div>
-                      <p className={styles.cardDescription}>
-                        {organization.description || "ยังไม่มีคำอธิบายหน่วยงาน"}
+
+                      <p className={styles.organizationDescription}>
+                        {organization.description ||
+                          "ยังไม่มีคำอธิบายหน่วยงาน"}
                       </p>
+
+                      <span className={styles.organizationReference} data-technical>
+                        {organization.organizationId}
+                      </span>
                     </div>
 
-                    <div className={styles.cardActions}>
+                    <div className={styles.organizationAction}>
                       <Button
                         onClick={() =>
                           handleSelect(
@@ -312,12 +329,14 @@ export function OrganizationSelectView() {
             ) : null}
           </section>
 
-          <aside className={styles.panel}>
-            <div className={styles.panelHeading}>
-              <span className={styles.panelKicker}>เริ่มพื้นที่ใหม่</span>
-              <h2 className={styles.sectionTitle}>สร้างหน่วยงาน</h2>
+          <aside className={styles.createPanel} aria-labelledby="create-organization">
+            <div className={styles.createPanelHeading}>
+              <span className={styles.panelKicker}>สร้างพื้นที่ใหม่</span>
+              <h2 className={styles.sectionTitle} id="create-organization">
+                สร้างหน่วยงาน
+              </h2>
               <p className={styles.sectionDescription}>
-                คุณจะเป็นผู้ดูแลหน่วยงาน และหน่วยงานใหม่จะเริ่มในสถานะรออนุมัติ
+                ผู้สร้างจะเป็นผู้ดูแลหน่วยงาน และหน่วยงานใหม่จะเริ่มในสถานะรออนุมัติจากส่วนกลาง
               </p>
             </div>
 
@@ -347,14 +366,19 @@ export function OrganizationSelectView() {
                 disabled={creating}
               />
 
-              <Button
-                type="submit"
-                size="large"
-                pending={creating}
-                pendingLabel="กำลังสร้างหน่วยงาน"
-              >
-                สร้างหน่วยงาน
-              </Button>
+              <div className={styles.createActions}>
+                <Button
+                  type="submit"
+                  size="large"
+                  pending={creating}
+                  pendingLabel="กำลังสร้างหน่วยงาน"
+                >
+                  สร้างหน่วยงาน
+                </Button>
+                <span className={styles.createHint}>
+                  หลังสร้างสำเร็จ ระบบจะพาไปตั้งค่าหน่วยงานต่อ
+                </span>
+              </div>
             </form>
           </aside>
         </div>

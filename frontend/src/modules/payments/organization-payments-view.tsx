@@ -604,6 +604,7 @@ export function OrganizationPaymentsView({
       <main className={styles.main}>
         <header className={styles.header}>
           <div className={styles.headerCopy} data-ledger-heading>
+            <span className={styles.pageKicker}>คิวตรวจหลักฐานการชำระเงิน</span>
             <h1 className={styles.title}>ตรวจสอบการชำระเงิน</h1>
             <p className={styles.description}>
               เปิดหลักฐานการชำระเงิน เทียบกับคำสั่งซื้อ แล้วอนุมัติหรือปฏิเสธพร้อมเหตุผลจากคิวเดียว
@@ -793,6 +794,7 @@ export function OrganizationPaymentsView({
                       ]
                         .filter(Boolean)
                         .join(" ")}
+                      data-attention={payment.status === "PENDING_REVIEW" || undefined}
                       key={payment.paymentId}
                       aria-current={isSelected ? "true" : undefined}
                     >

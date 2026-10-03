@@ -16,7 +16,7 @@ export function AuthEntryState({ children }: { children: ReactNode }) {
       <div className={styles.formShell}>
         <LoadingState
           title="กำลังตรวจสอบบัญชี"
-          description="กำลังตรวจสอบว่าคุณมี Session ที่ใช้งานอยู่หรือไม่"
+          description="กำลังตรวจสอบว่าคุณมีบัญชีที่เข้าสู่ระบบอยู่แล้วหรือไม่"
         />
       </div>
     );
@@ -33,31 +33,68 @@ export function AuthEntryState({ children }: { children: ReactNode }) {
   return (
     <div className={styles.formShell}>
       <div className={styles.headingGroup}>
+        <span className={styles.formKicker}>บัญชีพร้อมใช้งาน</span>
         <h2 className={styles.title}>คุณเข้าสู่ระบบอยู่แล้ว</h2>
         <p className={styles.description}>
-          ไปยังงานที่ต้องการได้เลย โดยไม่ต้องกรอกข้อมูลบัญชีอีกครั้ง
+          เลือกปลายทางที่ต้องการได้เลย โดยไม่ต้องกรอกข้อมูลบัญชีอีกครั้ง
         </p>
       </div>
 
-      <div className={styles.accountSummary}>
-        <span className={styles.accountLabel}>บัญชีที่ใช้งาน</span>
-        <strong className={styles.accountName}>{auth.user.name}</strong>
-        <span className={styles.accountEmail}>{auth.user.email}</span>
-      </div>
+      <section className={styles.accountSummary} aria-label="บัญชีที่ใช้งาน">
+        <span className={styles.accountStatus}>
+          <span className={styles.accountStatusDot} aria-hidden="true" />
+          เข้าสู่ระบบแล้ว
+        </span>
+        <div className={styles.accountIdentity}>
+          <span className={styles.accountAvatar} aria-hidden="true">
+            {auth.user.name.trim().charAt(0).toUpperCase() || "U"}
+          </span>
+          <div>
+            <strong className={styles.accountName}>{auth.user.name}</strong>
+            <span className={styles.accountEmail}>{auth.user.email}</span>
+          </div>
+        </div>
+      </section>
 
-      <div className={styles.accountActions}>
-        <Link href="/my/orders/" className={styles.accountActionPrimary}>
-          คำสั่งซื้อของฉัน
+      <nav className={styles.accountActions} aria-label="ไปยังพื้นที่ใช้งาน">
+        <Link
+          href="/my/orders/"
+          className={styles.accountActionPrimary}
+          aria-label="คำสั่งซื้อของฉัน"
+        >
+          <span>
+            <strong>คำสั่งซื้อของฉัน</strong>
+            <small>ดูสถานะ ชำระเงิน และรับสินค้า</small>
+          </span>
+          <span aria-hidden="true">→</span>
         </Link>
-        <Link href="/notifications/" className={styles.accountActionSecondary}>
-          การแจ้งเตือน
+
+        <Link
+          href="/notifications/"
+          className={styles.accountActionSecondary}
+          aria-label="การแจ้งเตือน"
+        >
+          <span>
+            <strong>การแจ้งเตือน</strong>
+            <small>ดูเหตุการณ์ล่าสุดจากรายการของคุณ</small>
+          </span>
+          <span aria-hidden="true">→</span>
         </Link>
+
         {hasOrganizationAccess ? (
-          <Link href="/org/select/" className={styles.accountActionSecondary}>
-            ไปยังพื้นที่หน่วยงาน
+          <Link
+            href="/org/select/"
+            className={styles.accountActionSecondary}
+            aria-label="ไปยังพื้นที่หน่วยงาน"
+          >
+            <span>
+              <strong>พื้นที่หน่วยงาน</strong>
+              <small>เลือกหน่วยงานตามสิทธิ์ที่บัญชีได้รับ</small>
+            </span>
+            <span aria-hidden="true">→</span>
           </Link>
         ) : null}
-      </div>
+      </nav>
 
       <Link href="/" className={styles.backLink}>
         กลับหน้าร้านค้า

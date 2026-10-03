@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 
 import { ErrorState, LoadingState } from "@/components";
 import { ApiClientError } from "@/services";
+import type { CampaignStatus } from "@/types";
 import { formatIsoDateTime, getRequiredQueryId } from "@/utils";
 
 import {
@@ -25,6 +26,16 @@ type CampaignViewState =
   | { status: "notFound" }
   | { status: "error" }
   | { status: "success"; data: StorefrontCampaignView };
+
+const campaignGuidance: Record<CampaignStatus, string> = {
+  DRAFT: "แคมเปญนี้ยังไม่เปิดให้สั่งซื้อ",
+  OPEN: "กำลังเปิดรับคำสั่งซื้อ เลือกสินค้าด้านล่างเพื่อดูตัวเลือกและราคา",
+  CLOSED: "ปิดรับคำสั่งซื้อแล้ว รายการที่สั่งไว้จะดำเนินต่อไปตามสถานะของระบบ",
+  PRODUCING: "อยู่ระหว่างการผลิตสำหรับคำสั่งซื้อที่ผ่านขั้นตอนก่อนหน้า",
+  READY_FOR_PICKUP: "คำสั่งซื้อที่พร้อมแล้วสามารถติดตามขั้นตอนรับสินค้าได้จากบัญชีของคุณ",
+  COMPLETED: "แคมเปญนี้ดำเนินการเสร็จสิ้นแล้ว",
+  CANCELLED: "แคมเปญนี้ถูกยกเลิกและไม่เปิดรับคำสั่งซื้อ",
+};
 
 export function CampaignView() {
   const [state, setState] = useState<CampaignViewState>({
@@ -130,40 +141,47 @@ export function CampaignView() {
 
         <section className={styles.hero}>
           <div className={styles.heroCopy}>
-            <span className={styles.eyebrow}>แคมเปญจาก {store.name}</span>
-            <div>
-              <CampaignStatusBadge status={campaign.status} />
-            </div>
+            <span className={styles.eyebrow}>รอบขายจาก {store.name}</span>
             <h1 className={styles.title}>{campaign.name}</h1>
             <p className={styles.description}>
-              ตรวจสอบช่วงเวลาและสถานะของแคมเปญก่อนเลือกสินค้าที่ต้องการสั่งซื้อ
+              ตรวจสอบสถานะและช่วงเวลาสำคัญของรอบนี้ก่อนเลือกสินค้าที่ต้องการ
             </p>
           </div>
 
-          <div className={styles.heroMeta} role="group" aria-label="สรุปแคมเปญ">
-            <div>
-              <span className={styles.metaLabel}>สินค้าในแคมเปญ</span>
-              <strong className={styles.metaValue} data-numeric>
-                {products.length}
-              </strong>
+          <aside
+            className={styles.campaignStatusPanel}
+            aria-label="สถานะแคมเปญปัจจุบัน"
+          >
+            <div className={styles.campaignStatusTop}>
+              <span className={styles.metaLabel}>สถานะปัจจุบัน</span>
+              <CampaignStatusBadge status={campaign.status} />
             </div>
-            <div>
-              <span className={styles.metaLabel}>ร้านค้า</span>
-              <strong className={styles.metaValue}>{store.name}</strong>
+            <p className={styles.campaignStatusDescription}>
+              {campaignGuidance[campaign.status]}
+            </p>
+            <div className={styles.campaignFacts}>
+              <div>
+                <span className={styles.metaLabel}>สินค้า</span>
+                <strong data-numeric>{products.length}</strong>
+              </div>
+              <div>
+                <span className={styles.metaLabel}>ร้าน</span>
+                <strong>{store.name}</strong>
+              </div>
             </div>
-          </div>
+          </aside>
         </section>
 
         <section className={styles.section} aria-labelledby="schedule-heading">
           <div className={styles.sectionHeader}>
             <div>
-              <span className={styles.eyebrow}>กำหนดการ</span>
+              <span className={styles.eyebrow}>กำหนดการของรอบนี้</span>
               <h2 className={styles.sectionTitle} id="schedule-heading">
                 ช่วงเวลาสำคัญ
               </h2>
             </div>
             <p className={styles.sectionDescription}>
-              ใช้ช่วงเวลานี้ประกอบการวางแผนสั่งซื้อ ชำระเงิน และรับสินค้า
+              วันที่เหล่านี้เป็นข้อมูลของแคมเปญปัจจุบัน ใช้ประกอบการวางแผนสั่งซื้อ ชำระเงิน และรับสินค้า
             </p>
           </div>
 
@@ -198,13 +216,13 @@ export function CampaignView() {
         <section className={styles.section} aria-labelledby="campaign-products">
           <div className={styles.sectionHeader}>
             <div>
-              <span className={styles.eyebrow}>เลือกสินค้า</span>
+              <span className={styles.eyebrow}>สินค้าในรอบนี้</span>
               <h2 className={styles.sectionTitle} id="campaign-products">
-                สินค้าสำหรับแคมเปญนี้
+                เลือกสินค้าที่ต้องการ
               </h2>
             </div>
             <p className={styles.sectionDescription}>
-              เลือกสินค้าเพื่อดูตัวเลือก ราคา และเริ่มขั้นตอนสั่งซื้อ
+              เปิดสินค้าเพื่อดูตัวเลือก ราคา และตรวจสอบว่าสถานะปัจจุบันสามารถเริ่มสั่งซื้อได้หรือไม่
             </p>
           </div>
 

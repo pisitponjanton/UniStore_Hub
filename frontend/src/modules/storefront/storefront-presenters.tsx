@@ -101,13 +101,16 @@ export function CampaignCard({
       className={styles.campaignCard}
     >
       <div className={styles.cardHeader}>
-        <h3 className={styles.cardTitle}>{campaign.name}</h3>
+        <div className={styles.campaignIdentity}>
+          <span className={styles.campaignType}>รอบพรีออเดอร์</span>
+          <h3 className={styles.cardTitle}>{campaign.name}</h3>
+        </div>
         <CampaignStatusBadge status={campaign.status} />
       </div>
 
-      <div className={styles.cardMeta}>
+      <div className={styles.cardMeta} aria-label="ช่วงเวลารับคำสั่งซื้อ">
         <div className={styles.cardMetaRow}>
-          <span>เปิดรับ</span>
+          <span>เริ่มรับ</span>
           <span className={styles.cardMetaValue}>
             {formatIsoDateTime(campaign.openAt)}
           </span>
@@ -120,7 +123,9 @@ export function CampaignCard({
         </div>
       </div>
 
-      <span className={styles.cardAction}>ดูรายละเอียดแคมเปญ</span>
+      <div className={styles.campaignCardFooter}>
+        <span className={styles.cardAction}>ดูรอบขาย</span>
+      </div>
     </Link>
   );
 }
@@ -171,7 +176,8 @@ export function ProductCard({
         )}
       </div>
 
-      <div>
+      <div className={styles.productIdentity}>
+        <span className={styles.productType}>สินค้า</span>
         <h3 className={styles.cardTitle}>{product.name}</h3>
         {product.description ? (
           <p className={styles.cardDescription}>{product.description}</p>
@@ -179,7 +185,14 @@ export function ProductCard({
       </div>
 
       <div className={styles.productFooter}>
-        {price ? <div className={styles.price}>เริ่มต้น {price}</div> : <span />}
+        {price ? (
+          <div>
+            <span className={styles.priceLabel}>ราคาเริ่มต้น</span>
+            <strong className={styles.price}>{price}</strong>
+          </div>
+        ) : (
+          <span className={styles.priceUnavailable}>ตรวจสอบตัวเลือกสินค้า</span>
+        )}
         <span className={styles.cardAction}>ดูสินค้า</span>
       </div>
     </Link>

@@ -104,54 +104,57 @@ export function RegisterForm() {
   return (
     <div className={styles.formShell}>
       <div className={styles.headingGroup}>
-        <h2 className={styles.title}>สร้างบัญชี</h2>
+        <span className={styles.formKicker}>เริ่มใช้งาน UniStore Hub</span>
+        <h2 className={styles.title}>สร้างบัญชีของคุณ</h2>
         <p className={styles.description}>
-          สมัครเพื่อสั่งสินค้า ติดตามคำสั่งซื้อ และรับการแจ้งเตือนจากระบบ
+          ใช้บัญชีเดียวสำหรับสั่งซื้อ ติดตามการชำระเงิน และดูข้อมูลรับสินค้า
         </p>
       </div>
 
       {navigation.hasReturnContext ? (
-        <Notice tone="info" title="กลับไปทำรายการเดิมต่อได้">
-          หลังสมัครสำเร็จ ระบบจะพาคุณกลับไปยังหน้าที่กำลังใช้งานก่อนหน้านี้
+        <Notice tone="info" title="สมัครแล้วกลับไปทำรายการต่อ">
+          เมื่อสร้างบัญชีสำเร็จ ระบบจะพาคุณกลับไปยังหน้าที่กำลังใช้งานก่อนหน้านี้
         </Notice>
       ) : null}
 
       <form className={styles.form} onSubmit={handleSubmit} noValidate>
-        <TextField
-          id="register-name"
-          label="ชื่อ"
-          autoComplete="name"
-          value={name}
-          onChange={(event) => updateName(event.target.value)}
-          error={fieldErrors.name}
-          disabled={pending}
-          autoFocus
-          required
-        />
-        <TextField
-          id="register-email"
-          label="อีเมล"
-          type="email"
-          autoComplete="email"
-          inputMode="email"
-          value={email}
-          onChange={(event) => updateEmail(event.target.value)}
-          error={fieldErrors.email}
-          disabled={pending}
-          required
-        />
-        <TextField
-          id="register-password"
-          label="รหัสผ่าน"
-          type="password"
-          autoComplete="new-password"
-          hint="ใช้รหัสผ่านขนาด 8 ถึง 72 ไบต์"
-          value={password}
-          onChange={(event) => updatePassword(event.target.value)}
-          error={fieldErrors.password}
-          disabled={pending}
-          required
-        />
+        <div className={styles.formFields}>
+          <TextField
+            id="register-name"
+            label="ชื่อที่แสดง"
+            autoComplete="name"
+            value={name}
+            onChange={(event) => updateName(event.target.value)}
+            error={fieldErrors.name}
+            disabled={pending}
+            autoFocus
+            required
+          />
+          <TextField
+            id="register-email"
+            label="อีเมล"
+            type="email"
+            autoComplete="email"
+            inputMode="email"
+            value={email}
+            onChange={(event) => updateEmail(event.target.value)}
+            error={fieldErrors.email}
+            disabled={pending}
+            required
+          />
+          <TextField
+            id="register-password"
+            label="รหัสผ่าน"
+            type="password"
+            autoComplete="new-password"
+            hint="รหัสผ่านต้องมีความยาว 8 ถึง 72 ไบต์"
+            value={password}
+            onChange={(event) => updatePassword(event.target.value)}
+            error={fieldErrors.password}
+            disabled={pending}
+            required
+          />
+        </div>
 
         {serverError ? (
           <Notice tone="danger" role="alert" title="สมัครสมาชิกไม่สำเร็จ">
@@ -166,14 +169,18 @@ export function RegisterForm() {
             pending={pending}
             pendingLabel="กำลังสร้างบัญชี"
           >
-            สมัครสมาชิก
+            สร้างบัญชี
           </Button>
         </div>
       </form>
 
+      <div className={styles.formDivider} aria-hidden="true">
+        <span />
+      </div>
+
       <div className={styles.formFooter}>
         <p className={styles.switchText}>
-          มีบัญชีแล้ว?{" "}
+          มีบัญชีแล้ว?
           <Link href={navigation.loginHref} className={styles.switchLink}>
             เข้าสู่ระบบ
           </Link>

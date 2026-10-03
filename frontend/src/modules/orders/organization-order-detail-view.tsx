@@ -242,6 +242,7 @@ export function OrganizationOrderDetailView({
         <section className={styles.detailHero}>
           <div className={styles.detailTop}>
             <div className={styles.detailTitleGroup} data-ledger-heading>
+              <span className={styles.pageKicker}>คำสั่งซื้อในหน่วยงาน</span>
               <h1 className={styles.title}>รายละเอียดคำสั่งซื้อ</h1>
               <span className={styles.orderCode}>
                 Order {order.orderId}

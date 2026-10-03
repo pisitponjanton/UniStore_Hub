@@ -94,43 +94,46 @@ export function LoginForm() {
   return (
     <div className={styles.formShell}>
       <div className={styles.headingGroup}>
-        <h2 className={styles.title}>เข้าสู่ระบบ</h2>
+        <span className={styles.formKicker}>ยินดีต้อนรับกลับ</span>
+        <h2 className={styles.title}>เข้าสู่บัญชีของคุณ</h2>
         <p className={styles.description}>
-          ใช้อีเมลและรหัสผ่านของคุณเพื่อเข้าสู่ UniStore Hub
+          ใช้อีเมลและรหัสผ่านเดิมเพื่อกลับไปดูรายการที่กำลังดำเนินการ
         </p>
       </div>
 
       {navigation.hasReturnContext ? (
-        <Notice tone="info" title="กลับไปทำรายการเดิมต่อได้">
+        <Notice tone="info" title="ทำรายการเดิมต่อได้ทันที">
           หลังเข้าสู่ระบบ ระบบจะพาคุณกลับไปยังหน้าที่กำลังใช้งานก่อนหน้านี้
         </Notice>
       ) : null}
 
       <form className={styles.form} onSubmit={handleSubmit} noValidate>
-        <TextField
-          id="login-email"
-          label="อีเมล"
-          type="email"
-          autoComplete="email"
-          inputMode="email"
-          value={email}
-          onChange={(event) => updateEmail(event.target.value)}
-          error={fieldErrors.email}
-          disabled={pending}
-          autoFocus
-          required
-        />
-        <TextField
-          id="login-password"
-          label="รหัสผ่าน"
-          type="password"
-          autoComplete="current-password"
-          value={password}
-          onChange={(event) => updatePassword(event.target.value)}
-          error={fieldErrors.password}
-          disabled={pending}
-          required
-        />
+        <div className={styles.formFields}>
+          <TextField
+            id="login-email"
+            label="อีเมล"
+            type="email"
+            autoComplete="email"
+            inputMode="email"
+            value={email}
+            onChange={(event) => updateEmail(event.target.value)}
+            error={fieldErrors.email}
+            disabled={pending}
+            autoFocus
+            required
+          />
+          <TextField
+            id="login-password"
+            label="รหัสผ่าน"
+            type="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(event) => updatePassword(event.target.value)}
+            error={fieldErrors.password}
+            disabled={pending}
+            required
+          />
+        </div>
 
         {serverError ? (
           <Notice tone="danger" role="alert" title="เข้าสู่ระบบไม่สำเร็จ">
@@ -150,9 +153,13 @@ export function LoginForm() {
         </div>
       </form>
 
+      <div className={styles.formDivider} aria-hidden="true">
+        <span />
+      </div>
+
       <div className={styles.formFooter}>
         <p className={styles.switchText}>
-          ยังไม่มีบัญชี?{" "}
+          ยังไม่มีบัญชี?
           <Link href={navigation.registerHref} className={styles.switchLink}>
             สมัครสมาชิก
           </Link>

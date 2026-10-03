@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import {
   Button,
@@ -137,6 +137,16 @@ export function MyOrdersView() {
     }
   }
 
+  const attentionCount = useMemo(() => {
+    if (state.status !== "success") {
+      return 0;
+    }
+
+    return state.items.filter(
+      (order) => getCustomerOrderGuidance(order.status).action !== null,
+    ).length;
+  }, [state]);
+
   if (state.status !== "success") {
     return (
       <div className={styles.page}>
@@ -174,10 +184,11 @@ export function MyOrdersView() {
     <div className={styles.page}>
       <main className={styles.main}>
         <header className={styles.header}>
-          <div className={styles.headerCopy} data-ledger-heading>
+          <div className={styles.headerCopy}>
+            <span className={styles.pageKicker}>บัญชีของฉัน</span>
             <h1 className={styles.title}>คำสั่งซื้อของฉัน</h1>
             <p className={styles.description}>
-              ดูสถานะล่าสุด ยอดรวม และสิ่งที่ต้องทำต่อของแต่ละคำสั่งซื้อ
+              เริ่มจากรายการที่ต้องทำต่อ แล้วค่อยเปิดดูรายละเอียดของแต่ละคำสั่งซื้อ
             </p>
           </div>
           <Link href="/" className={styles.headerAction}>
@@ -185,39 +196,93 @@ export function MyOrdersView() {
           </Link>
         </header>
 
-        <section className={styles.orderLedger} aria-label="รายการคำสั่งซื้อ">
-          {state.items.map((order) => {
-            const guidance = getCustomerOrderGuidance(order.status);
+        <section
+          className={styles.orderOverview}
+          aria-label="ภาพรวมคำสั่งซื้อที่โหลดอยู่"
+        >
+          <div className={styles.overviewPrimary}>
+            <span className={styles.overviewMarker} aria-hidden="true" />
+            <div>
+              <span className={styles.summaryLabel}>รายการที่ต้องทำต่อ</span>
+              <strong data-numeric>{attentionCount}</strong>
+            </div>
+          </div>
+          <p className={styles.overviewDescription}>
+            {attentionCount > 0
+              ? "รายการที่มีขั้นตอนให้คุณดำเนินการจะถูกทำให้เห็นเด่นขึ้นด้านล่าง"
+              : "ยังไม่มีคำสั่งซื้อที่ต้องดำเนินการจากคุณในรายการที่โหลดอยู่"}
+          </p>
+          <div className={styles.overviewLoaded}>
+            <span className={styles.summaryLabel}>โหลดแล้ว</span>
+            <strong data-numeric>{state.items.length} รายการ</strong>
+          </div>
+        </section>
 
-            return (
-              <article className={styles.orderRow} key={order.orderId}>
-                <div className={styles.orderPrimary}>
-                  <div className={styles.orderTopline}>
-                    <OrderStatusBadge status={order.status} />
-                    <span className={styles.orderMeta}>
-                      {formatIsoDateTime(order.createdAt)}
+        <section className={styles.orderLedger} aria-label="รายการคำสั่งซื้อ">
+          <div className={styles.ledgerHeading}>
+            <div>
+              <span className={styles.pageKicker}>รายการล่าสุด</span>
+              <h2>ติดตามสถานะและขั้นตอนถัดไป</h2>
+            </div>
+            <span className={styles.ledgerHint}>
+              ยอดและสถานะแสดงจากข้อมูลล่าสุดที่โหลดจากระบบ
+            </span>
+          </div>
+
+          <div className={styles.orderRows}>
+            {state.items.map((order) => {
+              const guidance = getCustomerOrderGuidance(order.status);
+              const needsAction = guidance.action !== null;
+
+              return (
+                <article
+                  className={styles.orderRow}
+                  data-needs-action={needsAction || undefined}
+                  key={order.orderId}
+                >
+                  <div className={styles.orderPrimary}>
+                    <div className={styles.orderTopline}>
+                      <OrderStatusBadge status={order.status} />
+                      <span className={styles.orderMeta}>
+                        {formatIsoDateTime(order.updatedAt)}
+                      </span>
+                    </div>
+
+                    <div className={styles.orderIdentity}>
+                      <span className={styles.orderId} data-technical>
+                        {order.orderId}
+                      </span>
+                      <p className={styles.orderNextStep}>{guidance.title}</p>
+                      <p className={styles.orderGuidance}>
+                        {guidance.description}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className={styles.orderAmount}>
+                    <span className={styles.amountLabel}>ยอดรวม</span>
+                    <strong className={styles.amountValue} data-numeric>
+                      {formatSatang(order.total)}
+                    </strong>
+                    <span className={styles.orderCreated}>
+                      สร้าง {formatIsoDateTime(order.createdAt)}
                     </span>
                   </div>
-                  <div className={styles.orderId}>{order.orderId}</div>
-                  <p className={styles.orderNextStep}>{guidance.title}</p>
-                </div>
 
-                <div className={styles.orderAmount}>
-                  <span className={styles.amountLabel}>ยอดรวม</span>
-                  <span className={styles.amountValue}>
-                    {formatSatang(order.total)}
-                  </span>
-                </div>
-
-                <Link
-                  href={myOrderHref(order.orderId)}
-                  className={styles.detailLink}
-                >
-                  {guidance.action ? "ดูและดำเนินการ" : "ดูรายละเอียด"}
-                </Link>
-              </article>
-            );
-          })}
+                  <Link
+                    href={myOrderHref(order.orderId)}
+                    className={
+                      needsAction
+                        ? styles.detailLinkPrimary
+                        : styles.detailLink
+                    }
+                  >
+                    {needsAction ? "ดำเนินการต่อ" : "ดูรายละเอียด"}
+                  </Link>
+                </article>
+              );
+            })}
+          </div>
         </section>
 
         {loadMoreError ? (
@@ -234,10 +299,12 @@ export function MyOrdersView() {
               pendingLabel="กำลังโหลด"
               onClick={handleLoadMore}
             >
-              โหลดเพิ่มเติม
+              โหลดคำสั่งซื้อเพิ่มเติม
             </Button>
           </div>
-        ) : null}
+        ) : (
+          <p className={styles.endOfList}>แสดงรายการที่มีทั้งหมดแล้ว</p>
+        )}
       </main>
     </div>
   );

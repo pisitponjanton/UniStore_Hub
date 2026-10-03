@@ -8,12 +8,21 @@ import {
   isDefinitiveSessionFailure,
 } from "@/modules/auth";
 import { ApiClientError } from "@/services";
-import type { CampaignDTO } from "@/types";
+import type { CampaignDTO, CampaignStatus } from "@/types";
 
 import { campaignStatusLabel } from "./campaign-helpers";
 import { lifecycleActionsForStatus } from "./campaign-lifecycle";
 import { campaignService } from "./campaign-service";
 import styles from "./campaign-lifecycle-actions.module.css";
+
+const LIFECYCLE: CampaignStatus[] = [
+  "DRAFT",
+  "OPEN",
+  "CLOSED",
+  "PRODUCING",
+  "READY_FOR_PICKUP",
+  "COMPLETED",
+];
 
 function errorMessage(error: unknown): string {
   if (error instanceof ApiClientError) {
@@ -33,6 +42,28 @@ function errorMessage(error: unknown): string {
   }
 
   return "ไม่สามารถเปลี่ยนสถานะแคมเปญได้ กรุณาลองใหม่อีกครั้ง";
+}
+
+function lifecycleStepState(
+  step: CampaignStatus,
+  current: CampaignStatus,
+): "done" | "current" | "upcoming" {
+  if (current === "CANCELLED") {
+    return "upcoming";
+  }
+
+  const currentIndex = LIFECYCLE.indexOf(current);
+  const stepIndex = LIFECYCLE.indexOf(step);
+
+  if (stepIndex < currentIndex) {
+    return "done";
+  }
+
+  if (stepIndex === currentIndex) {
+    return "current";
+  }
+
+  return "upcoming";
 }
 
 export function CampaignLifecycleActions({
@@ -121,6 +152,40 @@ export function CampaignLifecycleActions({
           {campaignStatusLabel(campaign.status)}
         </Badge>
       </div>
+
+      {campaign.status === "CANCELLED" ? (
+        <div className={styles.cancelledPath} role="status">
+          <span className={styles.cancelledMarker} aria-hidden="true" />
+          <div>
+            <strong>วงจรแคมเปญสิ้นสุดด้วยการยกเลิก</strong>
+            <span>
+              ระบบจะไม่แสดงขั้นตอนถัดไปหลังจากสถานะยกเลิก
+            </span>
+          </div>
+        </div>
+      ) : (
+        <ol className={styles.lifecycleRail} aria-label="ลำดับสถานะแคมเปญ">
+          {LIFECYCLE.map((step, index) => {
+            const stepState = lifecycleStepState(step, campaign.status);
+
+            return (
+              <li
+                className={styles.lifecycleStep}
+                data-state={stepState}
+                aria-current={stepState === "current" ? "step" : undefined}
+                key={step}
+              >
+                <span className={styles.lifecycleIndex} aria-hidden="true">
+                  {stepState === "done" ? "✓" : index + 1}
+                </span>
+                <span className={styles.lifecycleLabel}>
+                  {campaignStatusLabel(step)}
+                </span>
+              </li>
+            );
+          })}
+        </ol>
+      )}
 
       {error ? (
         <Notice tone="danger" role="alert" title="เปลี่ยนสถานะไม่สำเร็จ">

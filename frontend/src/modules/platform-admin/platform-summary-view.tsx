@@ -138,6 +138,7 @@ export function PlatformSummaryView() {
       <main className={styles.main}>
         <header className={styles.header}>
           <div className={styles.headerCopy} data-ledger-heading>
+            <span className={styles.pageKicker}>ขอบเขตระดับ Platform</span>
             <h1 className={styles.title}>ภาพรวม Platform</h1>
             <p className={styles.description}>
               ตรวจสถานะหน่วยงานและผู้ใช้จากข้อมูลระดับ Platform

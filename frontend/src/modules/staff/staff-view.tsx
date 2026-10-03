@@ -272,6 +272,7 @@ export function StaffView({
       <main className={styles.main}>
         <header className={styles.header}>
           <div className={styles.headerCopy} data-ledger-heading>
+            <span className={styles.pageKicker}>สิทธิ์และสมาชิกหน่วยงาน</span>
             <h1 className={styles.title}>บุคลากรและสิทธิ์</h1>
             <p className={styles.description}>
               เพิ่มผู้ใช้ที่มีบัญชีอยู่แล้ว กำหนดบทบาท และจัดการสมาชิกของหน่วยงาน

@@ -281,6 +281,7 @@ export function ProductionSummaryView({
       <main className={styles.main}>
         <header className={styles.header}>
           <div className={styles.headerCopy} data-ledger-heading>
+            <span className={styles.pageKicker}>รายการเตรียมผลิตตามแคมเปญ</span>
             <h1 className={styles.title}>สรุปงานผลิต</h1>
             <p className={styles.description}>
               เลือกแคมเปญเพื่อดูจำนวนสินค้าที่ต้องเตรียม แยกตามสินค้าและตัวเลือก โดยใช้สรุปที่ระบบส่งกลับโดยตรง

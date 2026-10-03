@@ -295,37 +295,48 @@ export function NotificationsView() {
     <div className={styles.page}>
       <main className={styles.main}>
         <header className={styles.header}>
-          <div className={styles.headerCopy} data-ledger-heading>
+          <div className={styles.headerCopy}>
+            <span className={styles.pageKicker}>กล่องเหตุการณ์ของฉัน</span>
             <h1 className={styles.title}>การแจ้งเตือน</h1>
             <p className={styles.description}>
-              ดูเหตุการณ์สำคัญเรื่องการชำระเงินและการรับสินค้า
+              ใช้หน้านี้เพื่อดูว่าเกิดอะไรขึ้นล่าสุด แล้วเปิดหน้าคำสั่งซื้อหรือขั้นตอนที่เกี่ยวข้องเพื่อตรวจสถานะจริง
             </p>
           </div>
           <Button
             variant="secondary"
+            aria-label="รีเฟรชรายการ"
             pending={refreshing}
             pendingLabel="กำลังรีเฟรช"
             onClick={handleRefresh}
           >
-            รีเฟรชรายการ
+            ตรวจเหตุการณ์ล่าสุด
           </Button>
         </header>
 
-        <div className={styles.controlBar}>
-          {filterControls}
-          <div className={styles.refreshNote}>
-            รายการนี้ไม่อัปเดตอัตโนมัติ ใช้ปุ่มรีเฟรชเมื่อต้องการตรวจสอบเหตุการณ์ล่าสุด
+        <section className={styles.controlPanel} aria-label="ตัวกรองและภาพรวมการแจ้งเตือน">
+          <div className={styles.controlBar}>
+            {filterControls}
+            <div className={styles.refreshNote}>
+              รายการนี้ไม่อัปเดตอัตโนมัติ กดตรวจเหตุการณ์ล่าสุดเมื่ออยากดูข้อมูลรอบใหม่
+            </div>
           </div>
-        </div>
 
-        {state.status === "success" ? (
-          <div className={styles.listSummary} aria-live="polite">
-            <span>โหลดแล้ว {loadedCount} รายการ</span>
-            {filter !== "read" ? (
-              <span>ยังไม่อ่านในรายการที่โหลด {unreadLoadedCount}</span>
-            ) : null}
-          </div>
-        ) : null}
+          {state.status === "success" ? (
+            <div className={styles.listSummary} aria-live="polite">
+              <div>
+                <span className={styles.summaryLabel}>รายการที่โหลด</span>
+                <strong data-numeric>{loadedCount}</strong>
+              </div>
+              <div>
+                <span className={styles.summaryLabel}>ยังไม่อ่าน</span>
+                <strong data-numeric>{unreadLoadedCount}</strong>
+              </div>
+              <p>
+                การแจ้งเตือนบอกว่าเกิดเหตุการณ์อะไรขึ้น แต่สถานะล่าสุดให้ตรวจจากหน้าคำสั่งซื้อ การชำระเงิน หรือรับสินค้า
+              </p>
+            </div>
+          ) : null}
+        </section>
 
         {feedback ? (
           <div className={styles.feedback} role="status" aria-live="polite">

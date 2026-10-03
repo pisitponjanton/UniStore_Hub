@@ -298,6 +298,7 @@ export function AuditView({
       <main className={styles.main}>
         <header className={styles.header}>
           <div className={styles.headerCopy} data-ledger-heading>
+            <span className={styles.pageKicker}>บันทึกเหตุการณ์แบบอ่านอย่างเดียว</span>
             <h1 className={styles.title}>ประวัติการทำรายการ</h1>
             <p className={styles.description}>
               ตรวจสอบว่าใครทำอะไรกับข้อมูลใดและเมื่อไร โดยรายการนี้เป็นประวัติแบบอ่านอย่างเดียว

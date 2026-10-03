@@ -2,7 +2,7 @@
 
 import { useState, type ChangeEvent } from "react";
 
-import { Badge, Button, Notice } from "@/components";
+import { Badge, Button, FileField, Notice } from "@/components";
 import {
   authSession,
   isDefinitiveSessionFailure,
@@ -199,35 +199,15 @@ export function ProductImageUploadView({
         </Badge>
       </div>
 
-      <div className={styles.uploadField}>
-        <label
-          className={styles.fileLabel}
-          htmlFor={`product-image-${product.productId}`}
-        >
-          เลือกรูปสินค้า
-        </label>
-        <input
-          className={styles.fileInput}
-          id={`product-image-${product.productId}`}
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          disabled={pending}
-          aria-invalid={fileError ? true : undefined}
-          aria-describedby={
-            fileError
-              ? `product-image-${product.productId}-hint product-image-${product.productId}-error`
-              : `product-image-${product.productId}-hint`
-          }
-          onChange={handleFileChange}
-        />
-        <span
-          className={styles.fileHint}
-          id={`product-image-${product.productId}-hint`}
-        >
-          การอัปโหลดรูปใหม่จะใช้รูปนี้เป็นรูปปัจจุบันของสินค้า
-        </span>
-      </div>
-
+      <FileField
+        id={`product-image-${product.productId}`}
+        label="เลือกรูปสินค้า"
+        hint="การอัปโหลดรูปใหม่จะใช้รูปนี้เป็นรูปปัจจุบันของสินค้า"
+        error={fileError ?? undefined}
+        accept="image/jpeg,image/png,image/webp"
+        disabled={pending}
+        onChange={handleFileChange}
+      />
       {file ? (
         <div className={styles.selected}>
           <div className={styles.selectedCopy}>
@@ -240,17 +220,6 @@ export function ProductImageUploadView({
         </div>
       ) : null}
 
-      {fileError ? (
-        <Notice
-          tone="danger"
-          role="alert"
-          title="ไฟล์นี้ใช้ไม่ได้"
-        >
-          <span id={`product-image-${product.productId}-error`}>
-            {fileError}
-          </span>
-        </Notice>
-      ) : null}
 
       {serverError ? (
         <Notice

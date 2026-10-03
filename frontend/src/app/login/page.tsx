@@ -9,8 +9,9 @@ export const metadata: Metadata = {
 export default function LoginPage() {
   return (
     <AuthPageFrame
-      introTitle="กลับมาทำรายการต่อใน UniStore Hub"
-      introDescription="เข้าสู่ระบบเพื่อดูคำสั่งซื้อ การแจ้งเตือน และพื้นที่หน่วยงานที่บัญชีของคุณมีสิทธิ์ใช้งาน"
+      introKicker="กลับมาทำรายการต่อ"
+      introTitle="กลับเข้าสู่รายการของคุณได้จากบัญชีเดียว"
+      introDescription="เข้าสู่ระบบเพื่อดูคำสั่งซื้อ การชำระเงิน การรับสินค้า และพื้นที่หน่วยงานที่บัญชีของคุณได้รับสิทธิ์"
     >
       <AuthEntryState>
         <LoginForm />

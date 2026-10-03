@@ -170,11 +170,14 @@ export function MyPickupView() {
             กลับรายละเอียดคำสั่งซื้อ
           </Link>
 
-          <header className={styles.header} data-ledger-heading>
-            <h1 className={styles.title}>รับสินค้า</h1>
-            <p className={styles.description}>
-              QR และ Token จะพร้อมใช้งานเมื่อคำสั่งซื้อเข้าสู่ขั้นตอนรับสินค้า
-            </p>
+          <header className={styles.header}>
+            <div className={styles.headerCopy}>
+              <span className={styles.pageKicker}>ขั้นตอนรับสินค้า</span>
+              <h1 className={styles.title}>ยังไม่ต้องเดินทางไปรับสินค้า</h1>
+              <p className={styles.description}>
+                ระบบจะแสดงบัตรรับสินค้าเมื่อคำสั่งซื้อเข้าสู่สถานะพร้อมรับสินค้า
+              </p>
+            </div>
           </header>
 
           <TaskStatus
@@ -245,18 +248,18 @@ export function MyPickupView() {
           กลับรายละเอียดคำสั่งซื้อ
         </Link>
 
-        <header className={styles.header} data-ledger-heading>
-          <div>
+        <header className={styles.header}>
+          <div className={styles.headerCopy}>
+            <span className={styles.pageKicker}>บัตรรับสินค้าของฉัน</span>
             <h1 className={styles.title}>รับสินค้า</h1>
             <p className={styles.description}>
-              ใช้ QR หรือ Token ด้านล่างกับเจ้าหน้าที่ที่จุดรับสินค้า
+              เปิดหน้านี้เมื่อถึงจุดรับสินค้า แล้วแสดง QR หรือ Pickup Token ให้เจ้าหน้าที่
             </p>
           </div>
           <Badge tone={received ? "neutral" : "success"}>
             {getPickupStatusLabel(pickup.status)}
           </Badge>
         </header>
-
         <TaskStatus
           tone={presentation.tone}
           label={<OrderStatusBadge status={order.status} />}

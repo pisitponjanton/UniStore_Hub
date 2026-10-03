@@ -49,7 +49,6 @@ function operationErrorMessage(error: unknown): string {
 
   return "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง";
 }
-
 export function StoreManagementView({
   organizationId,
 }: {
@@ -326,6 +325,7 @@ export function StoreManagementView({
       <main className={styles.main}>
         <header className={styles.header}>
           <div className={styles.headerCopy} data-ledger-heading>
+            <span className={styles.pageKicker}>โครงสร้างพื้นที่ขาย</span>
             <h1 className={styles.title}>ร้านค้า</h1>
             <p className={styles.description}>
               จัดการพื้นที่ขายภายในหน่วยงาน และกำหนดว่าร้านค้าใดพร้อมใช้งาน

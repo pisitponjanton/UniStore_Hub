@@ -1,20 +1,21 @@
 .root {
   display: grid;
-  gap: var(--space-4);
+  gap: var(--space-5);
 }
 
 .currentState {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: var(--space-4);
+  align-items: center;
   padding: var(--space-4);
-  border-top: 1px solid var(--line-soft);
-  border-bottom: 1px solid var(--line-soft);
-  background: var(--surface-muted);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
 }
 
 .currentState > div {
+  min-width: 0;
   display: grid;
   gap: 2px;
 }
@@ -22,7 +23,7 @@
 .currentState strong {
   color: var(--ink);
   font-size: var(--text-title-sm);
-  font-weight: 600;
+  font-weight: 650;
 }
 
 .stateLabel {
@@ -30,9 +31,129 @@
   font-size: var(--text-caption);
 }
 
+.lifecycleRail {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  border-block: 1px solid var(--line-strong);
+}
+
+.lifecycleStep {
+  position: relative;
+  min-width: 0;
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-2);
+  border-right: 1px solid var(--line-soft);
+  text-align: center;
+}
+
+.lifecycleStep:last-child {
+  border-right: 0;
+}
+
+.lifecycleStep::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 3px;
+  background: transparent;
+}
+
+.lifecycleIndex {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--ink-tertiary);
+  font-family: var(--font-technical);
+  font-size: var(--text-caption);
+  font-weight: 700;
+}
+
+.lifecycleLabel {
+  color: var(--ink-tertiary);
+  font-size: var(--text-caption);
+  line-height: 1.35;
+}
+
+.lifecycleStep[data-state="done"] .lifecycleIndex {
+  border-color: var(--success);
+  background: var(--success);
+  color: var(--ink-inverse);
+}
+
+.lifecycleStep[data-state="done"] .lifecycleLabel {
+  color: var(--ink-secondary);
+}
+
+.lifecycleStep[data-state="current"] {
+  background: color-mix(in srgb, var(--campus-soft) 52%, transparent);
+}
+
+.lifecycleStep[data-state="current"]::after {
+  background: var(--campus);
+}
+
+.lifecycleStep[data-state="current"] .lifecycleIndex {
+  border-color: var(--campus);
+  background: var(--campus);
+  color: var(--ink-inverse);
+}
+
+.lifecycleStep[data-state="current"] .lifecycleLabel {
+  color: var(--campus-strong);
+  font-weight: 700;
+}
+
+.cancelledPath {
+  position: relative;
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: start;
+  padding: var(--space-4);
+  border: 1px solid color-mix(in srgb, var(--danger) 18%, var(--line-soft));
+  border-radius: var(--radius-md);
+  background: var(--danger-soft);
+}
+
+.cancelledMarker {
+  width: 10px;
+  height: 10px;
+  margin-top: 5px;
+  border-radius: 50%;
+  background: var(--danger);
+}
+
+.cancelledPath > div {
+  display: grid;
+  gap: 2px;
+}
+
+.cancelledPath strong {
+  color: var(--danger);
+  font-size: var(--text-body-sm);
+  font-weight: 700;
+}
+
+.cancelledPath span:last-child {
+  color: var(--ink-secondary);
+  font-size: var(--text-caption);
+  line-height: 1.5;
+}
+
 .actionArea {
   display: grid;
   gap: var(--space-4);
+  padding-top: var(--space-1);
 }
 
 .actionCopy {
@@ -42,42 +163,97 @@
 
 .actionCopy strong {
   color: var(--ink);
-  font-weight: 600;
+  font-weight: 650;
 }
 
 .actionCopy span {
+  max-width: 70ch;
   color: var(--ink-secondary);
   font-size: var(--text-body-sm);
+  line-height: 1.55;
 }
 
 .actions {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
+  align-items: center;
 }
 
 .none {
+  position: relative;
   display: grid;
   gap: var(--space-1);
-  padding: var(--space-4);
-  border-left: 3px solid var(--line-strong);
+  padding: var(--space-4) var(--space-4) var(--space-4) var(--space-5);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-md);
   background: var(--surface-muted);
+}
+
+.none::before {
+  content: "";
+  position: absolute;
+  inset-block: var(--space-3);
+  inset-inline-start: 0;
+  width: 3px;
+  border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
+  background: var(--line-strong);
 }
 
 .none strong {
   color: var(--ink);
-  font-weight: 600;
+  font-weight: 650;
 }
 
 .none span {
   color: var(--ink-secondary);
   font-size: var(--text-body-sm);
+  line-height: 1.5;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 860px) {
+  .lifecycleRail {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .lifecycleStep:nth-child(3n) {
+    border-right: 0;
+  }
+
+  .lifecycleStep:nth-child(-n + 3) {
+    border-bottom: 1px solid var(--line-soft);
+  }
+}
+
+@media (max-width: 620px) {
   .currentState {
-    display: grid;
+    grid-template-columns: 1fr;
     align-items: start;
+  }
+
+  .lifecycleRail {
+    grid-template-columns: 1fr;
+  }
+
+  .lifecycleStep,
+  .lifecycleStep:nth-child(3n) {
+    grid-template-columns: 34px minmax(0, 1fr);
+    justify-items: start;
+    align-items: center;
+    text-align: left;
+    border-right: 0;
+    border-bottom: 1px solid var(--line-soft);
+  }
+
+  .lifecycleStep:last-child {
+    border-bottom: 0;
+  }
+
+  .lifecycleStep[data-state="current"]::after {
+    inset-block: 0;
+    inset-inline: 0 auto;
+    width: 3px;
+    height: auto;
   }
 
   .actions {

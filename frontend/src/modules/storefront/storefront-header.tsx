@@ -12,17 +12,19 @@ export function StorefrontHeader() {
   return (
     <header className={styles.topbar}>
       <div className={styles.topbarInner}>
-        <Link href="/" className={styles.brand}>
-          <span className={styles.brandMark} aria-hidden="true" />
+        <Link href="/" className={styles.brand} aria-label="UniStore Hub หน้าร้าน">
+          <span className={styles.brandMark} aria-hidden="true">
+            <span />
+          </span>
           <span className={styles.brandCopy}>
             <strong>UniStore Hub</strong>
-            <span>ร้านค้าในมหาวิทยาลัย</span>
+            <span>Campus marketplace</span>
           </span>
         </Link>
 
         <nav className={styles.topbarNav} aria-label="เมนูหน้าร้าน">
-          <Link href="/" className={styles.topbarLink}>
-            เลือกร้านค้า
+          <Link href="/" className={styles.topbarHome}>
+            ร้านค้า
           </Link>
 
           {auth.status === "loading" ? (

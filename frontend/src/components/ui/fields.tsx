@@ -30,11 +30,9 @@ function FieldChrome({
   return (
     <div className={styles.field}>
       <label className={styles.fieldLabel} htmlFor={id}>
-        {label}
+        <span>{label}</span>
         {required ? (
-          <span className={styles.fieldRequired} aria-hidden="true">
-            {" "}*
-          </span>
+          <span className={styles.fieldRequired} aria-hidden="true" />
         ) : null}
       </label>
       {children}
@@ -169,6 +167,7 @@ export function SelectField({
 }: SelectFieldProps) {
   const classes = [
     styles.fieldControl,
+    styles.selectControl,
     error ? styles.fieldInvalid : "",
     className,
   ]
@@ -193,6 +192,53 @@ export function SelectField({
       >
         {children}
       </select>
+    </FieldChrome>
+  );
+}
+
+export interface FileFieldProps
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, "id" | "type"> {
+  id: string;
+  label: ReactNode;
+  hint?: ReactNode;
+  error?: ReactNode;
+}
+
+export function FileField({
+  id,
+  label,
+  hint,
+  error,
+  required,
+  className,
+  ...props
+}: FileFieldProps) {
+  const classes = [
+    styles.fieldControl,
+    styles.fileControl,
+    error ? styles.fieldInvalid : "",
+    className,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  return (
+    <FieldChrome
+      id={id}
+      label={label}
+      hint={hint}
+      error={error}
+      required={required}
+    >
+      <input
+        id={id}
+        type="file"
+        required={required}
+        className={classes}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={describedBy(id, hint, error)}
+        {...props}
+      />
     </FieldChrome>
   );
 }

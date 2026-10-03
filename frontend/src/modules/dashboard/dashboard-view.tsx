@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
 
 import {
@@ -68,6 +69,11 @@ function errorMessage(error: unknown): string {
 
 function countLabel(value: number): string {
   return value.toLocaleString("th-TH");
+}
+
+function organizationHref(path: string, organizationId: string): string {
+  const params = new URLSearchParams({ organizationId });
+  return `${path}?${params.toString()}`;
 }
 
 export function DashboardView({
@@ -235,54 +241,116 @@ export function DashboardView({
     <div className={styles.page}>
       <main className={styles.main}>
         <header className={styles.header}>
-          <div className={styles.headerCopy} data-ledger-heading>
+          <div className={styles.headerCopy}>
+            <span className={styles.pageKicker}>ศูนย์ควบคุมหน่วยงาน</span>
             <h1 className={styles.title}>ภาพรวมหน่วยงาน</h1>
             <p className={styles.description}>
-              ติดตามรายการที่ต้องดูแล ยอดสั่งซื้อ และสถานะการดำเนินงานของหน่วยงาน
+              เริ่มจากงานที่ต้องดูแลก่อน แล้วใช้รายงานด้านล่างเพื่อตรวจภาพรวมของร้านค้า แคมเปญ และคำสั่งซื้อ
             </p>
           </div>
-          <Badge tone="info">ผู้ดูแลหน่วยงาน</Badge>
+
+          <div className={styles.headerActions}>
+            <Badge tone="info">ผู้ดูแลหน่วยงาน</Badge>
+            <Link
+              href={organizationHref("/org/settings/", organizationId)}
+              className={styles.headerLink}
+            >
+              ตั้งค่าหน่วยงาน
+            </Link>
+          </div>
         </header>
 
-        <section className={styles.priorityMetrics} aria-label="ตัวชี้วัดสำคัญ">
-          <article className={styles.priorityMetric}>
-            <span className={styles.metricLabel}>การชำระเงินรอตรวจสอบ</span>
-            <strong className={styles.priorityValue}>
+        <section className={styles.actionBoard} aria-label="งานและตัวเลขสำคัญ">
+          <article
+            className={styles.actionMetric}
+            data-attention={summary.pendingPaymentReviews > 0 || undefined}
+          >
+            <div className={styles.metricTopline}>
+              <span className={styles.metricLabel}>การชำระเงินรอตรวจสอบ</span>
+              <span className={styles.metricSignal}>
+                {summary.pendingPaymentReviews > 0 ? "ต้องตรวจ" : "ไม่มีค้าง"}
+              </span>
+            </div>
+            <strong className={styles.priorityValue} data-numeric>
               {countLabel(summary.pendingPaymentReviews)}
             </strong>
-            <span className={styles.metricHint}>รายการที่ควรตรวจสอบต่อ</span>
+            <Link
+              href={organizationHref("/org/payments/", organizationId)}
+              className={styles.metricAction}
+            >
+              เปิดคิวตรวจการชำระเงิน
+            </Link>
           </article>
 
-          <article className={styles.priorityMetric}>
-            <span className={styles.metricLabel}>คำสั่งซื้อที่ชำระแล้ว</span>
-            <strong className={styles.priorityValue}>
+          <article className={styles.actionMetric}>
+            <div className={styles.metricTopline}>
+              <span className={styles.metricLabel}>คำสั่งซื้อที่ชำระแล้ว</span>
+              <span className={styles.metricSignal}>ในขอบเขตนี้</span>
+            </div>
+            <strong className={styles.priorityValue} data-numeric>
               {countLabel(summary.paidOrderCount)}
             </strong>
-            <span className={styles.metricHint}>รวมสถานะหลังชำระเงินแล้ว</span>
+            <Link
+              href={organizationHref("/org/orders/", organizationId)}
+              className={styles.metricAction}
+            >
+              เปิดรายการคำสั่งซื้อ
+            </Link>
           </article>
 
           <article className={styles.revenueMetric}>
-            <span className={styles.metricLabel}>รายได้จากคำสั่งซื้อที่ชำระแล้ว</span>
-            <strong className={styles.revenueValue}>
+            <span className={styles.metricLabel}>
+              รายได้จากคำสั่งซื้อที่ชำระแล้ว
+            </span>
+            <strong className={styles.revenueValue} data-numeric>
               {formatSatang(summary.paidRevenueSatang)}
             </strong>
             <span className={styles.metricHint}>
-              อ้างอิงยอดที่ระบบบันทึกจากคำสั่งซื้อ
+              อ้างอิงยอดที่ระบบบันทึกจากคำสั่งซื้อในขอบเขตรายงานปัจจุบัน
             </span>
           </article>
+        </section>
+
+        <section className={styles.resourceStrip} aria-label="ทรัพยากรในขอบเขตที่เลือก">
+          <div>
+            <span className={styles.metricLabel}>ร้านค้า</span>
+            <strong className={styles.resourceValue} data-numeric>
+              {countLabel(summary.totalStores)}
+            </strong>
+            <Link href={organizationHref("/org/stores/", organizationId)}>
+              จัดการร้านค้า
+            </Link>
+          </div>
+          <div>
+            <span className={styles.metricLabel}>สินค้า</span>
+            <strong className={styles.resourceValue} data-numeric>
+              {countLabel(summary.totalProducts)}
+            </strong>
+            <Link href={organizationHref("/org/products/", organizationId)}>
+              จัดการสินค้า
+            </Link>
+          </div>
+          <div className={styles.resourceContext}>
+            <span className={styles.metricLabel}>ขอบเขตรายงาน</span>
+            <strong>{hasFilters ? "กำลังกรองข้อมูล" : "ทั้งหน่วยงาน"}</strong>
+            <span className={styles.metricHint}>
+              ตัวกรองด้านล่างมีผลกับตัวเลขและสถานะในหน้านี้เท่านั้น
+            </span>
+          </div>
         </section>
 
         <section className={styles.reportScope} aria-labelledby="report-filter-title">
           <div className={styles.reportScopeHeading}>
             <div>
+              <span className={styles.sectionKicker}>เจาะขอบเขตรายงาน</span>
               <h2 className={styles.sectionTitle} id="report-filter-title">
-                ขอบเขตรายงาน
+                ตัวกรองรายงาน
               </h2>
               <p className={styles.sectionDescription}>
-                ปกติจะแสดงทั้งหน่วยงาน หากต้องการเจาะจงสามารถระบุรหัสร้านค้าหรือแคมเปญ
+                ระบุรหัสร้านค้าหรือแคมเปญเมื่ออยากดูตัวเลขเฉพาะส่วน หากเว้นว่างจะรวมทั้งหน่วยงาน
               </p>
             </div>
-            <div className={styles.scopeSummary}>
+            <div className={styles.scopeSummary} aria-label="ตัวกรองที่ใช้อยู่">
               {hasFilters ? (
                 <>
                   {appliedFilters.storeId ? (
@@ -349,43 +417,18 @@ export function DashboardView({
           </Notice>
         ) : null}
 
-        <section
-          className={styles.section}
-          aria-labelledby="dashboard-baseline-metrics"
-        >
-          <div className={styles.sectionHeading}>
-            <h2
-              className={styles.sectionTitle}
-              id="dashboard-baseline-metrics"
-            >
-              ข้อมูลในขอบเขตที่เลือก
-            </h2>
-          </div>
-
-          <div className={styles.metrics}>
-            <article className={styles.metricCard}>
-              <span className={styles.metricLabel}>ร้านค้า</span>
-              <strong className={styles.metricValue}>
-                {countLabel(summary.totalStores)}
-              </strong>
-            </article>
-
-            <article className={styles.metricCard}>
-              <span className={styles.metricLabel}>สินค้า</span>
-              <strong className={styles.metricValue}>
-                {countLabel(summary.totalProducts)}
-              </strong>
-            </article>
-          </div>
-        </section>
-
-        <section className={styles.statusGrid}>
+        <section className={styles.statusGrid} aria-label="สถานะการดำเนินงาน">
           <article className={styles.statusPanel}>
             <div className={styles.statusPanelHeading}>
-              <h2 className={styles.sectionTitle}>
-                แคมเปญตามสถานะ
-              </h2>
-              <span className={styles.sectionMeta}>จำนวนแคมเปญ</span>
+              <div>
+                <span className={styles.sectionKicker}>รอบขาย</span>
+                <h2 className={styles.sectionTitle}>
+                  แคมเปญตามสถานะ
+                </h2>
+              </div>
+              <Link href={organizationHref("/org/campaigns/", organizationId)}>
+                จัดการแคมเปญ
+              </Link>
             </div>
             <div className={styles.statusList}>
               {CAMPAIGN_STATUSES.map((status) => (
@@ -393,7 +436,7 @@ export function DashboardView({
                   <span className={styles.statusName}>
                     {campaignStatusLabel(status)}
                   </span>
-                  <strong className={styles.statusCount}>
+                  <strong className={styles.statusCount} data-numeric>
                     {countLabel(
                       summary.campaignsByStatus[status] ?? 0,
                     )}
@@ -405,10 +448,15 @@ export function DashboardView({
 
           <article className={styles.statusPanel}>
             <div className={styles.statusPanelHeading}>
-              <h2 className={styles.sectionTitle}>
-                คำสั่งซื้อตามสถานะ
-              </h2>
-              <span className={styles.sectionMeta}>จำนวนคำสั่งซื้อ</span>
+              <div>
+                <span className={styles.sectionKicker}>วงจรคำสั่งซื้อ</span>
+                <h2 className={styles.sectionTitle}>
+                  คำสั่งซื้อตามสถานะ
+                </h2>
+              </div>
+              <Link href={organizationHref("/org/orders/", organizationId)}>
+                เปิดคำสั่งซื้อ
+              </Link>
             </div>
             <div className={styles.statusList}>
               {ORDER_STATUSES.map((status) => (
@@ -416,7 +464,7 @@ export function DashboardView({
                   <span className={styles.statusName}>
                     {getOrderStatusLabel(status)}
                   </span>
-                  <strong className={styles.statusCount}>
+                  <strong className={styles.statusCount} data-numeric>
                     {countLabel(
                       summary.ordersByStatus[status] ?? 0,
                     )}

@@ -500,6 +500,7 @@ export function OrganizationPickupsView({
       <main className={styles.main}>
         <header className={styles.header}>
           <div className={styles.headerCopy} data-ledger-heading>
+            <span className={styles.pageKicker}>โต๊ะตรวจรับและส่งมอบสินค้า</span>
             <h1 className={styles.title}>จุดรับสินค้า</h1>
             <p className={styles.description}>
               ค้นหาด้วย Token หรือ Order ID ตรวจข้อมูลที่เกี่ยวข้อง แล้วจึงยืนยันการรับสินค้า
@@ -703,6 +704,7 @@ export function OrganizationPickupsView({
                       ]
                         .filter(Boolean)
                         .join(" ")}
+                      data-attention={pickup.status === "READY" || undefined}
                       key={pickup.pickupId}
                       aria-current={isSelected ? "true" : undefined}
                     >

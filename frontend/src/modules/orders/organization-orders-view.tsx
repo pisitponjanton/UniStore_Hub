@@ -297,6 +297,7 @@ export function OrganizationOrdersView({
       <main className={styles.main}>
         <header className={styles.header}>
           <div className={styles.headerCopy} data-ledger-heading>
+            <span className={styles.pageKicker}>ศูนย์ติดตามคำสั่งซื้อ</span>
             <h1 className={styles.title}>คำสั่งซื้อของหน่วยงาน</h1>
             <p className={styles.description}>
               ค้นหาและติดตามคำสั่งซื้อตามแคมเปญ ลูกค้า และสถานะ เพื่อไปยังรายการที่ต้องดำเนินการต่อได้เร็วขึ้น
@@ -459,7 +460,11 @@ export function OrganizationOrdersView({
           ) : (
             <div className={styles.list}>
               {state.orders.map((order) => (
-                <article className={styles.row} key={order.orderId}>
+                <article
+                  className={styles.row}
+                  data-attention={order.status === "PAYMENT_REVIEW" || undefined}
+                  key={order.orderId}
+                >
                   <div className={styles.rowMain}>
                     <div className={styles.rowHeading}>
                       <h3 className={styles.cardTitle}>

@@ -292,13 +292,18 @@ export function OrderCreateView() {
     return (
       <div className={styles.page}>
         <StorefrontHeader />
+
         <main className={styles.successMain}>
-          <header className={styles.successHeading} data-ledger-heading>
-            <h1 className={styles.successTitle}>
-              สร้างคำสั่งซื้อเรียบร้อยแล้ว
-            </h1>
+          <div className={styles.successMarker} aria-hidden="true">
+            <span>✓</span>
+          </div>
+
+          <header className={styles.successHeading}>
+            <span className={styles.pageKicker}>สร้างคำสั่งซื้อสำเร็จ</span>
+            <h1 className={styles.successTitle}>รายการนี้ถูกบันทึกแล้ว</h1>
             <p className={styles.description}>
-              ยอดและรายการด้านล่างคือข้อมูลที่ระบบบันทึกไว้สำหรับคำสั่งซื้อนี้
+              ยอดและสถานะด้านล่างมาจากข้อมูลที่ระบบบันทึกไว้จริง
+              ใช้ขั้นตอนถัดไปเพื่อดำเนินรายการต่อ
             </p>
           </header>
 
@@ -308,7 +313,7 @@ export function OrderCreateView() {
             title={guidance.title}
             description={guidance.description}
             metadata={
-              <span>
+              <span data-technical>
                 เลขคำสั่งซื้อ {state.order.orderId}
               </span>
             }
@@ -324,22 +329,25 @@ export function OrderCreateView() {
             }
           />
 
-          <section className={styles.successSummary} aria-label="สรุปคำสั่งซื้อ">
-            <div>
-              <span className={styles.summaryLabel}>ยอดรวม</span>
-              <strong className={styles.authoritativeTotal}>
+          <section
+            className={styles.successSummary}
+            aria-label="ข้อมูลคำสั่งซื้อที่บันทึกแล้ว"
+          >
+            <div className={styles.successTotal}>
+              <span className={styles.summaryLabel}>ยอดที่ระบบบันทึก</span>
+              <strong className={styles.authoritativeTotal} data-numeric>
                 {formatSatang(state.order.total)}
               </strong>
+            </div>
+            <div>
+              <span className={styles.summaryLabel}>สินค้า</span>
+              <span className={styles.summaryValue}>{product.name}</span>
             </div>
             <div>
               <span className={styles.summaryLabel}>สร้างเมื่อ</span>
               <span className={styles.summaryValue}>
                 {formatIsoDateTime(state.order.createdAt)}
               </span>
-            </div>
-            <div>
-              <span className={styles.summaryLabel}>สินค้า</span>
-              <span className={styles.summaryValue}>{product.name}</span>
             </div>
           </section>
 
@@ -388,52 +396,124 @@ export function OrderCreateView() {
           กลับไปที่สินค้า
         </Link>
 
-        <header className={styles.header} data-ledger-heading>
-          <h1 className={styles.title}>ตรวจสอบคำสั่งซื้อ</h1>
-          <p className={styles.description}>
-            ตรวจสอบสินค้า ตัวเลือก จำนวน และยอดประมาณการก่อนยืนยันคำสั่งซื้อ
-          </p>
+        <header className={styles.header}>
+          <div className={styles.headerCopy}>
+            <span className={styles.pageKicker}>ยืนยันก่อนสร้างรายการ</span>
+            <h1 className={styles.title}>ตรวจสอบคำสั่งซื้อ</h1>
+            <p className={styles.description}>
+              สินค้าและตัวเลือกถูกส่งมาจากหน้าสินค้าแล้ว
+              ระบุจำนวนและตรวจสอบยอดประมาณการก่อนยืนยัน
+            </p>
+          </div>
+
+          <ol className={styles.progress} aria-label="ขั้นตอนการสั่งซื้อ">
+            <li className={styles.progressDone}>
+              <span>1</span>
+              <strong>เลือกสินค้า</strong>
+            </li>
+            <li className={styles.progressCurrent} aria-current="step">
+              <span>2</span>
+              <strong>ตรวจสอบและยืนยัน</strong>
+            </li>
+            <li>
+              <span>3</span>
+              <strong>ดำเนินการต่อ</strong>
+            </li>
+          </ol>
         </header>
 
         <div className={styles.contentGrid}>
-          <section className={styles.reviewPanel} aria-labelledby="order-summary">
-            <div className={styles.productSummary}>
-              <span className={styles.summaryLabel}>สินค้าที่เลือก</span>
-              <h2 className={styles.summaryTitle} id="order-summary">
-                {product.name}
-              </h2>
-              {selection ? (
-                <span className={styles.variantName}>
-                  {selection.variant.name}
-                </span>
-              ) : null}
+          <section
+            className={styles.reviewPanel}
+            aria-labelledby="order-summary"
+          >
+            <div className={styles.productOverview}>
+              <div className={styles.productMedia}>
+                {product.imageUrl ? (
+                  // Backend supplies this short-lived Storefront URL for display only.
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={product.imageUrl}
+                    alt=""
+                    className={styles.productImage}
+                  />
+                ) : (
+                  <div className={styles.productPlaceholder}>
+                    ยังไม่มีรูปสินค้า
+                  </div>
+                )}
+              </div>
+
+              <div className={styles.productSummary}>
+                <span className={styles.summaryLabel}>สินค้าที่เลือก</span>
+                <h2 className={styles.summaryTitle} id="order-summary">
+                  {product.name}
+                </h2>
+                {selection ? (
+                  <span className={styles.variantName}>
+                    {selection.variant.name}
+                  </span>
+                ) : null}
+              </div>
             </div>
 
             {selection ? (
-              <div className={styles.reviewRows}>
-                <div className={styles.summaryRow}>
-                  <span className={styles.summaryLabel}>รอบพรีออเดอร์</span>
-                  <div className={styles.summaryValueGroup}>
-                    <span className={styles.summaryValue}>
-                      {selection.campaign.name}
-                    </span>
+              <>
+                <div className={styles.campaignRail}>
+                  <div className={styles.campaignRailTop}>
+                    <div>
+                      <span className={styles.summaryLabel}>รอบพรีออเดอร์</span>
+                      <strong>{selection.campaign.name}</strong>
+                    </div>
                     <CampaignStatusBadge status={selection.campaign.status} />
                   </div>
+                  <p>
+                    {selection.campaign.status === "OPEN"
+                      ? "รอบนี้กำลังเปิดรับคำสั่งซื้อ สามารถยืนยันรายการได้"
+                      : "รอบนี้ไม่เปิดรับคำสั่งซื้อใหม่แล้ว"}
+                  </p>
                 </div>
-                <div className={styles.summaryRow}>
-                  <span className={styles.summaryLabel}>ราคาต่อชิ้น</span>
-                  <span className={styles.summaryValue}>
-                    {formatSatang(selection.variant.price)}
-                  </span>
-                </div>
-              </div>
+
+                <dl className={styles.reviewFacts}>
+                  <div>
+                    <dt>ตัวเลือก</dt>
+                    <dd>{selection.variant.name}</dd>
+                  </div>
+                  <div>
+                    <dt>ราคาต่อชิ้น</dt>
+                    <dd data-numeric>{formatSatang(selection.variant.price)}</dd>
+                  </div>
+                  <div>
+                    <dt>ปิดรับคำสั่งซื้อ</dt>
+                    <dd>{formatIsoDateTime(selection.campaign.closeAt)}</dd>
+                  </div>
+                  <div>
+                    <dt>กำหนดชำระเงิน</dt>
+                    <dd>
+                      {formatIsoDateTime(selection.campaign.paymentDeadline)}
+                    </dd>
+                  </div>
+                </dl>
+              </>
             ) : null}
+
+            <p className={styles.authorityNote}>
+              ราคาที่เห็นในหน้านี้ใช้เพื่อช่วยตรวจสอบรายการ
+              ระบบฝั่งเซิร์ฟเวอร์จะตรวจสินค้าและคำนวณยอดจริงอีกครั้งตอนสร้างคำสั่งซื้อ
+            </p>
           </section>
 
-          <form className={styles.confirmPanel} onSubmit={handleSubmit}>
+          <form
+            className={styles.confirmPanel}
+            onSubmit={handleSubmit}
+            aria-labelledby="confirm-heading"
+          >
             <div className={styles.confirmHeading}>
-              <span className={styles.stepLabel}>ขั้นตอนสุดท้าย</span>
-              <h2>ระบุจำนวนและยืนยัน</h2>
+              <span className={styles.stepLabel}>จำนวนและยอดประมาณการ</span>
+              <h2 id="confirm-heading">พร้อมสร้างคำสั่งซื้อหรือยัง?</h2>
+              <p>
+                ตรวจจำนวนด้านล่างให้ถูกต้องก่อนกดยืนยัน
+              </p>
             </div>
 
             <TextField
@@ -449,20 +529,22 @@ export function OrderCreateView() {
                 setServerError(null);
               }}
               error={quantityError}
-              hint="อย่างน้อย 1 ชิ้น"
+              hint="ต้องเป็นจำนวนเต็มตั้งแต่ 1 ขึ้นไป"
               disabled={pending || campaignNotOpen}
               required
             />
 
-            <div className={styles.estimate}>
+            <div className={styles.estimate} aria-live="polite">
               <span className={styles.summaryLabel}>ยอดประมาณการ</span>
-              <strong className={styles.estimateValue}>
-                {selection?.estimate !== null && selection?.estimate !== undefined
+              <strong className={styles.estimateValue} data-numeric>
+                {selection?.estimate !== null &&
+                selection?.estimate !== undefined
                   ? formatSatang(selection.estimate)
                   : "ยังไม่คำนวณ"}
               </strong>
               <p className={styles.note}>
-                ระบบจะตรวจสอบสินค้าและคำนวณยอดจริงอีกครั้งเมื่อคุณยืนยัน
+                คำนวณจากราคาตัวเลือก × จำนวนที่กรอก
+                ยอดหลังสร้างคำสั่งซื้อเป็นยอดที่ใช้ดำเนินการจริง
               </p>
             </div>
 
@@ -473,7 +555,11 @@ export function OrderCreateView() {
             ) : null}
 
             {serverError ? (
-              <Notice tone="danger" role="alert" title="สร้างคำสั่งซื้อไม่สำเร็จ">
+              <Notice
+                tone="danger"
+                role="alert"
+                title="สร้างคำสั่งซื้อไม่สำเร็จ"
+              >
                 {serverError}
               </Notice>
             ) : null}
@@ -493,7 +579,7 @@ export function OrderCreateView() {
                 ยืนยันสร้างคำสั่งซื้อ
               </Button>
               <span className={styles.submitHint}>
-                หลังยืนยัน คุณจะเห็นยอดที่ระบบบันทึกและขั้นตอนถัดไป
+                กดยืนยันครั้งเดียว แล้วรอให้ระบบสร้างรายการให้เสร็จ
               </span>
             </div>
           </form>

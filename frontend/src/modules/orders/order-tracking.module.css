@@ -1,5 +1,5 @@
 .page {
-  min-height: 100vh;
+  min-height: 100dvh;
   background: var(--canvas);
 }
 
@@ -8,46 +8,61 @@
   margin-inline: auto;
   padding: var(--page-block-start) var(--page-gutter) var(--page-block-end);
   display: grid;
-  gap: var(--space-6);
+  gap: var(--space-8);
 }
 
 .header {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-6);
   align-items: end;
-  justify-content: space-between;
-  gap: var(--space-5);
-  padding-bottom: var(--space-5);
-  border-bottom: 1px solid var(--line-soft);
+  padding-bottom: var(--space-6);
+  border-bottom: 1px solid var(--line-strong);
 }
 
 .headerCopy {
-  max-width: 720px;
+  min-width: 0;
+  max-width: 780px;
   display: grid;
-  gap: var(--space-2);
+  gap: var(--space-3);
+}
+
+.pageKicker,
+.sectionKicker {
+  width: fit-content;
+  color: var(--campus);
+  font-size: var(--text-body-sm);
+  font-weight: 700;
 }
 
 .title {
-  font-size: var(--text-heading);
-  line-height: 1.2;
+  color: var(--ink);
+  font-size: clamp(2.1rem, 4vw, 3.6rem);
+  font-weight: 650;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
   text-wrap: balance;
 }
 
 .description {
+  max-width: 66ch;
   color: var(--ink-secondary);
-  text-wrap: pretty;
+  font-size: var(--text-body-lg);
+  line-height: 1.65;
 }
 
 .headerAction,
 .detailLink,
+.detailLinkPrimary,
 .primaryActionLink,
 .secondaryActionLink {
   min-height: var(--control-height);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-md);
   padding-inline: var(--space-4);
-  font-weight: 500;
+  border-radius: var(--radius-md);
+  font-weight: 650;
   text-align: center;
 }
 
@@ -64,44 +79,152 @@
 .secondaryActionLink:hover {
   border-color: var(--line-strong);
   background: var(--surface-muted);
+  text-decoration: none;
 }
 
+.detailLinkPrimary,
 .primaryActionLink {
   min-height: var(--control-height-lg);
   background: var(--campus);
   color: var(--ink-inverse);
-  font-weight: 600;
+  box-shadow: var(--shadow-subtle);
 }
 
+.detailLinkPrimary:hover,
 .primaryActionLink:hover {
   background: var(--campus-hover);
+  text-decoration: none;
+}
+
+.orderOverview {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.36fr) minmax(0, 1fr) auto;
+  gap: var(--space-5);
+  align-items: center;
+  padding-block: var(--space-4);
+  border-block: 1px solid var(--line-soft);
+}
+
+.overviewPrimary {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 4px minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: stretch;
+}
+
+.overviewMarker {
+  width: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--campus);
+}
+
+.overviewPrimary > div,
+.overviewLoaded {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.overviewPrimary strong {
+  color: var(--ink);
+  font-size: var(--text-title);
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+}
+
+.overviewDescription {
+  max-width: 62ch;
+  color: var(--ink-secondary);
+  font-size: var(--text-body-sm);
+  line-height: 1.55;
+}
+
+.overviewLoaded {
+  text-align: right;
+}
+
+.overviewLoaded strong {
+  color: var(--ink);
+  font-size: var(--text-body-sm);
+}
+
+.summaryLabel,
+.amountLabel,
+.mobileItemLabel {
+  color: var(--ink-tertiary);
+  font-size: var(--text-caption);
 }
 
 .orderLedger {
-  overflow: hidden;
-  border-top: 1px solid var(--line-soft);
+  display: grid;
+  border-top: 1px solid var(--line-strong);
+}
+
+.ledgerHeading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 460px);
+  gap: var(--space-6);
+  align-items: end;
+  padding-block: var(--space-4);
   border-bottom: 1px solid var(--line-soft);
-  background: var(--surface);
+}
+
+.ledgerHeading > div {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.ledgerHeading h2 {
+  font-size: var(--text-title);
+  letter-spacing: -0.015em;
+}
+
+.ledgerHint {
+  color: var(--ink-tertiary);
+  font-size: var(--text-caption);
+  line-height: 1.5;
+  text-align: right;
+}
+
+.orderRows {
+  display: grid;
 }
 
 .orderRow {
   position: relative;
+  min-width: 0;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(140px, 0.32fr) auto;
-  gap: var(--space-5);
+  grid-template-columns: minmax(0, 1fr) minmax(150px, 0.3fr) auto;
+  gap: var(--space-6);
   align-items: center;
-  padding: var(--space-5) var(--space-5) var(--space-5) calc(var(--space-5) + 4px);
+  padding: var(--space-5) var(--space-3) var(--space-5) var(--space-5);
   border-bottom: 1px solid var(--line-soft);
+  background: transparent;
+  transition: background-color var(--motion-fast) var(--motion-ease-out);
 }
 
 .orderRow::before {
   content: "";
   position: absolute;
   inset-block: var(--space-4);
-  inset-inline-start: var(--space-3);
+  inset-inline-start: 0;
   width: 3px;
-  border-radius: var(--radius-pill);
+  border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
+  background: var(--line-strong);
+}
+
+.orderRow[data-needs-action="true"] {
+  background: color-mix(in srgb, var(--campus-soft) 46%, transparent);
+}
+
+.orderRow[data-needs-action="true"]::before {
+  width: 4px;
   background: var(--campus);
+}
+
+.orderRow:hover {
+  background: var(--surface-raised);
 }
 
 .orderRow:last-child {
@@ -111,7 +234,7 @@
 .orderPrimary {
   min-width: 0;
   display: grid;
-  gap: var(--space-2);
+  gap: var(--space-3);
 }
 
 .orderTopline {
@@ -121,50 +244,70 @@
   gap: var(--space-2) var(--space-3);
 }
 
-.orderId,
-.orderCode {
-  color: var(--ink);
-  font-family: var(--font-technical);
-  font-size: var(--text-body-sm);
-  font-weight: 600;
-  overflow-wrap: anywhere;
-}
-
-.orderMeta {
+.orderMeta,
+.orderCreated {
   color: var(--ink-tertiary);
   font-size: var(--text-caption);
 }
 
+.orderIdentity {
+  min-width: 0;
+  display: grid;
+  gap: var(--space-1);
+}
+
+.orderId,
+.orderCode {
+  width: fit-content;
+  max-width: 100%;
+  color: var(--ink-tertiary);
+  font-size: var(--text-caption);
+  overflow-wrap: anywhere;
+}
+
 .orderNextStep {
+  color: var(--ink);
+  font-size: var(--text-title-sm);
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.orderGuidance {
+  max-width: 70ch;
   color: var(--ink-secondary);
   font-size: var(--text-body-sm);
-  font-weight: 500;
+  line-height: 1.55;
 }
 
 .orderAmount,
 .detailAmount {
+  min-width: 0;
   display: grid;
   gap: var(--space-1);
   text-align: right;
 }
 
-.amountLabel,
-.summaryLabel {
-  color: var(--ink-tertiary);
-  font-size: var(--text-caption);
-}
-
 .amountValue,
 .summaryValue {
   color: var(--ink);
-  font-weight: 600;
+  font-weight: 650;
   font-variant-numeric: tabular-nums;
+}
+
+.amountValue {
+  font-size: var(--text-title-sm);
 }
 
 .loadMore {
   display: flex;
   justify-content: center;
   padding-top: var(--space-2);
+}
+
+.endOfList {
+  color: var(--ink-tertiary);
+  font-size: var(--text-caption);
+  text-align: center;
 }
 
 .stateWrap {
@@ -182,11 +325,12 @@
   margin-left: calc(var(--space-3) * -1);
   border-radius: var(--radius-md);
   color: var(--campus);
-  font-weight: 500;
+  font-weight: 650;
 }
 
 .backLink:hover {
   background: var(--campus-soft);
+  text-decoration: none;
 }
 
 .backLink::before {
@@ -194,49 +338,70 @@
   margin-right: var(--space-2);
 }
 
-.detailHeading {
-  display: flex;
+.detailHero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 0.36fr);
+  gap: var(--space-8);
   align-items: end;
-  justify-content: space-between;
-  gap: var(--space-5);
-  padding-bottom: var(--space-5);
-  border-bottom: 1px solid var(--line-soft);
+  padding-bottom: var(--space-6);
+  border-bottom: 1px solid var(--line-strong);
 }
 
-.detailHeading > div:first-child {
+.detailHeroCopy {
   min-width: 0;
   display: grid;
-  gap: var(--space-2);
+  gap: var(--space-3);
+}
+
+.detailUpdated {
+  color: var(--ink-tertiary);
+  font-size: var(--text-caption);
 }
 
 .totalValue {
   color: var(--ink);
-  font-size: var(--text-title);
-  font-weight: 600;
+  font-size: clamp(1.65rem, 3vw, 2.35rem);
+  font-weight: 750;
   font-variant-numeric: tabular-nums;
 }
 
-.journeySection,
-.section {
+.currentState {
   display: grid;
-  gap: var(--space-4);
 }
 
-.sectionHeading {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-4);
+.journeySection,
+.section,
+.orderTools {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.sectionHeading,
+.orderToolsHeading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 540px);
+  gap: var(--space-6);
+  align-items: end;
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.sectionHeading > div,
+.orderToolsHeading > div {
+  display: grid;
+  gap: var(--space-1);
 }
 
 .sectionTitle {
-  font-size: var(--text-title-sm);
+  font-size: var(--text-title);
+  letter-spacing: -0.015em;
 }
 
-.sectionMeta {
-  max-width: 560px;
+.sectionMeta,
+.orderToolsHeading p {
   color: var(--ink-tertiary);
   font-size: var(--text-caption);
+  line-height: 1.55;
   text-align: right;
 }
 
@@ -246,16 +411,17 @@
   padding: 0;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  border-top: 1px solid var(--line-soft);
-  border-bottom: 1px solid var(--line-soft);
+  border-block: 1px solid var(--line-strong);
 }
 
 .journeyStep {
+  position: relative;
   min-width: 0;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-columns: 34px minmax(0, 1fr);
   gap: var(--space-3);
-  align-items: start;
+  align-items: center;
+  min-height: 94px;
   padding: var(--space-4);
   border-right: 1px solid var(--line-soft);
 }
@@ -264,39 +430,30 @@
   border-right: 0;
 }
 
-.journeyStep > div {
+.journeyIndex {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--ink-tertiary);
+  font-family: var(--font-technical);
+  font-size: var(--text-caption);
+  font-weight: 700;
+}
+
+.journeyCopy {
   min-width: 0;
   display: grid;
   gap: 2px;
 }
 
-.journeyStep strong {
+.journeyCopy strong {
+  color: var(--ink);
   font-size: var(--text-body-sm);
-  font-weight: 600;
-}
-
-.journeyMarker {
-  width: 10px;
-  height: 10px;
-  margin-top: 4px;
-  border: 2px solid var(--line-strong);
-  border-radius: 50%;
-  background: var(--surface);
-}
-
-.journeyStep[data-state="done"] .journeyMarker {
-  border-color: var(--success);
-  background: var(--success);
-}
-
-.journeyStep[data-state="current"] .journeyMarker {
-  border-color: var(--campus);
-  background: var(--campus-soft);
-  box-shadow: 0 0 0 3px var(--campus-soft);
-}
-
-.journeyStep[data-state="upcoming"] {
-  color: var(--ink-tertiary);
+  font-weight: 650;
 }
 
 .journeyStateLabel {
@@ -304,48 +461,118 @@
   font-size: var(--text-caption);
 }
 
+.journeyStep[data-state="done"] .journeyIndex {
+  border-color: var(--success);
+  background: var(--success);
+  color: var(--ink-inverse);
+}
+
 .journeyStep[data-state="done"] .journeyStateLabel {
   color: var(--success);
 }
 
+.journeyStep[data-state="current"] {
+  background: color-mix(in srgb, var(--campus-soft) 48%, transparent);
+}
+
+.journeyStep[data-state="current"]::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--campus);
+}
+
+.journeyStep[data-state="current"] .journeyIndex {
+  border-color: var(--campus);
+  background: var(--campus);
+  color: var(--ink-inverse);
+}
+
 .journeyStep[data-state="current"] .journeyStateLabel {
-  color: var(--campus);
-  font-weight: 600;
+  color: var(--campus-strong);
+  font-weight: 650;
+}
+
+.journeyStep[data-state="upcoming"] .journeyCopy strong {
+  color: var(--ink-secondary);
+}
+
+.orderContext {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.32fr) minmax(0, 1fr);
+  gap: var(--space-8);
+  align-items: start;
+  padding-block: var(--space-5);
+  border-block: 1px solid var(--line-soft);
+}
+
+.contextLead {
+  display: grid;
+  gap: var(--space-1);
 }
 
 .orderFacts {
+  margin: 0;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-5);
-  padding-block: var(--space-4);
-  border-top: 1px solid var(--line-soft);
-  border-bottom: 1px solid var(--line-soft);
 }
 
 .orderFacts > div {
   min-width: 0;
   display: grid;
   gap: var(--space-1);
+  padding-inline: var(--space-4);
+  border-left: 1px solid var(--line-soft);
+}
+
+.orderFacts > div:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.orderFacts dt {
+  color: var(--ink-tertiary);
+  font-size: var(--text-caption);
+}
+
+.orderFacts dd {
+  margin: 0;
+  color: var(--ink);
+  font-weight: 600;
+  overflow-wrap: anywhere;
 }
 
 .itemList {
   display: grid;
-  border-top: 1px solid var(--line-soft);
-  border-bottom: 1px solid var(--line-soft);
-  background: var(--surface);
+  border-block: 1px solid var(--line-strong);
+}
+
+.itemListHeader,
+.itemRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 88px minmax(120px, 0.28fr) minmax(120px, 0.28fr);
+  gap: var(--space-4);
+  align-items: center;
+}
+
+.itemListHeader {
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-muted);
+  color: var(--ink-tertiary);
+  font-size: var(--text-caption);
+  font-weight: 600;
+}
+
+.itemListHeader span:nth-child(n + 2) {
+  text-align: right;
 }
 
 .itemRow {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 88px minmax(120px, 0.3fr) minmax(120px, 0.3fr);
-  gap: var(--space-4);
-  align-items: center;
-  padding: var(--space-4) var(--space-5);
-  border-bottom: 1px solid var(--line-soft);
-}
-
-.itemRow:last-child {
-  border-bottom: 0;
+  padding: var(--space-4);
+  border-top: 1px solid var(--line-soft);
+  background: var(--surface);
 }
 
 .itemPrimary {
@@ -356,7 +583,7 @@
 
 .itemName {
   color: var(--ink);
-  font-weight: 600;
+  font-weight: 650;
 }
 
 .itemVariant {
@@ -367,59 +594,78 @@
 .itemQuantity,
 .itemPrice,
 .itemTotal {
-  display: grid;
-  gap: 2px;
-}
-
-.itemPrice,
-.itemTotal {
+  min-width: 0;
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
 .itemQuantity strong,
 .itemTotal strong {
-  font-weight: 600;
+  color: var(--ink);
+  font-weight: 650;
+}
+
+.mobileItemLabel {
+  display: none;
 }
 
 .totalPanel {
-  width: min(100%, 520px);
+  width: min(100%, 620px);
   justify-self: end;
   display: grid;
-  gap: var(--space-3);
-  padding: var(--space-4) var(--space-5);
-  border-radius: var(--radius-md);
-  background: var(--surface-muted);
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-5);
+  align-items: end;
+  padding: var(--space-5);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-subtle);
 }
 
-.totalRow,
+.totalPanel > div:first-child,
 .totalRowPrimary {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-4);
+  display: grid;
+  gap: var(--space-1);
 }
 
 .totalRowPrimary {
-  padding-top: var(--space-3);
-  border-top: 1px solid var(--line-soft);
+  justify-items: end;
+  padding-left: var(--space-5);
+  border-left: 1px solid var(--line-soft);
+}
+
+.orderTools {
+  padding-top: var(--space-2);
 }
 
 .orderActions {
-  padding-top: var(--space-2);
-  border-top: 1px solid var(--line-soft);
+  align-items: center;
 }
 
 .destructiveAction {
   margin-left: auto;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 980px) {
+  .orderOverview {
+    grid-template-columns: minmax(170px, 0.38fr) minmax(0, 1fr);
+  }
+
+  .overviewLoaded {
+    grid-column: 1 / -1;
+    grid-template-columns: auto auto;
+    justify-content: start;
+    gap: var(--space-2);
+    text-align: left;
+  }
+
   .orderRow {
     grid-template-columns: minmax(0, 1fr) auto;
   }
 
-  .detailLink {
+  .detailLink,
+  .detailLinkPrimary {
     grid-column: 1 / -1;
     justify-self: start;
   }
@@ -436,30 +682,19 @@
     border-bottom: 1px solid var(--line-soft);
   }
 
-  .itemRow {
-    grid-template-columns: minmax(0, 1fr) 72px minmax(110px, 0.32fr);
-  }
-
-  .itemTotal {
-    grid-column: 3;
-  }
-
-  .itemPrice {
-    display: none;
+  .orderContext {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
   }
 }
 
-@media (max-width: 700px) {
-  .main,
-  .stateWrap {
-    padding-left: var(--page-gutter-compact);
-    padding-right: var(--page-gutter-compact);
-  }
-
+@media (max-width: 760px) {
   .header,
-  .detailHeading,
-  .sectionHeading {
-    display: grid;
+  .detailHero,
+  .sectionHeading,
+  .orderToolsHeading,
+  .ledgerHeading {
+    grid-template-columns: 1fr;
     align-items: start;
   }
 
@@ -467,29 +702,113 @@
     justify-self: start;
   }
 
-  .orderRow {
-    grid-template-columns: 1fr;
-    gap: var(--space-4);
-    padding: var(--space-4) var(--space-4) var(--space-4) calc(var(--space-4) + 4px);
-  }
-
-  .orderRow::before {
-    inset-inline-start: var(--space-2);
-  }
-
-  .orderAmount,
-  .detailAmount,
-  .sectionMeta {
+  .ledgerHint,
+  .sectionMeta,
+  .orderToolsHeading p {
     text-align: left;
   }
 
-  .detailLink {
+  .detailAmount {
+    text-align: left;
+  }
+
+  .orderFacts {
+    grid-template-columns: 1fr;
+  }
+
+  .orderFacts > div,
+  .orderFacts > div:first-child {
+    padding: var(--space-3) 0;
+    border-left: 0;
+    border-bottom: 1px solid var(--line-soft);
+  }
+
+  .orderFacts > div:last-child {
+    border-bottom: 0;
+  }
+
+  .itemListHeader {
+    display: none;
+  }
+
+  .itemRow {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-3);
+  }
+
+  .itemQuantity {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .itemPrice,
+  .itemTotal {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--line-soft);
+    text-align: left;
+  }
+
+  .mobileItemLabel {
+    display: inline;
+  }
+
+  .totalPanel {
     width: 100%;
     justify-self: stretch;
   }
+}
 
-  .journeyList,
-  .orderFacts {
+@media (max-width: 620px) {
+  .main,
+  .stateWrap {
+    padding-left: var(--page-gutter-compact);
+    padding-right: var(--page-gutter-compact);
+  }
+
+  .main {
+    gap: var(--space-6);
+  }
+
+  .title {
+    font-size: clamp(2rem, 10vw, 2.8rem);
+  }
+
+  .description {
+    font-size: var(--text-body);
+  }
+
+  .orderOverview {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  .overviewLoaded {
+    grid-column: auto;
+  }
+
+  .orderRow {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+    padding: var(--space-4) 0 var(--space-4) var(--space-4);
+  }
+
+  .orderAmount {
+    text-align: left;
+  }
+
+  .detailLink,
+  .detailLinkPrimary {
+    width: 100%;
+    grid-column: auto;
+    justify-self: stretch;
+  }
+
+  .journeyList {
     grid-template-columns: 1fr;
   }
 
@@ -503,45 +822,38 @@
     border-bottom: 0;
   }
 
-  .itemRow {
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: var(--space-3);
-    padding: var(--space-4);
-  }
-
-  .itemQuantity {
-    text-align: right;
-  }
-
-  .itemTotal {
-    grid-column: 1 / -1;
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    text-align: left;
-    padding-top: var(--space-2);
-    border-top: 1px solid var(--line-soft);
+  .journeyStep[data-state="current"]::before {
+    inset-block: 0;
+    inset-inline: 0 auto;
+    width: 3px;
+    height: auto;
   }
 
   .totalPanel {
-    width: 100%;
-    justify-self: stretch;
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  .totalRowPrimary {
+    justify-items: start;
+    padding: var(--space-4) 0 0;
+    border-left: 0;
+    border-top: 1px solid var(--line-soft);
   }
 
   .orderActions {
     display: grid;
+    width: 100%;
   }
 
-  .secondaryActionLink {
+  .secondaryActionLink,
+  .destructiveAction,
+  .destructiveAction button {
     width: 100%;
   }
 
   .destructiveAction {
     margin-left: 0;
     padding-top: var(--space-2);
-  }
-
-  .destructiveAction button {
-    width: 100%;
   }
 }

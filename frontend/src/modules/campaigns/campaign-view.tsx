@@ -545,9 +545,10 @@ export function CampaignManagementView({
       <main className={styles.main}>
         <header className={styles.header}>
           <div className={styles.headerCopy} data-ledger-heading>
+            <span className={styles.pageKicker}>รอบการขายและวงจรงาน</span>
             <h1 className={styles.title}>แคมเปญ</h1>
             <p className={styles.description}>
-              วางแผนช่วงเวลา เปิดหรือปิดรับคำสั่งซื้อ และเดินสถานะแคมเปญตามขั้นตอนของงาน
+              กำหนดรอบการขายของร้านค้า วางแผนวันสำคัญ และควบคุมการเดินสถานะตั้งแต่ฉบับร่างจนถึงรับสินค้าเสร็จสิ้น
             </p>
           </div>
         </header>
@@ -568,6 +569,24 @@ export function CampaignManagementView({
           <div>
             <span className={styles.summaryLabel}>สิ้นสุดแล้ว</span>
             <strong>{finishedCount}</strong>
+          </div>
+        </section>
+
+        <section className={styles.flowStrip} aria-label="ความสัมพันธ์ของแคมเปญกับการขาย">
+          <div>
+            <span className={styles.flowIndex}>01</span>
+            <strong>ร้านค้าและสินค้า</strong>
+            <span>แคมเปญอยู่ภายใต้ร้านค้า และเป็นบริบทของสินค้าที่เปิดขายในรอบนั้น</span>
+          </div>
+          <div>
+            <span className={styles.flowIndex}>02</span>
+            <strong>รอบรับคำสั่งซื้อ</strong>
+            <span>สถานะแคมเปญเป็นตัวกำหนดว่ารอบนั้นกำลังรับคำสั่งซื้อหรือเดินงานต่อแล้ว</span>
+          </div>
+          <div>
+            <span className={styles.flowIndex}>03</span>
+            <strong>ผลิตและรับสินค้า</strong>
+            <span>หลังปิดรอบ ระบบเดินผ่านการผลิตและพร้อมรับสินค้าโดยใช้การยืนยันสถานะจริง</span>
           </div>
         </section>
 

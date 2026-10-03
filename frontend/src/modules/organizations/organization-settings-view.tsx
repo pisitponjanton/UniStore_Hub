@@ -222,47 +222,55 @@ export function OrganizationSettingsView({
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <header className={styles.header}>
-          <div className={styles.headerCopy} data-ledger-heading>
-            <h1 className={styles.title}>ข้อมูลหน่วยงาน</h1>
+        <header className={styles.settingsHeader}>
+          <div className={styles.headerCopy}>
+            <span className={styles.pageKicker}>ข้อมูลพื้นฐานของหน่วยงาน</span>
+            <h1 className={styles.title}>ตั้งค่าหน่วยงาน</h1>
             <p className={styles.description}>
-              จัดการชื่อและคำอธิบายที่ใช้แสดงหน่วยงานใน UniStore Hub
+              แก้ไขข้อมูลที่ผู้ใช้เห็นได้ โดยไม่กระทบสถานะอนุมัติ สิทธิ์สมาชิก หรือขอบเขตอำนาจของ Platform Admin
             </p>
           </div>
-          <Badge tone={organizationStatusTone(organization.status)}>
-            {organizationStatusLabel(organization.status)}
-          </Badge>
+
+          <div className={styles.statusBlock}>
+            <span className={styles.statusLabel}>สถานะปัจจุบัน</span>
+            <Badge tone={organizationStatusTone(organization.status)}>
+              {organizationStatusLabel(organization.status)}
+            </Badge>
+          </div>
         </header>
 
-        <section className={styles.detailGrid} aria-label="ข้อมูลอ้างอิงหน่วยงาน">
-          <div className={styles.detailCell}>
+        <section className={styles.referenceStrip} aria-label="ข้อมูลอ้างอิงหน่วยงาน">
+          <div>
             <span className={styles.detailLabel}>รหัสหน่วยงาน</span>
-            <span className={styles.detailValue}>
+            <strong className={styles.detailValue} data-technical>
               {organization.organizationId}
-            </span>
+            </strong>
           </div>
-          <div className={styles.detailCell}>
+          <div>
             <span className={styles.detailLabel}>สร้างเมื่อ</span>
-            <span className={styles.detailValue}>
+            <strong className={styles.detailValue}>
               {formatIsoDateTime(organization.createdAt)}
-            </span>
+            </strong>
           </div>
-          <div className={styles.detailCell}>
+          <div>
             <span className={styles.detailLabel}>อัปเดตล่าสุด</span>
-            <span className={styles.detailValue}>
+            <strong className={styles.detailValue}>
               {formatIsoDateTime(organization.updatedAt)}
-            </span>
+            </strong>
           </div>
         </section>
 
-        <div className={styles.settingsGrid}>
-          <section className={styles.panel} aria-labelledby="organization-edit">
-            <div className={styles.panelHeading}>
-              <h2 className={styles.sectionTitle} id="organization-edit">
-                แก้ไขข้อมูลที่แสดง
-              </h2>
+        <div className={styles.settingsWorkspace}>
+          <section className={styles.settingsPanel} aria-labelledby="organization-edit">
+            <div className={styles.sectionHeading}>
+              <div>
+                <span className={styles.sectionKicker}>ข้อมูลที่แก้ไขได้</span>
+                <h2 className={styles.sectionTitle} id="organization-edit">
+                  ข้อมูลที่แสดง
+                </h2>
+              </div>
               <p className={styles.sectionDescription}>
-                การเปลี่ยนชื่อหรือคำอธิบายจะมีผลกับหน่วยงานนี้เท่านั้น
+                การเปลี่ยนแปลงด้านล่างมีผลกับหน่วยงานนี้เท่านั้น และจะบันทึกเมื่อกดปุ่มยืนยัน
               </p>
             </div>
 
@@ -306,7 +314,7 @@ export function OrganizationSettingsView({
                 </Notice>
               ) : null}
 
-              <div className={styles.actions}>
+              <div className={styles.settingsActions}>
                 <Button
                   type="submit"
                   pending={saving}
@@ -315,10 +323,8 @@ export function OrganizationSettingsView({
                 >
                   บันทึกการเปลี่ยนแปลง
                 </Button>
-                <Link href="/org/select/">
-                  <Button type="button" variant="secondary">
-                    เปลี่ยนหน่วยงาน
-                  </Button>
+                <Link href="/org/select/" className={styles.secondaryLink}>
+                  เปลี่ยนหน่วยงาน
                 </Link>
                 {!isDirty && !saved ? (
                   <span className={styles.unsavedHint}>
@@ -329,11 +335,28 @@ export function OrganizationSettingsView({
             </form>
           </section>
 
-          <aside className={styles.settingsAside}>
-            <strong>สถานะหน่วยงานจัดการจากส่วนกลาง</strong>
-            <p>
-              การอนุมัติหรือระงับหน่วยงานเป็นสิทธิ์ของ Platform Admin หน้านี้จึงแก้ไขได้เฉพาะข้อมูลพื้นฐานของหน่วยงาน
-            </p>
+          <aside className={styles.governancePanel} aria-labelledby="organization-governance">
+            <div>
+              <span className={styles.sectionKicker}>ขอบเขตสิทธิ์</span>
+              <h2 className={styles.sectionTitle} id="organization-governance">
+                สิ่งที่หน้านี้เปลี่ยนไม่ได้
+              </h2>
+            </div>
+
+            <div className={styles.governanceList}>
+              <div>
+                <strong>สถานะหน่วยงาน</strong>
+                <span>อนุมัติหรือระงับโดย Platform Admin</span>
+              </div>
+              <div>
+                <strong>สิทธิ์สมาชิก</strong>
+                <span>จัดการผ่านส่วนสมาชิกของหน่วยงานตามสิทธิ์ที่กำหนด</span>
+              </div>
+              <div>
+                <strong>ข้อมูลธุรกรรม</strong>
+                <span>ยอดคำสั่งซื้อ การชำระเงิน และการรับสินค้าไม่เปลี่ยนจากหน้านี้</span>
+              </div>
+            </div>
           </aside>
         </div>
       </main>
