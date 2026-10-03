@@ -4,12 +4,10 @@ import type { ReactNode } from "react";
 import styles from "./auth-form.module.css";
 
 export function AuthPageFrame({
-  introKicker = "บัญชี UniStore Hub",
   introTitle,
   introDescription,
   children,
 }: {
-  introKicker?: string;
   introTitle: string;
   introDescription: string;
   children: ReactNode;
@@ -29,42 +27,31 @@ export function AuthPageFrame({
 
         <div className={styles.introBody}>
           <div className={styles.introCopy}>
-            <span className={styles.introKicker}>{introKicker}</span>
             <h1 className={styles.introTitle}>{introTitle}</h1>
             <p className={styles.introDescription}>{introDescription}</p>
           </div>
 
-          <div className={styles.accountJourney} aria-label="สิ่งที่ทำต่อได้ด้วยบัญชี">
-            <div className={styles.accountJourneyItem}>
-              <span className={styles.accountJourneyIndex}>01</span>
-              <div>
+          <section className={styles.accountJourney} aria-labelledby="account-journey-heading">
+            <h2 className={styles.accountJourneyTitle} id="account-journey-heading">
+              บัญชีนี้ใช้ทำอะไรได้
+            </h2>
+            <ul className={styles.accountJourneyList}>
+              <li className={styles.accountJourneyItem}>
                 <strong>สั่งซื้อ</strong>
                 <span>เลือกสินค้าและรอบขายที่เปิดรับ</span>
-              </div>
-            </div>
-            <div className={styles.accountJourneyItem}>
-              <span className={styles.accountJourneyIndex}>02</span>
-              <div>
+              </li>
+              <li className={styles.accountJourneyItem}>
                 <strong>ติดตาม</strong>
                 <span>ดูสถานะคำสั่งซื้อและการชำระเงิน</span>
-              </div>
-            </div>
-            <div className={styles.accountJourneyItem}>
-              <span className={styles.accountJourneyIndex}>03</span>
-              <div>
+              </li>
+              <li className={styles.accountJourneyItem}>
                 <strong>รับสินค้า</strong>
                 <span>ดูข้อมูลรับสินค้าเมื่อรายการพร้อม</span>
-              </div>
-            </div>
-          </div>
+              </li>
+            </ul>
+          </section>
         </div>
 
-        <div className={styles.introFooter}>
-          <span>บัญชีเดียวสำหรับการซื้อและงานที่ได้รับสิทธิ์</span>
-          <Link href="/" className={styles.introBackLink}>
-            กลับหน้าร้านค้า
-          </Link>
-        </div>
       </section>
 
       <section className={styles.panel} aria-label="บัญชี UniStore Hub">

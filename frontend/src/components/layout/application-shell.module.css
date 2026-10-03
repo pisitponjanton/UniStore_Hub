@@ -118,8 +118,9 @@
   align-items: center;
   min-height: 28px;
   padding: 0 var(--space-2);
-  border-radius: var(--radius-sm);
-  background: var(--shell-accent-soft);
+  border-bottom: 1px solid color-mix(in srgb, var(--shell-accent) 36%, var(--line));
+  border-radius: 0;
+  background: transparent;
   color: var(--shell-accent-strong);
 }
 
@@ -153,29 +154,12 @@
 }
 
 .workspaceSummary {
-  position: relative;
   display: grid;
-  gap: 3px;
-  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
-  border: 1px solid var(--line-soft);
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border: 1px solid var(--line);
   border-radius: var(--radius-md);
   background: var(--surface-raised);
-}
-
-.workspaceSummary::before {
-  content: "";
-  position: absolute;
-  inset-block: var(--space-3);
-  inset-inline-start: 0;
-  width: 3px;
-  border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
-  background: var(--shell-accent);
-}
-
-.workspaceKicker {
-  color: var(--ink-tertiary);
-  font-size: var(--text-caption);
-  font-weight: 600;
 }
 
 .workspaceTitle {
@@ -194,9 +178,22 @@
 }
 
 .workspaceReference {
-  margin-top: 2px;
+  margin-top: var(--space-1);
+  display: grid;
+  gap: 1px;
   color: var(--ink-tertiary);
   overflow-wrap: anywhere;
+}
+
+.workspaceReference span {
+  font-size: var(--text-caption);
+}
+
+.workspaceReference strong {
+  color: var(--ink-secondary);
+  font-family: var(--font-technical);
+  font-size: var(--text-caption);
+  font-weight: 500;
 }
 
 .navigation {
@@ -217,22 +214,7 @@
 
 .groupHeading {
   min-width: 0;
-  display: grid;
-  grid-template-columns: 3px minmax(0, 1fr);
-  align-items: center;
-  gap: var(--space-2);
   padding-inline: var(--space-2);
-}
-
-.groupMarker {
-  width: 3px;
-  height: 12px;
-  border-radius: var(--radius-pill);
-  background: var(--line-strong);
-}
-
-.group[data-active-group="true"] .groupMarker {
-  background: var(--shell-accent);
 }
 
 .groupLabel {
@@ -244,7 +226,8 @@
 }
 
 .group[data-active-group="true"] .groupLabel {
-  color: var(--ink-secondary);
+  color: var(--shell-accent-strong);
+  font-weight: 700;
 }
 
 .groupList {
@@ -274,13 +257,17 @@
 }
 
 .navLink:hover {
-  background: var(--surface-muted);
+  background: var(--surface-hover);
   color: var(--ink);
   text-decoration: none;
 }
 
+.navLink:active {
+  background: var(--surface-selected);
+}
+
 .navLinkActive {
-  border-color: color-mix(in srgb, var(--shell-accent) 24%, var(--line));
+  border-color: color-mix(in srgb, var(--shell-accent) 34%, var(--line));
   background: var(--shell-accent-soft);
   color: var(--shell-accent-strong);
   font-weight: 700;
@@ -292,16 +279,16 @@
 }
 
 .navState {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   border: 1px solid var(--line-strong);
   border-radius: 50%;
+  background: transparent;
 }
 
 .navLinkActive .navState {
-  border-color: var(--shell-accent);
-  background: var(--shell-accent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--shell-accent) 12%, transparent);
+  border: 2px solid var(--shell-accent);
+  background: var(--surface);
 }
 
 .sidebarFooter {
@@ -389,10 +376,14 @@
 }
 
 .switchOrganization:hover {
-  background: var(--surface-muted);
+  background: var(--surface-hover);
   border-color: var(--line-strong);
   color: var(--ink);
   text-decoration: none;
+}
+
+.switchOrganization:active {
+  background: var(--surface-selected);
 }
 
 .content {
@@ -439,8 +430,7 @@
     height: auto;
     border-right: 0;
     border-bottom: 1px solid var(--line-soft);
-    background: color-mix(in srgb, var(--surface) 96%, transparent);
-    backdrop-filter: blur(12px);
+    background: var(--surface);
   }
 
   .sidebarTop {
@@ -483,7 +473,11 @@
   }
 
   .menuButton:hover {
-    background: var(--surface-muted);
+    background: var(--surface-hover);
+  }
+
+  .menuButton:active {
+    background: var(--surface-selected);
   }
 
   .menuButtonLabel {
@@ -633,8 +627,12 @@
   }
 
   .drawerClose:hover {
-    background: var(--surface-muted);
+    background: var(--surface-hover);
     color: var(--ink);
+  }
+
+  .drawerClose:active {
+    background: var(--surface-selected);
   }
 
   .drawerClose span {

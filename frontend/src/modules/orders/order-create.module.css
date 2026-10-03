@@ -31,8 +31,13 @@
 
 .backLink::before,
 .quietLink::before {
-  content: "←";
+  content: "";
+  width: 8px;
+  height: 8px;
   margin-right: var(--space-2);
+  border-left: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
 }
 
 .backLink:hover,
@@ -56,22 +61,14 @@
   gap: var(--space-3);
 }
 
-.pageKicker,
-.stepLabel {
-  width: fit-content;
-  color: var(--campus);
-  font-size: var(--text-body-sm);
-  font-weight: 700;
-}
-
 .title,
 .successTitle {
   max-width: 760px;
   color: var(--ink);
-  font-size: clamp(2.2rem, 4.8vw, 4.1rem);
+  font-size: clamp(2.15rem, 4.2vw, 3.55rem);
   font-weight: 650;
-  line-height: 1.03;
-  letter-spacing: -0.04em;
+  line-height: 1.06;
+  letter-spacing: -0.034em;
   text-wrap: balance;
 }
 
@@ -138,7 +135,7 @@
 .progressCurrent > span {
   border-color: var(--campus) !important;
   background: var(--campus);
-  color: var(--ink-inverse);
+  color: var(--campus-on);
 }
 
 .contentGrid {
@@ -169,7 +166,7 @@
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
-  background: linear-gradient(135deg, var(--surface-muted), var(--surface-inset));
+  background: var(--surface-inset);
 }
 
 .productImage {
@@ -219,27 +216,16 @@
   font-variant-numeric: tabular-nums;
 }
 
-.campaignRail {
-  position: relative;
+.campaignContext {
   display: grid;
   gap: var(--space-3);
-  padding: var(--space-4) var(--space-4) var(--space-4) var(--space-5);
-  border: 1px solid var(--line-soft);
+  padding: var(--space-4);
+  border: 1px solid var(--line);
   border-radius: var(--radius-md);
   background: var(--surface-raised);
 }
 
-.campaignRail::before {
-  content: "";
-  position: absolute;
-  inset-block: var(--space-3);
-  inset-inline-start: 0;
-  width: 4px;
-  border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
-  background: var(--campus);
-}
-
-.campaignRailTop {
+.campaignContextTop {
   min-width: 0;
   display: flex;
   align-items: flex-start;
@@ -247,19 +233,19 @@
   gap: var(--space-4);
 }
 
-.campaignRailTop > div {
+.campaignContextTop > div {
   min-width: 0;
   display: grid;
   gap: var(--space-1);
 }
 
-.campaignRailTop strong {
+.campaignContextTop strong {
   color: var(--ink);
   font-size: var(--text-title-sm);
   overflow-wrap: anywhere;
 }
 
-.campaignRail p {
+.campaignContext p {
   max-width: 68ch;
   color: var(--ink-secondary);
   font-size: var(--text-body-sm);
@@ -296,8 +282,10 @@
 
 .authorityNote {
   max-width: 70ch;
-  padding-left: var(--space-4);
-  border-left: 3px solid var(--line-strong);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-md);
+  background: var(--surface-inset);
   color: var(--ink-tertiary);
   font-size: var(--text-caption);
   line-height: 1.6;
@@ -312,7 +300,7 @@
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   background: var(--surface);
-  box-shadow: var(--shadow-subtle);
+  box-shadow: none;
 }
 
 .confirmHeading {
@@ -375,16 +363,25 @@
 }
 
 .successMarker {
+  position: relative;
   width: 56px;
   height: 56px;
-  display: grid;
-  place-items: center;
-  border: 1px solid color-mix(in srgb, var(--success) 26%, var(--line));
+  border: 1px solid color-mix(in srgb, var(--success) 30%, var(--line));
   border-radius: 50%;
   background: var(--success-soft);
   color: var(--success);
-  font-size: 1.35rem;
-  font-weight: 800;
+}
+
+.successMarker::after {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 10px;
+  left: 18px;
+  top: 19px;
+  border-left: 3px solid currentColor;
+  border-bottom: 3px solid currentColor;
+  transform: rotate(-45deg);
 }
 
 .successHeading {
@@ -445,7 +442,7 @@
 
 .primaryLink {
   background: var(--campus);
-  color: var(--ink-inverse);
+  color: var(--campus-on);
 }
 
 .primaryLink:hover {
@@ -461,7 +458,7 @@
 
 .secondaryLink:hover {
   border-color: var(--line-strong);
-  background: var(--surface-muted);
+  background: var(--surface-hover);
   text-decoration: none;
 }
 
@@ -534,7 +531,7 @@
     font-size: var(--text-title);
   }
 
-  .campaignRailTop,
+  .campaignContextTop,
   .reviewFacts > div {
     display: grid;
     grid-template-columns: 1fr;

@@ -104,6 +104,42 @@ describe("OrganizationPaymentsView", () => {
     mocks.getOrganizationOrder.mockResolvedValue(order());
   });
 
+  it("announces applied payment queue filters with useful context", async () => {
+    mocks.listOrganizationPayments
+      .mockResolvedValueOnce({
+        items: [payment()],
+        nextCursor: null,
+      })
+      .mockResolvedValueOnce({
+        items: [payment()],
+        nextCursor: null,
+      });
+
+    render(
+      <OrganizationPaymentsView organizationId="org-1" />,
+    );
+
+    await screen.findByText("Payment payment-1");
+
+    fireEvent.change(screen.getByLabelText("สถานะ Payment"), {
+      target: { value: "PENDING_REVIEW" },
+    });
+    fireEvent.click(
+      screen.getByRole("button", { name: "ใช้ตัวกรอง" }),
+    );
+
+    expect(
+      await screen.findByRole("status"),
+    ).toHaveTextContent("แสดง 1 การชำระเงิน · รอตรวจสอบ");
+    expect(
+      mocks.listOrganizationPayments,
+    ).toHaveBeenLastCalledWith("org-1", {
+      status: "PENDING_REVIEW",
+      campaignId: null,
+      orderId: null,
+    });
+  });
+
   it("loads detail and exposes only an authorized temporary slip link", async () => {
     const download: PresignedDownloadDTO = {
       url: "https://download.example.test/private-slip",
@@ -119,7 +155,9 @@ describe("OrganizationPaymentsView", () => {
     await screen.findByText("Payment payment-1");
 
     fireEvent.click(
-      screen.getByRole("button", { name: "ตรวจสอบ" }),
+      screen.getByRole("button", {
+        name: "ตรวจสอบ การชำระเงิน payment-1",
+      }),
     );
 
     expect(
@@ -175,7 +213,9 @@ describe("OrganizationPaymentsView", () => {
 
     await screen.findByText("Payment payment-1");
     fireEvent.click(
-      screen.getByRole("button", { name: "ตรวจสอบ" }),
+      screen.getByRole("button", {
+        name: "ตรวจสอบ การชำระเงิน payment-1",
+      }),
     );
     await screen.findByText("Order order-1");
 
@@ -238,7 +278,9 @@ describe("OrganizationPaymentsView", () => {
 
     await screen.findByText("Payment payment-1");
     fireEvent.click(
-      screen.getByRole("button", { name: "ตรวจสอบ" }),
+      screen.getByRole("button", {
+        name: "ตรวจสอบ การชำระเงิน payment-1",
+      }),
     );
     await screen.findByText("Order order-1");
 
@@ -252,10 +294,18 @@ describe("OrganizationPaymentsView", () => {
     );
 
     expect(
-      await screen.findByText(
+      await screen.findAllByText(
         "กรุณาระบุเหตุผลที่ปฏิเสธการชำระเงิน",
       ),
-    ).toBeInTheDocument();
+    ).toHaveLength(2);
+
+    const summary = screen.getByRole("alert");
+    expect(
+      screen.getByRole("link", {
+        name: "กรุณาระบุเหตุผลที่ปฏิเสธการชำระเงิน",
+      }),
+    ).toHaveAttribute("href", "#payment-reject-reason");
+    await waitFor(() => expect(summary).toHaveFocus());
     expect(mocks.rejectPayment).not.toHaveBeenCalled();
 
     fireEvent.change(

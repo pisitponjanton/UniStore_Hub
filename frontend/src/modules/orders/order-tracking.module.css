@@ -27,14 +27,6 @@
   gap: var(--space-3);
 }
 
-.pageKicker,
-.sectionKicker {
-  width: fit-content;
-  color: var(--campus);
-  font-size: var(--text-body-sm);
-  font-weight: 700;
-}
-
 .title {
   color: var(--ink);
   font-size: clamp(2.1rem, 4vw, 3.6rem);
@@ -78,7 +70,7 @@
 .detailLink:hover,
 .secondaryActionLink:hover {
   border-color: var(--line-strong);
-  background: var(--surface-muted);
+  background: var(--surface-hover);
   text-decoration: none;
 }
 
@@ -86,7 +78,7 @@
 .primaryActionLink {
   min-height: var(--control-height-lg);
   background: var(--campus);
-  color: var(--ink-inverse);
+  color: var(--campus-on);
   box-shadow: var(--shadow-subtle);
 }
 
@@ -105,21 +97,7 @@
   border-block: 1px solid var(--line-soft);
 }
 
-.overviewPrimary {
-  min-width: 0;
-  display: grid;
-  grid-template-columns: 4px minmax(0, 1fr);
-  gap: var(--space-4);
-  align-items: stretch;
-}
-
-.overviewMarker {
-  width: 4px;
-  border-radius: var(--radius-pill);
-  background: var(--campus);
-}
-
-.overviewPrimary > div,
+.overviewPrimary,
 .overviewLoaded {
   min-width: 0;
   display: grid;
@@ -192,39 +170,26 @@
 }
 
 .orderRow {
-  position: relative;
   min-width: 0;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(150px, 0.3fr) auto;
   gap: var(--space-6);
   align-items: center;
-  padding: var(--space-5) var(--space-3) var(--space-5) var(--space-5);
+  padding: var(--space-5);
   border-bottom: 1px solid var(--line-soft);
   background: transparent;
-  transition: background-color var(--motion-fast) var(--motion-ease-out);
-}
-
-.orderRow::before {
-  content: "";
-  position: absolute;
-  inset-block: var(--space-4);
-  inset-inline-start: 0;
-  width: 3px;
-  border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
-  background: var(--line-strong);
+  transition:
+    background-color var(--motion-fast) var(--motion-ease-out),
+    box-shadow var(--motion-fast) var(--motion-ease-out);
 }
 
 .orderRow[data-needs-action="true"] {
-  background: color-mix(in srgb, var(--campus-soft) 46%, transparent);
-}
-
-.orderRow[data-needs-action="true"]::before {
-  width: 4px;
-  background: var(--campus);
+  background: var(--surface-selected);
+  box-shadow: inset 0 0 0 1px var(--campus-line);
 }
 
 .orderRow:hover {
-  background: var(--surface-raised);
+  background: var(--surface-hover);
 }
 
 .orderRow:last-child {
@@ -334,8 +299,13 @@
 }
 
 .backLink::before {
-  content: "←";
+  content: "";
+  width: 8px;
+  height: 8px;
   margin-right: var(--space-2);
+  border-left: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
 }
 
 .detailHero {
@@ -463,8 +433,8 @@
 
 .journeyStep[data-state="done"] .journeyIndex {
   border-color: var(--success);
-  background: var(--success);
-  color: var(--ink-inverse);
+  background: var(--success-soft);
+  color: var(--success);
 }
 
 .journeyStep[data-state="done"] .journeyStateLabel {
@@ -472,22 +442,14 @@
 }
 
 .journeyStep[data-state="current"] {
-  background: color-mix(in srgb, var(--campus-soft) 48%, transparent);
-}
-
-.journeyStep[data-state="current"]::before {
-  content: "";
-  position: absolute;
-  inset-inline: 0;
-  bottom: 0;
-  height: 3px;
-  background: var(--campus);
+  background: var(--surface-selected);
+  box-shadow: inset 0 0 0 1px var(--campus-line);
 }
 
 .journeyStep[data-state="current"] .journeyIndex {
   border-color: var(--campus);
-  background: var(--campus);
-  color: var(--ink-inverse);
+  background: var(--campus-soft);
+  color: var(--campus-strong);
 }
 
 .journeyStep[data-state="current"] .journeyStateLabel {
@@ -620,7 +582,7 @@
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   background: var(--surface);
-  box-shadow: var(--shadow-subtle);
+  box-shadow: none;
 }
 
 .totalPanel > div:first-child,
@@ -794,7 +756,7 @@
   .orderRow {
     grid-template-columns: 1fr;
     gap: var(--space-4);
-    padding: var(--space-4) 0 var(--space-4) var(--space-4);
+    padding: var(--space-4);
   }
 
   .orderAmount {
@@ -820,13 +782,6 @@
 
   .journeyStep:last-child {
     border-bottom: 0;
-  }
-
-  .journeyStep[data-state="current"]::before {
-    inset-block: 0;
-    inset-inline: 0 auto;
-    width: 3px;
-    height: auto;
   }
 
   .totalPanel {

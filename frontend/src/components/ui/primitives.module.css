@@ -24,7 +24,7 @@
 }
 
 .button:active:not(:disabled) {
-  box-shadow: inset 0 0 0 999px rgb(0 0 0 / 5%);
+  filter: brightness(0.96);
 }
 
 .button:disabled {
@@ -34,7 +34,7 @@
 
 .buttonPrimary {
   background: var(--campus);
-  color: var(--ink-inverse);
+  color: var(--campus-on);
   box-shadow: var(--shadow-subtle);
 }
 
@@ -49,7 +49,7 @@
 }
 
 .buttonSecondary:hover:not(:disabled) {
-  background: var(--surface-muted);
+  background: var(--surface-hover);
   border-color: var(--line-strong);
 }
 
@@ -59,7 +59,7 @@
 }
 
 .buttonQuiet:hover:not(:disabled) {
-  background: var(--surface-muted);
+  background: var(--surface-hover);
   color: var(--ink);
 }
 
@@ -124,9 +124,8 @@
   padding: 0 var(--space-3);
   border: 1px solid var(--control-line);
   border-radius: var(--radius-md);
-  background: var(--surface);
+  background: var(--surface-inset);
   color: var(--ink);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 4%);
   transition:
     border-color var(--motion-fast) var(--motion-ease-out),
     background-color var(--motion-fast) var(--motion-ease-out),
@@ -134,13 +133,15 @@
 }
 
 .fieldControl:hover:not(:disabled):not(:read-only) {
-  border-color: var(--ink-secondary);
+  border-color: var(--control-line-hover);
+  background: var(--surface);
 }
 
 .fieldControl:focus-visible {
   border-color: var(--focus);
-  outline: 2px solid color-mix(in srgb, var(--focus) 28%, transparent);
-  outline-offset: 1px;
+  background: var(--surface);
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
 }
 
 .fieldControl:disabled {
@@ -152,7 +153,7 @@
 
 .fieldControl:read-only {
   background: var(--surface-muted);
-  border-color: var(--line-soft);
+  border-color: var(--line);
   color: var(--ink-secondary);
 }
 
@@ -185,7 +186,7 @@
   padding: 0 var(--space-3);
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
-  background: var(--surface-muted);
+  background: var(--surface);
   color: var(--ink);
   font: inherit;
   font-weight: 600;
@@ -221,6 +222,46 @@
 .fieldInvalid {
   border-color: var(--danger);
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--danger) 18%, transparent);
+}
+
+.errorSummary {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid color-mix(in srgb, var(--danger) 36%, var(--line));
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--danger-soft) 72%, var(--surface));
+  scroll-margin-block: 112px 32px;
+}
+
+.errorSummary:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.errorSummaryTitle {
+  color: var(--ink);
+  font-size: var(--text-title-sm);
+}
+
+.errorSummaryList {
+  margin: 0;
+  padding-inline-start: var(--space-5);
+  display: grid;
+  gap: var(--space-2);
+  color: var(--danger);
+}
+
+.errorSummaryLink {
+  color: var(--danger);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.errorSummaryLink:hover {
+  text-decoration-thickness: 2px;
 }
 
 .badge {
@@ -277,7 +318,7 @@
   background: var(--surface);
   border: 1px solid var(--line-soft);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-subtle);
+  box-shadow: none;
 }
 
 .cardMuted {
@@ -350,7 +391,6 @@
   inset: 0;
   z-index: var(--z-overlay);
   background: var(--overlay-scrim);
-  backdrop-filter: blur(3px);
   animation: fadeIn var(--motion-standard) var(--motion-ease-out);
 }
 
@@ -521,12 +561,16 @@
 }
 
 .tableBodyRow:hover {
-  background: var(--surface-raised);
+  background: var(--surface-hover);
 }
 
 .tableBodyRow[data-selected="true"] {
-  background: var(--campus-soft);
-  box-shadow: inset 4px 0 0 var(--campus);
+  background: var(--surface-selected);
+  box-shadow: inset 0 0 0 1px var(--campus-line);
+}
+
+.tableBodyRow[data-selected="true"] .tableCell:first-child {
+  font-weight: 600;
 }
 
 .tableCompact .tableHeaderCell,
@@ -644,22 +688,11 @@
 
 .pageTitleRow {
   min-width: 0;
-  display: grid;
-  grid-template-columns: 4px minmax(0, 1fr);
-  gap: var(--space-4);
-  align-items: stretch;
-}
-
-.ledgerMarker {
-  width: 4px;
-  min-height: 34px;
-  border-radius: var(--radius-pill);
-  background: var(--campus);
 }
 
 .pageTitle {
   font-size: var(--text-heading);
-  letter-spacing: -0.018em;
+  letter-spacing: var(--tracking-tight);
 }
 
 .pageHeaderCustomer .pageTitle {
@@ -668,24 +701,13 @@
   letter-spacing: -0.026em;
 }
 
-.pageHeaderCustomer .pageTitleRow {
-  grid-template-columns: 5px minmax(0, 1fr);
-  gap: var(--space-5);
-}
-
-.pageHeaderCustomer .ledgerMarker {
-  width: 5px;
-}
-
 .pageDescription {
   max-width: 68ch;
-  padding-inline-start: calc(4px + var(--space-4));
   color: var(--ink-secondary);
 }
 
 .pageHeaderCustomer .pageDescription {
   max-width: 62ch;
-  padding-inline-start: calc(5px + var(--space-5));
   font-size: var(--text-body-lg);
 }
 
@@ -693,13 +715,8 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-1) var(--space-4);
-  padding-inline-start: calc(4px + var(--space-4));
   color: var(--ink-tertiary);
   font-size: var(--text-caption);
-}
-
-.pageHeaderCustomer .pageMeta {
-  padding-inline-start: calc(5px + var(--space-5));
 }
 
 .pageActions {

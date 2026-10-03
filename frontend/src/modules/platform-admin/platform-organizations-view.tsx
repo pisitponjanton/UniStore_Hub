@@ -245,13 +245,17 @@ export function PlatformOrganizationsView() {
   const suspendedCount = state.organizations.filter(
     (organization) => organization.status === "SUSPENDED",
   ).length;
+  const prioritizedOrganizations = [...state.organizations].sort(
+    (left, right) =>
+      Number(right.status === "PENDING") -
+      Number(left.status === "PENDING"),
+  );
 
   return (
     <div className={styles.page}>
       <main className={styles.main}>
         <header className={styles.header}>
-          <div className={styles.headerCopy} data-ledger-heading>
-            <span className={styles.pageKicker}>การกำกับดูแลระดับ Platform</span>
+          <div className={styles.headerCopy}>
             <h1 className={styles.title}>จัดการหน่วยงาน</h1>
             <p className={styles.description}>
               ตรวจสถานะของแต่ละหน่วยงานก่อนอนุมัติหรือระงับ
@@ -259,9 +263,20 @@ export function PlatformOrganizationsView() {
             </p>
           </div>
 
-          <div className={styles.headerCount}>
-            <strong>{state.organizations.length.toLocaleString("th-TH")}</strong>
-            <span>หน่วยงานที่โหลด</span>
+          <div className={styles.headerAside}>
+            <div
+              className={styles.scopeContext}
+              aria-label="ขอบเขตสิทธิ์ Platform Admin"
+            >
+              <Badge tone="info">Platform Admin</Badge>
+              <span>อนุมัติและระงับหน่วยงานระดับ Platform</span>
+            </div>
+            <div className={styles.headerCount}>
+              <strong data-numeric>
+                {state.organizations.length.toLocaleString("th-TH")}
+              </strong>
+              <span>หน่วยงานที่โหลด</span>
+            </div>
           </div>
         </header>
 
@@ -271,7 +286,7 @@ export function PlatformOrganizationsView() {
         >
           <article className={styles.priorityItem} data-attention={pendingCount > 0 || undefined}>
             <span className={styles.metricLabel}>รออนุมัติ</span>
-            <strong className={styles.priorityValue}>
+            <strong className={styles.priorityValue} data-numeric>
               {pendingCount.toLocaleString("th-TH")}
             </strong>
             <span className={styles.metricHint}>
@@ -281,7 +296,7 @@ export function PlatformOrganizationsView() {
 
           <article className={styles.priorityItem}>
             <span className={styles.metricLabel}>ใช้งานอยู่</span>
-            <strong className={styles.priorityValue}>
+            <strong className={styles.priorityValue} data-numeric>
               {activeCount.toLocaleString("th-TH")}
             </strong>
             <span className={styles.metricHint}>
@@ -291,7 +306,7 @@ export function PlatformOrganizationsView() {
 
           <article className={styles.priorityItem}>
             <span className={styles.metricLabel}>ถูกระงับ</span>
-            <strong className={styles.priorityValue}>
+            <strong className={styles.priorityValue} data-numeric>
               {suspendedCount.toLocaleString("th-TH")}
             </strong>
             <span className={styles.metricHint}>
@@ -345,7 +360,7 @@ export function PlatformOrganizationsView() {
               className={styles.organizationList}
               aria-label="รายการหน่วยงานทั้งหมด"
             >
-              {state.organizations.map((organization) => {
+              {prioritizedOrganizations.map((organization) => {
                 const isPending =
                   pending?.organizationId ===
                   organization.organizationId;
@@ -360,6 +375,8 @@ export function PlatformOrganizationsView() {
                   <article
                     className={styles.organizationRow}
                     data-attention={organization.status === "PENDING" || undefined}
+                    aria-busy={isPending}
+                    aria-label={`${organization.name} · ${platformOrganizationStatusLabel(organization.status)}`}
                     key={organization.organizationId}
                   >
                     <div className={styles.organizationMain}>
@@ -385,34 +402,34 @@ export function PlatformOrganizationsView() {
                         </Badge>
                       </div>
 
-                      <div className={styles.metaGrid}>
+                      <dl className={styles.metaGrid}>
                         <div className={styles.metaItem}>
-                          <span className={styles.metaLabel}>
+                          <dt className={styles.metaLabel}>
                             Organization ID
-                          </span>
-                          <span className={styles.code}>
+                          </dt>
+                          <dd className={styles.code}>
                             {organization.organizationId}
-                          </span>
+                          </dd>
                         </div>
                         <div className={styles.metaItem}>
-                          <span className={styles.metaLabel}>
+                          <dt className={styles.metaLabel}>
                             Created by
-                          </span>
-                          <span className={styles.code}>
+                          </dt>
+                          <dd className={styles.code}>
                             {organization.createdBy}
-                          </span>
+                          </dd>
                         </div>
                         <div className={styles.metaItem}>
-                          <span className={styles.metaLabel}>
+                          <dt className={styles.metaLabel}>
                             อัปเดตล่าสุด
-                          </span>
-                          <span className={styles.metaValue}>
-                            {formatIsoDateTime(
-                              organization.updatedAt,
-                            )}
-                          </span>
+                          </dt>
+                          <dd className={styles.metaValue}>
+                            <time dateTime={organization.updatedAt}>
+                              {formatIsoDateTime(organization.updatedAt)}
+                            </time>
+                          </dd>
                         </div>
-                      </div>
+                      </dl>
                     </div>
 
                     <div
@@ -421,7 +438,7 @@ export function PlatformOrganizationsView() {
                       aria-label={`จัดการ ${organization.name}`}
                     >
                       <span className={styles.actionLabel}>
-                        Action ที่ใช้ได้
+                        การดำเนินการที่ใช้ได้
                       </span>
 
                       {canApprove || canSuspend ? (

@@ -2,11 +2,13 @@
 
 ## Status
 
-Canonical visual authority for the full frontend redesign.
+Canonical visual authority for **Skill-Driven UniStore Hub UX/UI Redesign v2**.
 
-Working direction: **Campus Commerce Workbench**
+Approved direction: **Campus Commerce Workbench v2**
 
-This document replaces the previous visual direction. Do not maintain an old theme in parallel. All pages must consume the same semantic token source in `src/app/globals.css`.
+This document is the single visual authority for the frontend. It reconciles the existing UniStore Hub product model with verified `ui-ux-pro-max` search results and the local `interface-design`, `design-review`, `redesign`, `frontend-design`, and `a11y-audit` skills.
+
+Do not maintain an old theme or a second generated design system in parallel. All pages must consume the same semantic token source in `src/app/globals.css`.
 
 ## Product model
 
@@ -30,30 +32,36 @@ The interface should feel:
 - campus-specific without decorative university clichés
 - operational without looking like a generic SaaS dashboard
 
-The visual identity comes from composition, state hierarchy, typography, rhythm, and the **ledger rail**. It must not depend on gradients, glassmorphism, random shadows, oversized rounded cards, or decorative animation.
+The visual identity comes from composition, state hierarchy, Thai typography, rhythm, and a **task ledger** pattern. It must not depend on gradients, glassmorphism, random shadows, oversized rounded cards, decorative animation, or repeated accent strips.
 
-## Signature: ledger rail
+## Signature: task ledger
 
-The signature device is a restrained vertical/edge marker attached to the primary task or authoritative state.
+The signature is a **content arrangement**, not a decorative border treatment.
 
-A proper ledger rail contains:
+A proper task ledger contains:
 
-1. current task/state
+1. authoritative current state
 2. plain-language meaning
 3. minimum identifying references
-4. next valid action
-5. secondary metadata after the action context
+4. one clear next valid action when an action exists
+5. secondary metadata/history after the action context
 
-Use it for the main task/state context only. Do not add a marker to every section.
+The task ledger may use a quiet neutral rule, status icon, badge, or local surface shift to anchor attention. A colored left-edge rail is not required and must not be repeated across ordinary rows/cards.
+
+Use this pattern only for the primary transaction or work context. Queue rows, notices, selected items, and generic cards should use their own semantic patterns instead of copying the signature.
 
 ## Design dials
 
-These are manual design intent values, not generated UI/UX Pro Max search output.
+A verified `ui-ux-pro-max --design-system` search for `thai campus marketplace preorder operations` returned variance 6/10, motion 3/10, and density 7/10.
 
-- visual variance: 5/10
-- motion: 3/10
-- customer density: 4/10
-- operational density: 8/10
+The product adapts that calibration into:
+
+- visual variance: **6/10** — enough compositional variation to avoid template repetition
+- motion: **3/10** — subtle feedback only
+- customer density: **5/10** — browsable, comfortable, content-led
+- operational density: **8/10** — compact and scan-first without shrinking touch targets
+
+Customer and operational density intentionally diverge while using the same tokens and component language.
 
 ## Defaults rejected
 
@@ -71,6 +79,33 @@ Do not use these as the default answer:
 - motion without a user/task reason
 - hidden permissions masquerading as authorization
 - desktop layouts simply compressed into mobile
+
+## Skill evidence and decisions
+
+Verified `ui-ux-pro-max` searches are design evidence, not project authority. The complete audit record is in `ux-ui-audit.md`.
+
+### Adopted
+
+- **Noto Sans Thai** as the primary family. The typography search ranked it as the strongest Thai-modern/readable match.
+- **Minimalist / Swiss clarity**: strong grid, hierarchy, restrained surfaces, limited accent use, low effect cost.
+- **Motion 3/10**: direct interaction/state feedback rather than decorative choreography.
+- **Visible focus, focus-not-obscured, touch-friendly controls, submit feedback, inline errors, and contextual async status messaging.**
+- **Next.js internal navigation guidance** where compatible with the static-export architecture.
+
+### Adapted
+
+- **Density 7/10** becomes customer 5/10 and operations 8/10.
+- **Marketplace/e-commerce patterns** become campus-specific discovery, preorder, payment-review, production, and pickup compositions rather than generic cart/review patterns.
+- **Commerce icon guidance** becomes one shared project-local vector style used only when an icon improves comprehension.
+- **Minimalism** does not mean zero radius, pure black/white, or identical page layouts.
+
+### Rejected by default
+
+- **Hero + Testimonials + CTA** as a system pattern. UniStore Hub has no verified testimonial/social-proof source; do not fabricate one.
+- **Generic purple + green marketplace palette** as an automatic replacement.
+- **Green + orange e-commerce palette** as an automatic replacement.
+- **GSAP / scroll-reveal choreography** without a task-specific reason.
+- **Server/runtime recommendations** that conflict with static export, backend API authority, or pre-signed/direct-S3 flows.
 
 ## Color system
 
@@ -98,14 +133,20 @@ Dark:
 
 ### Identity
 
-Campus accent is deep teal-green:
+Final identity direction: **deep campus teal**.
 
-- `--campus`
-- `--campus-hover`
-- `--campus-soft`
-- `--campus-strong`
+The verified color searches surfaced marketplace purple/green, e-commerce green/orange, education teal, and trust teal candidates. The product keeps the existing darker teal family because it is more specific to the established UniStore Hub direction, works across storefront and operations, and avoids turning success green into the primary brand signal.
 
-Use the campus accent for identity, focus of action, selection, and active navigation. Do not use it as a decorative wash.
+Canonical identity tokens remain:
+
+- `--campus: #0F6A64`
+- `--campus-hover: #0A5752`
+- `--campus-soft: #E1F0ED`
+- `--campus-strong: #083E3B`
+
+Dark-mode identity remains a lighter teal family derived from the same hue.
+
+Use campus teal for identity, primary action, selection, active navigation, and current scope. Do not use it as a decorative wash. Success/warning/danger/info remain semantically separate and must not be recolored to match brand for aesthetics.
 
 ### Semantic states
 
@@ -120,9 +161,11 @@ State must always include text/semantics. Color is reinforcement, never the only
 
 ## Contrast policy
 
-The foundation palette was selected to keep common text/state pairings above normal-text AA contrast in both light and dark themes.
+The foundation palette keeps common text/state pairings above normal-text AA contrast in both light and dark themes.
 
-Do not claim full WCAG conformance until browser/runtime contrast and composed-state checks are completed in the accessibility phase.
+Phase 19 measured the core text, semantic-state, focus, and editable-control boundary pairs and ran rendered light/dark checks on the public entry flows at 320px. The shared field focus ring now uses the full focus token, and the light editable-control boundary is calibrated above 3:1 against the inset control surface.
+
+This is project-level accessibility verification, not a claim of formal WCAG certification. Manual assistive-technology testing remains appropriate before a production accessibility certification.
 
 Editable control boundaries must remain visually distinguishable from adjacent surfaces.
 
@@ -170,6 +213,19 @@ The mobile type increase is deliberate to preserve readability and avoid tiny in
 - 700 only for genuinely dominant totals or identity moments
 
 Avoid using type weight everywhere as a substitute for hierarchy.
+
+## Kicker / eyebrow policy
+
+Small labels above headings are allowed only when they add information that the heading does not already contain, for example:
+
+- active scope or authority boundary
+- lifecycle/state context
+- queue category
+- selected entity type when the title alone is ambiguous
+
+Do not add `pageKicker`, `sectionKicker`, `panelKicker`, or similar labels as decorative rhythm. A page should not automatically follow `kicker -> heading -> description` in every section.
+
+Prefer a direct heading, status badge, breadcrumb/back context, or compact metadata row when that communicates the information more clearly.
 
 ## Spacing
 
@@ -378,7 +434,9 @@ Rules:
 - hint/error is connected semantically
 - errors explain cause and recovery
 - pending submit disables repeat action
-- first invalid field or error summary receives focus after failed submit
+- simple forms focus the first invalid field after failed submit
+- complex multi-field forms use a focusable error summary at the top of the form, link/associate each summary item with its field where practical, and retain inline field errors
+- do not move focus on every blur; move it after failed submit when recovery context is needed
 - read-only state differs from disabled
 - grouped fields use meaningful visual/semantic grouping
 - password manager/paste/autofill must remain available
@@ -462,13 +520,21 @@ A state message should answer:
 
 Errors should not be vague.
 
+For asynchronous changes:
+
+- announce meaningful contextual status, not a bare changing number
+- prefer one status/live message for the operation
+- do not turn every badge/count into its own live region
+- do not move focus merely because background data refreshed
+- move focus only when user-triggered validation/navigation requires recovery context
+
 Permission/access states may explain why access is unavailable, but must not claim frontend visibility as security authority.
 
 ## Motion
 
-Motion is restrained.
+Motion target is **3/10**.
 
-Tokens:
+Tokens remain intentionally short:
 
 - fast: 120ms
 - standard: 180ms
@@ -480,27 +546,33 @@ Allowed uses:
 - menu/dialog open/close
 - state disclosure
 - action completion feedback
+- one-off customer-facing spatial transition only when it explains where content moved
 
-Avoid:
+Avoid by default:
 
+- GSAP or another motion dependency solely for polish
 - page-load choreography on operational screens
 - repeated stagger animations
-- scroll effects
+- scroll-reveal systems
 - decorative parallax
+- animation of layout dimensions when transform/opacity or no animation communicates the state better
 
-Respect `prefers-reduced-motion` globally.
+Respect `prefers-reduced-motion` globally and render the stable final state immediately for non-essential motion.
 
 ## Icons
 
-Use one vector icon family/style if icons are introduced.
+Use one project-local vector icon language.
+
+The `ui-ux-pro-max` commerce search surfaced Phosphor examples, but the project does not need a new icon dependency merely to satisfy that recommendation. Prefer a small shared set of inline SVG primitives using `currentColor`, consistent stroke weight, and the existing 16 / 20 / 24px size tokens. If a future feature justifies an icon package, choose one family and migrate deliberately rather than mixing sets.
 
 Rules:
 
 - no emoji as structural controls
-- consistent size tokens: 16 / 20 / 24px
-- consistent stroke/fill language at the same hierarchy level
-- icon-only controls require accessible name
+- do not use text arrows/checkmarks as decorative icon chrome when a semantic text label is sufficient
+- a completion/check marker is allowed when it communicates real state and has an accessible textual equivalent
+- icon-only controls require an accessible name
 - decorative icon beside visible text is hidden from assistive technology
+- meaningful standalone icons need a text alternative
 - do not add icons where text is clearer
 
 ## Z-index
@@ -535,7 +607,7 @@ Required throughout implementation:
 - authentication remains password-manager/paste compatible
 - minimum pointer target requirements respected
 
-Full accessibility certification remains a later phase.
+Phase 19 completed the project accessibility and anti-template audit. Maintain these rules in later regression/review phases; formal accessibility certification would still require dedicated assistive-technology/manual conformance testing.
 
 ## Project contract guardrails
 
@@ -561,6 +633,17 @@ Visual redesign must not change:
 - opaque cursors
 - notification events as signals rather than current-resource authority
 
+## Media / image policy
+
+Image guidance must remain compatible with static export and backend-issued URLs.
+
+- use responsive containers and reserve image space to avoid layout shift
+- use semantic `alt` text for meaningful product/store media
+- decorative imagery uses empty alt text
+- do not rewrite short-lived/backend-issued image URL behavior solely to satisfy generic Next.js image guidance
+- direct upload remains backend presign -> direct PUT -> persist backend-issued key
+- loading/error placeholders should preserve layout and explain recoverable failure where useful
+
 ## Shared implementation rule
 
 There is one design system.
@@ -568,6 +651,23 @@ There is one design system.
 Future phases should rebuild shared primitives first, then compose route-specific UX from them.
 
 Page-specific CSS is allowed for composition. It should not recreate generic controls, state semantics, dialog behavior, buttons, fields, badges, filters, or repeated workbench patterns without a documented reason.
+
+
+## v2 decision checklist
+
+Phase 2 is complete only when implementation follows these decisions:
+
+- identity stays deep campus teal rather than generic marketplace purple
+- Noto Sans Thai remains the primary family
+- task ledger is a state/action composition, not a repeated colored left border
+- decorative kickers are removed; informational scope/state labels remain
+- customer density 5/10 and operational density 8/10
+- motion remains 3/10 with no default scroll-reveal/GSAP system
+- complex forms may use a focusable error summary while retaining inline errors
+- async queue/count updates use contextual live messaging sparingly
+- icons use one shared vector language; no decorative arrows/emoji
+- no testimonials, fake ratings, or fabricated social proof
+- static-export/API/auth/direct-upload contracts override generic stack advice
 
 ## Implementation sequence
 

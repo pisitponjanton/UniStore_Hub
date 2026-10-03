@@ -32,13 +32,6 @@
   gap: var(--space-3);
 }
 
-.pageKicker {
-  width: fit-content;
-  color: var(--campus);
-  font-size: var(--text-body-sm);
-  font-weight: 700;
-}
-
 .title {
   color: var(--ink);
   font-size: clamp(2rem, 4vw, 3.4rem);
@@ -89,7 +82,7 @@
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   background: var(--surface);
-  box-shadow: var(--shadow-subtle);
+  box-shadow: none;
 }
 
 .filterHeading,
@@ -135,8 +128,8 @@
   max-width: 300px;
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--line-soft);
-  border-radius: var(--radius-pill);
-  background: var(--surface-raised);
+  border-radius: var(--radius-md);
+  background: var(--surface-inset);
   color: var(--ink-secondary);
   font-family: var(--font-technical);
   font-size: var(--text-caption);
@@ -166,6 +159,13 @@
   gap: var(--space-5);
 }
 
+.listFeedback {
+  margin: calc(var(--space-4) * -1) 0 0;
+  color: var(--ink-tertiary);
+  font-size: var(--text-caption);
+  line-height: 1.5;
+}
+
 .code,
 .action {
   overflow-wrap: anywhere;
@@ -183,7 +183,7 @@
   min-height: 28px;
   padding: 0 var(--space-2);
   border-radius: var(--radius-sm);
-  background: var(--surface-raised);
+  background: var(--surface-inset);
   color: var(--ink);
   font-family: var(--font-technical);
   font-size: var(--text-caption);
@@ -228,7 +228,7 @@
 }
 
 .metadataDetails summary:hover {
-  background: var(--campus-soft);
+  background: var(--surface-hover);
 }
 
 .metadataDetails summary:focus-visible {

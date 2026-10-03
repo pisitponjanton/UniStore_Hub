@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 
-import { Button, Notice, TextField } from "@/components";
+import { Button, ErrorSummary, Notice, TextField } from "@/components";
 import { ApiClientError } from "@/services";
 
 import styles from "./auth-form.module.css";
@@ -18,23 +18,13 @@ import { getAuthReturnPath } from "./return-route";
 import { authSession } from "./session";
 import { useAuthNavigationContext } from "./use-auth-navigation-context";
 
-function focusFirstInvalidField(errors: AuthFieldErrors) {
-  const id = errors.email
-    ? "login-email"
-    : errors.password
-      ? "login-password"
-      : null;
-
-  if (id) {
-    document.getElementById(id)?.focus();
-  }
-}
-
 export function LoginForm() {
   const navigation = useAuthNavigationContext();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<AuthFieldErrors>({});
+  const errorSummaryRef = useRef<HTMLDivElement>(null);
   const [serverError, setServerError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -62,7 +52,7 @@ export function LoginForm() {
     setServerError(null);
 
     if (hasAuthFieldErrors(nextErrors)) {
-      focusFirstInvalidField(nextErrors);
+      requestAnimationFrame(() => errorSummaryRef.current?.focus());
       return;
     }
 
@@ -94,7 +84,6 @@ export function LoginForm() {
   return (
     <div className={styles.formShell}>
       <div className={styles.headingGroup}>
-        <span className={styles.formKicker}>ยินดีต้อนรับกลับ</span>
         <h2 className={styles.title}>เข้าสู่บัญชีของคุณ</h2>
         <p className={styles.description}>
           ใช้อีเมลและรหัสผ่านเดิมเพื่อกลับไปดูรายการที่กำลังดำเนินการ
@@ -108,6 +97,19 @@ export function LoginForm() {
       ) : null}
 
       <form className={styles.form} onSubmit={handleSubmit} noValidate>
+        <ErrorSummary
+          ref={errorSummaryRef}
+          id="login-error-summary"
+          items={[
+            ...(fieldErrors.email
+              ? [{ fieldId: "login-email", message: fieldErrors.email }]
+              : []),
+            ...(fieldErrors.password
+              ? [{ fieldId: "login-password", message: fieldErrors.password }]
+              : []),
+          ]}
+        />
+
         <div className={styles.formFields}>
           <TextField
             id="login-email"
@@ -118,21 +120,32 @@ export function LoginForm() {
             value={email}
             onChange={(event) => updateEmail(event.target.value)}
             error={fieldErrors.email}
+            announceError={false}
             disabled={pending}
-            autoFocus
             required
           />
           <TextField
             id="login-password"
             label="รหัสผ่าน"
-            type="password"
+            type={showPassword ? "text" : "password"}
             autoComplete="current-password"
             value={password}
             onChange={(event) => updatePassword(event.target.value)}
             error={fieldErrors.password}
+            announceError={false}
             disabled={pending}
             required
           />
+          <button
+            type="button"
+            className={styles.passwordToggle}
+            aria-controls="login-password"
+            aria-pressed={showPassword}
+            disabled={pending}
+            onClick={() => setShowPassword((current) => !current)}
+          >
+            {showPassword ? "ซ่อนรหัสผ่าน" : "แสดงรหัสผ่าน"}
+          </button>
         </div>
 
         {serverError ? (
@@ -153,9 +166,7 @@ export function LoginForm() {
         </div>
       </form>
 
-      <div className={styles.formDivider} aria-hidden="true">
-        <span />
-      </div>
+      <div className={styles.formDivider} aria-hidden="true" />
 
       <div className={styles.formFooter}>
         <p className={styles.switchText}>

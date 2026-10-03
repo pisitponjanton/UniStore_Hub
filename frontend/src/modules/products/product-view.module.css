@@ -31,14 +31,6 @@
   gap: var(--space-3);
 }
 
-.pageKicker,
-.panelKicker {
-  width: fit-content;
-  color: var(--campus);
-  font-size: var(--text-body-sm);
-  font-weight: 700;
-}
-
 .title {
   color: var(--ink);
   font-size: clamp(2rem, 4vw, 3.4rem);
@@ -158,40 +150,25 @@
 }
 
 .row {
-  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: var(--space-5);
   align-items: center;
-  padding: var(--space-5) var(--space-4) var(--space-5) var(--space-5);
+  padding: var(--space-5) var(--space-4);
   border-bottom: 1px solid var(--line-soft);
   background: var(--surface);
   transition:
     background-color var(--motion-fast) var(--motion-ease-out),
-    padding-inline var(--motion-fast) var(--motion-ease-out);
-}
-
-.row::before {
-  content: "";
-  position: absolute;
-  inset-block: var(--space-4);
-  inset-inline-start: 0;
-  width: 3px;
-  border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
-  background: var(--line-strong);
+    box-shadow var(--motion-fast) var(--motion-ease-out);
 }
 
 .row:hover {
-  background: var(--surface-raised);
+  background: var(--surface-hover);
 }
 
 .rowSelected {
-  background: color-mix(in srgb, var(--campus-soft) 48%, var(--surface));
-}
-
-.rowSelected::before {
-  width: 4px;
-  background: var(--campus);
+  background: var(--surface-selected);
+  box-shadow: inset 0 0 0 1px var(--campus-line);
 }
 
 .rowMain {
@@ -255,7 +232,7 @@
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   background: var(--surface);
-  box-shadow: var(--shadow-subtle);
+  box-shadow: none;
 }
 
 .panelHeading {
@@ -286,7 +263,7 @@
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   background: var(--surface);
-  box-shadow: var(--shadow-subtle);
+  box-shadow: none;
 }
 
 .editorHeader {
@@ -413,7 +390,7 @@
   }
 
   .row {
-    padding: var(--space-4) 0 var(--space-4) var(--space-5);
+    padding: var(--space-4);
   }
 
   .cardActions,

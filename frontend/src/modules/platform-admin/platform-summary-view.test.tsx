@@ -60,6 +60,12 @@ describe("PlatformSummaryView", () => {
         exact: false,
       }),
     ).toBeInTheDocument();
+    expect(
+      screen.getByLabelText("ขอบเขตสิทธิ์ Platform Admin"),
+    ).toHaveTextContent("สิทธิ์ระดับ Platform ทั้งระบบ");
+    expect(
+      screen.getByText("หน่วยงานรออนุมัติ").closest("article"),
+    ).toHaveAttribute("data-attention", "true");
 
     expect(mocks.getSummary).toHaveBeenCalledWith({
       signal: expect.any(AbortSignal),

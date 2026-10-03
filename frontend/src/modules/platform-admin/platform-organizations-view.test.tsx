@@ -6,6 +6,7 @@ import {
 } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { ApiClientError } from "@/services";
 import type { OrganizationDTO } from "@/types";
 
 const mocks = vi.hoisted(() => ({
@@ -70,6 +71,37 @@ describe("PlatformOrganizationsView", () => {
     });
   });
 
+  it("prioritizes PENDING organizations without changing Backend state rules", async () => {
+    mocks.listOrganizations.mockResolvedValue({
+      items: [
+        organization({
+          organizationId: "org-active",
+          name: "Active Store",
+          status: "ACTIVE",
+        }),
+        organization({
+          organizationId: "org-pending",
+          name: "Pending Store",
+          status: "PENDING",
+        }),
+      ],
+      nextCursor: null,
+    });
+
+    render(<PlatformOrganizationsView />);
+
+    await screen.findByText("Pending Store");
+
+    const list = screen.getByLabelText("รายการหน่วยงานทั้งหมด");
+    const rows = Array.from(list.querySelectorAll("article"));
+
+    expect(rows[0]).toHaveTextContent("Pending Store");
+    expect(rows[1]).toHaveTextContent("Active Store");
+    expect(
+      screen.getByLabelText("ขอบเขตสิทธิ์ Platform Admin"),
+    ).toHaveTextContent("อนุมัติและระงับหน่วยงานระดับ Platform");
+  });
+
   it("shows approve and suspend only for Backend-allowed PENDING state", async () => {
     render(<PlatformOrganizationsView />);
 
@@ -108,6 +140,45 @@ describe("PlatformOrganizationsView", () => {
         "อนุมัติหน่วยงาน Student Store เรียบร้อยแล้ว",
       ),
     ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "อนุมัติ" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "ระงับหน่วยงาน" }),
+    ).toBeInTheDocument();
+  });
+
+  it("refreshes the authoritative organization list after a transition conflict", async () => {
+    mocks.approveOrganization.mockRejectedValue(
+      new ApiClientError({
+        status: 409,
+        code: "INVALID_STATUS_TRANSITION",
+        kind: "conflict",
+      }),
+    );
+    mocks.listOrganizations
+      .mockResolvedValueOnce({
+        items: [organization()],
+        nextCursor: null,
+      })
+      .mockResolvedValueOnce({
+        items: [organization({ status: "ACTIVE" })],
+        nextCursor: null,
+      });
+
+    render(<PlatformOrganizationsView />);
+
+    await screen.findByText("Student Store");
+    clickConfirm("อนุมัติ");
+
+    expect(
+      await screen.findByText(
+        /สถานะหน่วยงานเปลี่ยนไปแล้ว/,
+      ),
+    ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(mocks.listOrganizations).toHaveBeenCalledTimes(2);
+    });
     expect(
       screen.queryByRole("button", { name: "อนุมัติ" }),
     ).not.toBeInTheDocument();

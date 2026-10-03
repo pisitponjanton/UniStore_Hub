@@ -133,6 +133,36 @@ describe("MyPaymentView", () => {
     );
   });
 
+  it("keeps submit available and focuses the file field when no proof is selected", async () => {
+    mocks.getMyOrder.mockResolvedValue(
+      makeOrder({ status: "PENDING_PAYMENT" }),
+    );
+    mocks.getMyPayment.mockRejectedValue(
+      new ApiClientError({
+        status: 404,
+        code: "PAYMENT_NOT_FOUND",
+        kind: "notFound",
+      }),
+    );
+
+    render(<MyPaymentView />);
+
+    const submitButton = await screen.findByRole("button", {
+      name: "ส่งหลักฐานการชำระเงิน",
+    });
+    expect(submitButton).toBeEnabled();
+
+    fireEvent.click(submitButton);
+
+    expect(
+      await screen.findByText("กรุณาเลือกไฟล์หลักฐานการชำระเงิน"),
+    ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByLabelText("หลักฐานการชำระเงิน")).toHaveFocus();
+    });
+    expect(mocks.requestSlipUploadUrl).not.toHaveBeenCalled();
+  });
+
   it("submits a new slip through fresh presign -> direct PUT -> Backend slipKey -> authoritative refresh", async () => {
     const upload: PresignedUploadDTO = {
       objectKey:
@@ -217,6 +247,9 @@ describe("MyPaymentView", () => {
       await screen.findByText(
         "ส่งหลักฐานแล้วและกำลังรอเจ้าหน้าที่ตรวจสอบ",
       ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("ส่งหลักฐานแล้ว ระบบกำลังรอเจ้าหน้าที่ตรวจสอบ"),
     ).toBeInTheDocument();
     expect(
       screen.queryByRole("button", {

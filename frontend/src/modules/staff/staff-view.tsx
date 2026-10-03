@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 
 import {
   Badge,
@@ -8,6 +8,7 @@ import {
   ConfirmDialog,
   EmptyState,
   ErrorState,
+  ErrorSummary,
   LoadingState,
   Notice,
   SelectField,
@@ -89,6 +90,7 @@ export function StaffView({
   >({});
   const [inlineError, setInlineError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const addErrorSummaryRef = useRef<HTMLDivElement>(null);
 
   const refreshMembers = useCallback(
     async (signal?: AbortSignal) => {
@@ -156,6 +158,7 @@ export function StaffView({
     setNotice(null);
 
     if (error) {
+      requestAnimationFrame(() => addErrorSummaryRef.current?.focus());
       return;
     }
 
@@ -271,8 +274,7 @@ export function StaffView({
     <div className={styles.page}>
       <main className={styles.main}>
         <header className={styles.header}>
-          <div className={styles.headerCopy} data-ledger-heading>
-            <span className={styles.pageKicker}>สิทธิ์และสมาชิกหน่วยงาน</span>
+          <div className={styles.headerCopy}>
             <h1 className={styles.title}>บุคลากรและสิทธิ์</h1>
             <p className={styles.description}>
               เพิ่มผู้ใช้ที่มีบัญชีอยู่แล้ว กำหนดบทบาท และจัดการสมาชิกของหน่วยงาน
@@ -461,14 +463,22 @@ export function StaffView({
 
           <aside className={styles.panel}>
             <div className={styles.panelHeading}>
-              <span className={styles.panelKicker}>เพิ่มสิทธิ์ให้ผู้ใช้</span>
               <h2 className={styles.sectionTitle}>เพิ่มสมาชิก</h2>
               <p className={styles.sectionDescription}>
                 ใช้อีเมลของผู้ใช้ที่สมัครบัญชี UniStore Hub แล้ว
               </p>
             </div>
 
-            <form className={styles.form} onSubmit={handleAdd}>
+            <form className={styles.form} onSubmit={handleAdd} noValidate>
+              <ErrorSummary
+                ref={addErrorSummaryRef}
+                id="staff-add-error-summary"
+                items={
+                  emailError
+                    ? [{ fieldId: "staff-email", message: emailError }]
+                    : []
+                }
+              />
               <TextField
                 id="staff-email"
                 type="email"
@@ -480,6 +490,10 @@ export function StaffView({
                   setInlineError(null);
                 }}
                 error={emailError}
+                announceError={false}
+                onBlur={() => {
+                  setEmailError(validateStaffEmail(email) ?? undefined);
+                }}
                 autoComplete="email"
                 required
                 disabled={adding}

@@ -55,6 +55,7 @@ export function MyOrderView() {
   });
   const [cancelPending, setCancelPending] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [actionSuccess, setActionSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -130,11 +131,13 @@ export function MyOrderView() {
 
     setCancelPending(true);
     setActionError(null);
+    setActionSuccess(null);
 
     try {
       await orderService.cancelMyOrder(state.order.orderId);
       const refreshed = await orderService.getMyOrder(state.order.orderId);
       setState({ status: "success", order: refreshed });
+      setActionSuccess("ยกเลิกคำสั่งซื้อแล้ว");
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();
@@ -235,7 +238,6 @@ export function MyOrderView() {
 
         <header className={styles.detailHero}>
           <div className={styles.detailHeroCopy}>
-            <span className={styles.pageKicker}>คำสั่งซื้อของฉัน</span>
             <h1 className={styles.title}>รายละเอียดคำสั่งซื้อ</h1>
             <span className={styles.orderCode} data-technical>
               {order.orderId}
@@ -247,9 +249,9 @@ export function MyOrderView() {
             <strong className={styles.totalValue} data-numeric>
               {formatSatang(order.total)}
             </strong>
-            <span className={styles.detailUpdated}>
+            <time className={styles.detailUpdated} dateTime={order.updatedAt}>
               อัปเดตล่าสุด {formatIsoDateTime(order.updatedAt)}
-            </span>
+            </time>
           </div>
         </header>
 
@@ -281,7 +283,6 @@ export function MyOrderView() {
           >
             <div className={styles.sectionHeading}>
               <div>
-                <span className={styles.sectionKicker}>เส้นทางของรายการ</span>
                 <h2 className={styles.sectionTitle} id="order-journey">
                   ขั้นตอนคำสั่งซื้อ
                 </h2>
@@ -291,7 +292,7 @@ export function MyOrderView() {
               </span>
             </div>
 
-            <ol className={styles.journeyList}>
+            <ol className={styles.journeyList} aria-label="ขั้นตอนคำสั่งซื้อ">
               {journey.map((step, index) => (
                 <li
                   className={styles.journeyStep}
@@ -300,7 +301,7 @@ export function MyOrderView() {
                   aria-current={step.state === "current" ? "step" : undefined}
                 >
                   <div className={styles.journeyIndex} aria-hidden="true">
-                    {step.state === "done" ? "✓" : index + 1}
+                    {index + 1}
                   </div>
                   <div className={styles.journeyCopy}>
                     <strong>{step.label}</strong>
@@ -320,13 +321,16 @@ export function MyOrderView() {
 
         <section className={styles.orderContext} aria-label="ข้อมูลคำสั่งซื้อ">
           <div className={styles.contextLead}>
-            <span className={styles.sectionKicker}>ข้อมูลอ้างอิง</span>
             <h2 className={styles.sectionTitle}>ข้อมูลของรายการนี้</h2>
           </div>
           <dl className={styles.orderFacts}>
             <div>
               <dt>สร้างเมื่อ</dt>
-              <dd>{formatIsoDateTime(order.createdAt)}</dd>
+              <dd>
+                <time dateTime={order.createdAt}>
+                  {formatIsoDateTime(order.createdAt)}
+                </time>
+              </dd>
             </div>
             <div>
               <dt>จำนวนรายการสินค้า</dt>
@@ -342,7 +346,6 @@ export function MyOrderView() {
         <section className={styles.section} aria-labelledby="order-items">
           <div className={styles.sectionHeading}>
             <div>
-              <span className={styles.sectionKicker}>รายการที่บันทึก</span>
               <h2 className={styles.sectionTitle} id="order-items">
                 สินค้าในคำสั่งซื้อ
               </h2>
@@ -397,6 +400,12 @@ export function MyOrderView() {
           </div>
         </section>
 
+        {actionSuccess ? (
+          <Notice tone="success" role="status" title="อัปเดตคำสั่งซื้อแล้ว">
+            {actionSuccess}
+          </Notice>
+        ) : null}
+
         {actionError ? (
           <Notice tone="danger" role="alert" title="ดำเนินการไม่สำเร็จ">
             {actionError}
@@ -406,7 +415,6 @@ export function MyOrderView() {
         <section className={styles.orderTools} aria-labelledby="order-tools">
           <div className={styles.orderToolsHeading}>
             <div>
-              <span className={styles.sectionKicker}>เมนูของรายการ</span>
               <h2 className={styles.sectionTitle} id="order-tools">
                 ดูข้อมูลที่เกี่ยวข้อง
               </h2>

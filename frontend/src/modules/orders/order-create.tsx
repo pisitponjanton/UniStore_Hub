@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 
 import {
   Button,
   ErrorState,
+  ErrorSummary,
   LoadingState,
   Notice,
   TaskStatus,
@@ -71,6 +72,9 @@ export function OrderCreateView() {
     status: "loading",
   });
   const [quantityInput, setQuantityInput] = useState("1");
+  const [quantityTouched, setQuantityTouched] = useState(false);
+  const [submitAttempted, setSubmitAttempted] = useState(false);
+  const errorSummaryRef = useRef<HTMLDivElement>(null);
   const [pending, setPending] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [campaignNotOpen, setCampaignNotOpen] = useState(false);
@@ -189,14 +193,20 @@ export function OrderCreateView() {
       pending ||
       state.status !== "ready" ||
       !orderContext ||
-      orderContext.quantity === null ||
       campaignNotOpen
     ) {
       return;
     }
 
-    setPending(true);
+    setSubmitAttempted(true);
     setServerError(null);
+
+    if (orderContext.quantity === null) {
+      requestAnimationFrame(() => errorSummaryRef.current?.focus());
+      return;
+    }
+
+    setPending(true);
 
     const request = buildCreateOrderRequest({
       ...state.context,
@@ -294,13 +304,10 @@ export function OrderCreateView() {
         <StorefrontHeader />
 
         <main className={styles.successMain}>
-          <div className={styles.successMarker} aria-hidden="true">
-            <span>✓</span>
-          </div>
+          <div className={styles.successMarker} aria-hidden="true" />
 
           <header className={styles.successHeading}>
-            <span className={styles.pageKicker}>สร้างคำสั่งซื้อสำเร็จ</span>
-            <h1 className={styles.successTitle}>รายการนี้ถูกบันทึกแล้ว</h1>
+            <h1 className={styles.successTitle}>สร้างคำสั่งซื้อสำเร็จ</h1>
             <p className={styles.description}>
               ยอดและสถานะด้านล่างมาจากข้อมูลที่ระบบบันทึกไว้จริง
               ใช้ขั้นตอนถัดไปเพื่อดำเนินรายการต่อ
@@ -376,7 +383,7 @@ export function OrderCreateView() {
 
   const selection = orderContext;
   const quantityError =
-    quantityInput.length > 0 && selection?.quantity === null
+    (quantityTouched || submitAttempted) && selection?.quantity === null
       ? "จำนวนต้องเป็นจำนวนเต็มตั้งแต่ 1 ขึ้นไป"
       : undefined;
 
@@ -398,7 +405,6 @@ export function OrderCreateView() {
 
         <header className={styles.header}>
           <div className={styles.headerCopy}>
-            <span className={styles.pageKicker}>ยืนยันก่อนสร้างรายการ</span>
             <h1 className={styles.title}>ตรวจสอบคำสั่งซื้อ</h1>
             <p className={styles.description}>
               สินค้าและตัวเลือกถูกส่งมาจากหน้าสินค้าแล้ว
@@ -417,7 +423,7 @@ export function OrderCreateView() {
             </li>
             <li>
               <span>3</span>
-              <strong>ดำเนินการต่อ</strong>
+              <strong>ติดตามรายการ</strong>
             </li>
           </ol>
         </header>
@@ -434,8 +440,9 @@ export function OrderCreateView() {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={product.imageUrl}
-                    alt=""
+                    alt={product.name}
                     className={styles.productImage}
+                    decoding="async"
                   />
                 ) : (
                   <div className={styles.productPlaceholder}>
@@ -459,8 +466,8 @@ export function OrderCreateView() {
 
             {selection ? (
               <>
-                <div className={styles.campaignRail}>
-                  <div className={styles.campaignRailTop}>
+                <div className={styles.campaignContext}>
+                  <div className={styles.campaignContextTop}>
                     <div>
                       <span className={styles.summaryLabel}>รอบพรีออเดอร์</span>
                       <strong>{selection.campaign.name}</strong>
@@ -509,12 +516,19 @@ export function OrderCreateView() {
             aria-labelledby="confirm-heading"
           >
             <div className={styles.confirmHeading}>
-              <span className={styles.stepLabel}>จำนวนและยอดประมาณการ</span>
-              <h2 id="confirm-heading">พร้อมสร้างคำสั่งซื้อหรือยัง?</h2>
-              <p>
-                ตรวจจำนวนด้านล่างให้ถูกต้องก่อนกดยืนยัน
-              </p>
+              <h2 id="confirm-heading">จำนวนและยอดประมาณการ</h2>
+              <p>ตรวจจำนวนด้านล่างให้ถูกต้องก่อนกดยืนยัน</p>
             </div>
+
+            <ErrorSummary
+              ref={errorSummaryRef}
+              id="order-create-error-summary"
+              items={
+                quantityError
+                  ? [{ fieldId: "order-quantity", message: quantityError }]
+                  : []
+              }
+            />
 
             <TextField
               id="order-quantity"
@@ -528,23 +542,32 @@ export function OrderCreateView() {
                 setQuantityInput(event.target.value);
                 setServerError(null);
               }}
+              onBlur={() => setQuantityTouched(true)}
               error={quantityError}
+              announceError={false}
               hint="ต้องเป็นจำนวนเต็มตั้งแต่ 1 ขึ้นไป"
               disabled={pending || campaignNotOpen}
               required
             />
 
-            <div className={styles.estimate} aria-live="polite">
-              <span className={styles.summaryLabel}>ยอดประมาณการ</span>
-              <strong className={styles.estimateValue} data-numeric>
+            <div className={styles.estimate}>
+              <span className={styles.summaryLabel} id="order-estimate-label">
+                ยอดประมาณการ
+              </span>
+              <output
+                className={styles.estimateValue}
+                htmlFor="order-quantity"
+                aria-labelledby="order-estimate-label"
+                data-numeric
+              >
                 {selection?.estimate !== null &&
                 selection?.estimate !== undefined
                   ? formatSatang(selection.estimate)
                   : "ยังไม่คำนวณ"}
-              </strong>
+              </output>
               <p className={styles.note}>
                 คำนวณจากราคาตัวเลือก × จำนวนที่กรอก
-                ยอดหลังสร้างคำสั่งซื้อเป็นยอดที่ใช้ดำเนินการจริง
+                ระบบฝั่งเซิร์ฟเวอร์จะตรวจและบันทึกยอดจริงอีกครั้งเมื่อสร้างคำสั่งซื้อ
               </p>
             </div>
 
@@ -570,11 +593,7 @@ export function OrderCreateView() {
                 size="large"
                 pending={pending}
                 pendingLabel="กำลังสร้างคำสั่งซื้อ"
-                disabled={
-                  campaignNotOpen ||
-                  !selection ||
-                  selection.quantity === null
-                }
+                disabled={campaignNotOpen || !selection}
               >
                 ยืนยันสร้างคำสั่งซื้อ
               </Button>

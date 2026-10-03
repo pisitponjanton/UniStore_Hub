@@ -103,6 +103,9 @@ describe("AuditView", () => {
         },
       );
     });
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "แสดง 1 เหตุการณ์ตามตัวกรอง",
+    );
   });
 
   it("keeps applied filters while paging with the opaque cursor", async () => {
@@ -141,5 +144,8 @@ describe("AuditView", () => {
       resourceId: null,
       cursor: "opaque-next",
     });
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "โหลดเพิ่มเติมแล้ว ตอนนี้แสดง 2 Audit Log",
+    );
   });
 });

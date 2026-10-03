@@ -106,6 +106,7 @@ export function MyPaymentView() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [serverError, setServerError] = useState<string | null>(null);
+  const [submitFeedback, setSubmitFeedback] = useState<string | null>(null);
   const [latestPayment, setLatestPayment] = useState<PaymentDTO | null>(null);
   const [stage, setStage] = useState<SubmitStage>("idle");
 
@@ -202,6 +203,7 @@ export function MyPaymentView() {
     setSelectedFile(file);
     setFileError(null);
     setServerError(null);
+    setSubmitFeedback(null);
 
     if (!file) {
       return;
@@ -225,9 +227,17 @@ export function MyPaymentView() {
     if (
       state.status !== "success" ||
       !canSubmitPaymentSlip(state.order.status) ||
-      !selectedFile ||
       stage !== "idle"
     ) {
+      return;
+    }
+
+    setServerError(null);
+    setSubmitFeedback(null);
+
+    if (!selectedFile) {
+      setFileError("กรุณาเลือกไฟล์หลักฐานการชำระเงิน");
+      requestAnimationFrame(() => document.getElementById("payment-slip")?.focus());
       return;
     }
 
@@ -237,8 +247,6 @@ export function MyPaymentView() {
       handleFileChange(selectedFile);
       return;
     }
-
-    setServerError(null);
 
     try {
       setStage("signing");
@@ -272,6 +280,7 @@ export function MyPaymentView() {
       setSelectedFile(null);
       setLatestPayment(refreshedPayment);
       setState({ status: "success", order: refreshedOrder });
+      setSubmitFeedback("ส่งหลักฐานแล้ว ระบบกำลังรอเจ้าหน้าที่ตรวจสอบ");
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();
@@ -355,7 +364,6 @@ export function MyPaymentView() {
 
         <header className={styles.header}>
           <div className={styles.headerCopy}>
-            <span className={styles.pageKicker}>ขั้นตอนการชำระเงิน</span>
             <h1 className={styles.title}>ชำระและส่งหลักฐาน</h1>
             <p className={styles.description}>
               ตรวจสอบสถานะล่าสุดก่อนทุกครั้ง จากนั้นส่งหลักฐานเฉพาะเมื่อรายการนี้เปิดให้ส่งได้
@@ -381,30 +389,32 @@ export function MyPaymentView() {
           }
         />
 
-        <section className={styles.paymentFacts} aria-label="ข้อมูลการชำระเงิน">
+        <dl className={styles.paymentFacts} aria-label="ข้อมูลการชำระเงิน">
           <div>
-            <span className={styles.metaLabel}>ยอดคำสั่งซื้อ</span>
-            <strong className={styles.metaValue}>
+            <dt className={styles.metaLabel}>ยอดคำสั่งซื้อ</dt>
+            <dd className={styles.metaValue} data-numeric>
               {formatSatang(order.total)}
-            </strong>
+            </dd>
           </div>
           <div>
-            <span className={styles.metaLabel}>สถานะหลักฐาน</span>
-            <strong className={styles.metaValue}>
+            <dt className={styles.metaLabel}>สถานะหลักฐาน</dt>
+            <dd className={styles.metaValue}>
               {latestPayment
                 ? getPaymentStatusLabel(latestPayment.status)
                 : "ยังไม่ได้ส่ง"}
-            </strong>
+            </dd>
           </div>
           <div>
-            <span className={styles.metaLabel}>อัปเดตล่าสุด</span>
-            <strong className={styles.metaValue}>
-              {latestPayment
-                ? formatIsoDateTime(latestPayment.updatedAt)
-                : formatIsoDateTime(order.updatedAt)}
-            </strong>
+            <dt className={styles.metaLabel}>อัปเดตล่าสุด</dt>
+            <dd className={styles.metaValue}>
+              <time dateTime={latestPayment?.updatedAt ?? order.updatedAt}>
+                {latestPayment
+                  ? formatIsoDateTime(latestPayment.updatedAt)
+                  : formatIsoDateTime(order.updatedAt)}
+              </time>
+            </dd>
           </div>
-        </section>
+        </dl>
 
         {order.status === "PAYMENT_REJECTED" && latestPayment ? (
           <Notice
@@ -425,13 +435,10 @@ export function MyPaymentView() {
           <section className={styles.uploadSection} aria-labelledby="payment-upload-title">
             <div className={styles.sectionHeading}>
               <div>
-                <span className={styles.stepLabel}>
-                  {order.status === "PAYMENT_REJECTED"
-                    ? "ส่งหลักฐานใหม่"
-                    : "ส่งหลักฐาน"}
-                </span>
                 <h2 className={styles.sectionTitle} id="payment-upload-title">
-                  เลือกไฟล์หลักฐานการชำระเงิน
+                  {order.status === "PAYMENT_REJECTED"
+                    ? "เลือกหลักฐานใหม่เพื่อส่งตรวจอีกครั้ง"
+                    : "เลือกไฟล์หลักฐานการชำระเงิน"}
                 </h2>
               </div>
               <p className={styles.sectionDescription}>
@@ -439,7 +446,12 @@ export function MyPaymentView() {
               </p>
             </div>
 
-            <form className={styles.uploadForm} onSubmit={handleSubmit}>
+            <form
+              className={styles.uploadForm}
+              onSubmit={handleSubmit}
+              aria-busy={stage !== "idle"}
+              noValidate
+            >
               <FileField
                 id="payment-slip"
                 label="หลักฐานการชำระเงิน"
@@ -454,7 +466,11 @@ export function MyPaymentView() {
               />
 
               {selectedFile ? (
-                <div className={styles.selectedFile} aria-live="polite">
+                <div
+                  className={styles.selectedFile}
+                  role="status"
+                  aria-atomic="true"
+                >
                   <div>
                     <span className={styles.selectedFileLabel}>
                       ไฟล์ที่เลือก
@@ -476,11 +492,14 @@ export function MyPaymentView() {
               {activeStage ? (
                 <div
                   className={styles.progressPanel}
-                  role="status"
-                  aria-live="polite"
                   aria-label="ความคืบหน้าการส่งหลักฐาน"
                 >
-                  <div className={styles.progressCurrent}>
+                  <div
+                    className={styles.progressCurrent}
+                    role="status"
+                    aria-live="polite"
+                    aria-atomic="true"
+                  >
                     <strong>{stageCopy[activeStage].label}</strong>
                     <span>{stageCopy[activeStage].description}</span>
                   </div>
@@ -494,7 +513,16 @@ export function MyPaymentView() {
                           data-state={itemState}
                         >
                           <span className={styles.progressMarker} aria-hidden="true" />
-                          <span>{stageCopy[item].label}</span>
+                          <span className={styles.progressStepCopy}>
+                            <span>{stageCopy[item].label}</span>
+                            <span className={styles.progressStateLabel}>
+                              {itemState === "done"
+                                ? "เสร็จแล้ว"
+                                : itemState === "current"
+                                  ? "กำลังดำเนินการ"
+                                  : "รอดำเนินการ"}
+                            </span>
+                          </span>
                         </li>
                       );
                     })}
@@ -514,7 +542,6 @@ export function MyPaymentView() {
                   size="large"
                   pending={stage !== "idle"}
                   pendingLabel="กำลังส่งหลักฐาน"
-                  disabled={!selectedFile}
                 >
                   {order.status === "PAYMENT_REJECTED"
                     ? "ส่งหลักฐานใหม่"
@@ -528,13 +555,18 @@ export function MyPaymentView() {
           </section>
         ) : null}
 
+        {submitFeedback ? (
+          <Notice tone="success" role="status" title="ส่งหลักฐานสำเร็จ">
+            {submitFeedback}
+          </Notice>
+        ) : null}
+
         {!canSubmit && latestPayment ? (
           <section className={styles.reviewSummary} aria-label="สถานะหลักฐานล่าสุด">
             <div className={styles.sectionHeading}>
               <div>
-                <span className={styles.stepLabel}>หลักฐานล่าสุด</span>
                 <h2 className={styles.sectionTitle}>
-                  {getPaymentStatusLabel(latestPayment.status)}
+                  หลักฐานล่าสุด · {getPaymentStatusLabel(latestPayment.status)}
                 </h2>
               </div>
               <span className={styles.paymentId}>

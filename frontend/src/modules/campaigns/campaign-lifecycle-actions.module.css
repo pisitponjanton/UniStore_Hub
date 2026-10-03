@@ -5,25 +5,31 @@
 
 .currentState {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-4);
-  align-items: center;
   padding: var(--space-4);
   border: 1px solid var(--line-soft);
   border-radius: var(--radius-md);
-  background: var(--surface-raised);
+  background: var(--surface-inset);
 }
 
-.currentState > div {
+.stateBlock {
   min-width: 0;
   display: grid;
-  gap: 2px;
+  gap: var(--space-2);
+  align-content: start;
+}
+
+.stateBlock + .stateBlock {
+  padding-left: var(--space-4);
+  border-left: 1px solid var(--line-soft);
 }
 
 .currentState strong {
   color: var(--ink);
   font-size: var(--text-title-sm);
   font-weight: 650;
+  overflow-wrap: anywhere;
 }
 
 .stateLabel {
@@ -41,7 +47,6 @@
 }
 
 .lifecycleStep {
-  position: relative;
   min-width: 0;
   display: grid;
   justify-items: center;
@@ -53,15 +58,6 @@
 
 .lifecycleStep:last-child {
   border-right: 0;
-}
-
-.lifecycleStep::after {
-  content: "";
-  position: absolute;
-  inset-inline: 0;
-  bottom: 0;
-  height: 3px;
-  background: transparent;
 }
 
 .lifecycleIndex {
@@ -78,59 +74,61 @@
   font-weight: 700;
 }
 
+.lifecycleCopy {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
 .lifecycleLabel {
   color: var(--ink-tertiary);
   font-size: var(--text-caption);
   line-height: 1.35;
 }
 
+.lifecycleState {
+  color: var(--ink-tertiary);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
 .lifecycleStep[data-state="done"] .lifecycleIndex {
   border-color: var(--success);
-  background: var(--success);
-  color: var(--ink-inverse);
+  background: var(--success-soft);
+  color: var(--success);
 }
 
 .lifecycleStep[data-state="done"] .lifecycleLabel {
   color: var(--ink-secondary);
 }
 
-.lifecycleStep[data-state="current"] {
-  background: color-mix(in srgb, var(--campus-soft) 52%, transparent);
+.lifecycleStep[data-state="done"] .lifecycleState {
+  color: var(--success);
 }
 
-.lifecycleStep[data-state="current"]::after {
-  background: var(--campus);
+.lifecycleStep[data-state="current"] {
+  background: var(--surface-selected);
+  box-shadow: inset 0 0 0 1px var(--campus-line);
 }
 
 .lifecycleStep[data-state="current"] .lifecycleIndex {
   border-color: var(--campus);
-  background: var(--campus);
-  color: var(--ink-inverse);
+  background: var(--campus-soft);
+  color: var(--campus-strong);
 }
 
-.lifecycleStep[data-state="current"] .lifecycleLabel {
+.lifecycleStep[data-state="current"] .lifecycleLabel,
+.lifecycleStep[data-state="current"] .lifecycleState {
   color: var(--campus-strong);
   font-weight: 700;
 }
 
 .cancelledPath {
-  position: relative;
   display: grid;
-  grid-template-columns: 10px minmax(0, 1fr);
-  gap: var(--space-3);
-  align-items: start;
   padding: var(--space-4);
   border: 1px solid color-mix(in srgb, var(--danger) 18%, var(--line-soft));
   border-radius: var(--radius-md);
   background: var(--danger-soft);
-}
-
-.cancelledMarker {
-  width: 10px;
-  height: 10px;
-  margin-top: 5px;
-  border-radius: 50%;
-  background: var(--danger);
 }
 
 .cancelledPath > div {
@@ -181,23 +179,12 @@
 }
 
 .none {
-  position: relative;
   display: grid;
   gap: var(--space-1);
-  padding: var(--space-4) var(--space-4) var(--space-4) var(--space-5);
+  padding: var(--space-4);
   border: 1px solid var(--line-soft);
   border-radius: var(--radius-md);
   background: var(--surface-muted);
-}
-
-.none::before {
-  content: "";
-  position: absolute;
-  inset-block: var(--space-3);
-  inset-inline-start: 0;
-  width: 3px;
-  border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
-  background: var(--line-strong);
 }
 
 .none strong {
@@ -228,7 +215,13 @@
 @media (max-width: 620px) {
   .currentState {
     grid-template-columns: 1fr;
-    align-items: start;
+  }
+
+  .stateBlock + .stateBlock {
+    padding-left: 0;
+    padding-top: var(--space-3);
+    border-left: 0;
+    border-top: 1px solid var(--line-soft);
   }
 
   .lifecycleRail {
@@ -247,13 +240,6 @@
 
   .lifecycleStep:last-child {
     border-bottom: 0;
-  }
-
-  .lifecycleStep[data-state="current"]::after {
-    inset-block: 0;
-    inset-inline: 0 auto;
-    width: 3px;
-    height: auto;
   }
 
   .actions {

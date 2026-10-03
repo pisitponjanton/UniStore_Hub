@@ -45,7 +45,6 @@ export function PageHeader({
       <div className={styles.pageHeadingGroup}>
         {eyebrow ? <div className={styles.pageEyebrow}>{eyebrow}</div> : null}
         <div className={styles.pageTitleRow}>
-          <span className={styles.ledgerMarker} aria-hidden="true" />
           <h1 className={styles.pageTitle}>{title}</h1>
         </div>
         {description ? (

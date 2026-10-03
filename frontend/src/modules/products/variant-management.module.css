@@ -68,33 +68,25 @@
 }
 
 .row {
-  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: var(--space-4);
   align-items: center;
-  padding: var(--space-4) var(--space-3) var(--space-4) var(--space-5);
+  padding: var(--space-4);
   border-bottom: 1px solid var(--line-soft);
   background: var(--surface);
+  transition:
+    background-color var(--motion-fast) var(--motion-ease-out),
+    box-shadow var(--motion-fast) var(--motion-ease-out);
 }
 
-.row::before {
-  content: "";
-  position: absolute;
-  inset-block: var(--space-3);
-  inset-inline-start: 0;
-  width: 3px;
-  border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
-  background: var(--line-strong);
+.row:hover {
+  background: var(--surface-hover);
 }
 
 .rowEditing {
-  background: color-mix(in srgb, var(--campus-soft) 48%, var(--surface));
-}
-
-.rowEditing::before {
-  width: 4px;
-  background: var(--campus);
+  background: var(--surface-selected);
+  box-shadow: inset 0 0 0 1px var(--campus-line);
 }
 
 .rowMain {
@@ -138,7 +130,11 @@
   padding: var(--space-4);
   border: 1px solid var(--line-soft);
   border-radius: var(--radius-md);
-  background: var(--surface-raised);
+  background: var(--surface-inset);
+}
+
+.editForm > [role="alert"] {
+  grid-column: 1 / -1;
 }
 
 .editActions {
@@ -155,7 +151,7 @@
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   background: var(--surface);
-  box-shadow: var(--shadow-subtle);
+  box-shadow: none;
 }
 
 .createHeading {
@@ -169,12 +165,6 @@
   color: var(--ink);
   font-size: var(--text-title-sm);
   font-weight: 650;
-}
-
-.kicker {
-  color: var(--campus);
-  font-size: var(--text-caption);
-  font-weight: 700;
 }
 
 .createForm button {
@@ -219,6 +209,6 @@
   }
 
   .row {
-    padding: var(--space-4) 0 var(--space-4) var(--space-5);
+    padding: var(--space-4);
   }
 }

@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 
 import {
   Badge,
   Button,
   ErrorState,
+  ErrorSummary,
   ForbiddenState,
   LoadingState,
   Notice,
@@ -72,6 +73,7 @@ export function OrganizationSettingsView({
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const settingsErrorSummaryRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -146,6 +148,7 @@ export function OrganizationSettingsView({
     setSaved(false);
 
     if (!validation.valid) {
+      requestAnimationFrame(() => settingsErrorSummaryRef.current?.focus());
       return;
     }
 
@@ -224,7 +227,6 @@ export function OrganizationSettingsView({
       <main className={styles.main}>
         <header className={styles.settingsHeader}>
           <div className={styles.headerCopy}>
-            <span className={styles.pageKicker}>ข้อมูลพื้นฐานของหน่วยงาน</span>
             <h1 className={styles.title}>ตั้งค่าหน่วยงาน</h1>
             <p className={styles.description}>
               แก้ไขข้อมูลที่ผู้ใช้เห็นได้ โดยไม่กระทบสถานะอนุมัติ สิทธิ์สมาชิก หรือขอบเขตอำนาจของ Platform Admin
@@ -239,32 +241,35 @@ export function OrganizationSettingsView({
           </div>
         </header>
 
-        <section className={styles.referenceStrip} aria-label="ข้อมูลอ้างอิงหน่วยงาน">
+        <dl className={styles.referenceStrip} aria-label="ข้อมูลอ้างอิงหน่วยงาน">
           <div>
-            <span className={styles.detailLabel}>รหัสหน่วยงาน</span>
-            <strong className={styles.detailValue} data-technical>
+            <dt className={styles.detailLabel}>รหัสหน่วยงาน</dt>
+            <dd className={styles.detailValue} data-technical>
               {organization.organizationId}
-            </strong>
+            </dd>
           </div>
           <div>
-            <span className={styles.detailLabel}>สร้างเมื่อ</span>
-            <strong className={styles.detailValue}>
-              {formatIsoDateTime(organization.createdAt)}
-            </strong>
+            <dt className={styles.detailLabel}>สร้างเมื่อ</dt>
+            <dd className={styles.detailValue}>
+              <time dateTime={organization.createdAt}>
+                {formatIsoDateTime(organization.createdAt)}
+              </time>
+            </dd>
           </div>
           <div>
-            <span className={styles.detailLabel}>อัปเดตล่าสุด</span>
-            <strong className={styles.detailValue}>
-              {formatIsoDateTime(organization.updatedAt)}
-            </strong>
+            <dt className={styles.detailLabel}>อัปเดตล่าสุด</dt>
+            <dd className={styles.detailValue}>
+              <time dateTime={organization.updatedAt}>
+                {formatIsoDateTime(organization.updatedAt)}
+              </time>
+            </dd>
           </div>
-        </section>
+        </dl>
 
         <div className={styles.settingsWorkspace}>
           <section className={styles.settingsPanel} aria-labelledby="organization-edit">
             <div className={styles.sectionHeading}>
               <div>
-                <span className={styles.sectionKicker}>ข้อมูลที่แก้ไขได้</span>
                 <h2 className={styles.sectionTitle} id="organization-edit">
                   ข้อมูลที่แสดง
                 </h2>
@@ -274,7 +279,21 @@ export function OrganizationSettingsView({
               </p>
             </div>
 
-            <form className={styles.settingsForm} onSubmit={handleSubmit}>
+            <form className={styles.settingsForm} onSubmit={handleSubmit} noValidate>
+              <ErrorSummary
+                ref={settingsErrorSummaryRef}
+                id="organization-settings-error-summary"
+                items={
+                  nameError
+                    ? [
+                        {
+                          fieldId: "organization-settings-name",
+                          message: nameError,
+                        },
+                      ]
+                    : []
+                }
+              />
               <TextField
                 id="organization-settings-name"
                 label="ชื่อหน่วยงาน"
@@ -286,6 +305,14 @@ export function OrganizationSettingsView({
                   setSaveError(null);
                 }}
                 error={nameError}
+                announceError={false}
+                onBlur={() => {
+                  const validation = validateOrganizationForm({
+                    name,
+                    description,
+                  });
+                  setNameError(validation.errors.name);
+                }}
                 required
                 disabled={saving}
               />
@@ -337,26 +364,25 @@ export function OrganizationSettingsView({
 
           <aside className={styles.governancePanel} aria-labelledby="organization-governance">
             <div>
-              <span className={styles.sectionKicker}>ขอบเขตสิทธิ์</span>
               <h2 className={styles.sectionTitle} id="organization-governance">
                 สิ่งที่หน้านี้เปลี่ยนไม่ได้
               </h2>
             </div>
 
-            <div className={styles.governanceList}>
-              <div>
+            <ul className={styles.governanceList}>
+              <li>
                 <strong>สถานะหน่วยงาน</strong>
                 <span>อนุมัติหรือระงับโดย Platform Admin</span>
-              </div>
-              <div>
+              </li>
+              <li>
                 <strong>สิทธิ์สมาชิก</strong>
                 <span>จัดการผ่านส่วนสมาชิกของหน่วยงานตามสิทธิ์ที่กำหนด</span>
-              </div>
-              <div>
+              </li>
+              <li>
                 <strong>ข้อมูลธุรกรรม</strong>
                 <span>ยอดคำสั่งซื้อ การชำระเงิน และการรับสินค้าไม่เปลี่ยนจากหน้านี้</span>
-              </div>
-            </div>
+              </li>
+            </ul>
           </aside>
         </div>
       </main>

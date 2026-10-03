@@ -117,4 +117,28 @@ describe("StaffView", () => {
       screen.getByText("เพิ่ม new@example.com เป็นบุคลากรแล้ว"),
     ).toBeInTheDocument();
   });
+
+  it("focuses a validation summary when an invalid member email is submitted", async () => {
+    mocks.list.mockResolvedValue([
+      member("admin-1", "Admin One", "ORGANIZATION_ADMIN"),
+    ]);
+
+    render(<StaffView organizationId="org-1" />);
+
+    await screen.findByRole("heading", { name: "Admin One" });
+
+    fireEvent.change(screen.getByRole("textbox", { name: /อีเมลผู้ใช้/ }), {
+      target: { value: "not-an-email" },
+    });
+    fireEvent.click(
+      screen.getByRole("button", { name: "เพิ่มสมาชิก" }),
+    );
+
+    const summary = await screen.findByRole("alert");
+    expect(
+      screen.getByRole("link", { name: "กรุณาระบุอีเมลที่ถูกต้อง" }),
+    ).toHaveAttribute("href", "#staff-email");
+    await waitFor(() => expect(summary).toHaveFocus());
+    expect(mocks.add).not.toHaveBeenCalled();
+  });
 });

@@ -197,6 +197,9 @@ describe("OrganizationOrderDetailView", () => {
     });
 
     expect((await screen.findAllByText("ยกเลิก")).length).toBeGreaterThan(0);
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "ยกเลิกคำสั่งซื้อแล้ว",
+    );
     expect(
       screen.queryByRole("button", { name: "ยกเลิกคำสั่งซื้อ" }),
     ).not.toBeInTheDocument();

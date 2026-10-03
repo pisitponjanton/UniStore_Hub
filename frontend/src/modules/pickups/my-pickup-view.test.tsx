@@ -108,6 +108,22 @@ describe("MyPickupView", () => {
     expect(screen.getAllByText("พร้อมรับสินค้า").length).toBeGreaterThan(0);
   });
 
+  it("keeps the backend token usable when local QR generation fails", async () => {
+    mocks.getMyOrder.mockResolvedValue(makeOrder());
+    mocks.getMyPickup.mockResolvedValue(makePickup());
+    mocks.createQr.mockRejectedValue(new Error("QR failed"));
+
+    render(<MyPickupView />);
+
+    expect(
+      await screen.findByText(
+        "สร้าง QR ไม่สำเร็จ ใช้ Token ด้านข้างแทนได้",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByText("abcdefghijklmnopqrstuv")).toBeInTheDocument();
+    expect(screen.queryByAltText("QR สำหรับรับสินค้า")).not.toBeInTheDocument();
+  });
+
   it("renders a safe not-ready state without requesting a Pickup early", async () => {
     mocks.getMyOrder.mockResolvedValue(
       makeOrder({ status: "IN_PRODUCTION" }),

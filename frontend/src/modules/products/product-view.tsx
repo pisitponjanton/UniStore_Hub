@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 
 import {
   Badge,
@@ -8,6 +8,7 @@ import {
   ConfirmDialog,
   EmptyState,
   ErrorState,
+  ErrorSummary,
   LoadingState,
   Notice,
   SelectField,
@@ -107,6 +108,8 @@ export function ProductManagementView({
 
   const [inlineError, setInlineError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const createErrorSummaryRef = useRef<HTMLDivElement>(null);
+  const editErrorSummaryRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -254,6 +257,7 @@ export function ProductManagementView({
     setNotice(null);
 
     if (!validation.valid) {
+      requestAnimationFrame(() => createErrorSummaryRef.current?.focus());
       return;
     }
 
@@ -343,6 +347,7 @@ export function ProductManagementView({
     setNotice(null);
 
     if (!validation.valid) {
+      requestAnimationFrame(() => editErrorSummaryRef.current?.focus());
       return;
     }
 
@@ -476,8 +481,7 @@ export function ProductManagementView({
     <div className={styles.page}>
       <main className={styles.main}>
         <header className={styles.header}>
-          <div className={styles.headerCopy} data-ledger-heading>
-            <span className={styles.pageKicker}>แค็ตตาล็อกของหน่วยงาน</span>
+          <div className={styles.headerCopy}>
             <h1 className={styles.title}>สินค้าและตัวเลือก</h1>
             <p className={styles.description}>
               จัดการสินค้า รูปสินค้า ตัวเลือก และราคาที่ใช้ในแต่ละร้านค้า
@@ -626,9 +630,9 @@ export function ProductManagementView({
                           <span className={styles.meta}>
                             {product.imageKey ? "มีรูปสินค้า" : "ยังไม่มีรูปสินค้า"}
                           </span>
-                          <span className={styles.meta}>
+                          <time className={styles.meta} dateTime={product.updatedAt}>
                             อัปเดต {formatIsoDateTime(product.updatedAt)}
-                          </span>
+                          </time>
                         </div>
                       </div>
 
@@ -688,7 +692,6 @@ export function ProductManagementView({
 
           <aside className={styles.panel}>
             <div className={styles.panelHeading}>
-              <span className={styles.panelKicker}>เพิ่มรายการขาย</span>
               <h2 className={styles.sectionTitle}>สร้างสินค้าใหม่</h2>
               <p className={styles.sectionDescription}>
                 เลือกร้านค้าและเพิ่มข้อมูลพื้นฐานก่อน จากนั้นจึงเพิ่มรูปและตัวเลือกสินค้า
@@ -701,7 +704,29 @@ export function ProductManagementView({
               </Notice>
             ) : null}
 
-            <form className={styles.form} onSubmit={handleCreate}>
+            <form className={styles.form} onSubmit={handleCreate} noValidate>
+              <ErrorSummary
+                ref={createErrorSummaryRef}
+                id="product-create-error-summary"
+                items={[
+                  ...(createStoreError
+                    ? [
+                        {
+                          fieldId: "product-create-store",
+                          message: createStoreError,
+                        },
+                      ]
+                    : []),
+                  ...(createNameError
+                    ? [
+                        {
+                          fieldId: "product-create-name",
+                          message: createNameError,
+                        },
+                      ]
+                    : []),
+                ]}
+              />
               <SelectField
                 id="product-create-store"
                 label="ร้านค้า"
@@ -711,6 +736,15 @@ export function ProductManagementView({
                   setCreateStoreError(undefined);
                 }}
                 error={createStoreError}
+                announceError={false}
+                onBlur={() => {
+                  const validation = validateProductForm({
+                    storeId: createStoreId,
+                    name: createName,
+                    description: createDescription,
+                  });
+                  setCreateStoreError(validation.errors.storeId);
+                }}
                 required
                 disabled={creating || state.stores.length === 0}
               >
@@ -734,6 +768,15 @@ export function ProductManagementView({
                   setCreateNameError(undefined);
                 }}
                 error={createNameError}
+                announceError={false}
+                onBlur={() => {
+                  const validation = validateProductForm({
+                    storeId: createStoreId,
+                    name: createName,
+                    description: createDescription,
+                  });
+                  setCreateNameError(validation.errors.name);
+                }}
                 required
                 disabled={creating}
               />
@@ -808,12 +851,29 @@ export function ProductManagementView({
                   <h3 className={styles.editorSectionTitle} id="product-basic-title">
                     ข้อมูลสินค้า
                   </h3>
-                  <span className={styles.meta}>
+                  <time
+                    className={styles.meta}
+                    dateTime={selectedProduct.updatedAt}
+                  >
                     อัปเดตล่าสุด {formatIsoDateTime(selectedProduct.updatedAt)}
-                  </span>
+                  </time>
                 </div>
 
-                <form className={styles.form} onSubmit={handleSaveEdit}>
+                <form className={styles.form} onSubmit={handleSaveEdit} noValidate>
+                  <ErrorSummary
+                    ref={editErrorSummaryRef}
+                    id="product-edit-error-summary"
+                    items={
+                      editNameError
+                        ? [
+                            {
+                              fieldId: "product-edit-name",
+                              message: editNameError,
+                            },
+                          ]
+                        : []
+                    }
+                  />
                   <TextField
                     id="product-edit-name"
                     label="ชื่อสินค้า"
@@ -823,6 +883,15 @@ export function ProductManagementView({
                       setEditNameError(undefined);
                     }}
                     error={editNameError}
+                    announceError={false}
+                    onBlur={() => {
+                      const validation = validateProductForm({
+                        storeId: selectedProduct.storeId,
+                        name: editName,
+                        description: editDescription,
+                      });
+                      setEditNameError(validation.errors.name);
+                    }}
                     required
                     disabled={
                       savingProductId === selectedProduct.productId

@@ -135,8 +135,7 @@ export function PlatformUsersView() {
     <div className={styles.page}>
       <main className={styles.main}>
         <header className={styles.header}>
-          <div className={styles.headerCopy} data-ledger-heading>
-            <span className={styles.pageKicker}>ทะเบียนผู้ใช้ระดับ Platform</span>
+          <div className={styles.headerCopy}>
             <h1 className={styles.title}>ผู้ใช้ระดับ Platform</h1>
             <p className={styles.description}>
               ตรวจสอบสถานะผู้ใช้และ Platform role ที่บันทึกอยู่ในระบบ
@@ -144,9 +143,20 @@ export function PlatformUsersView() {
             </p>
           </div>
 
-          <div className={styles.headerCount}>
-            <strong>{state.users.length.toLocaleString("th-TH")}</strong>
-            <span>ผู้ใช้ที่โหลด</span>
+          <div className={styles.headerAside}>
+            <div
+              className={styles.scopeContext}
+              aria-label="ขอบเขตสิทธิ์ Platform Admin"
+            >
+              <Badge tone="info">Platform Admin</Badge>
+              <span>รายการผู้ใช้ระดับ Platform แบบอ่านอย่างเดียว</span>
+            </div>
+            <div className={styles.headerCount}>
+              <strong data-numeric>
+                {state.users.length.toLocaleString("th-TH")}
+              </strong>
+              <span>ผู้ใช้ที่โหลด</span>
+            </div>
           </div>
         </header>
 
@@ -156,7 +166,7 @@ export function PlatformUsersView() {
         >
           <article className={styles.priorityItem}>
             <span className={styles.metricLabel}>Platform Admin</span>
-            <strong className={styles.priorityValue}>
+            <strong className={styles.priorityValue} data-numeric>
               {platformAdminCount.toLocaleString("th-TH")}
             </strong>
             <span className={styles.metricHint}>
@@ -166,7 +176,7 @@ export function PlatformUsersView() {
 
           <article className={styles.priorityItem}>
             <span className={styles.metricLabel}>ใช้งานอยู่</span>
-            <strong className={styles.priorityValue}>
+            <strong className={styles.priorityValue} data-numeric>
               {activeCount.toLocaleString("th-TH")}
             </strong>
             <span className={styles.metricHint}>
@@ -176,7 +186,7 @@ export function PlatformUsersView() {
 
           <article className={styles.priorityItem}>
             <span className={styles.metricLabel}>ปิดใช้งาน</span>
-            <strong className={styles.priorityValue}>
+            <strong className={styles.priorityValue} data-numeric>
               {disabledCount.toLocaleString("th-TH")}
             </strong>
             <span className={styles.metricHint}>
@@ -253,14 +263,14 @@ export function PlatformUsersView() {
                       )}
                     </TableCell>
                     <TableCell>
-                      <span className={styles.timeValue}>
+                      <time className={styles.timeValue} dateTime={user.createdAt}>
                         {formatIsoDateTime(user.createdAt)}
-                      </span>
+                      </time>
                     </TableCell>
                     <TableCell>
-                      <span className={styles.timeValue}>
+                      <time className={styles.timeValue} dateTime={user.updatedAt}>
                         {formatIsoDateTime(user.updatedAt)}
-                      </span>
+                      </time>
                     </TableCell>
                   </TableRow>
                 ))}

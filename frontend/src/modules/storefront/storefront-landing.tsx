@@ -75,63 +75,65 @@ export function StorefrontLanding() {
       <StorefrontHeader />
 
       <main>
-        <section className={styles.hero}>
+        <section className={styles.hero} aria-labelledby="storefront-intro-heading">
           <div className={styles.heroMain}>
-            <span className={styles.heroKicker}>ตลาดของชุมชนมหาวิทยาลัย</span>
-            <h1 className={styles.heroTitle}>
-              ของที่อยากได้
-              <span> จากร้านที่อยู่ใกล้ตัวคุณ</span>
+            <h1 className={styles.heroTitle} id="storefront-intro-heading">
+              เลือกซื้อจากร้านในมหาวิทยาลัย
             </h1>
             <p className={styles.heroDescription}>
-              เลือกร้าน ดูรอบพรีออเดอร์ และติดตามคำสั่งซื้อจากหน่วยงานในมหาวิทยาลัย
-              ด้วยสถานะที่อ่านง่ายตั้งแต่เริ่มสั่งจนถึงรับสินค้า
+              เลือกหน่วยงานและร้านที่ต้องการ ดูสินค้าและรอบพรีออเดอร์
+              จากนั้นติดตามการชำระเงินและการรับสินค้าได้จากคำสั่งซื้อของคุณ
             </p>
+
+            <div className={styles.heroActions}>
+              <a className={styles.heroPrimaryAction} href="#storefront-heading">
+                ดูร้านที่เปิดอยู่
+              </a>
+              <Link className={styles.heroSecondaryAction} href="/my/orders/">
+                ติดตามคำสั่งซื้อ
+              </Link>
+            </div>
+
+            {summary ? (
+              <dl className={styles.heroSummary} aria-label="สรุปร้านค้าที่เปิดให้เข้าชม">
+                <div>
+                  <dt>ร้านที่เปิดให้เข้าชม</dt>
+                  <dd data-numeric>{summary.storeCount}</dd>
+                </div>
+                <div>
+                  <dt>หน่วยงาน</dt>
+                  <dd data-numeric>{summary.organizationCount}</dd>
+                </div>
+              </dl>
+            ) : null}
           </div>
 
-          <div className={styles.heroRail} aria-label="วิธีเริ่มใช้งาน">
-            <div className={styles.heroRailItem}>
-              <span className={styles.heroRailIndex}>01</span>
-              <div>
+          <aside className={styles.heroGuide} aria-labelledby="storefront-guide-heading">
+            <h2 className={styles.heroGuideTitle} id="storefront-guide-heading">
+              ซื้อและติดตามในที่เดียว
+            </h2>
+            <ol className={styles.heroGuideList}>
+              <li>
                 <strong>เลือกร้าน</strong>
-                <span>ดูร้านที่เปิดให้เข้าชมตามหน่วยงาน</span>
-              </div>
-            </div>
-            <div className={styles.heroRailItem}>
-              <span className={styles.heroRailIndex}>02</span>
-              <div>
-                <strong>ดูรอบขาย</strong>
-                <span>เช็กแคมเปญ ราคา และช่วงเวลาที่เกี่ยวข้อง</span>
-              </div>
-            </div>
-            <div className={styles.heroRailItem}>
-              <span className={styles.heroRailIndex}>03</span>
-              <div>
-                <strong>ติดตามต่อ</strong>
-                <span>ชำระเงินและดูสถานะรับสินค้าจากบัญชีเดียว</span>
-              </div>
-            </div>
-          </div>
-
-          {summary ? (
-            <div className={styles.heroSummary} role="group" aria-label="สรุปร้านค้าที่เปิดให้เข้าชม">
-              <div>
-                <strong data-numeric>{summary.storeCount}</strong>
-                <span>ร้านที่เปิดให้เข้าชม</span>
-              </div>
-              <div>
-                <strong data-numeric>{summary.organizationCount}</strong>
-                <span>หน่วยงาน</span>
-              </div>
-            </div>
-          ) : null}
+                <span>เริ่มจากหน่วยงานและร้านที่เปิดให้เข้าชม</span>
+              </li>
+              <li>
+                <strong>ดูสินค้าและรอบขาย</strong>
+                <span>ตรวจสอบตัวเลือก ราคา และช่วงเวลาของแคมเปญก่อนสั่ง</span>
+              </li>
+              <li>
+                <strong>ติดตามหลังสั่งซื้อ</strong>
+                <span>ดูสถานะคำสั่งซื้อ การชำระเงิน และการรับสินค้าในบัญชีของคุณ</span>
+              </li>
+            </ol>
+          </aside>
         </section>
 
         <section className={styles.catalog} aria-labelledby="storefront-heading">
           <div className={styles.catalogHeader}>
             <div>
-              <span className={styles.sectionKicker}>ร้านค้าใน UniStore Hub</span>
               <h2 className={styles.catalogTitle} id="storefront-heading">
-                เลือกร้านตามหน่วยงาน
+                ร้านที่เปิดให้เข้าชม
               </h2>
             </div>
             <p className={styles.catalogDescription}>
@@ -141,15 +143,12 @@ export function StorefrontLanding() {
 
           {state.status === "success" ? (
             <div className={styles.organizationList}>
-              {state.data.map(({ organization, stores }, organizationIndex) => (
+              {state.data.map(({ organization, stores }) => (
                 <section
                   className={styles.organization}
                   key={organization.organizationId}
                 >
                   <div className={styles.organizationInfo}>
-                    <span className={styles.organizationIndex} data-numeric>
-                      {String(organizationIndex + 1).padStart(2, "0")}
-                    </span>
                     <div>
                       <div className={styles.organizationHeading}>
                         <h3 className={styles.organizationName}>
@@ -182,7 +181,6 @@ export function StorefrontLanding() {
                           )}
                           className={styles.storeRow}
                         >
-                          <span className={styles.storeMarker} aria-hidden="true" />
                           <div className={styles.storeRowCopy}>
                             <h4 className={styles.storeName}>{store.name}</h4>
                             <p className={styles.storeDescription}>

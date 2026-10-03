@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 
 import {
   Badge,
@@ -8,6 +8,7 @@ import {
   ConfirmDialog,
   EmptyState,
   ErrorState,
+  ErrorSummary,
   LoadingState,
   Notice,
   TextareaField,
@@ -71,6 +72,8 @@ export function StoreManagementView({
 
   const [inlineError, setInlineError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const createErrorSummaryRef = useRef<HTMLDivElement>(null);
+  const editErrorSummaryRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -123,6 +126,7 @@ export function StoreManagementView({
     setNotice(null);
 
     if (!validation.valid) {
+      requestAnimationFrame(() => createErrorSummaryRef.current?.focus());
       return;
     }
 
@@ -205,6 +209,7 @@ export function StoreManagementView({
     setNotice(null);
 
     if (!validation.valid) {
+      requestAnimationFrame(() => editErrorSummaryRef.current?.focus());
       return;
     }
 
@@ -324,8 +329,7 @@ export function StoreManagementView({
     <div className={styles.page}>
       <main className={styles.main}>
         <header className={styles.header}>
-          <div className={styles.headerCopy} data-ledger-heading>
-            <span className={styles.pageKicker}>โครงสร้างพื้นที่ขาย</span>
+          <div className={styles.headerCopy}>
             <h1 className={styles.title}>ร้านค้า</h1>
             <p className={styles.description}>
               จัดการพื้นที่ขายภายในหน่วยงาน และกำหนดว่าร้านค้าใดพร้อมใช้งาน
@@ -414,9 +418,9 @@ export function StoreManagementView({
                         <p className={styles.cardDescription}>
                           {store.description || "ยังไม่มีคำอธิบายร้านค้า"}
                         </p>
-                        <span className={styles.meta}>
+                        <time className={styles.meta} dateTime={store.updatedAt}>
                           อัปเดตล่าสุด {formatIsoDateTime(store.updatedAt)}
-                        </span>
+                        </time>
                       </div>
 
                       <div className={styles.cardActions}>
@@ -478,14 +482,22 @@ export function StoreManagementView({
 
           <aside className={styles.panel}>
             <div className={styles.panelHeading}>
-              <span className={styles.panelKicker}>เพิ่มพื้นที่ขาย</span>
               <h2 className={styles.sectionTitle}>สร้างร้านค้าใหม่</h2>
               <p className={styles.sectionDescription}>
                 ร้านค้าใหม่จะพร้อมใช้งานทันทีหลังสร้างสำเร็จ
               </p>
             </div>
 
-            <form className={styles.form} onSubmit={handleCreate}>
+            <form className={styles.form} onSubmit={handleCreate} noValidate>
+              <ErrorSummary
+                ref={createErrorSummaryRef}
+                id="store-create-error-summary"
+                items={
+                  createNameError
+                    ? [{ fieldId: "store-create-name", message: createNameError }]
+                    : []
+                }
+              />
               <TextField
                 id="store-create-name"
                 label="ชื่อร้านค้า"
@@ -496,6 +508,14 @@ export function StoreManagementView({
                   setInlineError(null);
                 }}
                 error={createNameError}
+                announceError={false}
+                onBlur={() => {
+                  const validation = validateStoreForm({
+                    name: createName,
+                    description: createDescription,
+                  });
+                  setCreateNameError(validation.errors.name);
+                }}
                 required
                 disabled={creating}
               />
@@ -548,7 +568,16 @@ export function StoreManagementView({
               </Button>
             </div>
 
-            <form className={styles.editForm} onSubmit={handleSaveEdit}>
+            <form className={styles.editForm} onSubmit={handleSaveEdit} noValidate>
+              <ErrorSummary
+                ref={editErrorSummaryRef}
+                id="store-edit-error-summary"
+                items={
+                  editNameError
+                    ? [{ fieldId: "store-edit-name", message: editNameError }]
+                    : []
+                }
+              />
               <TextField
                 id="store-edit-name"
                 label="ชื่อร้านค้า"
@@ -558,6 +587,14 @@ export function StoreManagementView({
                   setEditNameError(undefined);
                 }}
                 error={editNameError}
+                announceError={false}
+                onBlur={() => {
+                  const validation = validateStoreForm({
+                    name: editName,
+                    description: editDescription,
+                  });
+                  setEditNameError(validation.errors.name);
+                }}
                 required
                 disabled={savingStoreId === selectedStore.storeId}
               />

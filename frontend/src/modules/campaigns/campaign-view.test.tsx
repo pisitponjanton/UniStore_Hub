@@ -80,6 +80,53 @@ describe("CampaignManagementView", () => {
     });
   });
 
+  it("focuses a linked error summary when campaign creation validation fails", async () => {
+    render(<CampaignManagementView organizationId="org-1" />);
+
+    await screen.findByText("Faculty Shirt Pre-order");
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "สร้างแคมเปญ" }),
+    );
+
+    const summary = await screen.findByRole("alert");
+    expect(
+      screen.getByRole("link", { name: "กรุณาระบุชื่อ Campaign" }),
+    ).toHaveAttribute("href", "#campaign-create-name");
+    await waitFor(() => expect(summary).toHaveFocus());
+    expect(mocks.create).not.toHaveBeenCalled();
+  });
+
+  it("announces the applied campaign filter with useful context", async () => {
+    mocks.listCampaigns
+      .mockResolvedValueOnce({
+        items: [campaign()],
+        nextCursor: null,
+      })
+      .mockResolvedValueOnce({
+        items: [campaign({ status: "OPEN" })],
+        nextCursor: null,
+      });
+
+    render(<CampaignManagementView organizationId="org-1" />);
+
+    await screen.findByText("Faculty Shirt Pre-order");
+
+    fireEvent.change(screen.getByLabelText("สถานะ"), {
+      target: { value: "OPEN" },
+    });
+
+    expect(
+      await screen.findByText(
+        "แสดง 1 แคมเปญ · ทุกร้านค้า · เปิดรับคำสั่งซื้อ",
+      ),
+    ).toHaveAttribute("role", "status");
+    expect(mocks.listCampaigns).toHaveBeenLastCalledWith("org-1", {
+      storeId: null,
+      status: "OPEN",
+    });
+  });
+
   it("creates a DRAFT campaign using nullable planning timestamps", async () => {
     const created = campaign({
       campaignId: "campaign-2",

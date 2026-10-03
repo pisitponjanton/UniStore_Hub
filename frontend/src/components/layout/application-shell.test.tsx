@@ -113,6 +113,10 @@ describe("ApplicationShell accessibility", () => {
     expect(dialog).toHaveAttribute("aria-modal", "true");
     expect(mainContent).toHaveAttribute("inert");
 
+    const scrim = screen.getByRole("button", { name: "ปิดแผงเมนู" });
+    expect(scrim).toHaveAttribute("tabindex", "-1");
+    expect(scrim).not.toHaveAttribute("aria-hidden");
+
     const closeButton = within(dialog).getByRole("button", {
       name: "ปิดเมนูหลัก",
     });
@@ -193,6 +197,41 @@ describe("ApplicationShell accessibility", () => {
 
     expect(trigger).toHaveAttribute("aria-expanded", "false");
     expect(mainContent).not.toHaveAttribute("inert");
+    expect(document.body.style.overflow).toBe("");
+  });
+
+  it("closes the mobile navigation before logging out", () => {
+    const onLogout = vi.fn();
+
+    render(
+      <ApplicationShell
+        groups={[
+          {
+            label: "งานของหน่วยงาน",
+            items: [{ label: "คำสั่งซื้อ", href: "/org/orders/" }],
+          },
+        ]}
+        userName="Staff User"
+        userEmail="staff@example.com"
+        onLogout={onLogout}
+      >
+        <p>เนื้อหาหลัก</p>
+      </ApplicationShell>,
+    );
+
+    const trigger = screen.getByRole("button", { name: "เปิดเมนูหลัก" });
+    fireEvent.click(trigger);
+    expect(screen.getByRole("dialog", { name: "เมนูหลัก" })).toBeInTheDocument();
+
+    fireEvent.click(
+      within(screen.getByRole("dialog", { name: "เมนูหลัก" })).getByRole(
+        "button",
+        { name: "ออกจากระบบ" },
+      ),
+    );
+
+    expect(onLogout).toHaveBeenCalledTimes(1);
+    expect(trigger).toHaveAttribute("aria-expanded", "false");
     expect(document.body.style.overflow).toBe("");
   });
 

@@ -33,7 +33,6 @@ export function AuthEntryState({ children }: { children: ReactNode }) {
   return (
     <div className={styles.formShell}>
       <div className={styles.headingGroup}>
-        <span className={styles.formKicker}>บัญชีพร้อมใช้งาน</span>
         <h2 className={styles.title}>คุณเข้าสู่ระบบอยู่แล้ว</h2>
         <p className={styles.description}>
           เลือกปลายทางที่ต้องการได้เลย โดยไม่ต้องกรอกข้อมูลบัญชีอีกครั้ง
@@ -66,7 +65,6 @@ export function AuthEntryState({ children }: { children: ReactNode }) {
             <strong>คำสั่งซื้อของฉัน</strong>
             <small>ดูสถานะ ชำระเงิน และรับสินค้า</small>
           </span>
-          <span aria-hidden="true">→</span>
         </Link>
 
         <Link
@@ -78,7 +76,6 @@ export function AuthEntryState({ children }: { children: ReactNode }) {
             <strong>การแจ้งเตือน</strong>
             <small>ดูเหตุการณ์ล่าสุดจากรายการของคุณ</small>
           </span>
-          <span aria-hidden="true">→</span>
         </Link>
 
         {hasOrganizationAccess ? (
@@ -91,8 +88,7 @@ export function AuthEntryState({ children }: { children: ReactNode }) {
               <strong>พื้นที่หน่วยงาน</strong>
               <small>เลือกหน่วยงานตามสิทธิ์ที่บัญชีได้รับ</small>
             </span>
-            <span aria-hidden="true">→</span>
-          </Link>
+            </Link>
         ) : null}
       </nav>
 

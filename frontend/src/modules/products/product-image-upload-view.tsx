@@ -27,6 +27,13 @@ type UploadStage =
   | "persisting"
   | "refreshing";
 
+const UPLOAD_STAGES = [
+  "signing",
+  "uploading",
+  "persisting",
+  "refreshing",
+] as const satisfies readonly Exclude<UploadStage, "idle">[];
+
 function formatBytes(bytes: number): string {
   if (bytes >= 1024 * 1024) {
     return `${(bytes / (1024 * 1024)).toFixed(2)} MiB`;
@@ -209,7 +216,7 @@ export function ProductImageUploadView({
         onChange={handleFileChange}
       />
       {file ? (
-        <div className={styles.selected}>
+        <div className={styles.selected} role="status" aria-atomic="true">
           <div className={styles.selectedCopy}>
             <span className={styles.selectedLabel}>ไฟล์ที่เลือก</span>
             <span className={styles.fileName}>{file.name}</span>
@@ -242,9 +249,48 @@ export function ProductImageUploadView({
       ) : null}
 
       {pending ? (
-        <div className={styles.progress} role="status" aria-live="polite">
-          <span className={styles.progressDot} aria-hidden="true" />
-          <span>{stageLabel(stage)}</span>
+        <div className={styles.progress} aria-label="ขั้นตอนการอัปโหลดรูปสินค้า">
+          <div
+            className={styles.progressCurrent}
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {stageLabel(stage)}
+          </div>
+          <ol className={styles.progressSteps}>
+            {UPLOAD_STAGES.map((item, index) => {
+              const currentIndex = UPLOAD_STAGES.indexOf(
+                stage as (typeof UPLOAD_STAGES)[number],
+              );
+              const itemState =
+                index < currentIndex
+                  ? "done"
+                  : index === currentIndex
+                    ? "current"
+                    : "upcoming";
+
+              return (
+                <li
+                  className={styles.progressStep}
+                  data-state={itemState}
+                  key={item}
+                >
+                  <span className={styles.progressMarker} aria-hidden="true" />
+                  <span className={styles.progressStepCopy}>
+                    <span>{stageLabel(item)}</span>
+                    <span className={styles.progressStateLabel}>
+                      {itemState === "done"
+                        ? "เสร็จแล้ว"
+                        : itemState === "current"
+                          ? "กำลังดำเนินการ"
+                          : "รอดำเนินการ"}
+                    </span>
+                  </span>
+                </li>
+              );
+            })}
+          </ol>
         </div>
       ) : null}
 

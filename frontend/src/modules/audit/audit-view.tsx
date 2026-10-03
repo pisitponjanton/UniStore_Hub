@@ -85,6 +85,7 @@ export function AuditView({
   const [inlineError, setInlineError] = useState<string | null>(
     null,
   );
+  const [listFeedback, setListFeedback] = useState<string | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -161,6 +162,16 @@ export function AuditView({
         items: result.items,
         nextCursor: result.nextCursor,
       });
+      const filtered =
+        Boolean(filters.actorId) ||
+        Boolean(filters.action) ||
+        Boolean(filters.resourceType) ||
+        Boolean(filters.resourceId);
+      setListFeedback(
+        filtered
+          ? `แสดง ${result.items.length.toLocaleString("th-TH")} เหตุการณ์ตามตัวกรอง`
+          : `แสดง Audit Log ทั้งหมดที่โหลด ${result.items.length.toLocaleString("th-TH")} รายการ`,
+      );
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();
@@ -238,11 +249,16 @@ export function AuditView({
         },
       );
 
+      const nextItems = [...state.items, ...result.items];
+
       setState({
         status: "success",
-        items: [...state.items, ...result.items],
+        items: nextItems,
         nextCursor: result.nextCursor,
       });
+      setListFeedback(
+        `โหลดเพิ่มเติมแล้ว ตอนนี้แสดง ${nextItems.length.toLocaleString("th-TH")} Audit Log`,
+      );
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();
@@ -297,8 +313,7 @@ export function AuditView({
     <div className={styles.page}>
       <main className={styles.main}>
         <header className={styles.header}>
-          <div className={styles.headerCopy} data-ledger-heading>
-            <span className={styles.pageKicker}>บันทึกเหตุการณ์แบบอ่านอย่างเดียว</span>
+          <div className={styles.headerCopy}>
             <h1 className={styles.title}>ประวัติการทำรายการ</h1>
             <p className={styles.description}>
               ตรวจสอบว่าใครทำอะไรกับข้อมูลใดและเมื่อไร โดยรายการนี้เป็นประวัติแบบอ่านอย่างเดียว
@@ -357,6 +372,7 @@ export function AuditView({
           <form
             className={styles.filterForm}
             onSubmit={handleFilter}
+            aria-busy={filtering}
           >
             <div className={styles.filters}>
               <TextField
@@ -426,6 +442,17 @@ export function AuditView({
           </form>
         </section>
 
+        {listFeedback ? (
+          <p
+            className={styles.listFeedback}
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {listFeedback}
+          </p>
+        ) : null}
+
         {inlineError ? (
           <Notice tone="danger" role="alert" title="โหลดรายการไม่สำเร็จ">
             {inlineError}
@@ -474,9 +501,9 @@ export function AuditView({
                 {state.items.map((item) => (
                   <TableRow key={item.auditId}>
                     <TableCell>
-                      <span className={styles.time}>
+                      <time className={styles.time} dateTime={item.createdAt}>
                         {formatIsoDateTime(item.createdAt)}
-                      </span>
+                      </time>
                     </TableCell>
                     <TableCell>
                       <span className={styles.action}>
@@ -498,7 +525,9 @@ export function AuditView({
                     </TableCell>
                     <TableCell>
                       <details className={styles.metadataDetails}>
-                        <summary>ดู metadata</summary>
+                        <summary>
+                          ดู metadata ของ {item.resourceType} {item.resourceId}
+                        </summary>
                         <pre className={styles.metadata}>
                           {formatAuditMetadata(item.metadata)}
                         </pre>

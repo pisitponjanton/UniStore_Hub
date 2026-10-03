@@ -61,20 +61,24 @@
 
 .notice {
   display: grid;
-  grid-template-columns: 4px minmax(0, 1fr);
+  grid-template-columns: 10px minmax(0, 1fr);
   gap: var(--space-3);
+  align-items: start;
   padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--line-soft);
+  border: 1px solid var(--line);
   border-radius: var(--radius-md);
   background: var(--surface-raised);
   color: var(--ink-secondary);
 }
 
 .noticeMarker {
-  width: 4px;
-  min-height: 100%;
+  width: 8px;
+  height: 8px;
+  margin-top: 0.45em;
+  border: 2px solid currentColor;
   border-radius: var(--radius-pill);
-  background: var(--ink-tertiary);
+  background: transparent;
+  color: var(--ink-tertiary);
 }
 
 .noticeContent {
@@ -111,24 +115,24 @@
 }
 
 .notice[data-tone="info"] .noticeMarker {
-  background: var(--info);
+  color: var(--info);
 }
 
 .notice[data-tone="success"] .noticeMarker {
-  background: var(--success);
+  color: var(--success);
 }
 
 .notice[data-tone="warning"] .noticeMarker {
-  background: var(--warning);
+  color: var(--warning);
 }
 
 .notice[data-tone="danger"] .noticeMarker {
-  background: var(--danger);
+  color: var(--danger);
 }
 
 .taskStatus {
   display: grid;
-  grid-template-columns: 4px minmax(0, 1fr) minmax(0, auto);
+  grid-template-columns: 12px minmax(0, 1fr) minmax(0, auto);
   gap: var(--space-4);
   align-items: start;
   padding: var(--space-4) 0;
@@ -136,11 +140,13 @@
 }
 
 .taskStatusMarker {
-  width: 4px;
-  min-height: 68px;
-  align-self: stretch;
+  width: 10px;
+  height: 10px;
+  margin-top: 0.45em;
+  border: 2px solid currentColor;
   border-radius: var(--radius-pill);
-  background: var(--campus);
+  background: var(--surface);
+  color: var(--campus);
 }
 
 .taskStatusContent {
@@ -185,19 +191,19 @@
 }
 
 .taskStatus[data-tone="info"] .taskStatusMarker {
-  background: var(--info);
+  color: var(--info);
 }
 
 .taskStatus[data-tone="success"] .taskStatusMarker {
-  background: var(--success);
+  color: var(--success);
 }
 
 .taskStatus[data-tone="warning"] .taskStatusMarker {
-  background: var(--warning);
+  color: var(--warning);
 }
 
 .taskStatus[data-tone="danger"] .taskStatusMarker {
-  background: var(--danger);
+  color: var(--danger);
 }
 
 @media (max-width: 720px) {
@@ -228,7 +234,7 @@
   }
 
   .taskStatus {
-    grid-template-columns: 4px minmax(0, 1fr);
+    grid-template-columns: 12px minmax(0, 1fr);
   }
 
   .taskStatusActions {

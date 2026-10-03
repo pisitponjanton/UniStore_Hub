@@ -33,25 +33,15 @@
 }
 
 .selected {
-  position: relative;
   display: grid;
-  grid-template-columns: 4px minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: var(--space-4);
   align-items: center;
   min-height: 76px;
   padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--line-soft);
+  border: 1px solid var(--campus-line);
   border-radius: var(--radius-md);
-  background: var(--surface-raised);
-}
-
-.selected::before {
-  content: "";
-  width: 4px;
-  height: 100%;
-  min-height: 44px;
-  border-radius: var(--radius-pill);
-  background: var(--campus);
+  background: var(--surface-selected);
 }
 
 .selectedCopy {
@@ -79,27 +69,77 @@
 }
 
 .progress {
-  position: relative;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
   gap: var(--space-3);
-  align-items: center;
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-4);
   border: 1px solid color-mix(in srgb, var(--info) 20%, var(--line-soft));
   border-radius: var(--radius-md);
   background: var(--info-soft);
-  color: var(--info);
-  font-size: var(--text-body-sm);
-  font-weight: 600;
 }
 
-.progressDot {
+.progressCurrent {
+  color: var(--info);
+  font-size: var(--text-body-sm);
+  font-weight: 650;
+}
+
+.progressSteps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.progressStep {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-2);
+  align-items: start;
+  color: var(--ink-tertiary);
+  font-size: var(--text-caption);
+}
+
+.progressMarker {
   width: 9px;
   height: 9px;
+  margin-top: 4px;
+  border: 1px solid var(--line-strong);
   border-radius: 50%;
-  background: currentColor;
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--info) 12%, transparent);
-  animation: uploadPulse 1.2s var(--motion-ease-out) infinite alternate;
+  background: var(--surface);
+}
+
+.progressStep[data-state="done"] .progressMarker {
+  border-color: var(--success);
+  background: var(--success-soft);
+}
+
+.progressStep[data-state="current"] .progressMarker {
+  border-color: var(--info);
+  background: var(--info-soft);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--info) 14%, transparent);
+}
+
+.progressStepCopy {
+  min-width: 0;
+  display: grid;
+  gap: 1px;
+}
+
+.progressStateLabel {
+  color: var(--ink-tertiary);
+  font-size: 0.92em;
+}
+
+.progressStep[data-state="done"] .progressStateLabel {
+  color: var(--success);
+}
+
+.progressStep[data-state="current"] .progressStateLabel {
+  color: var(--info);
+  font-weight: 650;
 }
 
 .actions {
@@ -109,18 +149,6 @@
   padding-top: var(--space-1);
 }
 
-@keyframes uploadPulse {
-  from {
-    opacity: 0.45;
-    transform: scale(0.86);
-  }
-
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
 @media (max-width: 640px) {
   .header,
   .selected {
@@ -128,10 +156,8 @@
     align-items: start;
   }
 
-  .selected::before {
-    width: 42px;
-    height: 3px;
-    min-height: 0;
+  .progressSteps {
+    grid-template-columns: 1fr;
   }
 
   .meta {
@@ -140,11 +166,5 @@
 
   .actions button {
     width: 100%;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .progressDot {
-    animation: none;
   }
 }

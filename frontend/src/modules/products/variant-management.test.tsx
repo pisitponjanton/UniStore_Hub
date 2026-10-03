@@ -215,4 +215,28 @@ describe("VariantManagement", () => {
       ),
     ).toBeInTheDocument();
   });
+
+  it("focuses a summary for invalid variant name and THB price", async () => {
+    render(
+      <VariantManagement
+        organizationId="org-1"
+        product={product([])}
+        onProductRefreshed={vi.fn()}
+      />,
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "เพิ่มตัวเลือก" }),
+    );
+
+    const summary = await screen.findByRole("alert");
+    expect(
+      screen.getByRole("link", { name: "กรุณาระบุชื่อ Variant" }),
+    ).toHaveAttribute("href", "#variant-create-name-product-1");
+    expect(
+      screen.getByRole("link", { name: "กรุณาระบุราคา" }),
+    ).toHaveAttribute("href", "#variant-create-price-product-1");
+    await waitFor(() => expect(summary).toHaveFocus());
+    expect(mocks.createVariant).not.toHaveBeenCalled();
+  });
 });

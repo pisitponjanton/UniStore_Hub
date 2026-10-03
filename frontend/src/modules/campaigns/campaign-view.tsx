@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 
 import {
   Badge,
   Button,
   EmptyState,
   ErrorState,
+  ErrorSummary,
   LoadingState,
   Notice,
   SelectField,
@@ -103,6 +104,7 @@ function DateField({
   error,
   disabled,
   onChange,
+  onBlur,
 }: {
   id: string;
   label: string;
@@ -110,6 +112,7 @@ function DateField({
   error?: string;
   disabled?: boolean;
   onChange: (value: string) => void;
+  onBlur?: () => void;
 }) {
   return (
     <TextField
@@ -119,13 +122,43 @@ function DateField({
       value={value}
       onChange={(event) => onChange(event.target.value)}
       error={error}
+      announceError={false}
       disabled={disabled}
+      onBlur={onBlur}
     />
   );
 }
 
-function scheduleValue(value: string | null): string {
-  return value ? formatIsoDateTime(value) : "ยังไม่กำหนด";
+function ScheduleValue({ value }: { value: string | null }) {
+  return value ? (
+    <time dateTime={value}>{formatIsoDateTime(value)}</time>
+  ) : (
+    <>ยังไม่กำหนด</>
+  );
+}
+
+const CAMPAIGN_ERROR_FIELDS: Array<
+  [keyof CampaignFormErrors, string]
+> = [
+  ["storeId", "store"],
+  ["name", "name"],
+  ["openAt", "open"],
+  ["closeAt", "close"],
+  ["paymentDeadline", "payment"],
+  ["pickupAt", "pickup"],
+];
+
+function campaignErrorItems(
+  prefix: "campaign-create" | "campaign-edit",
+  errors: CampaignFormErrors,
+) {
+  return CAMPAIGN_ERROR_FIELDS.flatMap(([field, suffix]) => {
+    const message = errors[field];
+
+    return message
+      ? [{ fieldId: `${prefix}-${suffix}`, message }]
+      : [];
+  });
 }
 
 function formChanged(
@@ -179,6 +212,9 @@ export function CampaignManagementView({
 
   const [inlineError, setInlineError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [listFeedback, setListFeedback] = useState<string | null>(null);
+  const createErrorSummaryRef = useRef<HTMLDivElement>(null);
+  const editErrorSummaryRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -275,6 +311,22 @@ export function CampaignManagementView({
     setInlineError(null);
   }
 
+  function validateCreateField(field: keyof CampaignFormValues) {
+    const validation = validateCampaignForm(createValues);
+    setCreateErrors((current) => ({
+      ...current,
+      [field]: validation.errors[field],
+    }));
+  }
+
+  function validateEditField(field: keyof CampaignFormValues) {
+    const validation = validateCampaignForm(editValues);
+    setEditErrors((current) => ({
+      ...current,
+      [field]: validation.errors[field],
+    }));
+  }
+
   async function replaceList(
     storeId: string,
     status: CampaignStatus | "",
@@ -299,6 +351,16 @@ export function CampaignManagementView({
         nextCursor: result.nextCursor,
       });
       setSelectedCampaign(null);
+
+      const storeLabel = storeId
+        ? storeNames.get(storeId) ?? storeId
+        : "ทุกร้านค้า";
+      const statusLabel = status
+        ? campaignStatusLabel(status)
+        : "ทุกสถานะ";
+      setListFeedback(
+        `แสดง ${result.items.length.toLocaleString("th-TH")} แคมเปญ · ${storeLabel} · ${statusLabel}`,
+      );
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();
@@ -330,11 +392,16 @@ export function CampaignManagementView({
         cursor: state.nextCursor,
       });
 
+      const nextCampaigns = [...state.campaigns, ...result.items];
+
       setState({
         ...state,
-        campaigns: [...state.campaigns, ...result.items],
+        campaigns: nextCampaigns,
         nextCursor: result.nextCursor,
       });
+      setListFeedback(
+        `โหลดเพิ่มเติมแล้ว ตอนนี้แสดง ${nextCampaigns.length.toLocaleString("th-TH")} แคมเปญ`,
+      );
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();
@@ -360,6 +427,7 @@ export function CampaignManagementView({
     setNotice(null);
 
     if (!validation.valid || !validation.values) {
+      requestAnimationFrame(() => createErrorSummaryRef.current?.focus());
       return;
     }
 
@@ -447,6 +515,7 @@ export function CampaignManagementView({
     setNotice(null);
 
     if (!validation.valid || !validation.values) {
+      requestAnimationFrame(() => editErrorSummaryRef.current?.focus());
       return;
     }
 
@@ -544,8 +613,7 @@ export function CampaignManagementView({
     <div className={styles.page}>
       <main className={styles.main}>
         <header className={styles.header}>
-          <div className={styles.headerCopy} data-ledger-heading>
-            <span className={styles.pageKicker}>รอบการขายและวงจรงาน</span>
+          <div className={styles.headerCopy}>
             <h1 className={styles.title}>แคมเปญ</h1>
             <p className={styles.description}>
               กำหนดรอบการขายของร้านค้า วางแผนวันสำคัญ และควบคุมการเดินสถานะตั้งแต่ฉบับร่างจนถึงรับสินค้าเสร็จสิ้น
@@ -572,22 +640,27 @@ export function CampaignManagementView({
           </div>
         </section>
 
-        <section className={styles.flowStrip} aria-label="ความสัมพันธ์ของแคมเปญกับการขาย">
-          <div>
-            <span className={styles.flowIndex}>01</span>
-            <strong>ร้านค้าและสินค้า</strong>
-            <span>แคมเปญอยู่ภายใต้ร้านค้า และเป็นบริบทของสินค้าที่เปิดขายในรอบนั้น</span>
-          </div>
-          <div>
-            <span className={styles.flowIndex}>02</span>
-            <strong>รอบรับคำสั่งซื้อ</strong>
-            <span>สถานะแคมเปญเป็นตัวกำหนดว่ารอบนั้นกำลังรับคำสั่งซื้อหรือเดินงานต่อแล้ว</span>
-          </div>
-          <div>
-            <span className={styles.flowIndex}>03</span>
-            <strong>ผลิตและรับสินค้า</strong>
-            <span>หลังปิดรอบ ระบบเดินผ่านการผลิตและพร้อมรับสินค้าโดยใช้การยืนยันสถานะจริง</span>
-          </div>
+        <section
+          className={styles.flowContext}
+          aria-labelledby="campaign-flow-context"
+        >
+          <h2 className={styles.flowContextTitle} id="campaign-flow-context">
+            แคมเปญเชื่อมงานขายอย่างไร
+          </h2>
+          <ul className={styles.flowStrip}>
+            <li>
+              <strong>ร้านค้าและสินค้า</strong>
+              <span>แคมเปญอยู่ภายใต้ร้านค้า และเป็นบริบทของสินค้าที่เปิดขายในรอบนั้น</span>
+            </li>
+            <li>
+              <strong>คำสั่งซื้อ</strong>
+              <span>สถานะแคมเปญกำหนดว่ารอบนั้นรับคำสั่งซื้อใหม่ได้หรือกำลังเดินงานต่อจากรายการเดิม</span>
+            </li>
+            <li>
+              <strong>ผลิตและรับสินค้า</strong>
+              <span>หลังปิดรอบ ระบบเดินผ่านการผลิตและพร้อมรับสินค้าโดยใช้การยืนยันสถานะจริง</span>
+            </li>
+          </ul>
         </section>
 
         <Notice tone="info" title="วันเวลาเป็นข้อมูลวางแผน">
@@ -622,7 +695,7 @@ export function CampaignManagementView({
               </span>
             </div>
 
-            <div className={styles.toolbar}>
+            <div className={styles.toolbar} aria-busy={listLoading}>
               <SelectField
                 id="campaign-store-filter"
                 label="ร้านค้า"
@@ -679,6 +752,17 @@ export function CampaignManagementView({
               </Button>
             </div>
 
+            {listFeedback ? (
+              <p
+                className={styles.listFeedback}
+                role="status"
+                aria-live="polite"
+                aria-atomic="true"
+              >
+                {listFeedback}
+              </p>
+            ) : null}
+
             {listLoading ? (
               <LoadingState
                 title="กำลังโหลดรายการแคมเปญ"
@@ -729,10 +813,10 @@ export function CampaignManagementView({
                               campaign.storeId}
                           </span>
                           <span className={styles.meta}>
-                            เปิดตามแผน: {scheduleValue(campaign.openAt)}
+                            เปิดตามแผน: <ScheduleValue value={campaign.openAt} />
                           </span>
                           <span className={styles.meta}>
-                            ปิดตามแผน: {scheduleValue(campaign.closeAt)}
+                            ปิดตามแผน: <ScheduleValue value={campaign.closeAt} />
                           </span>
                         </div>
                       </div>
@@ -776,7 +860,6 @@ export function CampaignManagementView({
 
           <aside className={styles.panel}>
             <div className={styles.panelHeading}>
-              <span className={styles.panelKicker}>เริ่มรอบการขายใหม่</span>
               <h2 className={styles.sectionTitle}>สร้างแคมเปญ</h2>
               <p className={styles.sectionDescription}>
                 แคมเปญใหม่จะเริ่มเป็นฉบับร่าง และยังไม่เปิดรับคำสั่งซื้อจนกว่าจะสั่งเปิด
@@ -789,7 +872,12 @@ export function CampaignManagementView({
               </Notice>
             ) : null}
 
-            <form className={styles.form} onSubmit={handleCreate}>
+            <form className={styles.form} onSubmit={handleCreate} noValidate>
+              <ErrorSummary
+                ref={createErrorSummaryRef}
+                id="campaign-create-error-summary"
+                items={campaignErrorItems("campaign-create", createErrors)}
+              />
               <SelectField
                 id="campaign-create-store"
                 label="ร้านค้า"
@@ -798,6 +886,8 @@ export function CampaignManagementView({
                   updateCreateField("storeId", event.target.value)
                 }
                 error={createErrors.storeId}
+                announceError={false}
+                onBlur={() => validateCreateField("storeId")}
                 required
                 disabled={creating || state.stores.length === 0}
               >
@@ -820,6 +910,8 @@ export function CampaignManagementView({
                   updateCreateField("name", event.target.value)
                 }
                 error={createErrors.name}
+                announceError={false}
+                onBlur={() => validateCreateField("name")}
                 required
                 disabled={creating}
               />
@@ -834,6 +926,7 @@ export function CampaignManagementView({
                   onChange={(value) =>
                     updateCreateField("openAt", value)
                   }
+                  onBlur={() => validateCreateField("openAt")}
                 />
                 <DateField
                   id="campaign-create-close"
@@ -844,6 +937,7 @@ export function CampaignManagementView({
                   onChange={(value) =>
                     updateCreateField("closeAt", value)
                   }
+                  onBlur={() => validateCreateField("closeAt")}
                 />
                 <DateField
                   id="campaign-create-payment"
@@ -854,6 +948,7 @@ export function CampaignManagementView({
                   onChange={(value) =>
                     updateCreateField("paymentDeadline", value)
                   }
+                  onBlur={() => validateCreateField("paymentDeadline")}
                 />
                 <DateField
                   id="campaign-create-pickup"
@@ -864,6 +959,7 @@ export function CampaignManagementView({
                   onChange={(value) =>
                     updateCreateField("pickupAt", value)
                   }
+                  onBlur={() => validateCreateField("pickupAt")}
                 />
               </div>
 
@@ -907,9 +1003,12 @@ export function CampaignManagementView({
                   <span className={styles.meta}>
                     รหัสแคมเปญ: {selectedCampaign.campaignId}
                   </span>
-                  <span className={styles.meta}>
+                  <time
+                    className={styles.meta}
+                    dateTime={selectedCampaign.updatedAt}
+                  >
                     อัปเดตล่าสุด {formatIsoDateTime(selectedCampaign.updatedAt)}
-                  </span>
+                  </time>
                 </div>
               </div>
               <Button
@@ -933,7 +1032,12 @@ export function CampaignManagementView({
                     </p>
                   </div>
 
-                  <form className={styles.form} onSubmit={handleSave}>
+                  <form className={styles.form} onSubmit={handleSave} noValidate>
+                    <ErrorSummary
+                      ref={editErrorSummaryRef}
+                      id="campaign-edit-error-summary"
+                      items={campaignErrorItems("campaign-edit", editErrors)}
+                    />
                     <SelectField
                       id="campaign-edit-store"
                       label="ร้านค้า"
@@ -945,6 +1049,8 @@ export function CampaignManagementView({
                         )
                       }
                       error={editErrors.storeId}
+                      announceError={false}
+                      onBlur={() => validateEditField("storeId")}
                       required
                       disabled={
                         savingCampaignId === selectedCampaign.campaignId
@@ -971,6 +1077,8 @@ export function CampaignManagementView({
                         updateEditField("name", event.target.value)
                       }
                       error={editErrors.name}
+                      announceError={false}
+                      onBlur={() => validateEditField("name")}
                       required
                       disabled={
                         savingCampaignId === selectedCampaign.campaignId
@@ -989,6 +1097,7 @@ export function CampaignManagementView({
                         onChange={(value) =>
                           updateEditField("openAt", value)
                         }
+                        onBlur={() => validateEditField("openAt")}
                       />
                       <DateField
                         id="campaign-edit-close"
@@ -1001,6 +1110,7 @@ export function CampaignManagementView({
                         onChange={(value) =>
                           updateEditField("closeAt", value)
                         }
+                        onBlur={() => validateEditField("closeAt")}
                       />
                       <DateField
                         id="campaign-edit-payment"
@@ -1013,6 +1123,7 @@ export function CampaignManagementView({
                         onChange={(value) =>
                           updateEditField("paymentDeadline", value)
                         }
+                        onBlur={() => validateEditField("paymentDeadline")}
                       />
                       <DateField
                         id="campaign-edit-pickup"
@@ -1025,6 +1136,7 @@ export function CampaignManagementView({
                         onChange={(value) =>
                           updateEditField("pickupAt", value)
                         }
+                        onBlur={() => validateEditField("pickupAt")}
                       />
                     </div>
 
@@ -1092,40 +1204,32 @@ export function CampaignManagementView({
                     </p>
                   </div>
 
-                  <div className={styles.scheduleGrid}>
+                  <dl className={styles.scheduleGrid}>
                     <div className={styles.scheduleItem}>
-                      <span className={styles.scheduleLabel}>
-                        เปิดตามแผน
-                      </span>
-                      <span className={styles.scheduleValue}>
-                        {scheduleValue(selectedCampaign.openAt)}
-                      </span>
+                      <dt className={styles.scheduleLabel}>เปิดตามแผน</dt>
+                      <dd className={styles.scheduleValue}>
+                        <ScheduleValue value={selectedCampaign.openAt} />
+                      </dd>
                     </div>
                     <div className={styles.scheduleItem}>
-                      <span className={styles.scheduleLabel}>
-                        ปิดตามแผน
-                      </span>
-                      <span className={styles.scheduleValue}>
-                        {scheduleValue(selectedCampaign.closeAt)}
-                      </span>
+                      <dt className={styles.scheduleLabel}>ปิดตามแผน</dt>
+                      <dd className={styles.scheduleValue}>
+                        <ScheduleValue value={selectedCampaign.closeAt} />
+                      </dd>
                     </div>
                     <div className={styles.scheduleItem}>
-                      <span className={styles.scheduleLabel}>
-                        กำหนดชำระเงิน
-                      </span>
-                      <span className={styles.scheduleValue}>
-                        {scheduleValue(selectedCampaign.paymentDeadline)}
-                      </span>
+                      <dt className={styles.scheduleLabel}>กำหนดชำระเงิน</dt>
+                      <dd className={styles.scheduleValue}>
+                        <ScheduleValue value={selectedCampaign.paymentDeadline} />
+                      </dd>
                     </div>
                     <div className={styles.scheduleItem}>
-                      <span className={styles.scheduleLabel}>
-                        วันรับสินค้า
-                      </span>
-                      <span className={styles.scheduleValue}>
-                        {scheduleValue(selectedCampaign.pickupAt)}
-                      </span>
+                      <dt className={styles.scheduleLabel}>วันรับสินค้า</dt>
+                      <dd className={styles.scheduleValue}>
+                        <ScheduleValue value={selectedCampaign.pickupAt} />
+                      </dd>
                     </div>
-                  </div>
+                  </dl>
                 </section>
 
                 <section className={styles.detailSection}>

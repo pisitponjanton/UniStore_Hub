@@ -124,7 +124,6 @@ export function StoreView() {
 
         <section className={styles.hero}>
           <div className={styles.heroCopy}>
-            <span className={styles.eyebrow}>ร้านค้า</span>
             <h1 className={styles.title}>{store.name}</h1>
             {store.description ? (
               <p className={styles.description}>{store.description}</p>
@@ -135,26 +134,25 @@ export function StoreView() {
             )}
           </div>
 
-          <div className={styles.heroMeta} role="group" aria-label="สรุปร้านค้า">
+          <dl className={styles.heroMeta} aria-label="สรุปร้านค้า">
             <div>
-              <span className={styles.metaLabel}>แคมเปญ</span>
-              <strong className={styles.metaValue} data-numeric>
+              <dt className={styles.metaLabel}>แคมเปญ</dt>
+              <dd className={styles.metaValue} data-numeric>
                 {campaigns.length}
-              </strong>
+              </dd>
             </div>
             <div>
-              <span className={styles.metaLabel}>สินค้า</span>
-              <strong className={styles.metaValue} data-numeric>
+              <dt className={styles.metaLabel}>สินค้า</dt>
+              <dd className={styles.metaValue} data-numeric>
                 {products.length}
-              </strong>
+              </dd>
             </div>
-          </div>
+          </dl>
         </section>
 
         <section className={styles.section} aria-labelledby="campaign-heading">
           <div className={styles.sectionHeader}>
             <div>
-              <span className={styles.eyebrow}>พรีออเดอร์และรอบขาย</span>
               <h2 className={styles.sectionTitle} id="campaign-heading">
                 แคมเปญของร้าน
               </h2>
@@ -183,7 +181,6 @@ export function StoreView() {
         <section className={styles.section} aria-labelledby="product-heading">
           <div className={styles.sectionHeader}>
             <div>
-              <span className={styles.eyebrow}>เลือกสินค้า</span>
               <h2 className={styles.sectionTitle} id="product-heading">
                 สินค้าของร้าน
               </h2>

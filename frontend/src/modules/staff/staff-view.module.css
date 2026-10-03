@@ -31,14 +31,6 @@
   gap: var(--space-3);
 }
 
-.pageKicker,
-.panelKicker {
-  width: fit-content;
-  color: var(--campus);
-  font-size: var(--text-body-sm);
-  font-weight: 700;
-}
-
 .title {
   color: var(--ink);
   font-size: clamp(2rem, 4vw, 3.4rem);
@@ -147,30 +139,15 @@
 }
 
 .memberCard {
-  position: relative;
   display: grid;
   gap: var(--space-4);
-  padding: var(--space-5) var(--space-4) var(--space-5) var(--space-5);
+  padding: var(--space-5) var(--space-4);
   border-bottom: 1px solid var(--line-soft);
   background: var(--surface);
 }
 
-.memberCard::before {
-  content: "";
-  position: absolute;
-  inset-block: var(--space-4);
-  inset-inline-start: 0;
-  width: 3px;
-  border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
-  background: var(--line-strong);
-}
-
 .memberCardInactive {
   background: var(--surface-muted);
-}
-
-.memberCardInactive::before {
-  background: var(--ink-tertiary);
 }
 
 .memberHeader {
@@ -208,25 +185,13 @@
 
 .finalAdmin,
 .inactiveNote {
-  position: relative;
-  padding: var(--space-3) var(--space-4) var(--space-3) var(--space-5);
+  padding: var(--space-3) var(--space-4);
   border: 1px solid color-mix(in srgb, var(--warning) 20%, var(--line-soft));
   border-radius: var(--radius-md);
   background: var(--warning-soft);
   color: var(--warning);
   font-size: var(--text-body-sm);
   line-height: 1.55;
-}
-
-.finalAdmin::before,
-.inactiveNote::before {
-  content: "";
-  position: absolute;
-  inset-block: var(--space-3);
-  inset-inline-start: 0;
-  width: 3px;
-  border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
-  background: currentColor;
 }
 
 .inactiveNote {
@@ -253,7 +218,7 @@
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   background: var(--surface);
-  box-shadow: var(--shadow-subtle);
+  box-shadow: none;
 }
 
 .panelHeading {
@@ -273,23 +238,12 @@
 }
 
 .roleHelp {
-  position: relative;
   display: grid;
   gap: var(--space-1);
-  padding: var(--space-3) var(--space-4) var(--space-3) var(--space-5);
+  padding: var(--space-3) var(--space-4);
   border: 1px solid var(--line-soft);
   border-radius: var(--radius-md);
-  background: var(--surface-raised);
-}
-
-.roleHelp::before {
-  content: "";
-  position: absolute;
-  inset-block: var(--space-3);
-  inset-inline-start: 0;
-  width: 3px;
-  border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
-  background: var(--campus);
+  background: var(--surface-inset);
 }
 
 .roleHelp strong {
@@ -388,9 +342,5 @@
   .panel,
   .memberCard {
     padding: var(--space-4);
-  }
-
-  .memberCard {
-    padding-left: var(--space-5);
   }
 }

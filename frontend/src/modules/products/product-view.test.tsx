@@ -179,4 +179,21 @@ describe("ProductManagementView", () => {
       await screen.findByText("บันทึกข้อมูลสินค้า Updated Shirt แล้ว"),
     ).toBeInTheDocument();
   });
+
+  it("focuses a validation summary when creating a product without a name", async () => {
+    render(<ProductManagementView organizationId="org-1" />);
+
+    await screen.findByText("Faculty Shirt");
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "สร้างสินค้า" }),
+    );
+
+    const summary = await screen.findByRole("alert");
+    expect(
+      screen.getByRole("link", { name: "กรุณาระบุชื่อสินค้า" }),
+    ).toHaveAttribute("href", "#product-create-name");
+    await waitFor(() => expect(summary).toHaveFocus());
+    expect(mocks.create).not.toHaveBeenCalled();
+  });
 });

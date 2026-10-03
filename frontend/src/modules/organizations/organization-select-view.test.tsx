@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { OrganizationDTO } from "@/types";
@@ -87,7 +87,7 @@ describe("OrganizationSelectView", () => {
     expect(screen.getByText("ผู้ดูแลหน่วยงาน")).toBeInTheDocument();
 
     fireEvent.click(
-      screen.getByRole("button", { name: "เข้าใช้งาน" }),
+      screen.getByRole("button", { name: "เข้าใช้งาน IT Club" }),
     );
 
     expect(mocks.remember).toHaveBeenCalledWith(
@@ -97,5 +97,27 @@ describe("OrganizationSelectView", () => {
     expect(mocks.push).toHaveBeenCalledWith(
       "/org/dashboard/?organizationId=org-1",
     );
+  });
+
+  it("shows a focusable validation summary before creating an unnamed organization", async () => {
+    mocks.listAccessible.mockResolvedValue([
+      organization("org-1", "IT Club"),
+    ]);
+
+    render(<OrganizationSelectView />);
+
+    await screen.findByText("IT Club");
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "สร้างหน่วยงาน" }),
+    );
+
+    const summary = await screen.findByRole("alert");
+    expect(summary).toHaveAttribute("tabindex", "-1");
+    expect(
+      screen.getByRole("link", { name: "กรุณาระบุชื่อหน่วยงาน" }),
+    ).toHaveAttribute("href", "#organization-name");
+    await waitFor(() => expect(summary).toHaveFocus());
+    expect(mocks.create).not.toHaveBeenCalled();
   });
 });

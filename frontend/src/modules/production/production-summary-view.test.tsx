@@ -56,6 +56,28 @@ describe("ProductionSummaryView", () => {
     window.history.replaceState({}, "", "/org/production/?organizationId=org-1");
   });
 
+  it("focuses a linked error summary when Campaign ID is missing", async () => {
+    render(
+      <ProductionSummaryView
+        organizationId="org-1"
+        initialCampaignId={null}
+      />,
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "โหลดสรุปการผลิต",
+      }),
+    );
+
+    const summaryError = await screen.findByRole("alert");
+    expect(
+      screen.getByRole("link", { name: "กรุณาระบุ Campaign ID" }),
+    ).toHaveAttribute("href", "#production-campaign-id");
+    await waitFor(() => expect(summaryError).toHaveFocus());
+    expect(mocks.getSummary).not.toHaveBeenCalled();
+  });
+
   it("does not call the required-query endpoint until a Campaign ID exists", () => {
     render(
       <ProductionSummaryView
@@ -149,6 +171,9 @@ describe("ProductionSummaryView", () => {
     ).toBeInTheDocument();
     expect(window.location.search).toBe(
       "?organizationId=org-1&campaignId=campaign-1",
+    );
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "โหลดสรุปการผลิตของ campaign-1 แล้ว",
     );
   });
 });

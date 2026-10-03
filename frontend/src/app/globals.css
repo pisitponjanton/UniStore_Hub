@@ -1,13 +1,15 @@
 :root {
   color-scheme: light;
 
-  /* Campus Commerce Workbench — surfaces */
+  /* Campus Commerce Workbench v2 — semantic surfaces */
   --canvas: #f4f6f3;
   --surface: #ffffff;
   --surface-raised: #fbfcfa;
   --surface-muted: #edf1ed;
   --surface-inset: #e7ece8;
   --surface-strong: #dfe6e1;
+  --surface-hover: #f0f3ef;
+  --surface-selected: #e5f1ee;
 
   /* Text */
   --ink: #14201e;
@@ -20,13 +22,16 @@
   --line: rgb(20 32 30 / 14%);
   --line-soft: rgb(20 32 30 / 8%);
   --line-strong: rgb(20 32 30 / 24%);
-  --control-line: rgb(20 32 30 / 48%);
+  --control-line: rgb(20 32 30 / 52%);
+  --control-line-hover: rgb(20 32 30 / 66%);
 
   /* Product identity */
   --campus: #0f6a64;
   --campus-hover: #0a5752;
   --campus-soft: #e1f0ed;
   --campus-strong: #083e3b;
+  --campus-on: #ffffff;
+  --campus-line: #a9d2cc;
 
   /* Semantic state */
   --success: #217a52;
@@ -75,9 +80,11 @@
   --text-heading: 1.75rem;
   --text-display: 2.75rem;
 
-  --leading-tight: 1.28;
+  --leading-tight: 1.24;
   --leading-normal: 1.6;
   --leading-loose: 1.72;
+  --tracking-tight: -0.018em;
+  --tracking-normal: 0;
 
   --font-sans: "Noto Sans Thai", "Leelawadee UI", Tahoma, sans-serif;
   --font-technical: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
@@ -93,7 +100,7 @@
   --page-block-end: 72px;
   --sidebar-width: 264px;
 
-  /* Density */
+  /* Density calibration: customer 5/10, operations 8/10 */
   --density-customer: 1;
   --density-operational: 0.84;
 
@@ -111,6 +118,9 @@
 
   /* Depth */
   --shadow-subtle: 0 1px 2px rgb(11 31 27 / 7%);
+  --shadow-floating:
+    0 0 0 1px rgb(11 31 27 / 6%),
+    0 8px 24px rgb(7 24 21 / 9%);
   --shadow-overlay: 0 18px 48px rgb(7 24 21 / 18%);
 
   /* Motion */
@@ -139,6 +149,8 @@
     --surface-muted: #1c2926;
     --surface-inset: #0a1110;
     --surface-strong: #253530;
+    --surface-hover: #1f2d2a;
+    --surface-selected: #1c3733;
 
     --ink: #f1f5f3;
     --ink-secondary: #c4d0cc;
@@ -150,11 +162,14 @@
     --line-soft: rgb(241 245 243 / 8%);
     --line-strong: rgb(241 245 243 / 24%);
     --control-line: rgb(241 245 243 / 42%);
+    --control-line-hover: rgb(241 245 243 / 62%);
 
     --campus: #77c9be;
     --campus-hover: #8fd7cd;
     --campus-soft: #183a36;
     --campus-strong: #b6e9e2;
+    --campus-on: #07110f;
+    --campus-line: #315b55;
 
     --success: #7bc79b;
     --success-soft: #153427;
@@ -172,6 +187,7 @@
     --media-paper-line: rgb(0 0 0 / 14%);
 
     --shadow-subtle: 0 1px 2px rgb(0 0 0 / 24%);
+    --shadow-floating: 0 0 0 1px rgb(241 245 243 / 8%);
     --shadow-overlay: 0 20px 52px rgb(0 0 0 / 48%);
   }
 }
@@ -198,6 +214,7 @@ body {
   font-family: var(--font-sans);
   font-size: var(--text-body);
   line-height: var(--leading-normal);
+  font-synthesis: none;
 }
 
 ::selection {
@@ -220,6 +237,7 @@ h4 {
   color: var(--ink);
   font-weight: 600;
   line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
   text-wrap: balance;
 }
 
@@ -289,6 +307,7 @@ table {
   font-variant-numeric: tabular-nums;
 }
 
+time,
 [data-numeric] {
   font-variant-numeric: tabular-nums;
 }
@@ -313,26 +332,20 @@ table {
   background: var(--surface-muted);
 }
 
-/* Signature task/state rail. Use once for the primary context, not decoratively. */
+/* Task-ledger heading foundation.
+   The signature is hierarchy + state/action grouping, not a repeated color rail. */
 [data-ledger-heading] {
   position: relative;
-  padding-inline-start: var(--space-5);
 }
 
 [data-ledger-heading]::before {
-  content: "";
-  position: absolute;
-  inset-block: 2px;
-  inset-inline-start: 0;
-  width: 4px;
-  border-radius: var(--radius-pill);
-  background: var(--campus);
+  content: none;
 }
 
 [data-ledger-heading] h1 {
   font-size: var(--text-heading);
   line-height: var(--leading-tight);
-  letter-spacing: -0.018em;
+  letter-spacing: var(--tracking-tight);
 }
 
 /* Reduced motion is a product rule, not a page-level preference. */
@@ -381,15 +394,10 @@ table {
     --page-gutter: 16px;
     --page-block-start: 24px;
     --page-block-end: 48px;
+    --control-height-sm: 40px;
     --control-height: 44px;
     --control-height-lg: 48px;
-  }
-
-  [data-ledger-heading] {
-    padding-inline-start: var(--space-4);
-  }
-
-  [data-ledger-heading]::before {
-    width: 4px;
+    --target-min: 44px;
+    --target-comfortable: 48px;
   }
 }

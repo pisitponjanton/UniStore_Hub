@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 
-import { Button, Notice, TextField } from "@/components";
+import { Button, ErrorSummary, Notice, TextField } from "@/components";
 import { ApiClientError } from "@/services";
 
 import styles from "./auth-form.module.css";
@@ -18,26 +18,14 @@ import { getAuthReturnPath } from "./return-route";
 import { authSession } from "./session";
 import { useAuthNavigationContext } from "./use-auth-navigation-context";
 
-function focusFirstInvalidField(errors: AuthFieldErrors) {
-  const id = errors.name
-    ? "register-name"
-    : errors.email
-      ? "register-email"
-      : errors.password
-        ? "register-password"
-        : null;
-
-  if (id) {
-    document.getElementById(id)?.focus();
-  }
-}
-
 export function RegisterForm() {
   const navigation = useAuthNavigationContext();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<AuthFieldErrors>({});
+  const errorSummaryRef = useRef<HTMLDivElement>(null);
   const [serverError, setServerError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -71,7 +59,7 @@ export function RegisterForm() {
     setServerError(null);
 
     if (hasAuthFieldErrors(nextErrors)) {
-      focusFirstInvalidField(nextErrors);
+      requestAnimationFrame(() => errorSummaryRef.current?.focus());
       return;
     }
 
@@ -104,7 +92,6 @@ export function RegisterForm() {
   return (
     <div className={styles.formShell}>
       <div className={styles.headingGroup}>
-        <span className={styles.formKicker}>เริ่มใช้งาน UniStore Hub</span>
         <h2 className={styles.title}>สร้างบัญชีของคุณ</h2>
         <p className={styles.description}>
           ใช้บัญชีเดียวสำหรับสั่งซื้อ ติดตามการชำระเงิน และดูข้อมูลรับสินค้า
@@ -118,6 +105,22 @@ export function RegisterForm() {
       ) : null}
 
       <form className={styles.form} onSubmit={handleSubmit} noValidate>
+        <ErrorSummary
+          ref={errorSummaryRef}
+          id="register-error-summary"
+          items={[
+            ...(fieldErrors.name
+              ? [{ fieldId: "register-name", message: fieldErrors.name }]
+              : []),
+            ...(fieldErrors.email
+              ? [{ fieldId: "register-email", message: fieldErrors.email }]
+              : []),
+            ...(fieldErrors.password
+              ? [{ fieldId: "register-password", message: fieldErrors.password }]
+              : []),
+          ]}
+        />
+
         <div className={styles.formFields}>
           <TextField
             id="register-name"
@@ -126,8 +129,8 @@ export function RegisterForm() {
             value={name}
             onChange={(event) => updateName(event.target.value)}
             error={fieldErrors.name}
+            announceError={false}
             disabled={pending}
-            autoFocus
             required
           />
           <TextField
@@ -139,21 +142,33 @@ export function RegisterForm() {
             value={email}
             onChange={(event) => updateEmail(event.target.value)}
             error={fieldErrors.email}
+            announceError={false}
             disabled={pending}
             required
           />
           <TextField
             id="register-password"
             label="รหัสผ่าน"
-            type="password"
+            type={showPassword ? "text" : "password"}
             autoComplete="new-password"
             hint="รหัสผ่านต้องมีความยาว 8 ถึง 72 ไบต์"
             value={password}
             onChange={(event) => updatePassword(event.target.value)}
             error={fieldErrors.password}
+            announceError={false}
             disabled={pending}
             required
           />
+          <button
+            type="button"
+            className={styles.passwordToggle}
+            aria-controls="register-password"
+            aria-pressed={showPassword}
+            disabled={pending}
+            onClick={() => setShowPassword((current) => !current)}
+          >
+            {showPassword ? "ซ่อนรหัสผ่าน" : "แสดงรหัสผ่าน"}
+          </button>
         </div>
 
         {serverError ? (
@@ -174,9 +189,7 @@ export function RegisterForm() {
         </div>
       </form>
 
-      <div className={styles.formDivider} aria-hidden="true">
-        <span />
-      </div>
+      <div className={styles.formDivider} aria-hidden="true" />
 
       <div className={styles.formFooter}>
         <p className={styles.switchText}>

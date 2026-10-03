@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 
 import {
   Badge,
@@ -9,6 +9,7 @@ import {
   Dialog,
   EmptyState,
   ErrorState,
+  ErrorSummary,
   ForbiddenState,
   LoadingState,
   Notice,
@@ -147,6 +148,8 @@ export function OrganizationPaymentsView({
 
   const [inlineError, setInlineError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [listFeedback, setListFeedback] = useState<string | null>(null);
+  const rejectErrorSummaryRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -254,6 +257,12 @@ export function OrganizationPaymentsView({
         payments: result.items,
         nextCursor: result.nextCursor,
       });
+      setListFeedback(
+        `แสดงการชำระเงินทั้งหมดที่โหลด ${result.items.length.toLocaleString("th-TH")} รายการ`,
+      );
+      setListFeedback(
+        `แสดง ${result.items.length.toLocaleString("th-TH")} การชำระเงิน${nextFilters.status ? ` · ${paymentStatusLabel(nextFilters.status)}` : ""}`,
+      );
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();
@@ -328,11 +337,16 @@ export function OrganizationPaymentsView({
           },
         );
 
+      const nextPayments = [...state.payments, ...result.items];
+
       setState({
         status: "success",
-        payments: [...state.payments, ...result.items],
+        payments: nextPayments,
         nextCursor: result.nextCursor,
       });
+      setListFeedback(
+        `โหลดเพิ่มเติมแล้ว ตอนนี้แสดง ${nextPayments.length.toLocaleString("th-TH")} การชำระเงิน`,
+      );
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();
@@ -506,6 +520,7 @@ export function OrganizationPaymentsView({
     setRejectReasonError(validation.error);
 
     if (!validation.valid) {
+      requestAnimationFrame(() => rejectErrorSummaryRef.current?.focus());
       return;
     }
 
@@ -603,8 +618,7 @@ export function OrganizationPaymentsView({
     <div className={styles.page}>
       <main className={styles.main}>
         <header className={styles.header}>
-          <div className={styles.headerCopy} data-ledger-heading>
-            <span className={styles.pageKicker}>คิวตรวจหลักฐานการชำระเงิน</span>
+          <div className={styles.headerCopy}>
             <h1 className={styles.title}>ตรวจสอบการชำระเงิน</h1>
             <p className={styles.description}>
               เปิดหลักฐานการชำระเงิน เทียบกับคำสั่งซื้อ แล้วอนุมัติหรือปฏิเสธพร้อมเหตุผลจากคิวเดียว
@@ -665,6 +679,7 @@ export function OrganizationPaymentsView({
           <form
             className={styles.filterForm}
             onSubmit={applyFilters}
+            aria-busy={filtering}
           >
             <div className={styles.filters}>
               <SelectField
@@ -737,6 +752,17 @@ export function OrganizationPaymentsView({
           </form>
         </section>
 
+        {listFeedback ? (
+          <p
+            className={styles.listFeedback}
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {listFeedback}
+          </p>
+        ) : null}
+
         {inlineError ? (
           <Notice tone="danger" role="alert" title="ดำเนินการไม่สำเร็จ">
             {inlineError}
@@ -797,6 +823,7 @@ export function OrganizationPaymentsView({
                       data-attention={payment.status === "PENDING_REVIEW" || undefined}
                       key={payment.paymentId}
                       aria-current={isSelected ? "true" : undefined}
+                      aria-label={`การชำระเงิน ${payment.paymentId} · ${paymentStatusLabel(payment.status)}`}
                     >
                       <div className={styles.rowMain}>
                         <div className={styles.rowHeading}>
@@ -816,15 +843,16 @@ export function OrganizationPaymentsView({
                           <span className={styles.meta}>
                             Customer: {payment.customerId}
                           </span>
-                          <span className={styles.meta}>
+                          <time className={styles.meta} dateTime={payment.createdAt}>
                             ส่งเมื่อ {formatIsoDateTime(payment.createdAt)}
-                          </span>
+                          </time>
                         </div>
                       </div>
 
                       <div className={styles.cardActions}>
                         <Button
                           variant="secondary"
+                          aria-label={`${isSelected ? "กำลังตรวจสอบ" : "ตรวจสอบ"} การชำระเงิน ${payment.paymentId}`}
                           pending={
                             detailLoadingId === payment.paymentId
                           }
@@ -884,57 +912,55 @@ export function OrganizationPaymentsView({
                   </Badge>
                 </div>
 
-                <div className={styles.reviewSnapshot}>
+                <dl className={styles.reviewSnapshot}>
                   <div>
-                    <span className={styles.metaLabel}>ยอดคำสั่งซื้อ</span>
-                    <strong className={styles.amount}>
+                    <dt className={styles.metaLabel}>ยอดคำสั่งซื้อ</dt>
+                    <dd className={styles.amount} data-numeric>
                       {formatSatang(selected.order.total)}
-                    </strong>
+                    </dd>
                   </div>
                   <div>
-                    <span className={styles.metaLabel}>สถานะ Order</span>
-                    <OrderStatusBadge
-                      status={selected.order.status}
-                    />
+                    <dt className={styles.metaLabel}>สถานะ Order</dt>
+                    <dd className={styles.snapshotValue}>
+                      <OrderStatusBadge
+                        status={selected.order.status}
+                      />
+                    </dd>
                   </div>
-                </div>
+                </dl>
 
-                <div className={styles.metaGrid}>
+                <dl className={styles.metaGrid}>
                   <div className={styles.metaItem}>
-                    <span className={styles.metaLabel}>
-                      Customer ID
-                    </span>
-                    <span className={styles.metaValue}>
+                    <dt className={styles.metaLabel}>Customer ID</dt>
+                    <dd className={styles.metaValue}>
                       {selected.payment.customerId}
-                    </span>
+                    </dd>
                   </div>
                   <div className={styles.metaItem}>
-                    <span className={styles.metaLabel}>
-                      Campaign ID
-                    </span>
-                    <span className={styles.metaValue}>
+                    <dt className={styles.metaLabel}>Campaign ID</dt>
+                    <dd className={styles.metaValue}>
                       {selected.order.campaignId}
-                    </span>
+                    </dd>
                   </div>
                   <div className={styles.metaItem}>
-                    <span className={styles.metaLabel}>
-                      ตรวจสอบโดย
-                    </span>
-                    <span className={styles.metaValue}>
+                    <dt className={styles.metaLabel}>ตรวจสอบโดย</dt>
+                    <dd className={styles.metaValue}>
                       {selected.payment.reviewedBy ?? "ยังไม่ตรวจสอบ"}
-                    </span>
+                    </dd>
                   </div>
                   <div className={styles.metaItem}>
-                    <span className={styles.metaLabel}>
-                      เวลาตรวจสอบ
-                    </span>
-                    <span className={styles.metaValue}>
-                      {selected.payment.reviewedAt
-                        ? formatIsoDateTime(selected.payment.reviewedAt)
-                        : "ยังไม่ตรวจสอบ"}
-                    </span>
+                    <dt className={styles.metaLabel}>เวลาตรวจสอบ</dt>
+                    <dd className={styles.metaValue}>
+                      {selected.payment.reviewedAt ? (
+                        <time dateTime={selected.payment.reviewedAt}>
+                          {formatIsoDateTime(selected.payment.reviewedAt)}
+                        </time>
+                      ) : (
+                        "ยังไม่ตรวจสอบ"
+                      )}
+                    </dd>
                   </div>
-                </div>
+                </dl>
 
                 {selected.payment.status === "REJECTED" ? (
                   <Notice
@@ -1103,6 +1129,20 @@ export function OrganizationPaymentsView({
                   }
                 >
                   <div className={styles.dialogBody}>
+                    <ErrorSummary
+                      ref={rejectErrorSummaryRef}
+                      id="payment-reject-error-summary"
+                      items={
+                        rejectReasonError
+                          ? [
+                              {
+                                fieldId: "payment-reject-reason",
+                                message: rejectReasonError,
+                              },
+                            ]
+                          : []
+                      }
+                    />
                     <TextareaField
                       id="payment-reject-reason"
                       label="เหตุผลที่ปฏิเสธ"
@@ -1112,6 +1152,11 @@ export function OrganizationPaymentsView({
                         setRejectReasonError(undefined);
                       }}
                       error={rejectReasonError}
+                      announceError={false}
+                      onBlur={() => {
+                        const validation = validateRejectReason(rejectReason);
+                        setRejectReasonError(validation.error);
+                      }}
                       required
                       disabled={reviewPending === "reject"}
                       placeholder="เช่น ยอดเงินในสลิปไม่ตรงกับยอดคำสั่งซื้อ"

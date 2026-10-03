@@ -1,363 +1,744 @@
-# UniStore Hub Full Frontend Redesign Audit
+# UniStore Hub UX/UI Redesign v2 — Skill-Driven Baseline Audit
 
-Status: Phase 1 complete — source-backed redesign baseline
-Scope: all canonical routes and shared frontend UI under `frontend/**`
-Method: static source/design-system audit using `interface-design`, `ui-ux-pro-max`, `design-review`, `redesign`, and `frontend-design`.
+## 1. Purpose
 
-> This phase defines the redesign direction. It does not claim screenshot/browser certification. Runtime responsive, visual, and accessibility verification remains for later phases.
+This document is the Phase 1 baseline for **Skill-Driven UniStore Hub UX/UI Redesign v2**.
 
-## 1. Product model
+The frontend was already redesigned once. This pass does not start from a broken or unstructured UI. Its purpose is to re-evaluate the current implementation using the now fully installed `ui-ux-pro-max` searchable dataset together with the repository's existing design skills:
 
-UniStore Hub is two related experiences inside one product:
+- `interface-design`
+- `ui-ux-pro-max`
+- `design-review`
+- `redesign`
+- `frontend-design`
+- `a11y-audit`
 
-- **Campus storefront** for students/customers browsing organizations, stores, campaigns, products, ordering, paying, tracking, and collecting.
-- **Operations workbench** for Staff, Organization Admin, and Platform Admin users repeatedly processing queues, reviewing state, changing configuration, and completing high-impact actions.
+This is a source/code audit, not a browser screenshot audit. Scores and visual observations remain provisional until the responsive/accessibility review phases.
 
-The redesign must make these feel related without forcing them into the same page template.
+No business behavior is intentionally changed in Phase 1.
 
-## 2. Canonical route inventory
+---
 
-### Public / customer
+## 2. Product and user brief
 
-| Route | Current responsibility | Redesign composition |
-| --- | --- | --- |
-| `/` | storefront landing | campus marketplace index: organization/store discovery first, concise product identity second |
-| `/login/` | login | focused account entry with clear return destination and low-friction recovery |
-| `/register/` | account creation | same account system as login, with progressive form hierarchy |
-| `/stores/view/` | store detail | store identity + active campaigns/products + availability-led browsing |
-| `/products/view/` | public product detail | product-first composition, variant/availability/price hierarchy, campaign entry |
-| `/campaigns/view/` | public campaign detail | campaign status/timing + offered products + clear order eligibility |
-| `/orders/new/` | create order | guided order workspace: selection -> quantity -> authoritative review -> submit |
-| `/my/orders/` | customer order history | lifecycle-oriented order list with state and next action visible at row level |
-| `/my/order/` | customer order detail | order journey/status first, items and references second, next action obvious |
-| `/my/payment/` | submit/resubmit payment proof | payment task page with review state, rejection recovery, and upload action |
-| `/my/pickup/` | pickup token/QR and state | pickup pass: readiness, token/QR, what to bring/do, received state |
-| `/notifications/` | customer notifications | event inbox with readable grouping, unread state, and destination context |
+### Product domain
 
-### Organization / staff
+UniStore Hub combines two related products:
 
-| Route | Current responsibility | Redesign composition |
-| --- | --- | --- |
-| `/org/select/` | organization context selection | organization switcher with role/context clarity, not dashboard chrome |
-| `/org/dashboard/` | organization summary | action-led operational overview: urgent work first, totals second |
-| `/org/settings/` | organization configuration | compact settings form with read/edit distinction and safe save feedback |
-| `/org/staff/` | membership management | staff roster/workbench with role/status hierarchy and guarded admin actions |
-| `/org/stores/` | store management | store list + editing context; avoid equal-weight promotional cards |
-| `/org/products/` | product/variant/image management | inventory-style product workspace with product identity, variants, images, state |
-| `/org/campaigns/` | campaign planning/lifecycle | lifecycle board/list with dates, state, next transition, and destructive separation |
-| `/org/orders/` | order queue | dense queue with active filters, status, customer/campaign refs, next work |
-| `/org/orders/view/` | order operational detail | authoritative order state + item detail + allowed actions/history |
-| `/org/payments/` | payment review queue | review queue + selected payment evidence/detail + approve/reject task rail |
-| `/org/production/` | production summary | production workload grouped by campaign/product/variant with actionable status |
-| `/org/pickups/` | pickup confirmation queue | token/order verification + selected pickup + one safe confirm action |
-| `/org/audit/` | audit history | read-only event ledger with compact filters and inspectable metadata |
+1. **Campus storefront / marketplace**
+   - discover organizations, stores, campaigns, and products
+   - place preorder-style orders
+   - submit payment proof
+   - track order state
+   - receive pickup QR/token and collection status
+   - read notifications
 
-### Platform Admin
+2. **Operations workbench**
+   - Organization Admin and Staff manage stores, products, campaigns, orders, payments, production, pickups, staff, settings, and audit history
+   - Platform Admin reviews organizations and platform users
 
-| Route | Current responsibility | Redesign composition |
-| --- | --- | --- |
-| `/platform/summary/` | platform overview | platform health/attention summary; actionable counts outrank generic metrics |
-| `/platform/organizations/` | organization administration | organization review/state workbench with clear platform scope |
-| `/platform/users/` | platform user lookup/list | read-oriented user table/list with platform role/status clarity |
+### Primary audiences
 
-**Coverage:** all 28 current `page.tsx` routes are included in the redesign plan.
+- Thai-speaking student/customer using mobile first
+- organization staff repeatedly processing queues and records
+- organization admins managing configuration and lifecycle transitions
+- platform admins reviewing cross-organization state
 
-## 3. Shared implementation inventory
+### Required feel
 
-Current shared layer:
+The interface should feel:
 
-- `src/app/globals.css` — semantic color/spacing/type/layout/motion tokens
-- `src/components/ui/*` — Button, Fields, Badge, Card, Table, Dialog, StatePanel
-- `src/components/ui/operational.tsx` — ActionBar, FilterToolbar, Notice, TaskStatus
-- `src/components/layout/*` — PageShell/PageHeader patterns and ApplicationShell
-- `src/modules/auth/navigation.ts` — role-aware navigation source
-- 25 feature CSS modules — substantial page-level visual duplication remains
+- Thai-readable
+- trustworthy
+- task-oriented
+- calm but not bland
+- recognizable as campus commerce
+- more browsable on customer surfaces
+- denser and faster on operational surfaces
 
-This is a useful implementation foundation, but it is **not a visual constraint** for the full redesign. Shared semantics can be retained while composition and styling are rebuilt.
+It must not feel like a generic SaaS dashboard or a generic marketplace template.
 
-## 4. Code-backed baseline review
+---
 
-This score is provisional because it is based on source inspection, not rendered screenshots.
+## 3. Current implementation inventory
 
-| Dimension | Weight | Baseline | Main reason |
+### Canonical routes
+
+The current frontend contains **28 `page.tsx` routes** and all are in redesign scope.
+
+#### Public / customer
+
+| Route | Primary job |
+| --- | --- |
+| `/` | storefront / discovery entry |
+| `/login/` | sign in |
+| `/register/` | account creation |
+| `/stores/view/` | store detail |
+| `/products/view/` | product detail |
+| `/campaigns/view/` | campaign detail |
+| `/orders/new/` | create order |
+| `/my/orders/` | order history |
+| `/my/order/` | order detail |
+| `/my/payment/` | payment proof and review state |
+| `/my/pickup/` | pickup token/QR and pickup state |
+| `/notifications/` | customer event inbox |
+
+#### Organization / Staff
+
+| Route | Primary job |
+| --- | --- |
+| `/org/select/` | choose organization context |
+| `/org/dashboard/` | organization attention/workload summary |
+| `/org/settings/` | organization settings |
+| `/org/staff/` | membership and role management |
+| `/org/stores/` | store management |
+| `/org/products/` | product, variant, and image management |
+| `/org/campaigns/` | campaign lifecycle management |
+| `/org/orders/` | order queue |
+| `/org/orders/view/` | order operational detail |
+| `/org/payments/` | payment review queue |
+| `/org/production/` | production workload |
+| `/org/pickups/` | pickup confirmation queue |
+| `/org/audit/` | read-only audit history |
+
+#### Platform Admin
+
+| Route | Primary job |
+| --- | --- |
+| `/platform/summary/` | platform attention summary |
+| `/platform/organizations/` | organization review/state management |
+| `/platform/users/` | platform user lookup/list |
+
+### Shared layer
+
+Current shared UI files include:
+
+- `src/components/ui/button.tsx`
+- `src/components/ui/fields.tsx`
+- `src/components/ui/badge.tsx`
+- `src/components/ui/card.tsx`
+- `src/components/ui/table.tsx`
+- `src/components/ui/dialog.tsx`
+- `src/components/ui/state-panel.tsx`
+- `src/components/ui/operational.tsx`
+- `src/components/layout/page-shell.tsx`
+- `src/components/layout/application-shell.tsx`
+- associated shared CSS modules and tests
+
+The feature layer currently contains **23 module CSS files**.
+
+### Token reality
+
+`src/app/globals.css` already has:
+
+- semantic surfaces
+- four text hierarchy levels
+- structural borders
+- campus identity tokens
+- semantic success/warning/danger/info tokens
+- focus/selection/overlay tokens
+- 4px spacing scale
+- radius scale
+- type scale
+- Noto Sans Thai
+- layout widths/gutters
+- customer/operational density tokens
+- control/touch target sizes
+- icon sizes
+- subtle overlay/shadow tokens
+- motion durations/easing
+- light and dark token sets
+
+A source scan of component/module CSS found only two direct `rgb(...)` utility literals outside the global token file. This is a strong token-adherence baseline.
+
+---
+
+## 4. Verified UI/UX Pro Max search record
+
+The following results were actually produced by the local tool:
+
+`python3 .agents/skills/ui-ux-pro-max/scripts/search.py`
+
+No database result is claimed unless listed below.
+
+### 4.1 System-level search
+
+Query:
+
+`"thai campus marketplace preorder operations" --design-system --variance 6 --motion 3 --density 7 -p "UniStore Hub"`
+
+Returned:
+
+- variance **6/10**
+- motion **3/10**
+- density **7/10**
+- pattern: **Hero + Testimonials + CTA**
+- style: **Minimalism**
+- candidate palette: purple + green marketplace palette
+- typography: **Noto Sans Thai / Noto Sans Thai**
+- suggested subtle scroll reveal motion
+- checklist emphasizing focus, contrast, reduced motion, responsive checks
+
+Interpretation:
+
+- variance/motion/density are useful calibration
+- Noto Sans Thai is a strong product fit
+- Minimalism is compatible with the operational product
+- the testimonial pattern is **not supported by UniStore Hub data** and must not be copied
+- scroll-reveal/GSAP is unnecessary unless a specific customer-facing interaction benefits from it
+- purple/green is a candidate, not an automatic replacement for the existing teal identity
+
+### 4.2 Product search
+
+Query:
+
+`"campus marketplace preorder ecommerce" --domain product -n 4`
+
+Returned relevant matches:
+
+- E-commerce
+- Marketplace (P2P)
+
+Common recommendations:
+
+- stronger commerce identity
+- category/product hierarchy
+- success/transaction color semantics
+- sales/e-commerce information patterns
+
+Interpretation:
+
+The product does have e-commerce/marketplace behavior, but it is not a generic P2P marketplace. Organization/store/campaign structure and preorder lifecycle remain more important than copying marketplace conventions blindly.
+
+### 4.3 Style search
+
+Initial query:
+
+`"clean trustworthy campus marketplace" --domain style`
+
+returned **0 results**.
+
+Per skill contract, one narrower retry was made:
+
+`"minimalism marketplace" --domain style -n 5`
+
+Returned:
+
+- **Minimalism & Swiss Style**
+- clean, functional, grid-based
+- strong hierarchy
+- subtle motion
+- low performance cost
+- explicit focus/contrast/reduced-motion requirements
+
+Interpretation:
+
+Adopt the clarity, restraint, grid discipline, and hierarchy. Do not copy the search result's literal zero-radius/black-white defaults because they conflict with the existing Thai-friendly product language and current interface system.
+
+### 4.4 Typography search
+
+Query:
+
+`"thai modern readable ecommerce" --domain typography -n 4`
+
+Top result:
+
+- **Thai Modern**
+- heading: Noto Sans Thai
+- body: Noto Sans Thai
+- keywords: Thai, modern, readable, clean, multilingual, accessible
+
+Interpretation:
+
+**Adopt.** The current font choice is independently supported by the dataset. No Latin-first font replacement is justified.
+
+### 4.5 Color search
+
+Query:
+
+`"campus ecommerce trust marketplace" --domain color -n 4`
+
+Relevant results:
+
+- Marketplace (P2P): purple primary + green accent
+- E-commerce: green primary + orange accent
+
+Interpretation:
+
+These are **reference candidates only**. The current deep teal-green identity is already coherent with campus commerce, transaction trust, dark mode, and semantic states. Phase 2 should compare these options rather than replacing the palette mechanically.
+
+### 4.6 Forms and error recovery
+
+Query:
+
+`"mobile ecommerce checkout form validation error feedback" --domain ux -n 5`
+
+Relevant returned guidance:
+
+- submit feedback: loading -> success/error
+- focusable error summary for failed validation
+- retain inline field errors
+- provide recovery actions
+- avoid silent failures
+
+Interpretation:
+
+Adopt for order creation, auth, settings, product/campaign management, payment upload, and other long forms where multiple errors may exist.
+
+### 4.7 Operational async state
+
+Query:
+
+`"dense operational dashboard queue status next action" --domain ux -n 5`
+
+Returned relevant guidance:
+
+- submit feedback is high severity
+- asynchronous badge/count updates should announce meaningful contextual status rather than bare numbers
+
+Interpretation:
+
+Operational counts and queue refreshes should not create noisy competing live regions. Announce meaningful contextual updates only where an async change affects task understanding.
+
+### 4.8 Focus / overlays
+
+Query:
+
+`"focus not obscured" --domain ux -n 4`
+
+Returned:
+
+- Focus Not Obscured (Minimum), WCAG 2.2 AA
+- Focus Not Obscured (Enhanced), AAA
+- visible focus states
+- focus appearance guidance
+
+Interpretation:
+
+Adopt. Sticky navigation, mobile drawers, dialogs, action bars, and long forms must not cover the focused control. The current mobile drawer already contains focus trapping/return logic and breakpoint cleanup tests; retain this behavior during visual redesign.
+
+### 4.9 Touch targets
+
+Query:
+
+`"touch target mobile navigation" --domain ux -n 4`
+
+Returned:
+
+- platform-specific touch target guidance
+- web should follow the WCAG target-size rule rather than blindly using native platform units
+- adequate spacing between adjacent touch controls
+- increase target sizes for mobile layouts
+
+Interpretation:
+
+Keep the existing 40/44px control tokens as the product comfort baseline, while preserving WCAG minimum behavior and spacing. Do not shrink operational controls merely to increase density.
+
+### 4.10 Commerce icon search
+
+Query:
+
+`"commerce order payment pickup" --domain icons -n 5`
+
+Returned Phosphor examples including:
+
+- credit-card
+- tag
+- gift
+- percent
+- shopping-cart
+
+Interpretation:
+
+The useful rule is **consistent real iconography with correct accessible context**. Not every returned icon is relevant. Gift/percent should not appear unless actual product semantics require them.
+
+### 4.11 Next.js stack search
+
+Query:
+
+`"static export responsive navigation forms images" --stack nextjs`
+
+Returned:
+
+- use `next/link` for internal navigation
+- responsive image guidance
+- select rendering strategy deliberately
+- use metadata API for static metadata
+
+Interpretation:
+
+- retain `next/link` for internal navigation
+- preserve static-export architecture regardless of generic rendering recommendations
+- do not convert backend pre-signed/short-lived image display flows merely to satisfy generic image guidance without checking compatibility
+- do not introduce Server Actions or runtime server assumptions that conflict with the project API/static-export contract
+
+---
+
+## 5. Current design-review baseline
+
+This is a **source-backed provisional score**, not a rendered browser score.
+
+| Dimension | Weight | Baseline | Evidence / concern |
 | --- | ---: | ---: | --- |
-| Visual hierarchy | 20% | 6/10 | hierarchy exists, but many screens still repeat heading + summary + bordered sections |
-| Consistency | 20% | 7/10 | shared tokens/primitives are strong, but 25 feature CSS modules still recreate similar page structures |
-| Accessibility | 20% | 7/10 | good focus/semantic/reduced-motion foundation; browser contrast, zoom, and target-size validation remains |
-| Usability | 20% | 6/10 | functional state is present, but operational pages can make filters/metadata/actions compete |
-| Responsiveness | 10% | 6/10 | breakpoints exist, but dense list/detail behavior and mobile text/control sizing need a dedicated redesign |
-| Performance | 10% | 7/10 | no obvious source-level redesign blocker; perceived loading/layout stability still needs runtime testing |
+| Visual hierarchy | 20% | 7/10 | current redesign has clear task/state sections, but repeated kickers/rails/markers reduce distinctiveness |
+| Consistency | 20% | 8/10 | strong shared tokens and primitives; 23 feature CSS modules still contain repeated composition patterns |
+| Accessibility | 20% | 8/10 | focus, semantic states, reduced motion, dialog/drawer work are strong; full rendered contrast/target verification remains |
+| Usability | 20% | 7/10 | next actions are clearer than before, but operational information still sometimes competes at similar weight |
+| Responsiveness | 10% | 7/10 | responsive rules exist and drawer breakpoint regression is tested; full 320–1440 route review remains |
+| Performance | 10% | 7/10 | low-effect CSS system and static export are favorable; image/perceived-loading behavior still needs runtime review |
 
-Provisional weighted baseline: **6.5/10**.
+Weighted provisional baseline: **7.4/10**.
 
-The frontend is functionally organized, but the full redesign is justified because the current composition still reads as an incremental operational UI rather than one deliberately designed product system.
+The redesign v2 should therefore be a refinement and system correction, not a destructive rewrite.
 
-## 5. Highest-priority findings
+---
 
-| Severity | Finding | Full-redesign response |
+## 6. Code-backed findings
+
+### Finding A — decorative kicker language is overused
+
+Source scan found **42** occurrences of classes such as:
+
+- `pageKicker`
+- `sectionKicker`
+- `panelKicker`
+- `workspaceKicker`
+
+Many are meaningful, but some repeat information already present in the heading.
+
+Risk:
+
+- creates the exact "label above every heading" template rhythm warned about by `frontend-design` and the anti-slop skill
+- makes unrelated screens feel generated from one shell
+
+Direction:
+
+- keep only kickers that communicate scope/state/context not already obvious from the heading
+- remove decorative or redundant labels
+- vary hierarchy by page archetype rather than repeating kicker -> heading -> description everywhere
+
+Severity: **Major**
+
+### Finding B — ledger/edge-marker idea has spread beyond its intended role
+
+The canonical system defines a ledger rail as a signature state/task device. Source inspection shows many `::before` row/status markers and several explicit left-edge treatments.
+
+Risk:
+
+- the signature loses meaning when applied to many rows, cards, alerts, and contexts
+- repeated colored/edge strips can read as an AI-generated callout pattern
+
+Direction:
+
+- retain the **concept** of authoritative state anchoring
+- restrict it to the primary state/task context
+- use selection, row density, typography, and semantic status components elsewhere instead of repeated edge strips
+
+Severity: **Major**
+
+### Finding C — text arrows/checkmarks are being used as icon-like UI chrome
+
+Source scan found **6** occurrences of symbols such as `→` and `✓` in TSX.
+
+Risk:
+
+- inconsistent rendering and visual weight
+- anti-template guidance explicitly discourages arrows appended for style
+- completion marks should use a consistent icon or semantic marker when iconography is warranted
+
+Direction:
+
+- remove decorative arrows from auth entry links
+- replace icon-like check glyphs with a shared accessible visual primitive or a CSS/SVG marker if it materially improves comprehension
+- do not add an icon dependency unless shared use justifies it
+
+Severity: **Minor / consistency**
+
+### Finding D — current typography is already the strongest verified match
+
+Current frontend uses Noto Sans Thai. The verified typography search independently ranked Noto Sans Thai first for Thai modern/readable UI.
+
+Direction:
+
+- keep Noto Sans Thai
+- improve hierarchy through size, weight, measure, and spacing rather than changing font
+- preserve machine/reference monospace only for genuine IDs/tokens
+
+Severity: **Adopt / no corrective change required**
+
+### Finding E — generic marketplace color output should not replace the current identity automatically
+
+The skill suggests purple/green for Marketplace and green/orange for E-commerce. The current system uses deep teal-green with restrained semantic colors.
+
+Risk of blind adoption:
+
+- turns UniStore Hub into a generic marketplace visual
+- forces large cross-theme rework without a product-specific reason
+- may blur semantic green usage if brand and success are too close
+
+Direction for Phase 2:
+
+Compare three candidates:
+
+1. current teal identity refined
+2. purple trust primary + transaction green accent
+3. green commerce primary + restrained warm accent
+
+Choose based on:
+
+- Thai readability
+- light/dark contrast
+- distinction between brand and semantic success
+- customer/operations cohesion
+- product specificity
+- actual component state behavior
+
+Severity: **Design decision required**
+
+### Finding F — generic testimonial/social-proof pattern is unsupported
+
+The design-system search returned Hero + Testimonials + CTA.
+
+There is no current project source establishing verified testimonials, ratings, or public social proof.
+
+Direction:
+
+- reject testimonials/fake reviews
+- storefront landing should lead with real organizations/stores/campaigns/products and actual availability
+- any trust signal must come from real system state, not invented marketing content
+
+Severity: **Must reject**
+
+### Finding G — customer and operations density should diverge more deliberately
+
+The current system already has customer/operational density tokens, but many page structures still share similar header/panel language.
+
+Direction:
+
+- customer: more browseable content rhythm, product/store identity, larger reading landmarks
+- operations: tighter rows, compact task headers, filters subordinate to work, explicit state and next action
+
+Severity: **Major**
+
+### Finding H — form recovery can be improved beyond inline errors
+
+Existing fields have labels/hints/errors and file fields are shared. The verified UX search adds a stronger pattern for multi-error forms:
+
+- top-level focusable error summary after failed submit
+- links/focus to invalid fields
+- inline errors remain in place
+- clear recovery action
+
+Direction:
+
+Introduce the summary only where multiple independently invalid fields make it useful. Do not add it to simple one-field forms.
+
+Severity: **Major for complex forms**
+
+### Finding I — async status messaging should be contextual, not noisy
+
+Several screens contain counts, refresh actions, and queue state. The verified UX guidance warns against announcing bare changing numbers or making every badge a live region.
+
+Direction:
+
+- one meaningful status message per async operation
+- avoid multiple competing `aria-live` regions
+- announce what changed, not just a number
+
+Severity: **Major accessibility/usability refinement**
+
+### Finding J — Next.js recommendations must stay subordinate to static export and upload contracts
+
+The skill's Next.js dataset recommends modern navigation/image/rendering practices.
+
+Project constraints require:
+
+- static export
+- query-param identifiers
+- backend API authority
+- backend-issued pre-signed S3 uploads
+- short-lived/backend-issued image URLs where applicable
+
+Direction:
+
+Use stack guidance where compatible, but reject any recommendation that introduces server runtime assumptions or changes direct-upload/auth behavior.
+
+Severity: **Contract guardrail**
+
+---
+
+## 7. Prioritized redesign brief
+
+### P0 — protect contracts and accessibility while changing visuals
+
+1. Preserve route/API/auth/tenant/lifecycle/payment/pickup/static-export/direct-S3 behavior.
+2. Preserve keyboard/focus/dialog/drawer correctness.
+3. Maintain visible text/semantic status in addition to color.
+4. Keep Noto Sans Thai and mobile-readable form text.
+5. Do not invent testimonials, ratings, social proof, permissions, or state.
+
+### P1 — correct the design language
+
+1. Reduce decorative kicker repetition.
+2. Restrict ledger/edge marker treatment to authoritative task/state context.
+3. Replace symbol-as-icon chrome with a consistent semantic visual approach.
+4. Make storefront composition more commerce-specific without becoming a generic marketplace.
+5. Make operational surfaces more task-first and compact without shrinking targets.
+6. Reconcile palette from product evidence instead of adopting search output mechanically.
+
+### P2 — improve shared interaction patterns
+
+1. Add reusable complex-form error-summary behavior where appropriate.
+2. Standardize contextual async/live feedback.
+3. Refine filters, queue rows, selected-detail states, notices, status blocks, and destructive action hierarchy.
+4. Confirm responsive media and image behavior without breaking short-lived URL/static-export constraints.
+
+### P3 — route-specific composition
+
+Apply distinct archetypes instead of one repeated shell:
+
+- discovery index
+- commerce detail
+- customer transaction
+- operational queue
+- management workspace
+- read-only ledger
+- attention summary
+
+Each route should use the same material system but a composition appropriate to its task.
+
+---
+
+## 8. Adopt / adapt / reject matrix for Phase 2
+
+| Skill recommendation | Decision going into Phase 2 | Reason |
 | --- | --- | --- |
-| Major | Public, customer, and operations pages share too much of the same safe panel/header vocabulary | establish distinct page archetypes under one token/component language |
-| Major | Operational queues can give filters, summary counts, rows, detail metadata, and actions similar weight | introduce a workbench hierarchy: queue -> selected work -> authoritative state -> next action |
-| Major | Current shell is one structure for several mental contexts | keep one navigation authority but redesign presentation for customer vs organization/platform work |
-| Major | Customer lifecycle screens are separate pages but need stronger continuity | use one recognizable order journey/state language across order, payment, and pickup |
-| Major | Metric/card grids can still read as generic SaaS | urgent/actionable summaries become primary; supporting totals become compact secondary data |
-| Major | Feature CSS remains broad and repetitive | rebuild shared primitives before route work; page CSS should describe composition, not duplicate controls |
-| Major | Mobile-first constraints are not strong enough for a full product redesign | make 320/375px composition a first-class design target, not a final collapse of desktop |
-| Major | Global body text is currently 14px and form controls inherit it | Phase 2 must define mobile-safe typography/control sizing; avoid iOS input zoom and cramped touch layouts |
-| Major | Status is present but not always the dominant decision context | transactional/operational pages get one canonical current-state + next-action pattern |
-| Major | Storefront identity is still restrained enough to feel like an admin system with a hero | customer pages get a more recognizable marketplace rhythm while staying within the same system |
-| Minor | Dark-mode tokens exist, but redesign quality/contrast is not browser-verified | design both themes from the same semantic tokens and test them separately later |
-| Minor | Technical references appear in several local patterns | define one technical/reference value style and use only where scanning IDs/tokens benefits |
-| Minor | Long forms/filters can become tall on mobile | use grouping/progressive disclosure where behavior allows it |
-| Minor | Navigation is role-aware but visual hierarchy can be more adaptive | preserve exact item authority while changing grouping/presentation only |
-
-## 6. UI/UX Pro Max rules adopted for this redesign
-
-Because only the Markdown portion is installed, these are direct rule selections from the vendored reference, **not database-search results**.
-
-### Critical
-
-- semantic labels and visible focus
-- keyboard order matches visual order
-- status is never color-only
-- form errors remain specific and connected to fields
-- primary interactions do not depend on hover
-- pending actions disable and communicate progress
-- destructive actions use confirmation and clear spatial separation
-- sticky/fixed UI must never obscure focused controls
-
-### Layout / responsive
-
-- mobile-first composition
-- systematic breakpoint behavior, with explicit checks around 320/375, 768, 1024, and 1440 widths
-- no page-level horizontal overflow on mobile
-- core content precedes secondary metadata on small screens
-- fixed/sticky UI reserves space for content
-- no nested scroll region unless the task genuinely requires one
-- predictable back/context behavior when desktop split views collapse
-
-### Navigation
-
-- large-screen operations may use a sidebar
-- small-screen primary navigation must remain discoverable without reproducing a desktop sidebar horizontally
-- active location must be explicit
-- top-level and secondary navigation must not compete at the same hierarchy level
-- deep pages retain a clear path back to the relevant queue/list
-
-### Forms / feedback
-
-- visible labels; placeholder is not a label
-- error cause + recovery guidance
-- first invalid field/error summary focus behavior
-- read-only differs from disabled
-- complex options use progressive disclosure
-- success/error feedback must describe the action that just completed
-
-## 7. New visual direction
-
-Working direction name: **Campus Commerce Workbench**.
-
-This is a manual design direction derived from the product domain and installed Markdown guidance. No UI/UX Pro Max search/database output is claimed.
-
-### Product character
-
-- modern, calm, precise
-- campus-specific without relying on decorative university clichés
-- customer surfaces feel browsable and welcoming
-- operational surfaces feel like a fast service counter / ledger workbench
-- important state is physical and legible: marker, label, reference, action
-- visual identity comes from composition and rhythm, not gradients or decorative effects
-
-### Design dials
-
-- visual variance: **5/10** — recognizable, not eccentric
-- motion: **3/10** — mostly direct state feedback
-- customer density: **4/10**
-- operational density: **8/10**
-
-These dials are design intent only; they were not generated by the absent upstream search script.
-
-### Signature interaction/visual language
-
-Use a **ledger rail** as the signature device:
-
-- a restrained vertical/edge marker identifies the authoritative task/state
-- adjacent content shows the state in plain language
-- the minimum identifying references sit directly below/beside it
-- the next valid action is spatially tied to the state
-- secondary metadata falls away into quieter rows/details
-
-The rail is functional context, not a repeated decoration on every section.
-
-## 8. Page archetypes
-
-Do not create one template and apply it 28 times.
-
-### A. Marketplace index
-For `/`, store discovery.
-
-Structure:
-`identity/context -> discovery/list -> organization grouping -> store entry`
-
-### B. Commerce detail
-For store/product/campaign.
-
-Structure:
-`identity -> availability/status -> core content/options -> related commerce action`
-
-### C. Customer transaction
-For order/payment/pickup.
-
-Structure:
-`journey/current state -> next action -> transaction detail -> references/history`
-
-### D. Operational queue
-For orders/payments/pickups.
-
-Desktop:
-`task header -> compact filter row -> queue/list | selected detail/action rail`
-
-Mobile:
-`task header -> active filters -> queue -> explicit detail screen/context`
-
-### E. Management workspace
-For staff/stores/products/campaigns/settings.
-
-Structure:
-`context -> current entities/config -> edit/create task -> supporting state`
-
-### F. Read-only ledger
-For audit and mostly-read platform data.
-
-Structure:
-`scope -> compact filter/search -> dense readable records -> inspect metadata`
-
-### G. Attention summary
-For organization/platform dashboards.
-
-Structure:
-`needs attention -> active workload/state distribution -> supporting totals`
-
-No equal-weight metric wall.
-
-## 9. Customer vs operational styling contract
-
-### Customer
-
-- more whitespace and larger content landmarks
-- stronger store/product/campaign identity
-- 16px-class comfortable reading on small screens
-- imagery/content may lead where real assets exist
-- transaction state remains explicit and non-promotional
-- primary CTA easy to find without sticky obstruction
-
-### Staff / Admin
-
-- compact task headers
-- dense rows/tables where appropriate
-- status/reference alignment optimized for scanning
-- filters visually subordinate to the work
-- one primary task action
-- destructive action separated
-- technical IDs available but not visually dominant
-- fewer decorative surfaces and less motion
-
-### Platform Admin
-
-Same workbench grammar, with an explicit platform-scope context treatment so platform authority cannot be confused with organization membership.
-
-## 10. Navigation direction
-
-Preserve the exact navigation authority from `src/modules/auth/navigation.ts`.
-
-### Desktop
-
-- persistent workbench sidebar for authenticated operational contexts
-- organization/platform scope clearly visible above task groups
-- active destination uses shape/marker/weight, not color alone
-- customer group remains distinct from organization/platform task groups
-
-### Mobile
-
-- compact top app bar + deliberate menu/drawer/sheet pattern
-- current area/page remains visible when menu is closed
-- no horizontally scrolling full navigation taxonomy
-- menu closes on route choice and Escape where applicable
-- deep operational detail retains a clear queue/back context
-
-No permission logic changes are needed.
-
-## 11. Responsive contract
-
-Every route must eventually be reviewed at:
-
-- 320px minimum
-- 375px phone
-- 768px tablet
-- 1024px laptop/tablet landscape
-- 1440px desktop
-
-Required invariants:
-
-- no avoidable page-level horizontal overflow
-- no primary action clipped by viewport
-- no dialog taller than viewport without internal body scrolling and fixed/visible controls
-- no input/control rendered too small for practical touch use
-- tables use containment or a task-appropriate mobile alternative
-- long IDs wrap safely
-- action groups wrap/recompose instead of shrinking unreadably
-- list/detail desktop layouts turn into an explicit sequence on mobile
-- sticky UI does not hide focused fields or bottom actions
-
-## 12. Design-system changes reserved for Phase 2
-
-Phase 2 must turn this direction into one canonical token system. It should specifically review:
-
-- type scale, including mobile body/form sizing
-- content widths and adaptive gutters
-- surface hierarchy
-- border/elevation strategy
-- campus accent and semantic states
-- dark-mode pairings
-- one icon family/style and icon size tokens
-- z-index layers
-- motion tokens
-- responsive breakpoints
-- customer vs operational density aliases
-- ledger-rail tokens/pattern
-- interactive states and target sizing
-
-`.interface-design/system.md` should be rewritten to describe that new foundation rather than preserving outdated visual assumptions.
-
-## 13. Contract guardrails for all redesign phases
-
-The redesign may change markup/composition for UX/accessibility, but must preserve:
-
-- all API routes and DTO meanings
-- role and membership authority
-- Platform Admin from persisted `user.platformRole`
-- Backend-authoritative 401/403 behavior
-- query-parameter entity navigation/static-export model
-- exact Campaign/Order/Payment/Pickup transitions and allowed actions
-- customer pickup as presentation-only
-- organization Staff/Admin pickup confirmation
-- direct S3 presign -> direct PUT without JWT -> persist Backend-issued key
-- integer-satang price semantics
-- opaque cursors
-- notification events as signals, not replacement authority for current resource state
-
-## 14. Phase 1 exit decision
-
-The current frontend should **not** receive another cosmetic polish pass.
-
-The approved implementation direction is a full system redesign:
-
-1. rebuild tokens/design foundation
-2. rebuild shared primitives
-3. rebuild shell/navigation
-4. redesign each route according to its task archetype
-5. perform product-wide responsive and accessibility review
-6. run regression/static-export verification
-7. add real-user browser E2E only after the new visual baseline is accepted
-
-Phase 2 can start without changing any business contract.
+| Noto Sans Thai | **Adopt** | verified top Thai-readable match and already installed |
+| Minimalism / Swiss clarity | **Adapt** | use hierarchy/grid/restraint, not literal zero-radius black/white defaults |
+| Variance 6/10 | **Adapt** | useful anti-template target, but operations remain more restrained |
+| Motion 3/10 | **Adopt** | fits task-oriented product and reduced-motion goals |
+| Density 7/10 | **Adapt** | customer lower, operations higher |
+| Marketplace purple + green | **Evaluate** | candidate only; current teal may remain more product-specific |
+| E-commerce green + orange | **Evaluate** | candidate only; risk of semantic collisions |
+| Hero + Testimonials + CTA | **Reject as system pattern** | testimonials/social proof are unsupported; operational routes must not use marketing heroes |
+| subtle scroll reveal / GSAP | **Reject by default** | no task value sufficient to justify new motion dependency |
+| Phosphor commerce icons | **Adapt** | use consistent icon semantics only where needed; no dependency required unless reuse justifies it |
+| focusable error summary | **Adopt selectively** | useful for complex forms, unnecessary for trivial forms |
+| contextual live badge updates | **Adopt** | improves async queue/status clarity without noisy announcements |
+| touch-friendly controls | **Adopt** | matches current 40/44px baseline |
+| Next Link for internal nav | **Adopt / preserve** | already aligned |
+| generic Next image/rendering advice | **Adapt** | must respect static export and short-lived/pre-signed URL constraints |
+
+---
+
+## 9. Phase 2 handoff
+
+Phase 2 should update **only the canonical design direction** in `.interface-design/system.md`.
+
+It should not create a second design system.
+
+The Phase 2 decision must explicitly settle:
+
+1. final identity palette
+2. how the ledger/state signature survives without becoming a repeated edge-strip pattern
+3. where kickers are allowed and where they are removed
+4. shared icon strategy
+5. customer vs operational density and page archetypes
+6. motion policy
+7. complex form error-summary policy
+8. contextual live-region policy
+9. image/media guidance compatible with static export and backend URLs
+
+After that document is coherent, Phase 3 can safely change global tokens/foundations.
+
+
+---
+
+## 10. Phase 19 accessibility and anti-template audit
+
+This pass re-ran the local `a11y-audit`, `design-review`, `frontend-design`, and verified `ui-ux-pro-max` guidance against the redesigned frontend. It is a project verification pass, not a formal accessibility certification.
+
+### Verified guidance used
+
+Focused `ui-ux-pro-max` searches returned the following relevant requirements:
+
+- WCAG 2.2 focus-not-obscured behavior for sticky/fixed UI
+- visible focus on every operable control
+- native control semantics and meaningful accessible names
+- focusable error summaries after failed complex-form submission
+- contextual live status messaging instead of competing live regions
+- 4.5:1 normal-text contrast and 3:1 non-text/focus-state targets where applicable
+- no color-only state communication
+- accessible authentication compatible with password managers and copy/paste
+- responsive text reflow without clipping
+
+### P0/P1 fixes made in this pass
+
+1. **Shared field focus appearance** — the field-specific focus outline used a 32% translucent focus mix. It was replaced with a full `var(--focus)` 2px outline and 2px offset so the shared field treatment no longer weakens the global focus indicator.
+2. **Editable-control boundary contrast** — the light `--control-line` opacity moved from 48% to 52%. Against `--surface-inset`, the measured composed boundary is **3.31:1**.
+3. **Mobile drawer scrim semantics** — the close scrim no longer hides a button from the accessibility tree. It retains an accessible name and stays out of the normal Tab sequence; keyboard users retain the explicit close button and Escape behavior.
+4. **Authentication reading order** — login/register no longer auto-focus the first field on page load, allowing heading/context content to remain first in the normal reading and focus sequence. Autocomplete remains `email`, `current-password`, `name`, and `new-password` as appropriate.
+5. **Disabled password-toggle token** — replaced an undefined `--ink-disabled` reference with the defined `--ink-muted` semantic token.
+6. **Notification spoken label** — removed the remaining em-dash-style generated copy and now states the notification read state explicitly.
+
+### Measured contrast samples after fixes
+
+| Pair | Measured ratio |
+| --- | ---: |
+| light ink / canvas | 15.40:1 |
+| light secondary / canvas | 7.11:1 |
+| light tertiary / canvas | 5.81:1 |
+| light campus-on / campus | 6.43:1 |
+| light focus / surface | 6.02:1 |
+| light danger / danger-soft | 4.70:1 |
+| light control-line / inset control surface | 3.31:1 |
+| dark ink / canvas | 16.95:1 |
+| dark secondary / canvas | 11.75:1 |
+| dark tertiary / canvas | 7.41:1 |
+| dark campus-on / campus | 9.93:1 |
+| dark focus / surface | 10.53:1 |
+| dark danger / danger-soft | 6.58:1 |
+
+### Rendered browser audit
+
+A temporary Chrome/CDP audit checked the public entry/discovery routes at **320px** in both light and dark color schemes:
+
+- `/`
+- `/login/`
+- `/register/`
+- `/stores/view/`
+- `/products/view/`
+- `/campaigns/view/`
+- `/orders/new/`
+
+The rendered pass reported no page-level horizontal overflow, normal-text contrast failures, non-inline interactive targets below 24px, unnamed visible native controls, or heading-level skips on those rendered states. Protected operational routes remain covered by source/component tests because their full populated states require authenticated backend data.
+
+### Anti-template / consistency scan
+
+Post-pass source scan:
+
+- decorative kicker classes: **0**
+- decorative arrow/check/emoji UI glyphs: **0**
+- gradients: **0**
+- backdrop-filter glass effects: **0**
+- hardcoded component/module CSS colors outside `globals.css`: **0**
+- em/en dash UI copy occurrences: **0**
+- focusable elements hidden with `aria-hidden` in the scanned source pattern: **0**
+- undefined CSS variables: only `--info-line`, which is intentionally used with `var(--info-line, var(--line))` fallback
+
+### Post-redesign design-review score
+
+| Dimension | Weight | Score | Evidence |
+| --- | ---: | ---: | --- |
+| Visual hierarchy | 20% | 9/10 | customer and operational archetypes now diverge intentionally; state and next action are consistently prioritized |
+| Consistency | 20% | 9/10 | one token authority, shared primitives, no page-local hardcoded color system, repeated decorative kickers/rails removed |
+| Accessibility | 20% | 9/10 | labels, focus, error recovery, live status, target sizing, reduced motion, light/dark contrast checks, drawer/dialog behavior |
+| Usability | 20% | 9/10 | task-first queues, explicit authoritative state, safer confirmations, contextual recovery and filters |
+| Responsiveness | 10% | 9/10 | 320px+ composition, mobile action stacking, sticky-panel release, prior multi-width overflow audit plus Phase 19 rendered checks |
+| Performance | 10% | 8/10 | static export, low-effect CSS, no heavy motion/icon dependency; backend short-lived image URLs intentionally remain plain `img` where required |
+
+Weighted post-redesign review: **8.9/10**.
+
+### Remaining non-blocking verification boundary
+
+No unresolved blocking accessibility/design finding was found in this phase. A formal WCAG conformance claim would still require dedicated manual screen-reader/assistive-technology testing of authenticated populated workflows, which is outside this source/component verification pass.

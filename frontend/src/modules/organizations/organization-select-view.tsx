@@ -1,13 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 
 import {
   Badge,
   Button,
   EmptyState,
   ErrorState,
+  ErrorSummary,
   LoadingState,
   Notice,
   TextareaField,
@@ -79,6 +80,7 @@ export function OrganizationSelectView() {
   const [nameError, setNameError] = useState<string | undefined>();
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
+  const createErrorSummaryRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -161,6 +163,7 @@ export function OrganizationSelectView() {
     setSubmitError(null);
 
     if (!validation.valid) {
+      requestAnimationFrame(() => createErrorSummaryRef.current?.focus());
       return;
     }
 
@@ -207,7 +210,6 @@ export function OrganizationSelectView() {
       <main className={styles.main}>
         <header className={styles.workspaceHeader}>
           <div className={styles.headerCopy}>
-            <span className={styles.pageKicker}>เลือกขอบเขตงาน</span>
             <h1 className={styles.title}>เลือกหน่วยงานที่จะทำงาน</h1>
             <p className={styles.description}>
               สิทธิ์ของบัญชีอาจต่างกันในแต่ละหน่วยงาน เลือกพื้นที่ให้ถูกก่อนเริ่มงานเพื่อให้เมนูและข้อมูลอยู่ในบริบทเดียวกัน
@@ -215,7 +217,12 @@ export function OrganizationSelectView() {
           </div>
 
           {loadState.status === "success" ? (
-            <div className={styles.headerSummary} aria-label="จำนวนหน่วยงานที่เข้าถึงได้">
+            <div
+              className={styles.headerSummary}
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
+            >
               <span className={styles.headerSummaryLabel}>เข้าถึงได้</span>
               <strong data-numeric>{accessible.length}</strong>
               <span>หน่วยงาน</span>
@@ -236,7 +243,6 @@ export function OrganizationSelectView() {
           >
             <div className={styles.sectionHeading}>
               <div>
-                <span className={styles.sectionKicker}>พื้นที่ที่มีสิทธิ์</span>
                 <h2 className={styles.sectionTitle} id="organizations">
                   หน่วยงานของคุณ
                 </h2>
@@ -268,16 +274,12 @@ export function OrganizationSelectView() {
             ) : null}
 
             {loadState.status === "success" && accessible.length > 0 ? (
-              <div className={styles.organizationList}>
-                {accessible.map(({ organization, membership }, index) => (
-                  <article
+              <ul className={styles.organizationList}>
+                {accessible.map(({ organization, membership }) => (
+                  <li
                     className={styles.organizationRow}
                     key={organization.organizationId}
                   >
-                    <span className={styles.organizationIndex} data-numeric>
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-
                     <div className={styles.organizationCopy}>
                       <div className={styles.organizationHeading}>
                         <h3 className={styles.organizationName}>
@@ -313,6 +315,7 @@ export function OrganizationSelectView() {
 
                     <div className={styles.organizationAction}>
                       <Button
+                        aria-label={`เข้าใช้งาน ${organization.name}`}
                         onClick={() =>
                           handleSelect(
                             organization.organizationId,
@@ -323,15 +326,14 @@ export function OrganizationSelectView() {
                         เข้าใช้งาน
                       </Button>
                     </div>
-                  </article>
+                  </li>
                 ))}
-              </div>
+              </ul>
             ) : null}
           </section>
 
           <aside className={styles.createPanel} aria-labelledby="create-organization">
             <div className={styles.createPanelHeading}>
-              <span className={styles.panelKicker}>สร้างพื้นที่ใหม่</span>
               <h2 className={styles.sectionTitle} id="create-organization">
                 สร้างหน่วยงาน
               </h2>
@@ -340,7 +342,16 @@ export function OrganizationSelectView() {
               </p>
             </div>
 
-            <form className={styles.form} onSubmit={handleCreate}>
+            <form className={styles.form} onSubmit={handleCreate} noValidate>
+              <ErrorSummary
+                ref={createErrorSummaryRef}
+                id="organization-create-error-summary"
+                items={
+                  nameError
+                    ? [{ fieldId: "organization-name", message: nameError }]
+                    : []
+                }
+              />
               <TextField
                 id="organization-name"
                 label="ชื่อหน่วยงาน"
@@ -351,6 +362,14 @@ export function OrganizationSelectView() {
                   setSubmitError(null);
                 }}
                 error={nameError}
+                announceError={false}
+                onBlur={() => {
+                  const validation = validateOrganizationForm({
+                    name,
+                    description,
+                  });
+                  setNameError(validation.errors.name);
+                }}
                 required
                 disabled={creating}
               />

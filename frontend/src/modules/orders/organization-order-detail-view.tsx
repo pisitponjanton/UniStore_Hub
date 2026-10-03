@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import {
@@ -53,6 +54,7 @@ export function OrganizationOrderDetailView({
   });
   const [cancelPending, setCancelPending] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [actionSuccess, setActionSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -131,6 +133,7 @@ export function OrganizationOrderDetailView({
 
     setCancelPending(true);
     setActionError(null);
+    setActionSuccess(null);
 
     try {
       const cancelled =
@@ -143,6 +146,7 @@ export function OrganizationOrderDetailView({
         status: "success",
         order: cancelled,
       });
+      setActionSuccess("ยกเลิกคำสั่งซื้อแล้ว");
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();
@@ -197,9 +201,9 @@ export function OrganizationOrderDetailView({
               title="ไม่พบคำสั่งซื้อ"
               description="คำสั่งซื้อนี้ไม่มีอยู่ในหน่วยงาน หรือไม่สามารถเข้าถึงได้"
               actions={
-                <a href={organizationOrdersHref(organizationId)}>
+                <Link href={organizationOrdersHref(organizationId)}>
                   กลับรายการคำสั่งซื้อ
-                </a>
+                </Link>
               }
             />
           ) : null}
@@ -214,9 +218,9 @@ export function OrganizationOrderDetailView({
               title="ไม่สามารถโหลดคำสั่งซื้อได้"
               description="กรุณาลองโหลดหน้านี้ใหม่อีกครั้ง"
               actions={
-                <a href={organizationOrdersHref(organizationId)}>
+                <Link href={organizationOrdersHref(organizationId)}>
                   กลับรายการคำสั่งซื้อ
-                </a>
+                </Link>
               }
             />
           ) : null}
@@ -232,17 +236,16 @@ export function OrganizationOrderDetailView({
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <a
+        <Link
           href={organizationOrdersHref(organizationId)}
           className={styles.backLink}
         >
           กลับรายการคำสั่งซื้อ
-        </a>
+        </Link>
 
         <section className={styles.detailHero}>
           <div className={styles.detailTop}>
-            <div className={styles.detailTitleGroup} data-ledger-heading>
-              <span className={styles.pageKicker}>คำสั่งซื้อในหน่วยงาน</span>
+            <div className={styles.detailTitleGroup}>
               <h1 className={styles.title}>รายละเอียดคำสั่งซื้อ</h1>
               <span className={styles.orderCode}>
                 Order {order.orderId}
@@ -261,23 +264,23 @@ export function OrganizationOrderDetailView({
             </div>
             <div className={styles.summaryCell}>
               <span className={styles.summaryLabel}>ยอดรวม</span>
-              <span className={styles.summaryValue}>
+              <span className={styles.summaryValue} data-numeric>
                 {formatSatang(order.total)}
               </span>
             </div>
             <div className={styles.summaryCell}>
               <span className={styles.summaryLabel}>สร้างเมื่อ</span>
-              <span className={styles.summaryValue}>
+              <time className={styles.summaryValue} dateTime={order.createdAt}>
                 {formatIsoDateTime(order.createdAt)}
-              </span>
+              </time>
             </div>
             <div className={styles.summaryCell}>
               <span className={styles.summaryLabel}>
                 อัปเดตล่าสุด
               </span>
-              <span className={styles.summaryValue}>
+              <time className={styles.summaryValue} dateTime={order.updatedAt}>
                 {formatIsoDateTime(order.updatedAt)}
-              </span>
+              </time>
             </div>
           </div>
 
@@ -290,6 +293,12 @@ export function OrganizationOrderDetailView({
             </span>
           </div>
         </section>
+
+        {actionSuccess ? (
+          <Notice tone="success" role="status" title="อัปเดตคำสั่งซื้อแล้ว">
+            {actionSuccess}
+          </Notice>
+        ) : null}
 
         {actionError ? (
           <Notice tone="danger" role="alert" title="ดำเนินการไม่สำเร็จ">
@@ -335,7 +344,7 @@ export function OrganizationOrderDetailView({
                     {formatSatang(item.unitPrice)} × {item.quantity}
                   </div>
                 </div>
-                <div className={styles.itemTotal}>
+                <div className={styles.itemTotal} data-numeric>
                   {formatSatang(item.totalPrice)}
                 </div>
               </article>
@@ -351,22 +360,25 @@ export function OrganizationOrderDetailView({
             <span className={styles.summaryLabel}>
               ยอดสินค้า
             </span>
-            <span className={styles.summaryValue}>
+            <span className={styles.summaryValue} data-numeric>
               {formatSatang(order.subtotal)}
             </span>
           </div>
           <div className={styles.totalRow}>
             <strong>ยอดรวมที่ยืนยันแล้ว</strong>
-            <span className={styles.totalValue}>
+            <span className={styles.totalValue} data-numeric>
               {formatSatang(order.total)}
             </span>
           </div>
         </section>
 
         {isAdmin && !canCancel ? (
-          <div className={styles.adminNote}>
+          <aside
+            className={styles.adminNote}
+            aria-label="เงื่อนไขการยกเลิกคำสั่งซื้อ"
+          >
             ผู้ดูแลหน่วยงานยกเลิกคำสั่งซื้อได้เฉพาะสถานะ “รอชำระเงิน” หรือ “การชำระเงินถูกปฏิเสธ” เท่านั้น
-          </div>
+          </aside>
         ) : null}
 
         <div className={styles.actionBar}>

@@ -212,7 +212,7 @@ export function ApplicationShell({
           </button>
         </div>
 
-        <div className={styles.mobileCurrent} aria-live="polite">
+        <div className={styles.mobileCurrent} aria-label="ตำแหน่งปัจจุบัน">
           <span className={styles.mobileCurrentScope}>
             {scopeLabel[shellScope]}
           </span>
@@ -227,7 +227,6 @@ export function ApplicationShell({
             type="button"
             className={styles.mobileScrim}
             aria-label="ปิดแผงเมนู"
-            aria-hidden="true"
             tabIndex={-1}
             onClick={() => {
               closeMenu();
@@ -272,9 +271,6 @@ export function ApplicationShell({
 
           <div className={styles.sidebarBody}>
             <section className={styles.workspaceSummary} aria-label="ขอบเขตการใช้งาน">
-              <span className={styles.workspaceKicker}>
-                {scopeLabel[shellScope]}
-              </span>
               <strong className={styles.workspaceTitle}>
                 {activeNavigation?.group.label ?? scopeLabel[shellScope]}
               </strong>
@@ -283,7 +279,8 @@ export function ApplicationShell({
               </span>
               {contextValue ? (
                 <span className={styles.workspaceReference}>
-                  {contextLabel ?? "บริบทปัจจุบัน"} · {contextValue}
+                  <span>{contextLabel ?? "บริบทปัจจุบัน"}</span>
+                  <strong>{contextValue}</strong>
                 </span>
               ) : null}
             </section>
@@ -299,7 +296,6 @@ export function ApplicationShell({
                     key={group.label}
                   >
                     <div className={styles.groupHeading}>
-                      <span className={styles.groupMarker} aria-hidden="true" />
                       <h2 className={styles.groupLabel}>{group.label}</h2>
                     </div>
                     <ul className={styles.groupList}>
@@ -356,7 +352,14 @@ export function ApplicationShell({
                     เปลี่ยนหน่วยงาน
                   </Link>
                 ) : null}
-                <Button variant="quiet" size="small" onClick={onLogout}>
+                <Button
+                  variant="quiet"
+                  size="small"
+                  onClick={() => {
+                    closeMenu();
+                    onLogout();
+                  }}
+                >
                   ออกจากระบบ
                 </Button>
               </div>

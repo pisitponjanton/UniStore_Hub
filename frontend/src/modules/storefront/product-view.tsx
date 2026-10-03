@@ -236,6 +236,7 @@ export function ProductView() {
                 src={product.imageUrl}
                 alt={product.name}
                 className={styles.productDetailImage}
+                decoding="async"
               />
             ) : (
               <div className={styles.productDetailPlaceholder}>
@@ -246,7 +247,7 @@ export function ProductView() {
 
           <div className={styles.productDetailBody}>
             <div className={styles.heroCopy}>
-              <span className={styles.eyebrow}>สินค้าในร้าน {store.name}</span>
+              <span className={styles.contextLine}>สินค้าในร้าน {store.name}</span>
               <h1 className={styles.title}>{product.name}</h1>
               {product.description ? (
                 <p className={styles.description}>
@@ -263,10 +264,12 @@ export function ProductView() {
               <div className={styles.selectionPanel}>
                 <div className={styles.selectionHeading}>
                   <div>
-                    <span className={styles.eyebrow}>เตรียมคำสั่งซื้อ</span>
                     <h2 className={styles.selectionTitle}>
                       เลือกรายละเอียดที่ต้องการ
                     </h2>
+                    <p className={styles.selectionDescription}>
+                      เลือกตัวเลือก แคมเปญ และจำนวนก่อนดำเนินการสั่งซื้อ
+                    </p>
                   </div>
                   <span className={styles.selectionStep}>1 รายการสินค้า</span>
                 </div>
@@ -333,12 +336,18 @@ export function ProductView() {
 
                 <div className={styles.estimatePanel}>
                   <span className={styles.metaLabel}>ยอดประมาณการ</span>
-                  <strong className={styles.estimateValue} data-numeric>
+                  <output
+                    className={styles.estimateValue}
+                    htmlFor="product-variant product-campaign product-quantity"
+                    aria-live="polite"
+                    aria-atomic="true"
+                    data-numeric
+                  >
                     {selection?.estimate !== null &&
                     selection?.estimate !== undefined
                       ? formatSatang(selection.estimate)
                       : "ยังไม่คำนวณ"}
-                  </strong>
+                  </output>
                   <p className={styles.estimateNote}>
                     ยอดนี้คำนวณจากตัวเลือกและจำนวนที่เลือก
                     ยอดหลังสร้างคำสั่งซื้อเป็นยอดที่ใช้ดำเนินการจริง

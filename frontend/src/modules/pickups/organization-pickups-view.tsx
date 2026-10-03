@@ -124,6 +124,7 @@ export function OrganizationPickupsView({
     null,
   );
   const [notice, setNotice] = useState<string | null>(null);
+  const [listFeedback, setListFeedback] = useState<string | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -252,6 +253,9 @@ export function OrganizationPickupsView({
         pickups: result.items,
         nextCursor: result.nextCursor,
       });
+      setListFeedback(
+        `แสดง ${result.items.length.toLocaleString("th-TH")} รายการรับสินค้า${nextFilters.status ? ` · ${getPickupStatusLabel(nextFilters.status)}` : ""}`,
+      );
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();
@@ -290,6 +294,9 @@ export function OrganizationPickupsView({
         pickups: result.items,
         nextCursor: result.nextCursor,
       });
+      setListFeedback(
+        `แสดงรายการรับสินค้าทั้งหมดที่โหลด ${result.items.length.toLocaleString("th-TH")} รายการ`,
+      );
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();
@@ -327,11 +334,16 @@ export function OrganizationPickupsView({
           },
         );
 
+      const nextPickups = [...state.pickups, ...result.items];
+
       setState({
         status: "success",
-        pickups: [...state.pickups, ...result.items],
+        pickups: nextPickups,
         nextCursor: result.nextCursor,
       });
+      setListFeedback(
+        `โหลดเพิ่มเติมแล้ว ตอนนี้แสดง ${nextPickups.length.toLocaleString("th-TH")} รายการรับสินค้า`,
+      );
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();
@@ -499,8 +511,7 @@ export function OrganizationPickupsView({
     <div className={styles.page}>
       <main className={styles.main}>
         <header className={styles.header}>
-          <div className={styles.headerCopy} data-ledger-heading>
-            <span className={styles.pageKicker}>โต๊ะตรวจรับและส่งมอบสินค้า</span>
+          <div className={styles.headerCopy}>
             <h1 className={styles.title}>จุดรับสินค้า</h1>
             <p className={styles.description}>
               ค้นหาด้วย Token หรือ Order ID ตรวจข้อมูลที่เกี่ยวข้อง แล้วจึงยืนยันการรับสินค้า
@@ -571,6 +582,7 @@ export function OrganizationPickupsView({
           <form
             className={styles.filterForm}
             onSubmit={applyFilters}
+            aria-busy={filtering}
           >
             <div className={styles.filters}>
               <TextField
@@ -650,6 +662,17 @@ export function OrganizationPickupsView({
           </form>
         </section>
 
+        {listFeedback ? (
+          <p
+            className={styles.listFeedback}
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {listFeedback}
+          </p>
+        ) : null}
+
         {inlineError ? (
           <Notice tone="danger" role="alert" title="ดำเนินการไม่สำเร็จ">
             {inlineError}
@@ -707,6 +730,7 @@ export function OrganizationPickupsView({
                       data-attention={pickup.status === "READY" || undefined}
                       key={pickup.pickupId}
                       aria-current={isSelected ? "true" : undefined}
+                      aria-label={`Pickup ${pickup.pickupId} · ${getPickupStatusLabel(pickup.status)}`}
                     >
                       <div className={styles.rowMain}>
                         <div className={styles.rowHeading}>
@@ -725,15 +749,16 @@ export function OrganizationPickupsView({
                           <span className={styles.meta}>
                             Order: {pickup.orderId}
                           </span>
-                          <span className={styles.meta}>
+                          <time className={styles.meta} dateTime={pickup.updatedAt}>
                             อัปเดต {formatIsoDateTime(pickup.updatedAt)}
-                          </span>
+                          </time>
                         </div>
                       </div>
 
                       <div className={styles.cardActions}>
                         <Button
                           variant="secondary"
+                          aria-label={`${isSelected ? "กำลังดู" : "ดูรายละเอียด"} Pickup ${pickup.pickupId}`}
                           pending={
                             detailLoadingId === pickup.pickupId
                           }
@@ -821,58 +846,54 @@ export function OrganizationPickupsView({
                     />
                   </div>
 
-                  <div className={styles.orderSummary}>
+                  <dl className={styles.orderSummary}>
                     <div>
-                      <span className={styles.metaLabel}>ลูกค้า</span>
-                      <strong>{selected.order.customerId}</strong>
+                      <dt className={styles.metaLabel}>ลูกค้า</dt>
+                      <dd>{selected.order.customerId}</dd>
                     </div>
                     <div>
-                      <span className={styles.metaLabel}>แคมเปญ</span>
-                      <strong>{selected.order.campaignId}</strong>
+                      <dt className={styles.metaLabel}>แคมเปญ</dt>
+                      <dd>{selected.order.campaignId}</dd>
                     </div>
                     <div>
-                      <span className={styles.metaLabel}>ยอดรวม</span>
-                      <strong>{formatSatang(selected.order.total)}</strong>
+                      <dt className={styles.metaLabel}>ยอดรวม</dt>
+                      <dd data-numeric>{formatSatang(selected.order.total)}</dd>
                     </div>
-                  </div>
+                  </dl>
                 </section>
 
-                <div className={styles.metaGrid}>
+                <dl className={styles.metaGrid}>
                   <div className={styles.metaItem}>
-                    <span className={styles.metaLabel}>
-                      อัปเดต Pickup
-                    </span>
-                    <span className={styles.metaValue}>
-                      {formatIsoDateTime(
-                        selected.pickup.updatedAt,
-                      )}
-                    </span>
+                    <dt className={styles.metaLabel}>อัปเดต Pickup</dt>
+                    <dd className={styles.metaValue}>
+                      <time dateTime={selected.pickup.updatedAt}>
+                        {formatIsoDateTime(selected.pickup.updatedAt)}
+                      </time>
+                    </dd>
                   </div>
                   <div className={styles.metaItem}>
-                    <span className={styles.metaLabel}>
-                      รับโดย User ID
-                    </span>
-                    <span className={styles.metaValue}>
+                    <dt className={styles.metaLabel}>รับโดย User ID</dt>
+                    <dd className={styles.metaValue}>
                       {selected.pickup.receivedBy ??
                         "ยังไม่ได้รับสินค้า"}
-                    </span>
+                    </dd>
                   </div>
                   <div className={styles.metaItem}>
-                    <span className={styles.metaLabel}>
-                      เวลารับสินค้า
-                    </span>
-                    <span className={styles.metaValue}>
-                      {selected.pickup.receivedAt
-                        ? formatIsoDateTime(
-                            selected.pickup.receivedAt,
-                          )
-                        : "ยังไม่ได้รับสินค้า"}
-                    </span>
+                    <dt className={styles.metaLabel}>เวลารับสินค้า</dt>
+                    <dd className={styles.metaValue}>
+                      {selected.pickup.receivedAt ? (
+                        <time dateTime={selected.pickup.receivedAt}>
+                          {formatIsoDateTime(selected.pickup.receivedAt)}
+                        </time>
+                      ) : (
+                        "ยังไม่ได้รับสินค้า"
+                      )}
+                    </dd>
                   </div>
-                </div>
+                </dl>
 
                 {selected.pickup.status === "RECEIVED" ? (
-                  <Notice tone="success" role="status" title="รับสินค้าแล้ว">
+                  <Notice tone="success" title="รับสินค้าแล้ว">
                     Pickup นี้รับสินค้าเรียบร้อยแล้ว
                     {selected.pickup.receivedAt
                       ? " เมื่อ " +

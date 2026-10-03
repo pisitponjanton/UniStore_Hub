@@ -69,6 +69,16 @@ describe("PlatformUsersView", () => {
     expect(
       screen.getByText("รายการนี้เป็น read-only"),
     ).toBeInTheDocument();
+    expect(
+      screen.getByLabelText("ขอบเขตสิทธิ์ Platform Admin"),
+    ).toHaveTextContent("รายการผู้ใช้ระดับ Platform แบบอ่านอย่างเดียว");
+
+    const times = document.querySelectorAll("time");
+    expect(times).toHaveLength(4);
+    expect(times[0]).toHaveAttribute(
+      "datetime",
+      "2026-09-30T01:00:00.000Z",
+    );
 
     expect(mocks.listUsers).toHaveBeenCalledWith({
       signal: expect.any(AbortSignal),

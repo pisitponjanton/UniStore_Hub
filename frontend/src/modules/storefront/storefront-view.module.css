@@ -8,8 +8,7 @@
   z-index: var(--z-navigation);
   top: 0;
   border-bottom: 1px solid var(--line-soft);
-  background: color-mix(in srgb, var(--surface) 95%, transparent);
-  backdrop-filter: blur(14px);
+  background: var(--surface);
 }
 
 .topbarInner {
@@ -123,21 +122,37 @@
 
 .topbarHome:hover,
 .topbarLink:hover {
-  background: var(--surface-muted);
+  background: var(--surface-hover);
   color: var(--ink);
   text-decoration: none;
+}
+
+.topbarHome:active,
+.topbarLink:active {
+  background: var(--surface-selected);
+}
+
+.topbarLinkActive {
+  background: var(--campus-soft);
+  color: var(--campus-strong);
+  box-shadow: inset 0 -2px 0 var(--campus);
+  font-weight: 700;
 }
 
 .topbarPrimary {
   margin-left: var(--space-1);
   background: var(--campus);
-  color: var(--ink-inverse);
+  color: var(--campus-on);
   box-shadow: var(--shadow-subtle);
 }
 
 .topbarPrimary:hover {
   background: var(--campus-hover);
   text-decoration: none;
+}
+
+.topbarPrimary:active {
+  filter: brightness(0.96);
 }
 
 .topbarSessionStatus {
@@ -173,9 +188,13 @@
 }
 
 .backLink::before {
-  content: "←";
+  content: "";
+  width: 8px;
+  height: 8px;
   margin-right: var(--space-2);
-  font-size: 0.95em;
+  border-left: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
 }
 
 .hero {
@@ -193,11 +212,11 @@
   gap: var(--space-3);
 }
 
-.eyebrow {
+.contextLine {
   width: fit-content;
-  color: var(--campus);
+  color: var(--ink-tertiary);
   font-size: var(--text-body-sm);
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .title {
@@ -216,6 +235,7 @@
 }
 
 .heroMeta {
+  margin: 0;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   border-top: 1px solid var(--line-strong);
@@ -226,12 +246,12 @@
   display: grid;
   align-content: start;
   gap: var(--space-1);
-  padding: var(--space-4) 0 var(--space-4) var(--space-4);
+  padding: var(--space-4);
   border-bottom: 1px solid var(--line-soft);
 }
 
-.heroMeta > div:nth-child(odd) {
-  border-left: 3px solid var(--campus);
+.heroMeta > div + div {
+  border-left: 1px solid var(--line-soft);
 }
 
 .campaignStatusPanel {
@@ -240,8 +260,8 @@
   padding: var(--space-5);
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
-  background: var(--surface);
-  box-shadow: var(--shadow-subtle);
+  background: var(--surface-raised);
+  box-shadow: none;
 }
 
 .campaignStatusTop {
@@ -257,6 +277,7 @@
 }
 
 .campaignFacts {
+  margin: 0;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   border-top: 1px solid var(--line-soft);
@@ -269,9 +290,11 @@
   padding-top: var(--space-3);
 }
 
-.campaignFacts strong {
+.campaignFacts dd {
+  margin: 0;
   color: var(--ink);
   font-size: var(--text-body);
+  font-weight: 650;
   overflow-wrap: anywhere;
 }
 
@@ -282,6 +305,7 @@
 }
 
 .metaValue {
+  margin: 0;
   color: var(--ink);
   font-weight: 650;
   overflow-wrap: anywhere;
@@ -323,7 +347,6 @@
 }
 
 .campaignCard {
-  position: relative;
   min-width: 0;
   display: grid;
   gap: var(--space-4);
@@ -332,21 +355,9 @@
   border-radius: var(--radius-lg);
   background: var(--surface);
   color: var(--ink);
-  box-shadow: var(--shadow-subtle);
-  overflow: hidden;
   transition:
-    transform var(--motion-fast) var(--motion-ease-out),
-    border-color var(--motion-fast) var(--motion-ease-out),
-    box-shadow var(--motion-fast) var(--motion-ease-out);
-}
-
-.campaignCard::before {
-  content: "";
-  position: absolute;
-  inset-block: 0;
-  inset-inline-start: 0;
-  width: 4px;
-  background: var(--campus);
+    background-color var(--motion-fast) var(--motion-ease-out),
+    border-color var(--motion-fast) var(--motion-ease-out);
 }
 
 .productCard {
@@ -360,17 +371,20 @@
   background: var(--surface);
   color: var(--ink);
   transition:
-    transform var(--motion-fast) var(--motion-ease-out),
-    border-color var(--motion-fast) var(--motion-ease-out),
-    box-shadow var(--motion-fast) var(--motion-ease-out);
+    background-color var(--motion-fast) var(--motion-ease-out),
+    border-color var(--motion-fast) var(--motion-ease-out);
 }
 
 .campaignCard:hover,
 .productCard:hover {
-  transform: translateY(-2px);
   border-color: var(--line-strong);
-  box-shadow: var(--shadow-subtle);
+  background: var(--surface-hover);
   text-decoration: none;
+}
+
+.campaignCard:active,
+.productCard:active {
+  background: var(--surface-selected);
 }
 .cardHeader {
   min-width: 0;
@@ -387,16 +401,10 @@
   gap: var(--space-1);
 }
 
-.campaignType,
-.productType,
 .priceLabel {
   color: var(--ink-tertiary);
   font-size: var(--text-caption);
   font-weight: 600;
-}
-
-.campaignType {
-  color: var(--campus);
 }
 
 .cardTitle {
@@ -440,10 +448,6 @@
   font-weight: 700;
 }
 
-.cardAction::after {
-  content: "→";
-  margin-left: var(--space-2);
-}
 
 .campaignCardFooter {
   margin-top: auto;
@@ -468,19 +472,13 @@
   aspect-ratio: 4 / 3;
   overflow: hidden;
   border-radius: calc(var(--radius-lg) - 3px);
-  background:
-    linear-gradient(135deg, var(--surface-muted), var(--surface-inset));
+  background: var(--surface-inset);
 }
 
 .productImage {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform var(--motion-slow) var(--motion-ease-out);
-}
-
-.productCard:hover .productImage {
-  transform: scale(1.025);
 }
 
 .productPlaceholder {
@@ -513,6 +511,13 @@
   font-size: var(--text-caption);
 }
 
+.productAvailability {
+  display: block;
+  margin-top: 2px;
+  color: var(--ink-tertiary);
+  font-size: var(--text-caption);
+}
+
 .emptyBox {
   min-height: 144px;
   display: grid;
@@ -526,6 +531,9 @@
 }
 
 .timeline {
+  margin: 0;
+  padding: 0;
+  list-style: none;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   border-top: 1px solid var(--line-strong);
@@ -577,9 +585,8 @@
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: var(--radius-xl);
-  background:
-    linear-gradient(135deg, var(--surface-muted), var(--surface-inset));
-  box-shadow: var(--shadow-subtle);
+  background: var(--surface-inset);
+  box-shadow: none;
 }
 
 .productDetailImage {
@@ -615,7 +622,7 @@
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   background: var(--surface);
-  box-shadow: var(--shadow-subtle);
+  box-shadow: none;
 }
 
 .selectionHeading {
@@ -634,6 +641,13 @@
 
 .selectionTitle {
   font-size: var(--text-title-sm);
+}
+
+.selectionDescription {
+  max-width: 54ch;
+  color: var(--ink-tertiary);
+  font-size: var(--text-body-sm);
+  line-height: 1.5;
 }
 
 .selectionStep {
@@ -711,7 +725,7 @@
 
 .primaryAction {
   background: var(--campus);
-  color: var(--ink-inverse);
+  color: var(--campus-on);
   box-shadow: var(--shadow-subtle);
 }
 
@@ -853,8 +867,8 @@
   }
 
   .heroMeta > div,
-  .heroMeta > div:nth-child(odd) {
-    border-left: 3px solid var(--campus);
+  .heroMeta > div + div {
+    border-left: 0;
   }
 
   .timelineItem,

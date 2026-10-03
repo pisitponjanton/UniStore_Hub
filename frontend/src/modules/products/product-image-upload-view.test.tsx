@@ -115,6 +115,40 @@ describe("ProductImageUploadView", () => {
     ).toBeDisabled();
   });
 
+  it("shows contextual multi-step progress while preparing a direct upload", async () => {
+    mocks.requestImageUploadUrl.mockImplementation(
+      () => new Promise<never>(() => undefined),
+    );
+
+    render(
+      <ProductImageUploadView
+        organizationId="org-1"
+        product={product}
+        onProductRefreshed={vi.fn()}
+      />,
+    );
+
+    selectFile(
+      new File(["png"], "shirt.png", {
+        type: "image/png",
+      }),
+    );
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "อัปโหลดรูปสินค้า",
+      }),
+    );
+
+    const statuses = await screen.findAllByRole("status");
+    expect(
+      statuses.some(
+        (item) => item.textContent === "กำลังเตรียมการอัปโหลด",
+      ),
+    ).toBe(true);
+    expect(screen.getByText("กำลังดำเนินการ")).toBeInTheDocument();
+    expect(screen.getAllByText("รอดำเนินการ")).toHaveLength(3);
+  });
+
   it("requests a presign, PUTs directly to S3, persists imageKey, and refreshes Product data", async () => {
     const upload = signedUpload(
       "products/org-1/product-1/image-1",

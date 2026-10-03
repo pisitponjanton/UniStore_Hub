@@ -102,8 +102,7 @@ export function CampaignCard({
     >
       <div className={styles.cardHeader}>
         <div className={styles.campaignIdentity}>
-          <span className={styles.campaignType}>รอบพรีออเดอร์</span>
-          <h3 className={styles.cardTitle}>{campaign.name}</h3>
+                    <h3 className={styles.cardTitle}>{campaign.name}</h3>
         </div>
         <CampaignStatusBadge status={campaign.status} />
       </div>
@@ -151,6 +150,9 @@ export function ProductCard({
   product: StorefrontProductDTO;
   campaignId?: string;
 }) {
+  const activeVariantCount = (product.variants ?? []).filter(
+    (variant) => variant.status === "ACTIVE",
+  ).length;
   const price = productPrice(product);
 
   return (
@@ -168,8 +170,10 @@ export function ProductCard({
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={product.imageUrl}
-            alt=""
+            alt={product.name}
             className={styles.productImage}
+            loading="lazy"
+            decoding="async"
           />
         ) : (
           <div className={styles.productPlaceholder}>ยังไม่มีรูปสินค้า</div>
@@ -177,22 +181,28 @@ export function ProductCard({
       </div>
 
       <div className={styles.productIdentity}>
-        <span className={styles.productType}>สินค้า</span>
-        <h3 className={styles.cardTitle}>{product.name}</h3>
+                <h3 className={styles.cardTitle}>{product.name}</h3>
         {product.description ? (
           <p className={styles.cardDescription}>{product.description}</p>
         ) : null}
       </div>
 
       <div className={styles.productFooter}>
-        {price ? (
-          <div>
-            <span className={styles.priceLabel}>ราคาเริ่มต้น</span>
-            <strong className={styles.price}>{price}</strong>
-          </div>
-        ) : (
-          <span className={styles.priceUnavailable}>ตรวจสอบตัวเลือกสินค้า</span>
-        )}
+        <div>
+          {price ? (
+            <>
+              <span className={styles.priceLabel}>ราคาเริ่มต้น</span>
+              <strong className={styles.price}>{price}</strong>
+            </>
+          ) : (
+            <span className={styles.priceUnavailable}>ยังไม่มีราคาที่ใช้งาน</span>
+          )}
+          <span className={styles.productAvailability} data-numeric>
+            {activeVariantCount > 0
+              ? `${activeVariantCount} ตัวเลือก`
+              : "ยังไม่มีตัวเลือกที่ใช้งาน"}
+          </span>
+        </div>
         <span className={styles.cardAction}>ดูสินค้า</span>
       </div>
     </Link>

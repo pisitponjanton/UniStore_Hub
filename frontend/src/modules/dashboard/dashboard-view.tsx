@@ -242,7 +242,6 @@ export function DashboardView({
       <main className={styles.main}>
         <header className={styles.header}>
           <div className={styles.headerCopy}>
-            <span className={styles.pageKicker}>ศูนย์ควบคุมหน่วยงาน</span>
             <h1 className={styles.title}>ภาพรวมหน่วยงาน</h1>
             <p className={styles.description}>
               เริ่มจากงานที่ต้องดูแลก่อน แล้วใช้รายงานด้านล่างเพื่อตรวจภาพรวมของร้านค้า แคมเปญ และคำสั่งซื้อ
@@ -342,7 +341,6 @@ export function DashboardView({
         <section className={styles.reportScope} aria-labelledby="report-filter-title">
           <div className={styles.reportScopeHeading}>
             <div>
-              <span className={styles.sectionKicker}>เจาะขอบเขตรายงาน</span>
               <h2 className={styles.sectionTitle} id="report-filter-title">
                 ตัวกรองรายงาน
               </h2>
@@ -350,7 +348,13 @@ export function DashboardView({
                 ระบุรหัสร้านค้าหรือแคมเปญเมื่ออยากดูตัวเลขเฉพาะส่วน หากเว้นว่างจะรวมทั้งหน่วยงาน
               </p>
             </div>
-            <div className={styles.scopeSummary} aria-label="ตัวกรองที่ใช้อยู่">
+            <div
+              className={styles.scopeSummary}
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
+              aria-label="ขอบเขตรายงานที่ใช้อยู่"
+            >
               {hasFilters ? (
                 <>
                   {appliedFilters.storeId ? (
@@ -366,7 +370,11 @@ export function DashboardView({
             </div>
           </div>
 
-          <form className={styles.filterPanel} onSubmit={handleFilter}>
+          <form
+            className={styles.filterPanel}
+            onSubmit={handleFilter}
+            aria-busy={filtering}
+          >
             <div className={styles.filters}>
               <TextField
                 id="dashboard-campaign-filter"
@@ -421,7 +429,6 @@ export function DashboardView({
           <article className={styles.statusPanel}>
             <div className={styles.statusPanelHeading}>
               <div>
-                <span className={styles.sectionKicker}>รอบขาย</span>
                 <h2 className={styles.sectionTitle}>
                   แคมเปญตามสถานะ
                 </h2>
@@ -430,26 +437,25 @@ export function DashboardView({
                 จัดการแคมเปญ
               </Link>
             </div>
-            <div className={styles.statusList}>
+            <dl className={styles.statusList}>
               {CAMPAIGN_STATUSES.map((status) => (
                 <div className={styles.statusRow} key={status}>
-                  <span className={styles.statusName}>
+                  <dt className={styles.statusName}>
                     {campaignStatusLabel(status)}
-                  </span>
-                  <strong className={styles.statusCount} data-numeric>
+                  </dt>
+                  <dd className={styles.statusCount} data-numeric>
                     {countLabel(
                       summary.campaignsByStatus[status] ?? 0,
                     )}
-                  </strong>
+                  </dd>
                 </div>
               ))}
-            </div>
+            </dl>
           </article>
 
           <article className={styles.statusPanel}>
             <div className={styles.statusPanelHeading}>
               <div>
-                <span className={styles.sectionKicker}>วงจรคำสั่งซื้อ</span>
                 <h2 className={styles.sectionTitle}>
                   คำสั่งซื้อตามสถานะ
                 </h2>
@@ -458,20 +464,20 @@ export function DashboardView({
                 เปิดคำสั่งซื้อ
               </Link>
             </div>
-            <div className={styles.statusList}>
+            <dl className={styles.statusList}>
               {ORDER_STATUSES.map((status) => (
                 <div className={styles.statusRow} key={status}>
-                  <span className={styles.statusName}>
+                  <dt className={styles.statusName}>
                     {getOrderStatusLabel(status)}
-                  </span>
-                  <strong className={styles.statusCount} data-numeric>
+                  </dt>
+                  <dd className={styles.statusCount} data-numeric>
                     {countLabel(
                       summary.ordersByStatus[status] ?? 0,
                     )}
-                  </strong>
+                  </dd>
                 </div>
               ))}
-            </div>
+            </dl>
           </article>
         </section>
       </main>

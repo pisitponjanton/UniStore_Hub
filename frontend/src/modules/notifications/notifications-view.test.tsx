@@ -191,7 +191,9 @@ describe("NotificationsView", () => {
       filter: "all",
     });
     expect(
-      await screen.findByText("อัปเดตรายการแจ้งเตือนล่าสุดแล้ว"),
+      await screen.findByText(
+        "อัปเดตรายการแจ้งเตือนล่าสุดแล้ว ตอนนี้แสดง 1 รายการ",
+      ),
     ).toBeInTheDocument();
   });
 });

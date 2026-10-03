@@ -59,10 +59,12 @@ describe("OrganizationOrdersView", () => {
       await screen.findByText("Order order-1"),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: "ดูรายละเอียด" }),
+      screen.getByRole("link", {
+        name: "ดูรายละเอียดคำสั่งซื้อ order-1",
+      }),
     ).toHaveAttribute(
       "href",
-      "/org/orders/view/?organizationId=org-1&orderId=order-1",
+      "/org/orders/view?organizationId=org-1&orderId=order-1",
     );
     expect(mocks.listOrganizationOrders).toHaveBeenCalledWith(
       "org-1",
@@ -101,6 +103,12 @@ describe("OrganizationOrdersView", () => {
         status: "PAYMENT_REJECTED",
       });
     });
+
+    expect(
+      await screen.findByRole("status"),
+    ).toHaveTextContent(
+      "แสดง 1 คำสั่งซื้อ · การชำระเงินถูกปฏิเสธ",
+    );
   });
 
   it("uses the opaque next cursor with the applied filters", async () => {
@@ -127,6 +135,9 @@ describe("OrganizationOrdersView", () => {
     expect(
       await screen.findByText("Order order-2"),
     ).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "โหลดเพิ่มเติมแล้ว ตอนนี้แสดง 2 คำสั่งซื้อ",
+    );
     expect(
       mocks.listOrganizationOrders,
     ).toHaveBeenLastCalledWith("org-1", {

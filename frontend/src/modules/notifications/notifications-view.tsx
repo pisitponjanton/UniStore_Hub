@@ -138,7 +138,9 @@ export function NotificationsView() {
               nextCursor: result.nextCursor,
             },
       );
-      setFeedback("อัปเดตรายการแจ้งเตือนล่าสุดแล้ว");
+      setFeedback(
+        `อัปเดตรายการแจ้งเตือนล่าสุดแล้ว ตอนนี้แสดง ${result.items.length} รายการ`,
+      );
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();
@@ -174,11 +176,16 @@ export function NotificationsView() {
         cursor: state.nextCursor,
       });
 
+      const nextItems = [...state.items, ...result.items];
+
       setState({
         status: "success",
-        items: [...state.items, ...result.items],
+        items: nextItems,
         nextCursor: result.nextCursor,
       });
+      setFeedback(
+        `โหลดรายการเพิ่มเติมแล้ว ตอนนี้แสดง ${nextItems.length} รายการ`,
+      );
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();
@@ -229,7 +236,10 @@ export function NotificationsView() {
               nextCursor: state.nextCursor,
             },
       );
-      setFeedback("ทำเครื่องหมายการแจ้งเตือนว่าอ่านแล้ว");
+      const markedTitle =
+        state.items.find((item) => item.notificationId === notificationId)
+          ?.title ?? "การแจ้งเตือน";
+      setFeedback(`ทำเครื่องหมาย “${markedTitle}” ว่าอ่านแล้ว`);
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();
@@ -296,7 +306,6 @@ export function NotificationsView() {
       <main className={styles.main}>
         <header className={styles.header}>
           <div className={styles.headerCopy}>
-            <span className={styles.pageKicker}>กล่องเหตุการณ์ของฉัน</span>
             <h1 className={styles.title}>การแจ้งเตือน</h1>
             <p className={styles.description}>
               ใช้หน้านี้เพื่อดูว่าเกิดอะไรขึ้นล่าสุด แล้วเปิดหน้าคำสั่งซื้อหรือขั้นตอนที่เกี่ยวข้องเพื่อตรวจสถานะจริง
@@ -322,7 +331,7 @@ export function NotificationsView() {
           </div>
 
           {state.status === "success" ? (
-            <div className={styles.listSummary} aria-live="polite">
+            <div className={styles.listSummary} aria-label="สรุปรายการที่แสดง">
               <div>
                 <span className={styles.summaryLabel}>รายการที่โหลด</span>
                 <strong data-numeric>{loadedCount}</strong>
@@ -380,7 +389,11 @@ export function NotificationsView() {
         ) : null}
 
         {state.status === "success" ? (
-          <section className={styles.list} aria-label="รายการการแจ้งเตือน">
+          <section
+            className={styles.list}
+            aria-label="รายการการแจ้งเตือน"
+            aria-busy={loadingMore || markingId !== null}
+          >
             {state.items.map((notification) => {
               const unread = notification.readAt === null;
 
@@ -393,19 +406,20 @@ export function NotificationsView() {
                   ]
                     .filter(Boolean)
                     .join(" ")}
-                  aria-label={unread ? "การแจ้งเตือนที่ยังไม่อ่าน" : undefined}
+                  aria-label={`${notification.title}, สถานะ ${unread ? "ยังไม่อ่าน" : "อ่านแล้ว"}`}
                 >
-                  <div className={styles.rowMarker} aria-hidden="true" />
-
                   <div className={styles.content}>
                     <div className={styles.topline}>
                       <NotificationTypeBadge type={notification.type} />
                       {unread ? (
                         <span className={styles.unreadMarker}>ยังไม่อ่าน</span>
                       ) : (
-                        <span className={styles.readMeta}>
+                        <time
+                          className={styles.readMeta}
+                          dateTime={notification.readAt ?? undefined}
+                        >
                           อ่านแล้ว {formatIsoDateTime(notification.readAt)}
-                        </span>
+                        </time>
                       )}
                     </div>
 
@@ -413,7 +427,9 @@ export function NotificationsView() {
                     <p className={styles.message}>{notification.message}</p>
 
                     <div className={styles.rowMeta}>
-                      <span>{formatIsoDateTime(notification.createdAt)}</span>
+                      <time dateTime={notification.createdAt}>
+                        {formatIsoDateTime(notification.createdAt)}
+                      </time>
                     </div>
                   </div>
 
@@ -463,9 +479,12 @@ export function NotificationsView() {
           </div>
         ) : null}
 
-        <p className={styles.authorityNote}>
+        <aside
+          className={styles.authorityNote}
+          aria-label="แหล่งอ้างอิงสถานะปัจจุบัน"
+        >
           การแจ้งเตือนเป็นเพียงสัญญาณเหตุการณ์ สถานะการชำระเงินและการรับสินค้าปัจจุบันยังอ้างอิงจากหน้าคำสั่งซื้อ การชำระเงิน และการรับสินค้า
-        </p>
+        </aside>
       </main>
     </div>
   );

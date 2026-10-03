@@ -172,7 +172,6 @@ export function MyPickupView() {
 
           <header className={styles.header}>
             <div className={styles.headerCopy}>
-              <span className={styles.pageKicker}>ขั้นตอนรับสินค้า</span>
               <h1 className={styles.title}>ยังไม่ต้องเดินทางไปรับสินค้า</h1>
               <p className={styles.description}>
                 ระบบจะแสดงบัตรรับสินค้าเมื่อคำสั่งซื้อเข้าสู่สถานะพร้อมรับสินค้า
@@ -250,8 +249,7 @@ export function MyPickupView() {
 
         <header className={styles.header}>
           <div className={styles.headerCopy}>
-            <span className={styles.pageKicker}>บัตรรับสินค้าของฉัน</span>
-            <h1 className={styles.title}>รับสินค้า</h1>
+            <h1 className={styles.title}>ข้อมูลรับสินค้า</h1>
             <p className={styles.description}>
               เปิดหน้านี้เมื่อถึงจุดรับสินค้า แล้วแสดง QR หรือ Pickup Token ให้เจ้าหน้าที่
             </p>
@@ -281,11 +279,10 @@ export function MyPickupView() {
         >
           <div className={styles.credentialHeading}>
             <div>
-              <span className={styles.stepLabel}>
-                {received ? "ข้อมูลการรับสินค้าที่ใช้แล้ว" : "แสดงให้เจ้าหน้าที่"}
-              </span>
               <h2 className={styles.sectionTitle} id="pickup-credential-title">
-                QR และ Pickup Token
+                {received
+                  ? "QR และ Pickup Token ที่ใช้แล้ว"
+                  : "QR และ Pickup Token สำหรับแสดงให้เจ้าหน้าที่"}
               </h2>
             </div>
             {!received ? (
@@ -296,7 +293,10 @@ export function MyPickupView() {
           </div>
 
           <div className={styles.qrTokenGrid}>
-            <div className={styles.qrColumn}>
+            <div
+              className={styles.qrColumn}
+              aria-busy={!qrDataUrl && !qrError}
+            >
               <span className={styles.metaLabel}>QR สำหรับรับสินค้า</span>
               {qrDataUrl ? (
                 // QR is generated locally from the pickup token only.
@@ -305,9 +305,15 @@ export function MyPickupView() {
                   className={styles.qrImage}
                   src={qrDataUrl}
                   alt="QR สำหรับรับสินค้า"
+                  decoding="async"
                 />
               ) : (
-                <div className={styles.qrLoading} aria-live="polite">
+                <div
+                  className={styles.qrLoading}
+                  role="status"
+                  aria-live="polite"
+                  aria-atomic="true"
+                >
                   {qrError
                     ? "สร้าง QR ไม่สำเร็จ ใช้ Token ด้านข้างแทนได้"
                     : "กำลังสร้าง QR"}
@@ -328,30 +334,34 @@ export function MyPickupView() {
           </div>
         </section>
 
-        <section className={styles.pickupFacts} aria-label="ข้อมูลการรับสินค้า">
+        <dl className={styles.pickupFacts} aria-label="ข้อมูลการรับสินค้า">
           <div>
-            <span className={styles.metaLabel}>สถานะ</span>
-            <strong className={styles.metaValue}>
+            <dt className={styles.metaLabel}>สถานะ</dt>
+            <dd className={styles.metaValue}>
               {getPickupStatusLabel(pickup.status)}
-            </strong>
+            </dd>
           </div>
           <div>
-            <span className={styles.metaLabel}>สร้างเมื่อ</span>
-            <strong className={styles.metaValue}>
-              {formatIsoDateTime(pickup.createdAt)}
-            </strong>
+            <dt className={styles.metaLabel}>สร้างเมื่อ</dt>
+            <dd className={styles.metaValue}>
+              <time dateTime={pickup.createdAt}>
+                {formatIsoDateTime(pickup.createdAt)}
+              </time>
+            </dd>
           </div>
           <div>
-            <span className={styles.metaLabel}>
+            <dt className={styles.metaLabel}>
               {received ? "รับสินค้าเมื่อ" : "อัปเดตล่าสุด"}
-            </span>
-            <strong className={styles.metaValue}>
-              {received && pickup.receivedAt
-                ? formatIsoDateTime(pickup.receivedAt)
-                : formatIsoDateTime(pickup.updatedAt)}
-            </strong>
+            </dt>
+            <dd className={styles.metaValue}>
+              <time dateTime={received && pickup.receivedAt ? pickup.receivedAt : pickup.updatedAt}>
+                {received && pickup.receivedAt
+                  ? formatIsoDateTime(pickup.receivedAt)
+                  : formatIsoDateTime(pickup.updatedAt)}
+              </time>
+            </dd>
           </div>
-        </section>
+        </dl>
 
         {received ? (
           <div className={styles.receivedNote} role="status">

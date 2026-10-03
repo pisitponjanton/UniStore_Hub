@@ -82,6 +82,7 @@ export function CampaignLifecycleActions({
   const [notice, setNotice] = useState<string | null>(null);
 
   const actions = lifecycleActionsForStatus(campaign.status);
+  const nextAction = actions.find((action) => !action.danger) ?? null;
 
   async function handleAction(
     action: (typeof actions)[number],
@@ -129,33 +130,44 @@ export function CampaignLifecycleActions({
 
   return (
     <div className={styles.root}>
-      <div className={styles.currentState}>
-        <div>
+      <div
+        className={styles.currentState}
+        aria-label="สถานะและขั้นตอนถัดไป"
+      >
+        <div className={styles.stateBlock}>
           <span className={styles.stateLabel}>สถานะปัจจุบัน</span>
-          <strong>{campaignStatusLabel(campaign.status)}</strong>
+          <Badge
+            tone={
+              campaign.status === "CANCELLED"
+                ? "danger"
+                : campaign.status === "COMPLETED" ||
+                    campaign.status === "READY_FOR_PICKUP"
+                  ? "success"
+                  : campaign.status === "OPEN"
+                    ? "info"
+                    : campaign.status === "CLOSED" ||
+                        campaign.status === "PRODUCING"
+                      ? "warning"
+                      : "neutral"
+            }
+          >
+            {campaignStatusLabel(campaign.status)}
+          </Badge>
         </div>
-        <Badge
-          tone={
-            campaign.status === "CANCELLED"
-              ? "danger"
-              : campaign.status === "COMPLETED" ||
-                  campaign.status === "READY_FOR_PICKUP"
-                ? "success"
-                : campaign.status === "OPEN"
-                  ? "info"
-                  : campaign.status === "CLOSED" ||
-                      campaign.status === "PRODUCING"
-                    ? "warning"
-                    : "neutral"
-          }
-        >
-          {campaignStatusLabel(campaign.status)}
-        </Badge>
+        <div className={styles.stateBlock}>
+          <span className={styles.stateLabel}>ขั้นตอนถัดไป</span>
+          <strong>
+            {nextAction
+              ? nextAction.label
+              : campaign.status === "COMPLETED"
+                ? "งานแคมเปญเสร็จสิ้น"
+                : "ไม่มีการดำเนินการถัดไป"}
+          </strong>
+        </div>
       </div>
 
       {campaign.status === "CANCELLED" ? (
         <div className={styles.cancelledPath} role="status">
-          <span className={styles.cancelledMarker} aria-hidden="true" />
           <div>
             <strong>วงจรแคมเปญสิ้นสุดด้วยการยกเลิก</strong>
             <span>
@@ -176,10 +188,19 @@ export function CampaignLifecycleActions({
                 key={step}
               >
                 <span className={styles.lifecycleIndex} aria-hidden="true">
-                  {stepState === "done" ? "✓" : index + 1}
+                  {index + 1}
                 </span>
-                <span className={styles.lifecycleLabel}>
-                  {campaignStatusLabel(step)}
+                <span className={styles.lifecycleCopy}>
+                  <span className={styles.lifecycleLabel}>
+                    {campaignStatusLabel(step)}
+                  </span>
+                  <span className={styles.lifecycleState}>
+                    {stepState === "done"
+                      ? "เสร็จแล้ว"
+                      : stepState === "current"
+                        ? "สถานะปัจจุบัน"
+                        : "ขั้นตอนถัดไป"}
+                  </span>
                 </span>
               </li>
             );

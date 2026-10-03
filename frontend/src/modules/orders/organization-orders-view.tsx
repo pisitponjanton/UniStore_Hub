@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
 
 import {
@@ -81,6 +82,7 @@ export function OrganizationOrdersView({
   const [filtering, setFiltering] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [inlineError, setInlineError] = useState<string | null>(null);
+  const [listFeedback, setListFeedback] = useState<string | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -166,6 +168,9 @@ export function OrganizationOrdersView({
         orders: result.items,
         nextCursor: result.nextCursor,
       });
+      setListFeedback(
+        `แสดง ${result.items.length.toLocaleString("th-TH")} คำสั่งซื้อ${nextFilters.status ? ` · ${getOrderStatusLabel(nextFilters.status)}` : ""}`,
+      );
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();
@@ -201,6 +206,9 @@ export function OrganizationOrdersView({
         orders: result.items,
         nextCursor: result.nextCursor,
       });
+      setListFeedback(
+        `แสดงคำสั่งซื้อทั้งหมดที่โหลด ${result.items.length.toLocaleString("th-TH")} รายการ`,
+      );
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();
@@ -236,11 +244,16 @@ export function OrganizationOrdersView({
         },
       );
 
+      const nextOrders = [...state.orders, ...result.items];
+
       setState({
         status: "success",
-        orders: [...state.orders, ...result.items],
+        orders: nextOrders,
         nextCursor: result.nextCursor,
       });
+      setListFeedback(
+        `โหลดเพิ่มเติมแล้ว ตอนนี้แสดง ${nextOrders.length.toLocaleString("th-TH")} คำสั่งซื้อ`,
+      );
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();
@@ -296,8 +309,7 @@ export function OrganizationOrdersView({
     <div className={styles.page}>
       <main className={styles.main}>
         <header className={styles.header}>
-          <div className={styles.headerCopy} data-ledger-heading>
-            <span className={styles.pageKicker}>ศูนย์ติดตามคำสั่งซื้อ</span>
+          <div className={styles.headerCopy}>
             <h1 className={styles.title}>คำสั่งซื้อของหน่วยงาน</h1>
             <p className={styles.description}>
               ค้นหาและติดตามคำสั่งซื้อตามแคมเปญ ลูกค้า และสถานะ เพื่อไปยังรายการที่ต้องดำเนินการต่อได้เร็วขึ้น
@@ -355,7 +367,11 @@ export function OrganizationOrdersView({
             </div>
           </div>
 
-          <form className={styles.filterForm} onSubmit={applyFilters}>
+          <form
+            className={styles.filterForm}
+            onSubmit={applyFilters}
+            aria-busy={filtering}
+          >
             <div className={styles.filters}>
               <TextField
                 id="organization-orders-campaign"
@@ -427,6 +443,17 @@ export function OrganizationOrdersView({
           </form>
         </section>
 
+        {listFeedback ? (
+          <p
+            className={styles.listFeedback}
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {listFeedback}
+          </p>
+        ) : null}
+
         {inlineError ? (
           <Notice tone="danger" role="alert" title="โหลดรายการไม่สำเร็จ">
             {inlineError}
@@ -463,6 +490,7 @@ export function OrganizationOrdersView({
                 <article
                   className={styles.row}
                   data-attention={order.status === "PAYMENT_REVIEW" || undefined}
+                  aria-label={`คำสั่งซื้อ ${order.orderId} · ${getOrderStatusLabel(order.status)}`}
                   key={order.orderId}
                 >
                   <div className={styles.rowMain}>
@@ -479,25 +507,26 @@ export function OrganizationOrdersView({
                       <span className={styles.meta}>
                         Campaign: {order.campaignId}
                       </span>
-                      <span className={styles.meta}>
+                      <time className={styles.meta} dateTime={order.createdAt}>
                         สร้างเมื่อ {formatIsoDateTime(order.createdAt)}
-                      </span>
+                      </time>
                     </div>
                   </div>
 
                   <div className={styles.rowAside}>
-                    <span className={styles.total}>
+                    <span className={styles.total} data-numeric>
                       {formatSatang(order.total)}
                     </span>
-                    <a
+                    <Link
                       className={styles.detailLink}
                       href={organizationOrderHref(
                         organizationId,
                         order.orderId,
                       )}
+                      aria-label={`ดูรายละเอียดคำสั่งซื้อ ${order.orderId}`}
                     >
                       ดูรายละเอียด
-                    </a>
+                    </Link>
                   </div>
                 </article>
               ))}

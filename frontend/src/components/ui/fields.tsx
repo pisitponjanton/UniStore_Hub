@@ -1,8 +1,10 @@
-import type {
-  InputHTMLAttributes,
-  ReactNode,
-  SelectHTMLAttributes,
-  TextareaHTMLAttributes,
+import {
+  forwardRef,
+  type HTMLAttributes,
+  type InputHTMLAttributes,
+  type ReactNode,
+  type SelectHTMLAttributes,
+  type TextareaHTMLAttributes,
 } from "react";
 
 import styles from "./primitives.module.css";
@@ -13,6 +15,7 @@ interface FieldChromeProps {
   hint?: ReactNode;
   error?: ReactNode;
   required?: boolean;
+  announceError?: boolean;
   children: ReactNode;
 }
 
@@ -22,6 +25,7 @@ function FieldChrome({
   hint,
   error,
   required,
+  announceError = true,
   children,
 }: FieldChromeProps) {
   const hintId = hint ? `${id}-hint` : undefined;
@@ -42,7 +46,11 @@ function FieldChrome({
         </span>
       ) : null}
       {error ? (
-        <span className={styles.fieldError} id={errorId} role="alert">
+        <span
+          className={styles.fieldError}
+          id={errorId}
+          role={announceError ? "alert" : undefined}
+        >
           {error}
         </span>
       ) : null}
@@ -56,12 +64,69 @@ function describedBy(id: string, hint?: ReactNode, error?: ReactNode) {
     .join(" ") || undefined;
 }
 
+export interface ErrorSummaryItem {
+  fieldId: string;
+  message: ReactNode;
+}
+
+export interface ErrorSummaryProps
+  extends Omit<HTMLAttributes<HTMLDivElement>, "title"> {
+  title?: ReactNode;
+  items: ErrorSummaryItem[];
+}
+
+export const ErrorSummary = forwardRef<HTMLDivElement, ErrorSummaryProps>(
+  function ErrorSummary(
+    {
+      title = "กรุณาตรวจสอบข้อมูล",
+      items,
+      className,
+      id = "form-error-summary",
+      ...props
+    },
+    ref,
+  ) {
+    if (items.length === 0) {
+      return null;
+    }
+
+    const titleId = `${id}-title`;
+    const classes = [styles.errorSummary, className].filter(Boolean).join(" ");
+
+    return (
+      <div
+        ref={ref}
+        id={id}
+        className={classes}
+        role="alert"
+        tabIndex={-1}
+        aria-labelledby={titleId}
+        {...props}
+      >
+        <h2 className={styles.errorSummaryTitle} id={titleId}>
+          {title}
+        </h2>
+        <ul className={styles.errorSummaryList}>
+          {items.map((item) => (
+            <li key={item.fieldId}>
+              <a className={styles.errorSummaryLink} href={`#${item.fieldId}`}>
+                {item.message}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  },
+);
+
 export interface TextFieldProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, "id"> {
   id: string;
   label: ReactNode;
   hint?: ReactNode;
   error?: ReactNode;
+  announceError?: boolean;
 }
 
 export function TextField({
@@ -69,6 +134,7 @@ export function TextField({
   label,
   hint,
   error,
+  announceError,
   required,
   className,
   ...props
@@ -87,6 +153,7 @@ export function TextField({
       label={label}
       hint={hint}
       error={error}
+      announceError={announceError}
       required={required}
     >
       <input
@@ -95,6 +162,7 @@ export function TextField({
         className={classes}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy(id, hint, error)}
+        aria-errormessage={error ? `${id}-error` : undefined}
         {...props}
       />
     </FieldChrome>
@@ -107,6 +175,7 @@ export interface TextareaFieldProps
   label: ReactNode;
   hint?: ReactNode;
   error?: ReactNode;
+  announceError?: boolean;
 }
 
 export function TextareaField({
@@ -114,6 +183,7 @@ export function TextareaField({
   label,
   hint,
   error,
+  announceError,
   required,
   className,
   ...props
@@ -133,6 +203,7 @@ export function TextareaField({
       label={label}
       hint={hint}
       error={error}
+      announceError={announceError}
       required={required}
     >
       <textarea
@@ -141,6 +212,7 @@ export function TextareaField({
         className={classes}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy(id, hint, error)}
+        aria-errormessage={error ? `${id}-error` : undefined}
         {...props}
       />
     </FieldChrome>
@@ -153,6 +225,7 @@ export interface SelectFieldProps
   label: ReactNode;
   hint?: ReactNode;
   error?: ReactNode;
+  announceError?: boolean;
 }
 
 export function SelectField({
@@ -160,6 +233,7 @@ export function SelectField({
   label,
   hint,
   error,
+  announceError,
   required,
   className,
   children,
@@ -180,6 +254,7 @@ export function SelectField({
       label={label}
       hint={hint}
       error={error}
+      announceError={announceError}
       required={required}
     >
       <select
@@ -188,6 +263,7 @@ export function SelectField({
         className={classes}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy(id, hint, error)}
+        aria-errormessage={error ? `${id}-error` : undefined}
         {...props}
       >
         {children}
@@ -202,6 +278,7 @@ export interface FileFieldProps
   label: ReactNode;
   hint?: ReactNode;
   error?: ReactNode;
+  announceError?: boolean;
 }
 
 export function FileField({
@@ -209,6 +286,7 @@ export function FileField({
   label,
   hint,
   error,
+  announceError,
   required,
   className,
   ...props
@@ -228,6 +306,7 @@ export function FileField({
       label={label}
       hint={hint}
       error={error}
+      announceError={announceError}
       required={required}
     >
       <input
@@ -237,6 +316,7 @@ export function FileField({
         className={classes}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy(id, hint, error)}
+        aria-errormessage={error ? `${id}-error` : undefined}
         {...props}
       />
     </FieldChrome>

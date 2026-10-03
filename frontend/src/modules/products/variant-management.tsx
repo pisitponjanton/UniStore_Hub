@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 
 import {
   Badge,
   Button,
   ConfirmDialog,
   EmptyState,
+  ErrorSummary,
   Notice,
   TextField,
 } from "@/components";
@@ -80,6 +81,8 @@ export function VariantManagement({
 
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const createErrorSummaryRef = useRef<HTMLDivElement>(null);
+  const editErrorSummaryRef = useRef<HTMLDivElement>(null);
 
   const variants = product.variants ?? [];
   const activeCount = variants.filter(
@@ -113,6 +116,7 @@ export function VariantManagement({
     setNotice(null);
 
     if (!validation.valid || !validation.values) {
+      requestAnimationFrame(() => createErrorSummaryRef.current?.focus());
       return;
     }
 
@@ -171,6 +175,7 @@ export function VariantManagement({
     setNotice(null);
 
     if (!validation.valid || !validation.values) {
+      requestAnimationFrame(() => editErrorSummaryRef.current?.focus());
       return;
     }
 
@@ -312,7 +317,7 @@ export function VariantManagement({
                           {variantStatusLabel(variant.status)}
                         </Badge>
                       </div>
-                      <span className={styles.price}>
+                      <span className={styles.price} data-numeric>
                         {formatSatang(variant.price)}
                       </span>
                     </div>
@@ -352,7 +357,30 @@ export function VariantManagement({
                       <form
                         className={styles.editForm}
                         onSubmit={handleSave}
+                        noValidate
                       >
+                        <ErrorSummary
+                          ref={editErrorSummaryRef}
+                          id={`variant-edit-error-summary-${variant.variantId}`}
+                          items={[
+                            ...(editNameError
+                              ? [
+                                  {
+                                    fieldId: `variant-edit-name-${variant.variantId}`,
+                                    message: editNameError,
+                                  },
+                                ]
+                              : []),
+                            ...(editPriceError
+                              ? [
+                                  {
+                                    fieldId: `variant-edit-price-${variant.variantId}`,
+                                    message: editPriceError,
+                                  },
+                                ]
+                              : []),
+                          ]}
+                        />
                         <TextField
                           id={`variant-edit-name-${variant.variantId}`}
                           label="ชื่อตัวเลือก"
@@ -362,6 +390,14 @@ export function VariantManagement({
                             setEditNameError(undefined);
                           }}
                           error={editNameError}
+                          announceError={false}
+                          onBlur={() => {
+                            const validation = validateVariantForm({
+                              name: editName,
+                              priceThb: editPrice,
+                            });
+                            setEditNameError(validation.errors.name);
+                          }}
                           required
                           disabled={saving}
                         />
@@ -375,6 +411,14 @@ export function VariantManagement({
                             setEditPriceError(undefined);
                           }}
                           error={editPriceError}
+                          announceError={false}
+                          onBlur={() => {
+                            const validation = validateVariantForm({
+                              name: editName,
+                              priceThb: editPrice,
+                            });
+                            setEditPriceError(validation.errors.priceThb);
+                          }}
                           hint="ใส่ทศนิยมได้ไม่เกิน 2 ตำแหน่ง"
                           required
                           disabled={saving}
@@ -406,11 +450,32 @@ export function VariantManagement({
           )}
         </div>
 
-        <form className={styles.createForm} onSubmit={handleCreate}>
+        <form className={styles.createForm} onSubmit={handleCreate} noValidate>
           <div className={styles.createHeading}>
-            <span className={styles.kicker}>เพิ่มตัวเลือก</span>
-            <strong>ตัวเลือกใหม่</strong>
+            <strong>เพิ่มตัวเลือกใหม่</strong>
           </div>
+          <ErrorSummary
+            ref={createErrorSummaryRef}
+            id={`variant-create-error-summary-${product.productId}`}
+            items={[
+              ...(createNameError
+                ? [
+                    {
+                      fieldId: `variant-create-name-${product.productId}`,
+                      message: createNameError,
+                    },
+                  ]
+                : []),
+              ...(createPriceError
+                ? [
+                    {
+                      fieldId: `variant-create-price-${product.productId}`,
+                      message: createPriceError,
+                    },
+                  ]
+                : []),
+            ]}
+          />
           <TextField
             id={`variant-create-name-${product.productId}`}
             label="ชื่อตัวเลือก"
@@ -420,6 +485,14 @@ export function VariantManagement({
               setCreateNameError(undefined);
             }}
             error={createNameError}
+            announceError={false}
+            onBlur={() => {
+              const validation = validateVariantForm({
+                name: createName,
+                priceThb: createPrice,
+              });
+              setCreateNameError(validation.errors.name);
+            }}
             placeholder="เช่น Size M"
             required
             disabled={creating}
@@ -435,6 +508,14 @@ export function VariantManagement({
               setCreatePriceError(undefined);
             }}
             error={createPriceError}
+            announceError={false}
+            onBlur={() => {
+              const validation = validateVariantForm({
+                name: createName,
+                priceThb: createPrice,
+              });
+              setCreatePriceError(validation.errors.priceThb);
+            }}
             hint="ใส่ทศนิยมได้ไม่เกิน 2 ตำแหน่ง"
             required
             disabled={creating}

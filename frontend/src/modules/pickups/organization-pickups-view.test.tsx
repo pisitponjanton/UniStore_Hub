@@ -87,7 +87,7 @@ async function openDetail() {
   await screen.findByText("Pickup pickup-1");
   fireEvent.click(
     screen.getByRole("button", {
-      name: "ดูรายละเอียด",
+      name: "ดูรายละเอียด Pickup pickup-1",
     }),
   );
   await screen.findByText("Order ที่เกี่ยวข้อง");
@@ -155,6 +155,9 @@ describe("OrganizationPickupsView", () => {
         orderId: "order-2",
       });
     });
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "แสดง 1 รายการรับสินค้า · รับสินค้าแล้ว",
+    );
   });
 
   it("loads fresh Pickup and Order detail before confirmation", async () => {

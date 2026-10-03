@@ -99,5 +99,8 @@ describe("DashboardView", () => {
 
     expect(screen.getByText("ร้านค้า: store-1")).toBeInTheDocument();
     expect(screen.getByText("แคมเปญ: campaign-1")).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "ร้านค้า: store-1แคมเปญ: campaign-1",
+    );
   });
 });

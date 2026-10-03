@@ -7,7 +7,6 @@
 
 .intro {
   min-width: 0;
-  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -19,14 +18,6 @@
   overflow: hidden;
 }
 
-.intro::after {
-  content: "";
-  position: absolute;
-  inset: auto 0 0 auto;
-  width: min(34vw, 420px);
-  height: 6px;
-  background: var(--campus);
-}
 
 .brand {
   width: fit-content;
@@ -112,21 +103,13 @@
   gap: var(--space-4);
 }
 
-.introKicker,
-.formKicker {
-  width: fit-content;
-  color: var(--campus);
-  font-size: var(--text-body-sm);
-  font-weight: 700;
-}
-
 .introTitle {
-  max-width: 760px;
+  max-width: 720px;
   color: var(--ink);
-  font-size: clamp(2.4rem, 5vw, 4.8rem);
+  font-size: clamp(2.25rem, 4.2vw, 3.9rem);
   font-weight: 650;
-  line-height: 1.02;
-  letter-spacing: -0.045em;
+  line-height: 1.06;
+  letter-spacing: -0.036em;
   text-wrap: balance;
 }
 
@@ -140,28 +123,27 @@
 .accountJourney {
   width: min(100%, 620px);
   display: grid;
+  gap: var(--space-3);
+}
+
+.accountJourneyTitle {
+  color: var(--ink-secondary);
+  font-size: var(--text-body-sm);
+  font-weight: 700;
+}
+
+.accountJourneyList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
   border-top: 1px solid var(--line-strong);
 }
 
 .accountJourneyItem {
   display: grid;
-  grid-template-columns: 44px minmax(0, 1fr);
-  gap: var(--space-3);
+  gap: 2px;
   padding-block: var(--space-3);
   border-bottom: 1px solid var(--line-soft);
-}
-
-.accountJourneyIndex {
-  color: var(--campus);
-  font-family: var(--font-technical);
-  font-size: var(--text-caption);
-  font-weight: 700;
-}
-
-.accountJourneyItem > div {
-  min-width: 0;
-  display: grid;
-  gap: 1px;
 }
 
 .accountJourneyItem strong {
@@ -170,38 +152,10 @@
   font-weight: 650;
 }
 
-.accountJourneyItem span:last-child {
+.accountJourneyItem span {
   color: var(--ink-tertiary);
   font-size: var(--text-body-sm);
   line-height: 1.45;
-}
-
-.introFooter {
-  max-width: 620px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
-  color: var(--ink-tertiary);
-  font-size: var(--text-caption);
-}
-
-.introBackLink {
-  flex: 0 0 auto;
-  min-height: var(--control-height);
-  display: inline-flex;
-  align-items: center;
-  padding-inline: var(--space-2);
-  margin-right: calc(var(--space-2) * -1);
-  border-radius: var(--radius-md);
-  color: var(--ink-secondary);
-  font-weight: 600;
-}
-
-.introBackLink:hover {
-  background: var(--surface-muted);
-  color: var(--ink);
-  text-decoration: none;
 }
 
 .panel {
@@ -261,20 +215,38 @@
   width: 100%;
 }
 
-.formDivider {
-  position: relative;
-  height: 1px;
-  background: var(--line-soft);
+.passwordToggle {
+  width: fit-content;
+  min-height: var(--control-height-sm);
+  margin-top: calc(var(--space-2) * -1);
+  padding: 0 var(--space-2);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--campus);
+  font: inherit;
+  font-size: var(--text-body-sm);
+  font-weight: 650;
+  cursor: pointer;
 }
 
-.formDivider span {
-  position: absolute;
-  left: 0;
-  top: -1px;
-  width: 56px;
-  height: 2px;
-  border-radius: var(--radius-pill);
-  background: var(--campus);
+.passwordToggle:hover:not(:disabled) {
+  background: var(--surface-hover);
+  color: var(--campus-hover);
+}
+
+.passwordToggle:active:not(:disabled) {
+  background: var(--surface-selected);
+}
+
+.passwordToggle:disabled {
+  color: var(--ink-muted);
+  cursor: not-allowed;
+}
+
+.formDivider {
+  height: 1px;
+  background: var(--line-soft);
 }
 
 .formFooter {
@@ -315,12 +287,17 @@
 }
 
 .backLink::before {
-  content: "←";
+  content: "";
+  width: 8px;
+  height: 8px;
   margin-right: var(--space-2);
+  border-left: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
 }
 
 .backLink:hover {
-  background: var(--surface-muted);
+  background: var(--surface-hover);
   color: var(--ink);
   text-decoration: none;
 }
@@ -400,7 +377,7 @@
   min-width: 0;
   min-height: 64px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
@@ -432,11 +409,11 @@
 .accountActionPrimary {
   border: 1px solid var(--campus);
   background: var(--campus);
-  color: var(--ink-inverse);
+  color: var(--campus-on);
 }
 
 .accountActionPrimary small {
-  color: color-mix(in srgb, var(--ink-inverse) 78%, transparent);
+  color: color-mix(in srgb, var(--campus-on) 78%, transparent);
 }
 
 .accountActionPrimary:hover {
@@ -457,8 +434,13 @@
 
 .accountActionSecondary:hover {
   border-color: var(--line-strong);
-  background: var(--surface-muted);
+  background: var(--surface-hover);
   text-decoration: none;
+}
+
+.accountActionPrimary:active,
+.accountActionSecondary:active {
+  filter: brightness(0.96);
 }
 
 @media (max-width: 960px) {
@@ -487,11 +469,6 @@
     padding: var(--space-6) var(--page-gutter) var(--space-8);
   }
 
-  .intro::after {
-    width: 96px;
-    height: 4px;
-  }
-
   .introBody {
     gap: var(--space-5);
   }
@@ -501,23 +478,20 @@
     font-size: clamp(2rem, 8vw, 3rem);
   }
 
-  .accountJourney {
+  .accountJourneyList {
+    display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    border-top: 0;
-    gap: var(--space-3);
+    border-top: 1px solid var(--line-strong);
+    border-bottom: 1px solid var(--line-soft);
   }
 
   .accountJourneyItem {
-    grid-template-columns: 1fr;
-    gap: var(--space-2);
     padding: var(--space-3);
-    border: 1px solid var(--line-soft);
-    border-radius: var(--radius-md);
-    background: var(--surface-raised);
+    border-bottom: 0;
   }
 
-  .introFooter {
-    display: none;
+  .accountJourneyItem + .accountJourneyItem {
+    border-left: 1px solid var(--line-soft);
   }
 
   .panel {
@@ -556,19 +530,19 @@
     font-size: var(--text-body);
   }
 
-  .accountJourney {
-    grid-template-columns: 1fr;
-    gap: 0;
+  .accountJourneyList {
+    display: block;
     border-top: 1px solid var(--line-soft);
+    border-bottom: 0;
   }
 
   .accountJourneyItem {
-    grid-template-columns: 36px minmax(0, 1fr);
     padding: var(--space-3) 0;
-    border: 0;
     border-bottom: 1px solid var(--line-soft);
-    border-radius: 0;
-    background: transparent;
+  }
+
+  .accountJourneyItem + .accountJourneyItem {
+    border-left: 0;
   }
 
   .panel {

@@ -141,7 +141,7 @@ export function CampaignView() {
 
         <section className={styles.hero}>
           <div className={styles.heroCopy}>
-            <span className={styles.eyebrow}>รอบขายจาก {store.name}</span>
+            <span className={styles.contextLine}>รอบขายจาก {store.name}</span>
             <h1 className={styles.title}>{campaign.name}</h1>
             <p className={styles.description}>
               ตรวจสอบสถานะและช่วงเวลาสำคัญของรอบนี้ก่อนเลือกสินค้าที่ต้องการ
@@ -159,23 +159,22 @@ export function CampaignView() {
             <p className={styles.campaignStatusDescription}>
               {campaignGuidance[campaign.status]}
             </p>
-            <div className={styles.campaignFacts}>
+            <dl className={styles.campaignFacts}>
               <div>
-                <span className={styles.metaLabel}>สินค้า</span>
-                <strong data-numeric>{products.length}</strong>
+                <dt className={styles.metaLabel}>สินค้า</dt>
+                <dd data-numeric>{products.length}</dd>
               </div>
               <div>
-                <span className={styles.metaLabel}>ร้าน</span>
-                <strong>{store.name}</strong>
+                <dt className={styles.metaLabel}>ร้าน</dt>
+                <dd>{store.name}</dd>
               </div>
-            </div>
+            </dl>
           </aside>
         </section>
 
         <section className={styles.section} aria-labelledby="schedule-heading">
           <div className={styles.sectionHeader}>
             <div>
-              <span className={styles.eyebrow}>กำหนดการของรอบนี้</span>
               <h2 className={styles.sectionTitle} id="schedule-heading">
                 ช่วงเวลาสำคัญ
               </h2>
@@ -185,38 +184,37 @@ export function CampaignView() {
             </p>
           </div>
 
-          <div className={styles.timeline}>
-            <div className={styles.timelineItem}>
+          <ol className={styles.timeline}>
+            <li className={styles.timelineItem}>
               <span className={styles.metaLabel}>เปิดรับคำสั่งซื้อ</span>
               <span className={styles.metaValue}>
                 {formatIsoDateTime(campaign.openAt)}
               </span>
-            </div>
-            <div className={styles.timelineItem}>
+            </li>
+            <li className={styles.timelineItem}>
               <span className={styles.metaLabel}>ปิดรับคำสั่งซื้อ</span>
               <span className={styles.metaValue}>
                 {formatIsoDateTime(campaign.closeAt)}
               </span>
-            </div>
-            <div className={styles.timelineItem}>
+            </li>
+            <li className={styles.timelineItem}>
               <span className={styles.metaLabel}>กำหนดชำระเงิน</span>
               <span className={styles.metaValue}>
                 {formatIsoDateTime(campaign.paymentDeadline)}
               </span>
-            </div>
-            <div className={styles.timelineItem}>
+            </li>
+            <li className={styles.timelineItem}>
               <span className={styles.metaLabel}>วันรับสินค้า</span>
               <span className={styles.metaValue}>
                 {formatIsoDateTime(campaign.pickupAt)}
               </span>
-            </div>
-          </div>
+            </li>
+          </ol>
         </section>
 
         <section className={styles.section} aria-labelledby="campaign-products">
           <div className={styles.sectionHeader}>
             <div>
-              <span className={styles.eyebrow}>สินค้าในรอบนี้</span>
               <h2 className={styles.sectionTitle} id="campaign-products">
                 เลือกสินค้าที่ต้องการ
               </h2>

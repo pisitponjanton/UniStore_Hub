@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { OrganizationDTO } from "@/types";
@@ -76,5 +76,27 @@ describe("OrganizationSettingsView", () => {
       await screen.findByText("ข้อมูลหน่วยงานถูกอัปเดตเรียบร้อย"),
     ).toBeInTheDocument();
     expect(screen.getByText("รออนุมัติ")).toBeInTheDocument();
+  });
+
+  it("reports invalid editable data through a focusable error summary", async () => {
+    mocks.get.mockResolvedValue(organization);
+
+    render(<OrganizationSettingsView organizationId="org-1" />);
+
+    const name = await screen.findByLabelText(/ชื่อหน่วยงาน/);
+    fireEvent.change(name, { target: { value: "" } });
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "บันทึกการเปลี่ยนแปลง",
+      }),
+    );
+
+    const summary = await screen.findByRole("alert");
+    expect(
+      screen.getByRole("link", { name: "กรุณาระบุชื่อหน่วยงาน" }),
+    ).toHaveAttribute("href", "#organization-settings-name");
+    await waitFor(() => expect(summary).toHaveFocus());
+    expect(mocks.update).not.toHaveBeenCalled();
   });
 });

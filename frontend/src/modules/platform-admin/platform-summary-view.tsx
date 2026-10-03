@@ -137,8 +137,7 @@ export function PlatformSummaryView() {
     <div className={styles.page}>
       <main className={styles.main}>
         <header className={styles.header}>
-          <div className={styles.headerCopy} data-ledger-heading>
-            <span className={styles.pageKicker}>ขอบเขตระดับ Platform</span>
+          <div className={styles.headerCopy}>
             <h1 className={styles.title}>ภาพรวม Platform</h1>
             <p className={styles.description}>
               ตรวจสถานะหน่วยงานและผู้ใช้จากข้อมูลระดับ Platform
@@ -146,7 +145,13 @@ export function PlatformSummaryView() {
             </p>
           </div>
 
-          <Badge tone="info">Platform Admin</Badge>
+          <div
+            className={styles.scopeContext}
+            aria-label="ขอบเขตสิทธิ์ Platform Admin"
+          >
+            <Badge tone="info">Platform Admin</Badge>
+            <span>สิทธิ์ระดับ Platform ทั้งระบบ</span>
+          </div>
         </header>
 
         <Notice tone="neutral" title="ขอบเขตสิทธิ์ Platform">
@@ -158,9 +163,12 @@ export function PlatformSummaryView() {
           className={styles.priorityStrip}
           aria-label="ตัวชี้วัด Platform ที่สำคัญ"
         >
-          <article className={styles.priorityItem}>
+          <article
+            className={styles.priorityItem}
+            data-attention={pendingOrganizations > 0 || undefined}
+          >
             <span className={styles.metricLabel}>หน่วยงานรออนุมัติ</span>
-            <strong className={styles.priorityValue}>
+            <strong className={styles.priorityValue} data-numeric>
               {count(pendingOrganizations)}
             </strong>
             <span className={styles.metricHint}>
@@ -170,7 +178,7 @@ export function PlatformSummaryView() {
 
           <article className={styles.priorityItem}>
             <span className={styles.metricLabel}>หน่วยงานทั้งหมด</span>
-            <strong className={styles.priorityValue}>
+            <strong className={styles.priorityValue} data-numeric>
               {count(organizationTotal)}
             </strong>
             <span className={styles.metricHint}>
@@ -180,7 +188,7 @@ export function PlatformSummaryView() {
 
           <article className={styles.priorityItem}>
             <span className={styles.metricLabel}>ผู้ใช้ทั้งหมด</span>
-            <strong className={styles.priorityValue}>
+            <strong className={styles.priorityValue} data-numeric>
               {count(userTotal)}
             </strong>
             <span className={styles.metricHint}>
@@ -219,7 +227,7 @@ export function PlatformSummaryView() {
                   </Badge>
                   <span className={styles.code}>{status}</span>
                 </div>
-                <strong className={styles.statusCount}>
+                <strong className={styles.statusCount} data-numeric>
                   {count(
                     state.summary.organizationsByStatus[status],
                   )}
@@ -253,7 +261,7 @@ export function PlatformSummaryView() {
                   </Badge>
                   <span className={styles.code}>{status}</span>
                 </div>
-                <strong className={styles.statusCount}>
+                <strong className={styles.statusCount} data-numeric>
                   {count(state.summary.usersByStatus[status])}
                 </strong>
               </div>

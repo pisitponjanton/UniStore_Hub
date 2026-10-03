@@ -2,6 +2,7 @@
 
 import {
   useEffect,
+  useRef,
   useState,
   type FormEvent,
 } from "react";
@@ -10,6 +11,7 @@ import {
   Button,
   EmptyState,
   ErrorState,
+  ErrorSummary,
   ForbiddenState,
   LoadingState,
   Notice,
@@ -78,6 +80,10 @@ export function ProductionSummaryView({
   const [inlineError, setInlineError] = useState<string | null>(
     null,
   );
+  const [summaryFeedback, setSummaryFeedback] = useState<string | null>(
+    null,
+  );
+  const campaignErrorSummaryRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!initialCampaignId) {
@@ -100,6 +106,9 @@ export function ProductionSummaryView({
             status: "success",
             summary,
           });
+          setSummaryFeedback(
+            `โหลดสรุปการผลิตของ ${summary.campaignId} แล้ว`,
+          );
         }
       } catch (error) {
         if (
@@ -157,6 +166,7 @@ export function ProductionSummaryView({
       campaignId: nextCampaignId,
     });
     setInlineError(null);
+    setSummaryFeedback(null);
 
     try {
       const summary = await productionService.getSummary(
@@ -168,6 +178,9 @@ export function ProductionSummaryView({
         status: "success",
         summary,
       });
+      setSummaryFeedback(
+        `โหลดสรุปการผลิตของ ${summary.campaignId} แล้ว`,
+      );
 
       window.history.replaceState(
         {},
@@ -218,6 +231,9 @@ export function ProductionSummaryView({
 
     if (!normalized) {
       setCampaignError("กรุณาระบุ Campaign ID");
+      requestAnimationFrame(() =>
+        campaignErrorSummaryRef.current?.focus(),
+      );
       return;
     }
 
@@ -280,8 +296,7 @@ export function ProductionSummaryView({
     <div className={styles.page}>
       <main className={styles.main}>
         <header className={styles.header}>
-          <div className={styles.headerCopy} data-ledger-heading>
-            <span className={styles.pageKicker}>รายการเตรียมผลิตตามแคมเปญ</span>
+          <div className={styles.headerCopy}>
             <h1 className={styles.title}>สรุปงานผลิต</h1>
             <p className={styles.description}>
               เลือกแคมเปญเพื่อดูจำนวนสินค้าที่ต้องเตรียม แยกตามสินค้าและตัวเลือก โดยใช้สรุปที่ระบบส่งกลับโดยตรง
@@ -312,7 +327,26 @@ export function ProductionSummaryView({
             ) : null}
           </div>
 
-          <form className={styles.campaignForm} onSubmit={handleSubmit}>
+          <form
+            className={styles.campaignForm}
+            onSubmit={handleSubmit}
+            noValidate
+            aria-busy={state.status === "loading"}
+          >
+            <ErrorSummary
+              ref={campaignErrorSummaryRef}
+              id="production-campaign-error-summary"
+              items={
+                campaignError
+                  ? [
+                      {
+                        fieldId: "production-campaign-id",
+                        message: campaignError,
+                      },
+                    ]
+                  : []
+              }
+            />
             <TextField
               id="production-campaign-id"
               label="Campaign ID"
@@ -320,8 +354,17 @@ export function ProductionSummaryView({
               onChange={(event) => {
                 setCampaignId(event.target.value);
                 setCampaignError(undefined);
+                setSummaryFeedback(null);
               }}
               error={campaignError}
+              announceError={false}
+              onBlur={() => {
+                setCampaignError(
+                  normalizeCampaignId(campaignId)
+                    ? undefined
+                    : "กรุณาระบุ Campaign ID",
+                );
+              }}
               hint="ระบุแคมเปญที่ต้องการดูยอดผลิต"
               placeholder="เช่น campaign-123"
               disabled={state.status === "loading"}
@@ -339,6 +382,17 @@ export function ProductionSummaryView({
             </div>
           </form>
         </section>
+
+        {summaryFeedback ? (
+          <p
+            className={styles.loadFeedback}
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {summaryFeedback}
+          </p>
+        ) : null}
 
         {inlineError ? (
           <Notice tone="danger" role="alert" title="โหลดสรุปไม่สำเร็จ">
@@ -381,17 +435,17 @@ export function ProductionSummaryView({
             >
               <div>
                 <span className={styles.summaryLabel}>สินค้า</span>
-                <strong>{state.summary.products.length}</strong>
+                <strong data-numeric>{state.summary.products.length}</strong>
               </div>
               <div>
                 <span className={styles.summaryLabel}>ตัวเลือกสินค้า</span>
-                <strong>{totalVariants}</strong>
+                <strong data-numeric>{totalVariants}</strong>
               </div>
               <div>
                 <span className={styles.summaryLabel}>
                   จำนวนรวมที่ต้องผลิต
                 </span>
-                <strong>{totalQuantity.toLocaleString("th-TH")}</strong>
+                <strong data-numeric>{totalQuantity.toLocaleString("th-TH")}</strong>
               </div>
             </section>
 
@@ -442,7 +496,7 @@ export function ProductionSummaryView({
                           </div>
                           <div className={styles.productTotal}>
                             <span>รวม</span>
-                            <strong>
+                            <strong data-numeric>
                               {productQuantity.toLocaleString("th-TH")}
                             </strong>
                           </div>
@@ -467,7 +521,7 @@ export function ProductionSummaryView({
                                 <span className={styles.quantityLabel}>
                                   จำนวนที่ต้องผลิต
                                 </span>
-                                <strong>
+                                <strong data-numeric>
                                   {variant.quantity.toLocaleString("th-TH")}
                                 </strong>
                               </div>

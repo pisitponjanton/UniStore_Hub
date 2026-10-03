@@ -55,6 +55,29 @@ describe("CampaignLifecycleActions", () => {
     vi.clearAllMocks();
   });
 
+  it("shows current state, next valid action, and textual step state without color-only meaning", () => {
+    render(
+      <CampaignLifecycleActions
+        organizationId="org-1"
+        campaign={campaign("PRODUCING")}
+        onCampaignChanged={vi.fn()}
+      />,
+    );
+
+    const summary = screen.getByLabelText("สถานะและขั้นตอนถัดไป");
+    expect(summary).toHaveTextContent("สถานะปัจจุบัน");
+    expect(summary).toHaveTextContent("กำลังผลิต");
+    expect(summary).toHaveTextContent("ขั้นตอนถัดไป");
+    expect(summary).toHaveTextContent("แจ้งพร้อมรับสินค้า");
+
+    const lifecycle = screen.getByRole("list", {
+      name: "ลำดับสถานะแคมเปญ",
+    });
+    expect(within(lifecycle).getAllByText("เสร็จแล้ว")).toHaveLength(3);
+    expect(within(lifecycle).getByText("สถานะปัจจุบัน")).toBeInTheDocument();
+    expect(lifecycle).not.toHaveTextContent("✓");
+  });
+
   it("shows only DRAFT actions, confirms open, and applies the server-returned status", async () => {
     const opened = campaign("OPEN");
     mocks.transition.mockResolvedValue(opened);

@@ -185,7 +185,6 @@ export function MyOrdersView() {
       <main className={styles.main}>
         <header className={styles.header}>
           <div className={styles.headerCopy}>
-            <span className={styles.pageKicker}>บัญชีของฉัน</span>
             <h1 className={styles.title}>คำสั่งซื้อของฉัน</h1>
             <p className={styles.description}>
               เริ่มจากรายการที่ต้องทำต่อ แล้วค่อยเปิดดูรายละเอียดของแต่ละคำสั่งซื้อ
@@ -201,19 +200,21 @@ export function MyOrdersView() {
           aria-label="ภาพรวมคำสั่งซื้อที่โหลดอยู่"
         >
           <div className={styles.overviewPrimary}>
-            <span className={styles.overviewMarker} aria-hidden="true" />
-            <div>
-              <span className={styles.summaryLabel}>รายการที่ต้องทำต่อ</span>
-              <strong data-numeric>{attentionCount}</strong>
-            </div>
+            <span className={styles.summaryLabel}>รายการที่ต้องทำต่อ</span>
+            <strong data-numeric>{attentionCount}</strong>
           </div>
           <p className={styles.overviewDescription}>
             {attentionCount > 0
               ? "รายการที่มีขั้นตอนให้คุณดำเนินการจะถูกทำให้เห็นเด่นขึ้นด้านล่าง"
               : "ยังไม่มีคำสั่งซื้อที่ต้องดำเนินการจากคุณในรายการที่โหลดอยู่"}
           </p>
-          <div className={styles.overviewLoaded}>
-            <span className={styles.summaryLabel}>โหลดแล้ว</span>
+          <div
+            className={styles.overviewLoaded}
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            <span className={styles.summaryLabel}>รายการที่แสดง</span>
             <strong data-numeric>{state.items.length} รายการ</strong>
           </div>
         </section>
@@ -221,7 +222,6 @@ export function MyOrdersView() {
         <section className={styles.orderLedger} aria-label="รายการคำสั่งซื้อ">
           <div className={styles.ledgerHeading}>
             <div>
-              <span className={styles.pageKicker}>รายการล่าสุด</span>
               <h2>ติดตามสถานะและขั้นตอนถัดไป</h2>
             </div>
             <span className={styles.ledgerHint}>
@@ -238,14 +238,15 @@ export function MyOrdersView() {
                 <article
                   className={styles.orderRow}
                   data-needs-action={needsAction || undefined}
+                  aria-label={`คำสั่งซื้อ ${order.orderId}`}
                   key={order.orderId}
                 >
                   <div className={styles.orderPrimary}>
                     <div className={styles.orderTopline}>
                       <OrderStatusBadge status={order.status} />
-                      <span className={styles.orderMeta}>
-                        {formatIsoDateTime(order.updatedAt)}
-                      </span>
+                      <time className={styles.orderMeta} dateTime={order.updatedAt}>
+                        อัปเดต {formatIsoDateTime(order.updatedAt)}
+                      </time>
                     </div>
 
                     <div className={styles.orderIdentity}>
@@ -264,9 +265,12 @@ export function MyOrdersView() {
                     <strong className={styles.amountValue} data-numeric>
                       {formatSatang(order.total)}
                     </strong>
-                    <span className={styles.orderCreated}>
+                    <time
+                      className={styles.orderCreated}
+                      dateTime={order.createdAt}
+                    >
                       สร้าง {formatIsoDateTime(order.createdAt)}
-                    </span>
+                    </time>
                   </div>
 
                   <Link
@@ -276,6 +280,7 @@ export function MyOrdersView() {
                         ? styles.detailLinkPrimary
                         : styles.detailLink
                     }
+                    aria-label={`${needsAction ? "ดำเนินการต่อ" : "ดูรายละเอียด"} คำสั่งซื้อ ${order.orderId}`}
                   >
                     {needsAction ? "ดำเนินการต่อ" : "ดูรายละเอียด"}
                   </Link>

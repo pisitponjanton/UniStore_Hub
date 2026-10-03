@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { StoreDTO } from "@/types";
@@ -120,5 +120,22 @@ describe("StoreManagementView", () => {
     expect(
       await screen.findByText("บันทึกข้อมูลร้านค้า Updated Store แล้ว"),
     ).toBeInTheDocument();
+  });
+
+  it("focuses a validation summary when a store is submitted without a name", async () => {
+    render(<StoreManagementView organizationId="org-1" />);
+
+    await screen.findByText("Main Store");
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "สร้างร้านค้า" }),
+    );
+
+    const summary = await screen.findByRole("alert");
+    expect(
+      screen.getByRole("link", { name: "กรุณาระบุชื่อร้านค้า" }),
+    ).toHaveAttribute("href", "#store-create-name");
+    await waitFor(() => expect(summary).toHaveFocus());
+    expect(mocks.create).not.toHaveBeenCalled();
   });
 });
