@@ -42,10 +42,12 @@ Read before implementation:
 For any user-facing UI/UX work, also read:
 
 6. `.agents/skills/interface-design/SKILL.md`
-7. `.interface-design/system.md` when it exists
+7. `.agents/skills/ui-ux-pro-max/SKILL.md`
+8. `.interface-design/system.md` when it exists
 
 Then load the task-specific UX/UI skill when applicable:
 
+- UI structure, style selection, responsive/interaction guidance, typography/color, or stack-specific UI decisions → `.agents/skills/ui-ux-pro-max/SKILL.md` and its local search tool
 - UI/UX audit or heuristic review → `.agents/skills/design-review/SKILL.md`
 - redesign/polish of an existing working screen or flow → `.agents/skills/redesign/SKILL.md`
 - visual-direction work or reducing generic/template-like UI → `.agents/skills/frontend-design/SKILL.md`
@@ -67,7 +69,7 @@ when the file exists. This is the Frontend Agent's local inspection/handoff repo
 
 ## UI / UX Skills
 
-The Frontend Agent uses vendored Markdown-based UX/UI skills under:
+The Frontend Agent uses project-local vendored UX/UI skills under:
 
 ```text
 .agents/skills/
@@ -76,6 +78,7 @@ The Frontend Agent uses vendored Markdown-based UX/UI skills under:
 Available UX/UI skills:
 
 - `interface-design/SKILL.md` — primary product-interface craft, hierarchy, tokens, states, responsive behavior, and design-system consistency
+- `ui-ux-pro-max/SKILL.md` — searchable design intelligence for style/product fit, color, typography, UX patterns, icons, motion, charts, and stack-specific guidance
 - `design-review/SKILL.md` — audit/heuristic review before redesign
 - `redesign/SKILL.md` — audit-first redesign of existing working UI while preserving behavior
 - `frontend-design/SKILL.md` — visual direction, typography, composition, and reducing generic/template-like design
@@ -93,6 +96,7 @@ For substantial redesign work, use this sequence unless the task clearly needs o
 
 ```text
 interface-design + .interface-design/system.md
+→ ui-ux-pro-max search/design guidance
 → design-review
 → redesign
 → frontend-design
@@ -134,16 +138,26 @@ If a skill recommendation conflicts with canonical project docs/contracts, the c
 
 Do not change business behavior merely to make a redesign easier.
 
-### Markdown-only Skill Installation
+### UI/UX Pro Max Local Tooling
 
-The vendored UX/UI skill set is Markdown-only.
+The `ui-ux-pro-max` skill is installed with its searchable local dataset and Python scripts under:
 
-If an upstream skill references an executable script that is not installed locally:
+```text
+.agents/skills/ui-ux-pro-max/
+├── data/
+├── references/
+└── scripts/
+```
 
-- do not fabricate its output
-- do not claim a measured result that was not actually measured
-- use available project/browser/test tooling when possible
-- otherwise report the item as not measured yet
+For substantial visual-direction work, run the local `--design-system` search before implementation. For targeted concerns, use one explicit `--domain` or `--stack` query as described in the skill. Run from the `frontend` workspace root, for example:
+
+```bash
+python3 .agents/skills/ui-ux-pro-max/scripts/search.py "campus commerce operational dashboard" --design-system -p "UniStore Hub"
+python3 .agents/skills/ui-ux-pro-max/scripts/search.py "keyboard focus modal" --domain ux
+python3 .agents/skills/ui-ux-pro-max/scripts/search.py "responsive forms navigation" --stack nextjs
+```
+
+Use search results as design evidence, not as authority over project contracts. Never fabricate a search result; if a query returns no relevant result, retry once as instructed by the skill and then fall back to documented project guidance.
 
 ## Responsibilities
 
