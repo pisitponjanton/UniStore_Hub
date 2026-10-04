@@ -96,7 +96,9 @@ describe("PlatformOrganizationsView", () => {
     const rows = Array.from(list.querySelectorAll("article"));
 
     expect(rows[0]).toHaveTextContent("Pending Store");
-    expect(rows[1]).toHaveTextContent("Active Store");
+    expect(
+      screen.getByText("ตรวจข้อมูลก่อนอนุมัติหรือระงับ"),
+    ).toBeInTheDocument();
     expect(
       screen.getByLabelText("ขอบเขตสิทธิ์ Platform Admin"),
     ).toHaveTextContent("อนุมัติและระงับหน่วยงานระดับ Platform");

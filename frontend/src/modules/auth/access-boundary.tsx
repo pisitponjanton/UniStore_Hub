@@ -48,16 +48,22 @@ export function AuthenticatedBoundary({
   }, [requestError]);
 
   if (apiFailure === "forbidden") {
-    return <ForbiddenState />;
+    return <ForbiddenState headingLevel={1} />;
   }
 
   if (apiFailure === "unauthorized") {
-    return <UnauthorizedState actions={<LoginAction />} />;
+    return (
+      <UnauthorizedState
+        headingLevel={1}
+        actions={<LoginAction />}
+      />
+    );
   }
 
   if (auth.status === "loading") {
     return (
       <LoadingState
+        headingLevel={1}
         title="กำลังตรวจสอบบัญชี"
         description="กำลังตรวจสอบ Session ก่อนเปิดหน้านี้"
       />
@@ -65,7 +71,12 @@ export function AuthenticatedBoundary({
   }
 
   if (auth.status === "anonymous") {
-    return <UnauthorizedState actions={<LoginAction />} />;
+    return (
+      <UnauthorizedState
+        headingLevel={1}
+        actions={<LoginAction />}
+      />
+    );
   }
 
   return children;
@@ -92,19 +103,34 @@ export function OrganizationBoundary({
   }, [requestError]);
 
   if (apiFailure === "forbidden") {
-    return <ForbiddenState />;
+    return <ForbiddenState headingLevel={1} />;
   }
 
   if (apiFailure === "unauthorized") {
-    return <UnauthorizedState actions={<LoginAction />} />;
+    return (
+      <UnauthorizedState
+        headingLevel={1}
+        actions={<LoginAction />}
+      />
+    );
   }
 
   if (auth.status === "loading") {
-    return <LoadingState title="กำลังตรวจสอบสิทธิ์ของหน่วยงาน" />;
+    return (
+      <LoadingState
+        headingLevel={1}
+        title="กำลังตรวจสอบสิทธิ์ของหน่วยงาน"
+      />
+    );
   }
 
   if (auth.status === "anonymous") {
-    return <UnauthorizedState actions={<LoginAction />} />;
+    return (
+      <UnauthorizedState
+        headingLevel={1}
+        actions={<LoginAction />}
+      />
+    );
   }
 
   const access = resolveOrganizationAccess(
@@ -116,6 +142,7 @@ export function OrganizationBoundary({
   if (access.status === "missing") {
     return (
       <ErrorState
+        headingLevel={1}
         title="ลิงก์ไม่สมบูรณ์"
         description="ไม่พบ organizationId ที่จำเป็นสำหรับหน้านี้"
         actions={
@@ -128,7 +155,7 @@ export function OrganizationBoundary({
   }
 
   if (access.status === "forbidden") {
-    return <ForbiddenState />;
+    return <ForbiddenState headingLevel={1} />;
   }
 
   return children;
@@ -151,23 +178,38 @@ export function PlatformAdminBoundary({
   }, [requestError]);
 
   if (apiFailure === "forbidden") {
-    return <ForbiddenState />;
+    return <ForbiddenState headingLevel={1} />;
   }
 
   if (apiFailure === "unauthorized") {
-    return <UnauthorizedState actions={<LoginAction />} />;
+    return (
+      <UnauthorizedState
+        headingLevel={1}
+        actions={<LoginAction />}
+      />
+    );
   }
 
   if (auth.status === "loading") {
-    return <LoadingState title="กำลังตรวจสอบสิทธิ์ Platform Admin" />;
+    return (
+      <LoadingState
+        headingLevel={1}
+        title="กำลังตรวจสอบสิทธิ์ Platform Admin"
+      />
+    );
   }
 
   if (auth.status === "anonymous") {
-    return <UnauthorizedState actions={<LoginAction />} />;
+    return (
+      <UnauthorizedState
+        headingLevel={1}
+        actions={<LoginAction />}
+      />
+    );
   }
 
   if (auth.user.platformRole !== "PLATFORM_ADMIN") {
-    return <ForbiddenState />;
+    return <ForbiddenState headingLevel={1} />;
   }
 
   return children;

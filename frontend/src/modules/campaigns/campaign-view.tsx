@@ -29,6 +29,7 @@ import {
 import { formatIsoDateTime } from "@/utils";
 
 import { CampaignLifecycleActions } from "./campaign-lifecycle-actions";
+import { lifecycleActionsForStatus } from "./campaign-lifecycle";
 import {
   campaignStatusLabel,
   campaignToFormValues,
@@ -784,7 +785,9 @@ export function CampaignManagementView({
                     selectedCampaign?.campaignId === campaign.campaignId;
                   const loading =
                     loadingCampaignId === campaign.campaignId;
-
+                  const nextAction = lifecycleActionsForStatus(
+                    campaign.status,
+                  ).find((action) => !action.danger);
                   return (
                     <article
                       className={[
@@ -818,6 +821,19 @@ export function CampaignManagementView({
                           <span className={styles.meta}>
                             ปิดตามแผน: <ScheduleValue value={campaign.closeAt} />
                           </span>
+                        </div>
+
+                        <div className={styles.nextAction}>
+                          <span className={styles.nextActionLabel}>ขั้นตอนถัดไป</span>
+                          <strong>
+                            {nextAction
+                              ? nextAction.label
+                              : campaign.status === "COMPLETED"
+                                ? "เสร็จสิ้นแล้ว"
+                                : campaign.status === "CANCELLED"
+                                  ? "ยกเลิกแล้ว"
+                                  : "ไม่มีขั้นตอนถัดไป"}
+                          </strong>
                         </div>
                       </div>
 

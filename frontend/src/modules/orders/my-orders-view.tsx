@@ -43,6 +43,7 @@ type OrdersState =
 export function MyOrdersView() {
   const [state, setState] = useState<OrdersState>({ status: "loading" });
   const [loadingMore, setLoadingMore] = useState(false);
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const [loadMoreError, setLoadMoreError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -97,7 +98,7 @@ export function MyOrdersView() {
     void loadInitialOrders();
 
     return () => controller.abort();
-  }, []);
+  }, [loadAttempt]);
 
   async function handleLoadMore() {
     if (
@@ -171,8 +172,20 @@ export function MyOrdersView() {
           {state.status === "error" ? (
             <ErrorState
               title="ไม่สามารถโหลดคำสั่งซื้อได้"
-              description="กรุณาลองโหลดหน้านี้ใหม่อีกครั้ง"
-              actions={<Link href="/">กลับหน้าร้าน</Link>}
+              description="ลองดึงสถานะล่าสุดอีกครั้ง หรือกลับไปเลือกสินค้าจากหน้าร้าน"
+              actions={
+                <>
+                  <Button
+                    onClick={() => {
+                      setState({ status: "loading" });
+                      setLoadAttempt((attempt) => attempt + 1);
+                    }}
+                  >
+                    ลองโหลดอีกครั้ง
+                  </Button>
+                  <Link href="/">กลับหน้าร้าน</Link>
+                </>
+              }
             />
           ) : null}
         </main>
@@ -199,7 +212,10 @@ export function MyOrdersView() {
           className={styles.orderOverview}
           aria-label="ภาพรวมคำสั่งซื้อที่โหลดอยู่"
         >
-          <div className={styles.overviewPrimary}>
+          <div
+            className={styles.overviewPrimary}
+            data-has-attention={attentionCount > 0 || undefined}
+          >
             <span className={styles.summaryLabel}>รายการที่ต้องทำต่อ</span>
             <strong data-numeric>{attentionCount}</strong>
           </div>

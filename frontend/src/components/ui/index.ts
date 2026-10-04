@@ -3,6 +3,7 @@ export * from "./button";
 export * from "./card";
 export * from "./dialog";
 export * from "./fields";
+export * from "./media";
 export * from "./operational";
 export * from "./state-panel";
 export * from "./table";

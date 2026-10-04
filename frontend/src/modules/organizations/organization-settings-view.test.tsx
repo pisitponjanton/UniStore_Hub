@@ -78,6 +78,23 @@ describe("OrganizationSettingsView", () => {
     expect(screen.getByText("รออนุมัติ")).toBeInTheDocument();
   });
 
+  it("retries loading organization settings in place after a recoverable error", async () => {
+    mocks.get
+      .mockRejectedValueOnce(new Error("network"))
+      .mockResolvedValueOnce(organization);
+
+    render(<OrganizationSettingsView organizationId="org-1" />);
+
+    fireEvent.click(
+      await screen.findByRole("button", { name: "ลองโหลดอีกครั้ง" }),
+    );
+
+    expect(mocks.get).toHaveBeenCalledTimes(2);
+    expect(
+      await screen.findByRole("heading", { name: "ตั้งค่าหน่วยงาน" }),
+    ).toBeInTheDocument();
+  });
+
   it("reports invalid editable data through a focusable error summary", async () => {
     mocks.get.mockResolvedValue(organization);
 

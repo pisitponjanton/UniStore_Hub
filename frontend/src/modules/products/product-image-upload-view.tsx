@@ -206,6 +206,24 @@ export function ProductImageUploadView({
         </Badge>
       </div>
 
+      <div className={styles.currentMedia}>
+        {product.imageUrl ? (
+          // Backend supplies this short-lived Product image URL for display only.
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            className={styles.currentImage}
+            src={product.imageUrl}
+            alt={`รูปสินค้าปัจจุบันของ ${product.name}`}
+            loading="lazy"
+            decoding="async"
+          />
+        ) : (
+          <span className={styles.currentFallback}>
+            ยังไม่มีรูปสินค้า อัปโหลดรูปเพื่อช่วยให้สินค้าจดจำได้ง่ายขึ้นในหน้าร้าน
+          </span>
+        )}
+      </div>
+
       <FileField
         id={`product-image-${product.productId}`}
         label="เลือกรูปสินค้า"

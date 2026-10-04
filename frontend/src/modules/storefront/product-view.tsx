@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-
 import {
   ErrorState,
   LoadingState,
+  MediaFallback,
   Notice,
   SelectField,
   TextField,
@@ -202,6 +202,10 @@ export function ProductView() {
   const requestedCampaignMissing =
     state.requestedCampaignId !== null &&
     !findCampaign(campaigns, state.requestedCampaignId);
+  const startingPrice =
+    variants.length > 0
+      ? Math.min(...variants.map((variant) => variant.price))
+      : null;
   const orderHref =
     selection?.variant &&
     selection.campaign &&
@@ -239,9 +243,11 @@ export function ProductView() {
                 decoding="async"
               />
             ) : (
-              <div className={styles.productDetailPlaceholder}>
-                ยังไม่มีรูปสินค้า
-              </div>
+              <MediaFallback
+                variant="product"
+                label="ยังไม่มีรูปสินค้า"
+                className={styles.productDetailPlaceholder}
+              />
             )}
           </div>
 
@@ -259,6 +265,25 @@ export function ProductView() {
                 </p>
               )}
             </div>
+
+            <dl className={styles.productFacts} aria-label="ข้อมูลสินค้าสำหรับการสั่งซื้อ">
+              <div>
+                <dt>ตัวเลือกสินค้า</dt>
+                <dd data-numeric>{variants.length}</dd>
+              </div>
+              <div>
+                <dt>ราคาเริ่มต้น</dt>
+                <dd data-numeric>
+                  {startingPrice === null
+                    ? "ยังไม่มีราคา"
+                    : formatSatang(startingPrice)}
+                </dd>
+              </div>
+              <div>
+                <dt>แคมเปญที่พบ</dt>
+                <dd data-numeric>{campaigns.length}</dd>
+              </div>
+            </dl>
 
             {variants.length > 0 ? (
               <div className={styles.selectionPanel}>

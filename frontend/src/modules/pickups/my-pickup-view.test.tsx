@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { OrderDTO, PickupDTO } from "@/types";
@@ -106,6 +106,43 @@ describe("MyPickupView", () => {
       "abcdefghijklmnopqrstuv",
     );
     expect(screen.getAllByText("พร้อมรับสินค้า").length).toBeGreaterThan(0);
+  });
+
+  it("rechecks the latest order state in place without a full-page reload", async () => {
+    mocks.getMyOrder
+      .mockResolvedValueOnce(makeOrder({ status: "IN_PRODUCTION" }))
+      .mockResolvedValueOnce(makeOrder({ status: "READY_FOR_PICKUP" }));
+    mocks.getMyPickup.mockResolvedValue(makePickup());
+
+    render(<MyPickupView />);
+
+    fireEvent.click(
+      await screen.findByRole("button", { name: "ตรวจสอบสถานะล่าสุด" }),
+    );
+
+    expect(
+      await screen.findByText("abcdefghijklmnopqrstuv"),
+    ).toBeInTheDocument();
+    expect(mocks.getMyOrder).toHaveBeenCalledTimes(2);
+    expect(mocks.getMyPickup).toHaveBeenCalledTimes(1);
+  });
+
+  it("retries a recoverable pickup load error in place", async () => {
+    mocks.getMyOrder
+      .mockRejectedValueOnce(new Error("network"))
+      .mockResolvedValueOnce(makeOrder());
+    mocks.getMyPickup.mockResolvedValue(makePickup());
+
+    render(<MyPickupView />);
+
+    fireEvent.click(
+      await screen.findByRole("button", { name: "ลองโหลดอีกครั้ง" }),
+    );
+
+    expect(mocks.getMyOrder).toHaveBeenCalledTimes(2);
+    expect(
+      await screen.findByText("abcdefghijklmnopqrstuv"),
+    ).toBeInTheDocument();
   });
 
   it("keeps the backend token usable when local QR generation fails", async () => {

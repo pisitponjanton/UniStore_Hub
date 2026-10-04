@@ -559,3 +559,278 @@
     width: 100%;
   }
 }
+
+/* Phase 19 v3 pickup verification workbench */
+.page {
+  background: var(--gradient-ops-canvas);
+}
+
+.header {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(26px, 4vw, 42px);
+  border: 1px solid color-mix(in srgb, var(--brand) 16%, var(--line-soft));
+  border-radius: var(--radius-feature);
+  background: var(--gradient-brand-soft);
+  box-shadow: var(--shadow-raised);
+}
+
+.header::after {
+  content: "";
+  position: absolute;
+  right: -40px;
+  top: -70px;
+  width: 160px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent-mint) 48%, transparent);
+  pointer-events: none;
+}
+
+.headerCopy {
+  position: relative;
+  z-index: 1;
+}
+
+.summaryStrip {
+  gap: var(--space-3);
+  border-block: 0;
+}
+
+.summaryStrip > div,
+.summaryStrip > div:first-child,
+.summaryStrip > div:last-child {
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.summaryStrip > div:nth-child(2) {
+  background: color-mix(in srgb, var(--success-soft) 68%, var(--surface));
+}
+
+.summaryStrip > div:nth-child(3) {
+  background: color-mix(in srgb, var(--brand-soft) 42%, var(--surface));
+}
+
+.filterPanel {
+  border-color: color-mix(in srgb, var(--brand) 12%, var(--line-soft));
+  border-radius: var(--radius-feature);
+  box-shadow: var(--shadow-raised);
+}
+
+.list {
+  gap: var(--space-3);
+  border-top: 0;
+}
+
+.row {
+  position: relative;
+  overflow: hidden;
+  padding: var(--space-5);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-row);
+  transition:
+    transform var(--motion-fast) var(--motion-ease-out),
+    box-shadow var(--motion-fast) var(--motion-ease-out),
+    border-color var(--motion-fast) var(--motion-ease-out);
+}
+
+.row::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--brand);
+  opacity: .18;
+}
+
+.row:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--brand) 20%, var(--line-soft));
+  box-shadow: var(--shadow-raised);
+}
+
+.row[data-attention="true"] {
+  border-color: color-mix(in srgb, var(--success) 30%, var(--line-soft));
+  background: color-mix(in srgb, var(--success-soft) 42%, var(--surface));
+  box-shadow: var(--shadow-raised);
+}
+
+.row[data-attention="true"]::before {
+  background: var(--success);
+  opacity: 1;
+}
+
+.rowSelected,
+.rowSelected[data-attention="true"] {
+  border-color: var(--campus-line);
+  background: color-mix(in srgb, var(--brand-soft) 38%, var(--surface));
+  box-shadow: var(--shadow-feature);
+}
+
+.queuePriority {
+  width: fit-content;
+  max-width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  padding: 7px 10px;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--success-soft) 72%, var(--surface));
+}
+
+.queuePriorityLabel {
+  color: var(--success);
+  font-size: var(--text-caption);
+  font-weight: 700;
+}
+
+.queuePriority strong {
+  color: var(--ink);
+  font-size: var(--text-body-sm);
+  font-weight: 680;
+}
+
+.detailPanel {
+  overflow: hidden;
+  border-color: var(--campus-line);
+  border-radius: var(--radius-feature);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--brand-soft) 38%, var(--surface)) 0 110px, var(--surface) 110px);
+  box-shadow: var(--shadow-feature);
+}
+
+.detailPanel::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+  background: linear-gradient(90deg, var(--brand), var(--accent-mint), var(--accent-sky-strong));
+}
+
+.tokenPanel {
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--accent-mint) 28%, var(--surface));
+}
+
+.verificationGuide {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.verificationStep {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: var(--space-2);
+  align-items: start;
+  padding: var(--space-3);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-md);
+  background: var(--surface-inset);
+}
+
+.verificationStep > div {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.verificationStep strong {
+  color: var(--ink);
+  font-size: var(--text-body-sm);
+  font-weight: 680;
+}
+
+.verificationStep span:last-child {
+  color: var(--ink-secondary);
+  font-size: var(--text-caption);
+  line-height: 1.45;
+}
+
+.verificationIndex {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--brand-soft);
+  color: var(--brand-strong) !important;
+  font-family: var(--font-technical);
+  font-size: var(--text-caption) !important;
+  font-weight: 750;
+}
+
+.orderPanel {
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--accent-sky) 24%, var(--surface));
+}
+
+.orderSummary,
+.metaGrid {
+  gap: var(--space-2);
+  border-block: 0;
+}
+
+.orderSummary > div,
+.orderSummary > div:first-child,
+.orderSummary > div:last-child,
+.metaItem,
+.metaItem:nth-child(2n),
+.metaItem:nth-last-child(-n + 2) {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+
+.emptyDetail {
+  min-height: 260px;
+  border-radius: var(--radius-feature);
+  background: color-mix(in srgb, var(--brand-soft) 28%, var(--surface));
+}
+
+@media (max-width: 1080px) {
+  .verificationGuide {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 820px) {
+  .verificationGuide {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .header {
+    padding: var(--space-5);
+    border-radius: var(--radius-lg);
+  }
+
+  .summaryStrip > div,
+  .summaryStrip > div:first-child,
+  .summaryStrip > div:last-child {
+    padding: var(--space-4);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius-lg);
+  }
+
+  .queuePriority {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .row {
+    transition: none;
+  }
+
+  .row:hover {
+    transform: none;
+  }
+}

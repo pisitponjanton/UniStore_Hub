@@ -75,6 +75,7 @@ export function OrganizationSelectView() {
   const [loadState, setLoadState] = useState<LoadState>({
     status: "loading",
   });
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [nameError, setNameError] = useState<string | undefined>();
@@ -114,7 +115,7 @@ export function OrganizationSelectView() {
     void loadOrganizations();
 
     return () => controller.abort();
-  }, []);
+  }, [loadAttempt]);
 
   const accessible = useMemo(() => {
     if (
@@ -208,7 +209,7 @@ export function OrganizationSelectView() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <header className={styles.workspaceHeader}>
+        <header className={styles.workspaceHeader} data-workspace-state={loadState.status}>
           <div className={styles.headerCopy}>
             <h1 className={styles.title}>เลือกหน่วยงานที่จะทำงาน</h1>
             <p className={styles.description}>
@@ -262,7 +263,17 @@ export function OrganizationSelectView() {
             {loadState.status === "error" ? (
               <ErrorState
                 title="ไม่สามารถโหลดหน่วยงานได้"
-                description="กรุณาลองโหลดหน้านี้ใหม่อีกครั้ง"
+                description="ลองดึงหน่วยงานและสิทธิ์ล่าสุดอีกครั้ง"
+                actions={
+                  <Button
+                    onClick={() => {
+                      setLoadState({ status: "loading" });
+                      setLoadAttempt((attempt) => attempt + 1);
+                    }}
+                  >
+                    ลองโหลดอีกครั้ง
+                  </Button>
+                }
               />
             ) : null}
 

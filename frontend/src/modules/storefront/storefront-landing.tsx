@@ -3,8 +3,14 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
-import { EmptyState, ErrorState, LoadingState } from "@/components";
-
+import {
+  BrandIllustration,
+  Button,
+  EmptyState,
+  ErrorState,
+  LoadingState,
+  Skeleton,
+} from "@/components";
 import { StorefrontHeader } from "./storefront-header";
 import styles from "./storefront-landing.module.css";
 import {
@@ -29,6 +35,7 @@ function storeHref(organizationId: string, storeId: string): string {
 
 export function StorefrontLanding() {
   const [state, setState] = useState<LandingState>({ status: "loading" });
+  const [loadAttempt, setLoadAttempt] = useState(0);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -54,7 +61,7 @@ export function StorefrontLanding() {
       });
 
     return () => controller.abort();
-  }, []);
+  }, [loadAttempt]);
 
   const summary = useMemo(() => {
     if (state.status !== "success") {
@@ -68,6 +75,18 @@ export function StorefrontLanding() {
         0,
       ),
     };
+  }, [state]);
+
+  const discoveryStores = useMemo(() => {
+    if (state.status !== "success") {
+      return [];
+    }
+
+    return state.data
+      .flatMap(({ organization, stores }) =>
+        stores.map((store) => ({ organization, store })),
+      )
+      .slice(0, 4);
   }, [state]);
 
   return (
@@ -108,26 +127,82 @@ export function StorefrontLanding() {
             ) : null}
           </div>
 
-          <aside className={styles.heroGuide} aria-labelledby="storefront-guide-heading">
-            <h2 className={styles.heroGuideTitle} id="storefront-guide-heading">
-              ซื้อและติดตามในที่เดียว
-            </h2>
-            <ol className={styles.heroGuideList}>
-              <li>
-                <strong>เลือกร้าน</strong>
-                <span>เริ่มจากหน่วยงานและร้านที่เปิดให้เข้าชม</span>
-              </li>
-              <li>
-                <strong>ดูสินค้าและรอบขาย</strong>
-                <span>ตรวจสอบตัวเลือก ราคา และช่วงเวลาของแคมเปญก่อนสั่ง</span>
-              </li>
-              <li>
-                <strong>ติดตามหลังสั่งซื้อ</strong>
-                <span>ดูสถานะคำสั่งซื้อ การชำระเงิน และการรับสินค้าในบัญชีของคุณ</span>
-              </li>
-            </ol>
-          </aside>
+          <div className={styles.heroScene} aria-hidden="true">
+            <BrandIllustration
+              variant="market"
+              className={styles.heroSceneIllustration}
+              decorative
+            />
+          </div>
+
         </section>
+
+        <aside className={styles.heroGuide} aria-labelledby="storefront-guide-heading">
+          <h2 className={styles.heroGuideTitle} id="storefront-guide-heading">
+            ซื้อและติดตามในที่เดียว
+          </h2>
+          <ol className={styles.heroGuideList}>
+            <li>
+              <strong>เลือกร้าน</strong>
+              <span>เริ่มจากหน่วยงานและร้านที่เปิดให้เข้าชม</span>
+            </li>
+            <li>
+              <strong>ดูสินค้าและรอบขาย</strong>
+              <span>ตรวจสอบตัวเลือก ราคา และช่วงเวลาของแคมเปญก่อนสั่ง</span>
+            </li>
+            <li>
+              <strong>ติดตามหลังสั่งซื้อ</strong>
+              <span>ดูสถานะคำสั่งซื้อ การชำระเงิน และการรับสินค้าในบัญชีของคุณ</span>
+            </li>
+          </ol>
+        </aside>
+
+        {state.status === "success" && discoveryStores.length > 0 ? (
+          <section
+            className={styles.discovery}
+            aria-labelledby="storefront-discovery-heading"
+          >
+            <div className={styles.discoveryHeader}>
+              <div>
+                <span className={styles.discoveryLabel}>เริ่มสำรวจ</span>
+                <h2
+                  className={styles.discoveryTitle}
+                  id="storefront-discovery-heading"
+                >
+                  เลือกร้านจากพื้นที่ที่เปิดอยู่
+                </h2>
+              </div>
+              <a className={styles.discoveryJump} href="#storefront-heading">
+                ดูทุกร้าน
+              </a>
+            </div>
+
+            <div className={styles.discoveryGrid}>
+              {discoveryStores.map(({ organization, store }, index) => (
+                <Link
+                  key={store.storeId}
+                  href={storeHref(organization.organizationId, store.storeId)}
+                  className={styles.discoveryCard}
+                  data-size={index === 0 ? "feature" : "standard"}
+                >
+                  <span className={styles.discoveryCardIndex} aria-hidden="true">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <div className={styles.discoveryCardBody}>
+                    <span className={styles.discoveryOrganization}>
+                      {organization.name}
+                    </span>
+                    <h3 className={styles.discoveryStoreName}>{store.name}</h3>
+                    <p className={styles.discoveryStoreDescription}>
+                      {store.description || "ดูสินค้าและแคมเปญของร้านนี้"}
+                    </p>
+                  </div>
+                  <span className={styles.discoveryCardAction}>เข้าร้าน</span>
+                </Link>
+              ))}
+            </div>
+          </section>
+        ) : null}
 
         <section className={styles.catalog} aria-labelledby="storefront-heading">
           <div className={styles.catalogHeader}>
@@ -203,11 +278,20 @@ export function StorefrontLanding() {
         </section>
 
         {state.status === "loading" ? (
-          <div className={styles.stateWrap}>
-            <LoadingState
-              title="กำลังโหลดร้านค้า"
-              description="กำลังเตรียมรายการหน่วยงานและร้านค้าที่เปิดให้เข้าชม"
-            />
+          <div className={styles.loadingArea}>
+            <div className={styles.loadingPreview} aria-hidden="true">
+              <Skeleton shape="block" className={styles.loadingFeature} />
+              <div className={styles.loadingStack}>
+                <Skeleton shape="block" className={styles.loadingCard} />
+                <Skeleton shape="block" className={styles.loadingCard} />
+              </div>
+            </div>
+            <div className={styles.stateWrap}>
+              <LoadingState
+                title="กำลังโหลดร้านค้า"
+                description="กำลังเตรียมรายการหน่วยงานและร้านค้าที่เปิดให้เข้าชม"
+              />
+            </div>
           </div>
         ) : null}
 
@@ -215,6 +299,7 @@ export function StorefrontLanding() {
           <div className={styles.stateWrap}>
             <EmptyState
               title="ยังไม่มีร้านค้าที่เปิดให้เข้าชม"
+              media={<BrandIllustration variant="market" decorative />}
               description="เมื่อมีร้านค้าที่พร้อมให้ลูกค้าเข้าชม รายการจะปรากฏที่หน้านี้"
             />
           </div>
@@ -224,7 +309,17 @@ export function StorefrontLanding() {
           <div className={styles.stateWrap}>
             <ErrorState
               title="ไม่สามารถโหลดร้านค้าได้"
-              description="กรุณาตรวจสอบการเชื่อมต่อแล้วลองโหลดหน้านี้ใหม่"
+              description="กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง"
+              actions={
+                <Button
+                  onClick={() => {
+                    setState({ status: "loading" });
+                    setLoadAttempt((attempt) => attempt + 1);
+                  }}
+                >
+                  ลองโหลดอีกครั้ง
+                </Button>
+              }
             />
           </div>
         ) : null}

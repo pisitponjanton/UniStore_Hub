@@ -511,6 +511,15 @@ export function OrganizationOrdersView({
                         สร้างเมื่อ {formatIsoDateTime(order.createdAt)}
                       </time>
                     </div>
+
+                    {order.status === "PAYMENT_REVIEW" ? (
+                      <div className={styles.taskPriority} role="note">
+                        <span className={styles.taskPriorityLabel}>
+                          ต้องดำเนินการ
+                        </span>
+                        <strong>ตรวจหลักฐานการชำระเงิน</strong>
+                      </div>
+                    ) : null}
                   </div>
 
                   <div className={styles.rowAside}>

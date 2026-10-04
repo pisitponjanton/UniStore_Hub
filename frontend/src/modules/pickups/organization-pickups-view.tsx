@@ -753,6 +753,15 @@ export function OrganizationPickupsView({
                             อัปเดต {formatIsoDateTime(pickup.updatedAt)}
                           </time>
                         </div>
+
+                        {pickup.status === "READY" ? (
+                          <div className={styles.queuePriority} role="note">
+                            <span className={styles.queuePriorityLabel}>
+                              พร้อมดำเนินการ
+                            </span>
+                            <strong>ตรวจ Token และยืนยันการรับสินค้า</strong>
+                          </div>
+                        ) : null}
                       </div>
 
                       <div className={styles.cardActions}>
@@ -824,6 +833,41 @@ export function OrganizationPickupsView({
                     ตรวจให้ตรงกับ Token หรือ QR ที่ผู้รับแสดงก่อนยืนยัน
                   </span>
                 </div>
+
+                <section
+                  className={styles.verificationGuide}
+                  aria-label="ลำดับตรวจสอบก่อนยืนยันรับสินค้า"
+                >
+                  <div className={styles.verificationStep}>
+                    <span className={styles.verificationIndex} aria-hidden="true">1</span>
+                    <div>
+                      <strong>เทียบ Token หรือ QR</strong>
+                      <span>ตรวจให้ตรงกับข้อมูล Pickup ที่ระบบโหลดล่าสุด</span>
+                    </div>
+                  </div>
+                  <div className={styles.verificationStep}>
+                    <span className={styles.verificationIndex} aria-hidden="true">2</span>
+                    <div>
+                      <strong>ตรวจ Order ที่เกี่ยวข้อง</strong>
+                      <span>ตรวจผู้รับ แคมเปญ ยอดรวม และสถานะคำสั่งซื้อ</span>
+                    </div>
+                  </div>
+                  <div className={styles.verificationStep}>
+                    <span className={styles.verificationIndex} aria-hidden="true">3</span>
+                    <div>
+                      <strong>
+                        {selected.pickup.status === "READY"
+                          ? "ยืนยันเมื่อส่งมอบจริง"
+                          : "ยืนยันแล้ว"}
+                      </strong>
+                      <span>
+                        {selected.pickup.status === "READY"
+                          ? "ใช้ action ยืนยันหลังตรวจข้อมูลและส่งมอบสินค้าแล้ว"
+                          : "รายการนี้ไม่มี action ยืนยันซ้ำ"}
+                      </span>
+                    </div>
+                  </div>
+                </section>
 
                 <section
                   className={styles.orderPanel}

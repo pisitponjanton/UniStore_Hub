@@ -69,6 +69,22 @@ describe("storefront presenters", () => {
     );
   });
 
+
+  it("uses a generic accessible no-image fallback without inventing product media", () => {
+    render(
+      <ProductCard
+        organizationId="org-1"
+        product={{ ...product, imageUrl: null }}
+      />,
+    );
+
+    expect(screen.getByText("ยังไม่มีรูปสินค้า")).toBeInTheDocument();
+    expect(screen.queryByRole("img")).not.toBeInTheDocument();
+    expect(
+      document.querySelector('[data-illustration="product"]'),
+    ).toHaveAttribute("aria-hidden", "true");
+  });
+
   it("keeps campaign status visible alongside its schedule", () => {
     render(<CampaignCard campaign={campaign} />);
 

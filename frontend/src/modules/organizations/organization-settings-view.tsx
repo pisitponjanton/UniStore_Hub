@@ -67,6 +67,7 @@ export function OrganizationSettingsView({
   const [state, setState] = useState<SettingsState>({
     status: "loading",
   });
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [nameError, setNameError] = useState<string | undefined>();
@@ -129,7 +130,7 @@ export function OrganizationSettingsView({
     void loadOrganization();
 
     return () => controller.abort();
-  }, [organizationId]);
+  }, [organizationId, loadAttempt]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -208,8 +209,20 @@ export function OrganizationSettingsView({
           {state.status === "error" ? (
             <ErrorState
               title="ไม่สามารถโหลดข้อมูลหน่วยงานได้"
-              description="กรุณาลองโหลดหน้านี้ใหม่อีกครั้ง"
-              actions={<Link href="/org/select/">กลับไปเลือกหน่วยงาน</Link>}
+              description="ลองดึงข้อมูลหน่วยงานล่าสุดอีกครั้ง หรือกลับไปเลือกหน่วยงาน"
+              actions={
+                <>
+                  <Button
+                    onClick={() => {
+                      setState({ status: "loading" });
+                      setLoadAttempt((attempt) => attempt + 1);
+                    }}
+                  >
+                    ลองโหลดอีกครั้ง
+                  </Button>
+                  <Link href="/org/select/">กลับไปเลือกหน่วยงาน</Link>
+                </>
+              }
             />
           ) : null}
         </main>
@@ -225,7 +238,7 @@ export function OrganizationSettingsView({
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <header className={styles.settingsHeader}>
+        <header className={styles.settingsHeader} data-organization-status={organization.status}>
           <div className={styles.headerCopy}>
             <h1 className={styles.title}>ตั้งค่าหน่วยงาน</h1>
             <p className={styles.description}>

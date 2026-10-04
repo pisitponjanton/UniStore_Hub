@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import {
+  BrandIllustration,
   Button,
   EmptyState,
   ErrorState,
@@ -363,6 +364,7 @@ export function NotificationsView() {
         {state.status === "empty" ? (
           <EmptyState
             title="ไม่มีการแจ้งเตือน"
+            media={<BrandIllustration variant="notification" decorative />}
             description={
               filter === "all"
                 ? "เมื่อมีความคืบหน้าเรื่องการชำระเงินหรือรับสินค้า ระบบจะแจ้งที่นี่"

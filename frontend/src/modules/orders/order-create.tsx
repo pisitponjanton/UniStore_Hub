@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
-
 import {
   Button,
   ErrorState,
   ErrorSummary,
   LoadingState,
+  MediaFallback,
   Notice,
   TaskStatus,
   TextField,
@@ -72,6 +72,7 @@ export function OrderCreateView() {
     status: "loading",
   });
   const [quantityInput, setQuantityInput] = useState("1");
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const [quantityTouched, setQuantityTouched] = useState(false);
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const errorSummaryRef = useRef<HTMLDivElement>(null);
@@ -159,7 +160,7 @@ export function OrderCreateView() {
     void loadOrderContext();
 
     return () => controller.abort();
-  }, []);
+  }, [loadAttempt]);
 
   const orderContext = useMemo(() => {
     if (state.status !== "ready" && state.status !== "success") {
@@ -284,8 +285,20 @@ export function OrderCreateView() {
           {state.status === "error" ? (
             <ErrorState
               title="ไม่สามารถเตรียมคำสั่งซื้อได้"
-              description="กรุณาลองโหลดหน้านี้ใหม่อีกครั้ง"
-              actions={<Link href="/">กลับหน้าร้าน</Link>}
+              description="ลองโหลดข้อมูลสินค้าและรอบพรีออเดอร์อีกครั้ง หรือกลับไปเลือกสินค้าจากหน้าร้าน"
+              actions={
+                <>
+                  <Button
+                    onClick={() => {
+                      setState({ status: "loading" });
+                      setLoadAttempt((attempt) => attempt + 1);
+                    }}
+                  >
+                    ลองโหลดอีกครั้ง
+                  </Button>
+                  <Link href="/">กลับหน้าร้าน</Link>
+                </>
+              }
             />
           ) : null}
         </main>
@@ -445,20 +458,28 @@ export function OrderCreateView() {
                     decoding="async"
                   />
                 ) : (
-                  <div className={styles.productPlaceholder}>
-                    ยังไม่มีรูปสินค้า
-                  </div>
+                  <MediaFallback
+                    variant="product"
+                    label="ยังไม่มีรูปสินค้า"
+                    className={styles.productPlaceholder}
+                  />
                 )}
               </div>
 
               <div className={styles.productSummary}>
+                <span className={styles.storeName}>{data.store.name}</span>
                 <span className={styles.summaryLabel}>สินค้าที่เลือก</span>
                 <h2 className={styles.summaryTitle} id="order-summary">
                   {product.name}
                 </h2>
+                {product.description ? (
+                  <p className={styles.productDescription}>
+                    {product.description}
+                  </p>
+                ) : null}
                 {selection ? (
                   <span className={styles.variantName}>
-                    {selection.variant.name}
+                    ตัวเลือก {selection.variant.name}
                   </span>
                 ) : null}
               </div>
@@ -565,9 +586,17 @@ export function OrderCreateView() {
                   ? formatSatang(selection.estimate)
                   : "ยังไม่คำนวณ"}
               </output>
+              {selection ? (
+                <div className={styles.estimateBreakdown}>
+                  <span data-numeric>
+                    {formatSatang(selection.variant.price)} ×{" "}
+                    {selection.quantity ?? "—"}
+                  </span>
+                  <span>ราคาต่อชิ้น × จำนวน</span>
+                </div>
+              ) : null}
               <p className={styles.note}>
-                คำนวณจากราคาตัวเลือก × จำนวนที่กรอก
-                ระบบฝั่งเซิร์ฟเวอร์จะตรวจและบันทึกยอดจริงอีกครั้งเมื่อสร้างคำสั่งซื้อ
+                ระบบฝั่งเซิร์ฟเวอร์จะตรวจสินค้า ราคา และบันทึกยอดจริงอีกครั้งเมื่อสร้างคำสั่งซื้อ
               </p>
             </div>
 

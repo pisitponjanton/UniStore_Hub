@@ -369,3 +369,139 @@
     text-align: left;
   }
 }
+
+/* Phase 19 v3 production operations */
+.page {
+  background: var(--gradient-ops-canvas);
+}
+
+.header {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(26px, 4vw, 42px);
+  border: 1px solid color-mix(in srgb, var(--brand) 16%, var(--line-soft));
+  border-radius: var(--radius-feature);
+  background: var(--gradient-brand-soft);
+  box-shadow: var(--shadow-raised);
+}
+
+.header::after {
+  content: "";
+  position: absolute;
+  right: -36px;
+  top: -72px;
+  width: 160px;
+  aspect-ratio: 1;
+  border-radius: 48px;
+  background: color-mix(in srgb, var(--accent-mint) 42%, transparent);
+  transform: rotate(18deg);
+  pointer-events: none;
+}
+
+.headerCopy {
+  position: relative;
+  z-index: 1;
+}
+
+.campaignPanel {
+  border-color: color-mix(in srgb, var(--brand) 14%, var(--line-soft));
+  border-radius: var(--radius-feature);
+  background: var(--surface);
+  box-shadow: var(--shadow-raised);
+}
+
+.contextCode {
+  border-color: var(--campus-line);
+  border-radius: var(--radius-pill);
+  background: var(--brand-soft);
+  color: var(--brand-strong);
+}
+
+.summaryStrip {
+  gap: var(--space-3);
+  border-block: 0;
+}
+
+.summaryStrip > div,
+.summaryStrip > div:first-child,
+.summaryStrip > div:last-child {
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.summaryStrip > div:nth-child(2) {
+  background: color-mix(in srgb, var(--accent-sky) 36%, var(--surface));
+}
+
+.summaryStrip > div:last-child {
+  background: color-mix(in srgb, var(--accent-mint) 44%, var(--surface));
+}
+
+.productList {
+  gap: var(--space-4);
+  border-top: 0;
+}
+
+.productGroup {
+  overflow: hidden;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-feature);
+  background: var(--surface);
+  box-shadow: var(--shadow-raised);
+}
+
+.productHeader {
+  padding: var(--space-5);
+  border-bottom: 1px solid var(--line-soft);
+  background: color-mix(in srgb, var(--brand-soft) 32%, var(--surface));
+}
+
+.productTotal {
+  min-width: 124px;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.variantList {
+  gap: 0;
+}
+
+.variantRow {
+  padding: var(--space-4) var(--space-5);
+}
+
+.quantity {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--accent-yellow) 34%, var(--surface));
+}
+
+@media (max-width: 620px) {
+  .header {
+    padding: var(--space-5);
+    border-radius: var(--radius-lg);
+  }
+
+  .campaignPanel,
+  .productHeader,
+  .variantRow {
+    padding: var(--space-4);
+  }
+
+  .summaryStrip > div,
+  .summaryStrip > div:first-child,
+  .summaryStrip > div:last-child {
+    padding: var(--space-4);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius-lg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header::after {
+    transform: none;
+  }
+}

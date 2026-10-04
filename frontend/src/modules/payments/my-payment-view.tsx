@@ -104,6 +104,7 @@ export function MyPaymentView() {
     status: "loading",
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const [fileError, setFileError] = useState<string | null>(null);
   const [serverError, setServerError] = useState<string | null>(null);
   const [submitFeedback, setSubmitFeedback] = useState<string | null>(null);
@@ -197,7 +198,7 @@ export function MyPaymentView() {
     void loadOrder();
 
     return () => controller.abort();
-  }, []);
+  }, [loadAttempt]);
 
   function handleFileChange(file: File | null) {
     setSelectedFile(file);
@@ -341,8 +342,20 @@ export function MyPaymentView() {
           {state.status === "error" ? (
             <ErrorState
               title="ไม่สามารถโหลดข้อมูลการชำระเงินได้"
-              description="กรุณาลองโหลดหน้านี้ใหม่อีกครั้ง"
-              actions={<Link href="/my/orders/">กลับรายการคำสั่งซื้อ</Link>}
+              description="ลองดึงสถานะคำสั่งซื้อและหลักฐานล่าสุดอีกครั้ง หรือกลับไปดูรายการคำสั่งซื้อ"
+              actions={
+                <>
+                  <Button
+                    onClick={() => {
+                      setState({ status: "loading" });
+                      setLoadAttempt((attempt) => attempt + 1);
+                    }}
+                  >
+                    ลองโหลดอีกครั้ง
+                  </Button>
+                  <Link href="/my/orders/">กลับรายการคำสั่งซื้อ</Link>
+                </>
+              }
             />
           ) : null}
         </main>
@@ -362,7 +375,7 @@ export function MyPaymentView() {
           กลับรายละเอียดคำสั่งซื้อ
         </Link>
 
-        <header className={styles.header}>
+        <header className={styles.header} data-order-status={order.status}>
           <div className={styles.headerCopy}>
             <h1 className={styles.title}>ชำระและส่งหลักฐาน</h1>
             <p className={styles.description}>

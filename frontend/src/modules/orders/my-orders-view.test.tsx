@@ -81,6 +81,24 @@ describe("MyOrdersView", () => {
     );
   });
 
+  it("retries the initial order list in place after a recoverable error", async () => {
+    mocks.listMyOrders
+      .mockRejectedValueOnce(new Error("network"))
+      .mockResolvedValueOnce({
+        items: [makeOrder("order-retry")],
+        nextCursor: null,
+      });
+
+    render(<MyOrdersView />);
+
+    fireEvent.click(
+      await screen.findByRole("button", { name: "ลองโหลดอีกครั้ง" }),
+    );
+
+    expect(mocks.listMyOrders).toHaveBeenCalledTimes(2);
+    expect(await screen.findByText("order-retry")).toBeInTheDocument();
+  });
+
   it("announces a meaningful loaded-item count after loading another page", async () => {
     mocks.listMyOrders
       .mockResolvedValueOnce({

@@ -99,6 +99,21 @@ describe("OrganizationSelectView", () => {
     );
   });
 
+  it("retries loading accessible organizations in place after a recoverable error", async () => {
+    mocks.listAccessible
+      .mockRejectedValueOnce(new Error("network"))
+      .mockResolvedValueOnce([organization("org-1", "IT Club")]);
+
+    render(<OrganizationSelectView />);
+
+    fireEvent.click(
+      await screen.findByRole("button", { name: "ลองโหลดอีกครั้ง" }),
+    );
+
+    expect(mocks.listAccessible).toHaveBeenCalledTimes(2);
+    expect(await screen.findByText("IT Club")).toBeInTheDocument();
+  });
+
   it("shows a focusable validation summary before creating an unnamed organization", async () => {
     mocks.listAccessible.mockResolvedValue([
       organization("org-1", "IT Club"),

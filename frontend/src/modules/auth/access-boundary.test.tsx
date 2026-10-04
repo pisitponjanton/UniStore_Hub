@@ -70,7 +70,10 @@ describe("role-based access boundaries", () => {
     );
 
     expect(
-      screen.getByRole("heading", { name: "ไม่มีสิทธิ์เข้าถึง" }),
+      screen.getByRole("heading", {
+        level: 1,
+        name: "ไม่มีสิทธิ์เข้าถึง",
+      }),
     ).toBeInTheDocument();
     expect(
       screen.queryByText("admin-only-content"),
@@ -117,7 +120,10 @@ describe("role-based access boundaries", () => {
       screen.queryByText("platform-admin-content"),
     ).not.toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "ไม่มีสิทธิ์เข้าถึง" }),
+      screen.getByRole("heading", {
+        level: 1,
+        name: "ไม่มีสิทธิ์เข้าถึง",
+      }),
     ).toBeInTheDocument();
 
     mocks.useAuthSession.mockReturnValue(

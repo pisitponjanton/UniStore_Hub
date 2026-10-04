@@ -178,6 +178,26 @@ describe("OrderCreateView", () => {
     expect(mocks.createOrder).not.toHaveBeenCalled();
   });
 
+
+  it("retries loading the order context in place after a recoverable load error", async () => {
+    mocks.getProductView
+      .mockRejectedValueOnce(new Error("network"))
+      .mockResolvedValueOnce(productView);
+
+    render(<OrderCreateView />);
+
+    const retry = await screen.findByRole("button", {
+      name: "ลองโหลดอีกครั้ง",
+    });
+    fireEvent.click(retry);
+
+    expect(mocks.getProductView).toHaveBeenCalledTimes(2);
+    expect(
+      await screen.findByRole("heading", { name: "ตรวจสอบคำสั่งซื้อ" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("ร้านชมรม")).toBeInTheDocument();
+  });
+
   it("submits only identifiers and quantity, then presents the authoritative backend total", async () => {
     mocks.createOrder.mockResolvedValue(makeOrder());
 

@@ -22,6 +22,7 @@ export function AuthenticatedShell({
   if (auth.status === "loading") {
     return (
       <LoadingState
+        headingLevel={1}
         title="กำลังเตรียมพื้นที่ใช้งาน"
         description="กำลังตรวจสอบบัญชีและเมนูที่คุณสามารถเข้าถึงได้"
       />

@@ -133,6 +133,33 @@ describe("MyPaymentView", () => {
     );
   });
 
+  it("retries the payment context in place after a recoverable load error", async () => {
+    mocks.getMyOrder
+      .mockRejectedValueOnce(new Error("network"))
+      .mockResolvedValueOnce(makeOrder({ status: "PENDING_PAYMENT" }));
+    mocks.getMyPayment.mockRejectedValue(
+      new ApiClientError({
+        status: 404,
+        code: "PAYMENT_NOT_FOUND",
+        kind: "notFound",
+      }),
+    );
+
+    render(<MyPaymentView />);
+
+    fireEvent.click(
+      await screen.findByRole("button", { name: "ลองโหลดอีกครั้ง" }),
+    );
+
+    expect(mocks.getMyOrder).toHaveBeenCalledTimes(2);
+    expect(
+      await screen.findByRole("heading", { name: "ชำระและส่งหลักฐาน" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "ส่งหลักฐานการชำระเงิน" }),
+    ).toBeEnabled();
+  });
+
   it("keeps submit available and focuses the file field when no proof is selected", async () => {
     mocks.getMyOrder.mockResolvedValue(
       makeOrder({ status: "PENDING_PAYMENT" }),

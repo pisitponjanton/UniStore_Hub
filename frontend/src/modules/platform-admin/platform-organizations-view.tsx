@@ -430,6 +430,15 @@ export function PlatformOrganizationsView() {
                           </dd>
                         </div>
                       </dl>
+
+                      {organization.status === "PENDING" ? (
+                        <div className={styles.governancePriority} role="note">
+                          <span className={styles.governancePriorityLabel}>
+                            ต้องตัดสินใจ
+                          </span>
+                          <strong>ตรวจข้อมูลก่อนอนุมัติหรือระงับ</strong>
+                        </div>
+                      ) : null}
                     </div>
 
                     <div

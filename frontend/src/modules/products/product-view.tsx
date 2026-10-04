@@ -606,6 +606,24 @@ export function ProductManagementView({
                       key={product.productId}
                       aria-current={selected ? "true" : undefined}
                     >
+                      <div className={styles.productMedia}>
+                        {product.imageUrl ? (
+                          // Backend supplies this short-lived Product image URL for display only.
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            className={styles.productImage}
+                            src={product.imageUrl}
+                            alt={`รูปสินค้า ${product.name}`}
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        ) : (
+                          <span className={styles.productFallback} aria-hidden="true">
+                            {product.name.trim().charAt(0) || "U"}
+                          </span>
+                        )}
+                      </div>
+
                       <div className={styles.rowMain}>
                         <div className={styles.rowHeading}>
                           <h3 className={styles.cardTitle}>

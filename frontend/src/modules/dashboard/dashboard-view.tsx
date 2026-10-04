@@ -84,6 +84,7 @@ export function DashboardView({
   const [state, setState] = useState<DashboardState>({
     status: "loading",
   });
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const [draftCampaignId, setDraftCampaignId] = useState("");
   const [draftStoreId, setDraftStoreId] = useState("");
   const [appliedFilters, setAppliedFilters] =
@@ -139,7 +140,7 @@ export function DashboardView({
     void loadInitial();
 
     return () => controller.abort();
-  }, [organizationId]);
+  }, [organizationId, loadAttempt]);
 
   async function loadWithFilters(filters: ReportFilters) {
     setFiltering(true);
@@ -222,7 +223,17 @@ export function DashboardView({
           {state.status === "error" ? (
             <ErrorState
               title="ไม่สามารถโหลดแดชบอร์ดได้"
-              description="กรุณาลองโหลดหน้านี้ใหม่อีกครั้ง"
+              description="ลองดึงรายงานล่าสุดของหน่วยงานนี้อีกครั้ง"
+              actions={
+                <Button
+                  onClick={() => {
+                    setState({ status: "loading" });
+                    setLoadAttempt((attempt) => attempt + 1);
+                  }}
+                >
+                  ลองโหลดอีกครั้ง
+                </Button>
+              }
             />
           ) : null}
         </main>
@@ -240,7 +251,7 @@ export function DashboardView({
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <header className={styles.header}>
+        <header className={styles.header} data-has-attention={summary.pendingPaymentReviews > 0 || undefined}>
           <div className={styles.headerCopy}>
             <h1 className={styles.title}>ภาพรวมหน่วยงาน</h1>
             <p className={styles.description}>

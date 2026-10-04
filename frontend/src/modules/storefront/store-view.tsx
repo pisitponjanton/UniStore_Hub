@@ -122,7 +122,7 @@ export function StoreView() {
           ร้านค้าทั้งหมด
         </Link>
 
-        <section className={styles.hero}>
+        <section className={`${styles.hero} ${styles.storeHero}`}>
           <div className={styles.heroCopy}>
             <h1 className={styles.title}>{store.name}</h1>
             {store.description ? (
@@ -134,7 +134,16 @@ export function StoreView() {
             )}
           </div>
 
-          <dl className={styles.heroMeta} aria-label="สรุปร้านค้า">
+          <div className={styles.storeHeroAside}>
+            <div className={styles.storeHeroVisual} aria-hidden="true">
+              <span className={styles.storeHeroOrb} />
+              <span className={styles.storeHeroBag}>
+                <span />
+              </span>
+              <span className={styles.storeHeroTicket}>SHOP</span>
+            </div>
+
+            <dl className={styles.heroMeta} aria-label="สรุปร้านค้า">
             <div>
               <dt className={styles.metaLabel}>แคมเปญ</dt>
               <dd className={styles.metaValue} data-numeric>
@@ -147,7 +156,8 @@ export function StoreView() {
                 {products.length}
               </dd>
             </div>
-          </dl>
+            </dl>
+          </div>
         </section>
 
         <section className={styles.section} aria-labelledby="campaign-heading">

@@ -258,9 +258,6 @@ export function OrganizationPaymentsView({
         nextCursor: result.nextCursor,
       });
       setListFeedback(
-        `แสดงการชำระเงินทั้งหมดที่โหลด ${result.items.length.toLocaleString("th-TH")} รายการ`,
-      );
-      setListFeedback(
         `แสดง ${result.items.length.toLocaleString("th-TH")} การชำระเงิน${nextFilters.status ? ` · ${paymentStatusLabel(nextFilters.status)}` : ""}`,
       );
     } catch (error) {
@@ -301,6 +298,9 @@ export function OrganizationPaymentsView({
         payments: result.items,
         nextCursor: result.nextCursor,
       });
+      setListFeedback(
+        `แสดงการชำระเงินทั้งหมดที่โหลด ${result.items.length.toLocaleString("th-TH")} รายการ`,
+      );
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();
@@ -847,6 +847,15 @@ export function OrganizationPaymentsView({
                             ส่งเมื่อ {formatIsoDateTime(payment.createdAt)}
                           </time>
                         </div>
+
+                        {payment.status === "PENDING_REVIEW" ? (
+                          <div className={styles.queuePriority} role="note">
+                            <span className={styles.queuePriorityLabel}>
+                              รอดำเนินการ
+                            </span>
+                            <strong>เปิดหลักฐานและตัดสินผล</strong>
+                          </div>
+                        ) : null}
                       </div>
 
                       <div className={styles.cardActions}>
@@ -928,6 +937,41 @@ export function OrganizationPaymentsView({
                     </dd>
                   </div>
                 </dl>
+
+                <section
+                  className={styles.reviewGuide}
+                  aria-label="ลำดับการตรวจสอบการชำระเงิน"
+                >
+                  <div className={styles.reviewGuideStep}>
+                    <span className={styles.reviewGuideIndex} aria-hidden="true">1</span>
+                    <div>
+                      <strong>เปิดหลักฐาน</strong>
+                      <span>ขอลิงก์ชั่วคราวเพื่อดูสลิปที่ผูกกับ Payment นี้</span>
+                    </div>
+                  </div>
+                  <div className={styles.reviewGuideStep}>
+                    <span className={styles.reviewGuideIndex} aria-hidden="true">2</span>
+                    <div>
+                      <strong>เทียบกับคำสั่งซื้อ</strong>
+                      <span>ตรวจยอดรวมและข้อมูลในหลักฐานกับ Order ล่าสุดจากระบบ</span>
+                    </div>
+                  </div>
+                  <div className={styles.reviewGuideStep}>
+                    <span className={styles.reviewGuideIndex} aria-hidden="true">3</span>
+                    <div>
+                      <strong>
+                        {selected.payment.status === "PENDING_REVIEW"
+                          ? "ตัดสินผล"
+                          : "ตัดสินผลแล้ว"}
+                      </strong>
+                      <span>
+                        {selected.payment.status === "PENDING_REVIEW"
+                          ? "อนุมัติ หรือปฏิเสธพร้อมเหตุผลหลังตรวจหลักฐาน"
+                          : `สถานะปัจจุบัน: ${paymentStatusLabel(selected.payment.status)}`}
+                      </span>
+                    </div>
+                  </div>
+                </section>
 
                 <dl className={styles.metaGrid}>
                   <div className={styles.metaItem}>

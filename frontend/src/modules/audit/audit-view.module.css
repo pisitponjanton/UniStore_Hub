@@ -318,3 +318,138 @@
     max-width: min(78vw, 420px);
   }
 }
+
+/* Phase 19 v3 audit operations */
+.page {
+  background: var(--gradient-ops-canvas);
+}
+
+.header {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(24px, 4vw, 38px);
+  border: 1px solid color-mix(in srgb, var(--brand) 16%, var(--line-soft));
+  border-radius: var(--radius-feature);
+  background: var(--gradient-brand-soft);
+  box-shadow: var(--shadow-raised);
+}
+
+.header::after {
+  content: "";
+  position: absolute;
+  right: -32px;
+  top: -68px;
+  width: 150px;
+  aspect-ratio: 1;
+  border-radius: 44px;
+  background: color-mix(in srgb, var(--accent-sky) 42%, transparent);
+  transform: rotate(14deg);
+  pointer-events: none;
+}
+
+.headerCopy,
+.headerCount {
+  position: relative;
+  z-index: 1;
+}
+
+.readOnlyBadge {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding-inline: var(--space-3);
+  border: 1px solid var(--campus-line);
+  border-radius: var(--radius-pill);
+  background: var(--brand-soft);
+  color: var(--brand-strong);
+  font-size: var(--text-caption);
+  font-weight: 700;
+}
+
+.headerCount {
+  min-width: 160px;
+  padding: var(--space-4);
+  border: 1px solid color-mix(in srgb, var(--brand) 14%, var(--line-soft));
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+}
+
+.filterPanel {
+  border-color: color-mix(in srgb, var(--brand) 12%, var(--line-soft));
+  border-radius: var(--radius-feature);
+  box-shadow: var(--shadow-raised);
+}
+
+.appliedFilters span {
+  border-color: transparent;
+  border-radius: var(--radius-pill);
+  background: var(--surface-muted);
+}
+
+.section {
+  padding: var(--space-5);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-feature);
+  background: var(--surface);
+  box-shadow: var(--shadow-raised);
+}
+
+.auditTable {
+  min-width: 820px;
+}
+
+.auditTable tbody tr {
+  transition:
+    background-color var(--motion-fast) var(--motion-ease-out),
+    box-shadow var(--motion-fast) var(--motion-ease-out);
+}
+
+.auditTable tbody tr:hover {
+  background: color-mix(in srgb, var(--brand-soft) 24%, var(--surface));
+}
+
+.action {
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--brand-soft) 54%, var(--surface));
+  color: var(--brand-strong);
+}
+
+.metadataDetails summary {
+  border-radius: var(--radius-md);
+  background: var(--surface-inset);
+}
+
+.metadata {
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--surface-inset) 86%, var(--brand-soft));
+}
+
+@media (max-width: 760px) {
+  .headerCount {
+    justify-items: start;
+    text-align: left;
+  }
+}
+
+@media (max-width: 620px) {
+  .header {
+    padding: var(--space-5);
+    border-radius: var(--radius-lg);
+  }
+
+  .section {
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header::after {
+    transform: none;
+  }
+
+  .auditTable tbody tr {
+    transition: none;
+  }
+}

@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { Badge } from "@/components";
+import { Badge, MediaFallback } from "@/components";
 import type {
   CampaignDTO,
   CampaignStatus,
@@ -100,6 +100,12 @@ export function CampaignCard({
       href={campaignHref(campaign.organizationId, campaign.campaignId)}
       className={styles.campaignCard}
     >
+      <div className={styles.campaignVisual} aria-hidden="true">
+        <span className={styles.campaignVisualLabel}>รอบขาย</span>
+        <span className={styles.campaignVisualOrb} />
+        <span className={styles.campaignVisualTile} />
+      </div>
+
       <div className={styles.cardHeader}>
         <div className={styles.campaignIdentity}>
                     <h3 className={styles.cardTitle}>{campaign.name}</h3>
@@ -164,7 +170,13 @@ export function ProductCard({
       })}
       className={styles.productCard}
     >
-      <div className={styles.productMedia}>
+      <div
+        className={styles.productMedia}
+        data-has-image={product.imageUrl ? "true" : "false"}
+      >
+        <span className={styles.productMediaLabel} aria-hidden="true">
+          สินค้า
+        </span>
         {product.imageUrl ? (
           // Backend supplies this short-lived Storefront URL for display only.
           // eslint-disable-next-line @next/next/no-img-element
@@ -176,7 +188,11 @@ export function ProductCard({
             decoding="async"
           />
         ) : (
-          <div className={styles.productPlaceholder}>ยังไม่มีรูปสินค้า</div>
+          <MediaFallback
+            variant="product"
+            label="ยังไม่มีรูปสินค้า"
+            className={styles.productPlaceholder}
+          />
         )}
       </div>
 

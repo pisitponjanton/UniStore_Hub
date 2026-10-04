@@ -314,6 +314,7 @@ export function AuditView({
       <main className={styles.main}>
         <header className={styles.header}>
           <div className={styles.headerCopy}>
+            <span className={styles.readOnlyBadge}>อ่านอย่างเดียว</span>
             <h1 className={styles.title}>ประวัติการทำรายการ</h1>
             <p className={styles.description}>
               ตรวจสอบว่าใครทำอะไรกับข้อมูลใดและเมื่อไร โดยรายการนี้เป็นประวัติแบบอ่านอย่างเดียว
@@ -487,7 +488,11 @@ export function AuditView({
               }
             />
           ) : (
-            <Table caption="รายการ Audit Log ของหน่วยงาน">
+            <Table
+              caption="รายการ Audit Log ของหน่วยงาน"
+              density="compact"
+              className={styles.auditTable}
+            >
               <TableHead>
                 <TableRow>
                   <TableHeaderCell>เวลา</TableHeaderCell>

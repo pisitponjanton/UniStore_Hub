@@ -2,7 +2,7 @@ import type { HTMLAttributes, ReactNode } from "react";
 
 import styles from "./primitives.module.css";
 
-type CardSurface = "default" | "muted" | "flat";
+type CardSurface = "default" | "muted" | "flat" | "raised" | "feature";
 type CardDensity = "comfortable" | "compact";
 
 export interface CardProps extends Omit<HTMLAttributes<HTMLElement>, "title"> {
@@ -19,6 +19,8 @@ const surfaceClass: Record<CardSurface, string> = {
   default: "",
   muted: styles.cardMuted,
   flat: styles.cardFlat,
+  raised: styles.cardRaised,
+  feature: styles.cardFeature,
 };
 
 export function Card({

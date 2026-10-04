@@ -71,6 +71,23 @@ describe("DashboardView", () => {
     });
   });
 
+  it("retries the initial organization report in place after a recoverable error", async () => {
+    mocks.getSummary
+      .mockRejectedValueOnce(new Error("network"))
+      .mockResolvedValueOnce(summary);
+
+    render(<DashboardView organizationId="org-1" />);
+
+    fireEvent.click(
+      await screen.findByRole("button", { name: "ลองโหลดอีกครั้ง" }),
+    );
+
+    expect(mocks.getSummary).toHaveBeenCalledTimes(2);
+    expect(
+      await screen.findByRole("heading", { name: "ภาพรวมหน่วยงาน" }),
+    ).toBeInTheDocument();
+  });
+
   it("trims and submits only campaignId/storeId report filters", async () => {
     render(<DashboardView organizationId="org-1" />);
 

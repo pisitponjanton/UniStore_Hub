@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { ApiClientError } from "@/services";
 import type { OrderDTO } from "@/types";
 
 const mocks = vi.hoisted(() => ({
@@ -80,6 +81,61 @@ describe("MyOrderView", () => {
     expect(screen.getByText("ขั้นตอนปัจจุบัน")).toBeInTheDocument();
     expect(screen.getAllByText("เสร็จแล้ว")).toHaveLength(2);
     expect(screen.queryByText("✓")).not.toBeInTheDocument();
+  });
+
+  it("retries loading order detail in place after a recoverable error", async () => {
+    mocks.getMyOrder
+      .mockRejectedValueOnce(new Error("network"))
+      .mockResolvedValueOnce(makeOrder());
+
+    render(<MyOrderView />);
+
+    fireEvent.click(
+      await screen.findByRole("button", { name: "ลองโหลดอีกครั้ง" }),
+    );
+
+    expect(mocks.getMyOrder).toHaveBeenCalledTimes(2);
+    expect(
+      await screen.findByRole("heading", { name: "รายละเอียดคำสั่งซื้อ" }),
+    ).toBeInTheDocument();
+  });
+
+  it("refreshes authoritative state when cancellation conflicts with a newer backend status", async () => {
+    mocks.getMyOrder
+      .mockResolvedValueOnce(makeOrder())
+      .mockResolvedValueOnce(makeOrder({ status: "PAYMENT_REVIEW" }));
+    mocks.cancelMyOrder.mockRejectedValue(
+      new ApiClientError({
+        status: 409,
+        code: "INVALID_STATUS_TRANSITION",
+        kind: "conflict",
+      }),
+    );
+
+    render(<MyOrderView />);
+
+    fireEvent.click(
+      await screen.findByRole("button", { name: "ยกเลิกคำสั่งซื้อ" }),
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "ยืนยันยกเลิก" }),
+    );
+
+    await waitFor(() => {
+      expect(mocks.getMyOrder).toHaveBeenCalledTimes(2);
+    });
+
+    expect(
+      await screen.findByRole("alert"),
+    ).toHaveTextContent(
+      "สถานะคำสั่งซื้อเปลี่ยนไปแล้ว จึงไม่สามารถยกเลิกจากสถานะปัจจุบันได้",
+    );
+    expect(
+      screen.getAllByText("กำลังตรวจสอบการชำระเงิน").length,
+    ).toBeGreaterThan(0);
+    expect(
+      screen.queryByRole("button", { name: "ยกเลิกคำสั่งซื้อ" }),
+    ).not.toBeInTheDocument();
   });
 
   it("requires confirmation before cancellation and reports the refreshed success state", async () => {

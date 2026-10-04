@@ -3,6 +3,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -263,5 +264,37 @@ describe("CampaignManagementView", () => {
       screen.getByRole("button", { name: "ปิดรับคำสั่งซื้อ" }),
     ).toBeInTheDocument();
     expect(mocks.update).not.toHaveBeenCalled();
+  });
+
+  it("shows the next source-defined lifecycle action in the campaign list", async () => {
+    mocks.listCampaigns.mockResolvedValue({
+      items: [
+        campaign({
+          campaignId: "campaign-open",
+          name: "Open Campaign",
+          status: "OPEN",
+          openAt: "2020-01-01T00:00:00.000Z",
+          closeAt: "2020-01-02T00:00:00.000Z",
+        }),
+        campaign({
+          campaignId: "campaign-completed",
+          name: "Completed Campaign",
+          status: "COMPLETED",
+        }),
+      ],
+      nextCursor: null,
+    });
+
+    render(<CampaignManagementView organizationId="org-1" />);
+    const openCard = (await screen.findByRole("heading", {
+      name: "Open Campaign",
+    })).closest("article");
+    const completedCard = screen.getByRole("heading", {
+      name: "Completed Campaign",
+    }).closest("article");
+    expect(openCard).not.toBeNull();
+    expect(completedCard).not.toBeNull();
+    expect(within(openCard as HTMLElement).getByText("ปิดรับคำสั่งซื้อ")).toBeInTheDocument();
+    expect(within(completedCard as HTMLElement).getByText("เสร็จสิ้นแล้ว")).toBeInTheDocument();
   });
 });

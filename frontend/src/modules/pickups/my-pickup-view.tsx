@@ -49,6 +49,7 @@ export function MyPickupView() {
     status: "loading",
   });
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const [qrError, setQrError] = useState(false);
 
   useEffect(() => {
@@ -133,7 +134,7 @@ export function MyPickupView() {
     void loadPickup();
 
     return () => controller.abort();
-  }, []);
+  }, [loadAttempt]);
 
   useEffect(() => {
     if (state.status !== "success") {
@@ -170,7 +171,7 @@ export function MyPickupView() {
             กลับรายละเอียดคำสั่งซื้อ
           </Link>
 
-          <header className={styles.header}>
+          <header className={styles.header} data-pickup-status="not-ready">
             <div className={styles.headerCopy}>
               <h1 className={styles.title}>ยังไม่ต้องเดินทางไปรับสินค้า</h1>
               <p className={styles.description}>
@@ -187,7 +188,10 @@ export function MyPickupView() {
             actions={
               <Button
                 variant="secondary"
-                onClick={() => window.location.reload()}
+                onClick={() => {
+                  setState({ status: "loading" });
+                  setLoadAttempt((attempt) => attempt + 1);
+                }}
               >
                 ตรวจสอบสถานะล่าสุด
               </Button>
@@ -227,8 +231,20 @@ export function MyPickupView() {
           {state.status === "error" ? (
             <ErrorState
               title="ไม่สามารถโหลดข้อมูลรับสินค้าได้"
-              description="กรุณาลองโหลดหน้านี้ใหม่อีกครั้ง"
-              actions={<Link href="/my/orders/">กลับรายการคำสั่งซื้อ</Link>}
+              description="ลองดึงสถานะคำสั่งซื้อและข้อมูลรับสินค้าล่าสุดอีกครั้ง หรือกลับไปดูรายการคำสั่งซื้อ"
+              actions={
+                <>
+                  <Button
+                    onClick={() => {
+                      setState({ status: "loading" });
+                      setLoadAttempt((attempt) => attempt + 1);
+                    }}
+                  >
+                    ลองโหลดอีกครั้ง
+                  </Button>
+                  <Link href="/my/orders/">กลับรายการคำสั่งซื้อ</Link>
+                </>
+              }
             />
           ) : null}
         </main>
@@ -247,7 +263,7 @@ export function MyPickupView() {
           กลับรายละเอียดคำสั่งซื้อ
         </Link>
 
-        <header className={styles.header}>
+        <header className={styles.header} data-pickup-status={pickup.status}>
           <div className={styles.headerCopy}>
             <h1 className={styles.title}>ข้อมูลรับสินค้า</h1>
             <p className={styles.description}>

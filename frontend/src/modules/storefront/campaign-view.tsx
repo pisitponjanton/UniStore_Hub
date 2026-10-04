@@ -139,7 +139,7 @@ export function CampaignView() {
           {store.name}
         </Link>
 
-        <section className={styles.hero}>
+        <section className={`${styles.hero} ${styles.campaignHero}`}>
           <div className={styles.heroCopy}>
             <span className={styles.contextLine}>รอบขายจาก {store.name}</span>
             <h1 className={styles.title}>{campaign.name}</h1>

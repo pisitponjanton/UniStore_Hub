@@ -224,7 +224,11 @@ export function PlatformUsersView() {
               description="Platform ยังไม่มี User ในระบบ"
             />
           ) : (
-            <Table caption="รายการผู้ใช้ระดับ Platform">
+            <Table
+              caption="รายการผู้ใช้ระดับ Platform"
+              density="compact"
+              className={styles.platformUsersTable}
+            >
               <TableHead>
                 <TableRow>
                   <TableHeaderCell>ผู้ใช้</TableHeaderCell>

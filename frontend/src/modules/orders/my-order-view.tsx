@@ -54,6 +54,7 @@ export function MyOrderView() {
     status: "loading",
   });
   const [cancelPending, setCancelPending] = useState(false);
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
 
@@ -118,7 +119,7 @@ export function MyOrderView() {
     void loadOrder();
 
     return () => controller.abort();
-  }, []);
+  }, [loadAttempt]);
 
   async function handleCancel() {
     if (
@@ -196,8 +197,20 @@ export function MyOrderView() {
           {state.status === "error" ? (
             <ErrorState
               title="ไม่สามารถโหลดคำสั่งซื้อได้"
-              description="กรุณาลองโหลดหน้านี้ใหม่อีกครั้ง"
-              actions={<Link href="/my/orders/">กลับรายการคำสั่งซื้อ</Link>}
+              description="ลองดึงสถานะล่าสุดของคำสั่งซื้อนี้อีกครั้ง หรือกลับไปดูรายการทั้งหมด"
+              actions={
+                <>
+                  <Button
+                    onClick={() => {
+                      setState({ status: "loading" });
+                      setLoadAttempt((attempt) => attempt + 1);
+                    }}
+                  >
+                    ลองโหลดอีกครั้ง
+                  </Button>
+                  <Link href="/my/orders/">กลับรายการคำสั่งซื้อ</Link>
+                </>
+              }
             />
           ) : null}
         </main>
@@ -236,7 +249,7 @@ export function MyOrderView() {
           กลับรายการคำสั่งซื้อ
         </Link>
 
-        <header className={styles.detailHero}>
+        <header className={styles.detailHero} data-order-status={order.status}>
           <div className={styles.detailHeroCopy}>
             <h1 className={styles.title}>รายละเอียดคำสั่งซื้อ</h1>
             <span className={styles.orderCode} data-technical>
