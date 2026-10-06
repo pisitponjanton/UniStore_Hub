@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
 import {
   Badge,
@@ -14,6 +14,7 @@ import {
   TextareaField,
   TextField,
   UnauthorizedState,
+  useErrorSummaryFocus,
 } from "@/components";
 import {
   authSession,
@@ -64,6 +65,7 @@ export function OrganizationSettingsView({
 }: {
   organizationId: string;
 }) {
+  const focusErrorSummary = useErrorSummaryFocus();
   const [state, setState] = useState<SettingsState>({
     status: "loading",
   });
@@ -74,7 +76,6 @@ export function OrganizationSettingsView({
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
-  const settingsErrorSummaryRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -149,7 +150,9 @@ export function OrganizationSettingsView({
     setSaved(false);
 
     if (!validation.valid) {
-      requestAnimationFrame(() => settingsErrorSummaryRef.current?.focus());
+      focusErrorSummary(
+        "organization-settings-error-summary",
+      );
       return;
     }
 
@@ -294,7 +297,6 @@ export function OrganizationSettingsView({
 
             <form className={styles.settingsForm} onSubmit={handleSubmit} noValidate>
               <ErrorSummary
-                ref={settingsErrorSummaryRef}
                 id="organization-settings-error-summary"
                 items={
                   nameError
@@ -320,11 +322,14 @@ export function OrganizationSettingsView({
                 error={nameError}
                 announceError={false}
                 onBlur={() => {
-                  const validation = validateOrganizationForm({
-                    name,
-                    description,
-                  });
-                  setNameError(validation.errors.name);
+                  window.setTimeout(() => {
+                    const validation =
+                      validateOrganizationForm({
+                        name,
+                        description,
+                      });
+                    setNameError(validation.errors.name);
+                  }, 0);
                 }}
                 required
                 disabled={saving}
@@ -357,6 +362,7 @@ export function OrganizationSettingsView({
               <div className={styles.settingsActions}>
                 <Button
                   type="submit"
+                  formNoValidate
                   pending={saving}
                   pendingLabel="กำลังบันทึก"
                   disabled={!isDirty}

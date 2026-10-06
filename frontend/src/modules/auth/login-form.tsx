@@ -1,9 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 
-import { Button, ErrorSummary, Notice, TextField } from "@/components";
+import {
+  Button,
+  ErrorSummary,
+  Notice,
+  TextField,
+  useErrorSummaryFocus,
+} from "@/components";
 import { ApiClientError } from "@/services";
 
 import styles from "./auth-form.module.css";
@@ -19,12 +25,12 @@ import { authSession } from "./session";
 import { useAuthNavigationContext } from "./use-auth-navigation-context";
 
 export function LoginForm() {
+  const focusErrorSummary = useErrorSummaryFocus();
   const navigation = useAuthNavigationContext();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<AuthFieldErrors>({});
-  const errorSummaryRef = useRef<HTMLDivElement>(null);
   const [serverError, setServerError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -52,7 +58,7 @@ export function LoginForm() {
     setServerError(null);
 
     if (hasAuthFieldErrors(nextErrors)) {
-      requestAnimationFrame(() => errorSummaryRef.current?.focus());
+      focusErrorSummary("login-error-summary");
       return;
     }
 
@@ -98,7 +104,6 @@ export function LoginForm() {
 
       <form className={styles.form} onSubmit={handleSubmit} noValidate>
         <ErrorSummary
-          ref={errorSummaryRef}
           id="login-error-summary"
           items={[
             ...(fieldErrors.email

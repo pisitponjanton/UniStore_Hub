@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
 
 import {
   Badge,
@@ -13,6 +13,7 @@ import {
   Notice,
   SelectField,
   TextField,
+  useErrorSummaryFocus,
 } from "@/components";
 import {
   authSession,
@@ -38,6 +39,22 @@ type StaffState =
   | { status: "loading" }
   | { status: "error" }
   | { status: "success"; members: OrganizationMemberDTO[] };
+
+const STAFF_SUCCESS_NOTICE_KEY =
+  "unistoreHub.staffSuccessNotice";
+
+function rememberStaffSuccessNotice(message: string) {
+  window.sessionStorage.setItem(
+    STAFF_SUCCESS_NOTICE_KEY,
+    message,
+  );
+}
+
+function clearStaffSuccessNotice() {
+  window.sessionStorage.removeItem(
+    STAFF_SUCCESS_NOTICE_KEY,
+  );
+}
 
 function membershipStatusLabel(
   status: OrganizationMemberDTO["status"],
@@ -76,6 +93,7 @@ export function StaffView({
 }: {
   organizationId: string;
 }) {
+  const focusErrorSummary = useErrorSummaryFocus();
   const [state, setState] = useState<StaffState>({
     status: "loading",
   });
@@ -90,7 +108,6 @@ export function StaffView({
   >({});
   const [inlineError, setInlineError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
-  const addErrorSummaryRef = useRef<HTMLDivElement>(null);
 
   const refreshMembers = useCallback(
     async (signal?: AbortSignal) => {
@@ -104,6 +121,25 @@ export function StaffView({
     },
     [organizationId],
   );
+
+  useEffect(() => {
+    const persistedNotice = window.sessionStorage.getItem(
+      STAFF_SUCCESS_NOTICE_KEY,
+    );
+
+    if (!persistedNotice) {
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      clearStaffSuccessNotice();
+      setNotice(persistedNotice);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timeout);
+    };
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -158,7 +194,7 @@ export function StaffView({
     setNotice(null);
 
     if (error) {
-      requestAnimationFrame(() => addErrorSummaryRef.current?.focus());
+      focusErrorSummary("staff-add-error-summary");
       return;
     }
 
@@ -204,11 +240,18 @@ export function StaffView({
         nextRole,
       );
       await refreshMembers();
-      setNotice(
-        `อัปเดตสิทธิ์ของ ${member.user.name} เป็น ${staffRoleLabel(nextRole)} แล้ว`,
-      );
+
+      const successMessage =
+        `อัปเดตสิทธิ์ของ ${member.user.name} เป็น ${staffRoleLabel(nextRole)} แล้ว`;
+      rememberStaffSuccessNotice(successMessage);
       await authSession.restore();
+      setNotice(successMessage);
+      window.setTimeout(() => {
+        clearStaffSuccessNotice();
+      }, 2000);
     } catch (error) {
+      clearStaffSuccessNotice();
+
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();
         return;
@@ -236,9 +279,17 @@ export function StaffView({
     try {
       await staffService.remove(organizationId, member.userId);
       await refreshMembers();
-      setNotice(`นำ ${member.user.name} ออกจากหน่วยงานแล้ว`);
+
+      const successMessage =
+        `นำ ${member.user.name} ออกจากหน่วยงานแล้ว`;
+      rememberStaffSuccessNotice(successMessage);
       await authSession.restore();
+      setNotice(successMessage);
+      window.setTimeout(() => {
+        clearStaffSuccessNotice();
+      }, 2000);
     } catch (error) {
+      clearStaffSuccessNotice();
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();
         return;
@@ -471,7 +522,6 @@ export function StaffView({
 
             <form className={styles.form} onSubmit={handleAdd} noValidate>
               <ErrorSummary
-                ref={addErrorSummaryRef}
                 id="staff-add-error-summary"
                 items={
                   emailError
@@ -492,7 +542,11 @@ export function StaffView({
                 error={emailError}
                 announceError={false}
                 onBlur={() => {
-                  setEmailError(validateStaffEmail(email) ?? undefined);
+                  window.setTimeout(() => {
+                    setEmailError(
+                      validateStaffEmail(email) ?? undefined,
+                    );
+                  }, 0);
                 }}
                 autoComplete="email"
                 required
@@ -525,6 +579,7 @@ export function StaffView({
 
               <Button
                 type="submit"
+                formNoValidate
                 size="large"
                 pending={adding}
                 pendingLabel="กำลังเพิ่มสมาชิก"

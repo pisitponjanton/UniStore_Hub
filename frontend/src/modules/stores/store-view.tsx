@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
 import {
   Badge,
@@ -9,6 +9,7 @@ import {
   EmptyState,
   ErrorState,
   ErrorSummary,
+  useErrorSummaryFocus,
   LoadingState,
   Notice,
   TextareaField,
@@ -55,6 +56,7 @@ export function StoreManagementView({
 }: {
   organizationId: string;
 }) {
+  const focusErrorSummary = useErrorSummaryFocus();
   const [state, setState] = useState<StoreState>({ status: "loading" });
 
   const [createName, setCreateName] = useState("");
@@ -72,8 +74,6 @@ export function StoreManagementView({
 
   const [inlineError, setInlineError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
-  const createErrorSummaryRef = useRef<HTMLDivElement>(null);
-  const editErrorSummaryRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -126,7 +126,7 @@ export function StoreManagementView({
     setNotice(null);
 
     if (!validation.valid) {
-      requestAnimationFrame(() => createErrorSummaryRef.current?.focus());
+      focusErrorSummary("store-create-error-summary");
       return;
     }
 
@@ -209,7 +209,7 @@ export function StoreManagementView({
     setNotice(null);
 
     if (!validation.valid) {
-      requestAnimationFrame(() => editErrorSummaryRef.current?.focus());
+      focusErrorSummary("store-edit-error-summary");
       return;
     }
 
@@ -490,7 +490,6 @@ export function StoreManagementView({
 
             <form className={styles.form} onSubmit={handleCreate} noValidate>
               <ErrorSummary
-                ref={createErrorSummaryRef}
                 id="store-create-error-summary"
                 items={
                   createNameError
@@ -570,7 +569,6 @@ export function StoreManagementView({
 
             <form className={styles.editForm} onSubmit={handleSaveEdit} noValidate>
               <ErrorSummary
-                ref={editErrorSummaryRef}
                 id="store-edit-error-summary"
                 items={
                   editNameError

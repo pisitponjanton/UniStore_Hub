@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 
 import {
   Badge,
@@ -9,6 +9,7 @@ import {
   EmptyState,
   ErrorState,
   ErrorSummary,
+  useErrorSummaryFocus,
   LoadingState,
   Notice,
   SelectField,
@@ -74,6 +75,7 @@ export function ProductManagementView({
 }: {
   organizationId: string;
 }) {
+  const focusErrorSummary = useErrorSummaryFocus();
   const [state, setState] = useState<ProductState>({
     status: "loading",
   });
@@ -108,8 +110,6 @@ export function ProductManagementView({
 
   const [inlineError, setInlineError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
-  const createErrorSummaryRef = useRef<HTMLDivElement>(null);
-  const editErrorSummaryRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -257,7 +257,7 @@ export function ProductManagementView({
     setNotice(null);
 
     if (!validation.valid) {
-      requestAnimationFrame(() => createErrorSummaryRef.current?.focus());
+      focusErrorSummary("product-create-error-summary");
       return;
     }
 
@@ -347,7 +347,7 @@ export function ProductManagementView({
     setNotice(null);
 
     if (!validation.valid) {
-      requestAnimationFrame(() => editErrorSummaryRef.current?.focus());
+      focusErrorSummary("product-edit-error-summary");
       return;
     }
 
@@ -724,7 +724,6 @@ export function ProductManagementView({
 
             <form className={styles.form} onSubmit={handleCreate} noValidate>
               <ErrorSummary
-                ref={createErrorSummaryRef}
                 id="product-create-error-summary"
                 items={[
                   ...(createStoreError
@@ -879,7 +878,6 @@ export function ProductManagementView({
 
                 <form className={styles.form} onSubmit={handleSaveEdit} noValidate>
                   <ErrorSummary
-                    ref={editErrorSummaryRef}
                     id="product-edit-error-summary"
                     items={
                       editNameError

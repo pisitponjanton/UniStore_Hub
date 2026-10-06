@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 
 import {
   Badge,
@@ -9,6 +9,7 @@ import {
   EmptyState,
   ErrorState,
   ErrorSummary,
+  useErrorSummaryFocus,
   LoadingState,
   Notice,
   TextareaField,
@@ -70,6 +71,7 @@ function membershipRoleLabel(
 }
 
 export function OrganizationSelectView() {
+  const focusErrorSummary = useErrorSummaryFocus();
   const router = useRouter();
   const auth = useAuthSession();
   const [loadState, setLoadState] = useState<LoadState>({
@@ -81,7 +83,6 @@ export function OrganizationSelectView() {
   const [nameError, setNameError] = useState<string | undefined>();
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
-  const createErrorSummaryRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -164,7 +165,7 @@ export function OrganizationSelectView() {
     setSubmitError(null);
 
     if (!validation.valid) {
-      requestAnimationFrame(() => createErrorSummaryRef.current?.focus());
+      focusErrorSummary("organization-create-error-summary");
       return;
     }
 
@@ -355,7 +356,6 @@ export function OrganizationSelectView() {
 
             <form className={styles.form} onSubmit={handleCreate} noValidate>
               <ErrorSummary
-                ref={createErrorSummaryRef}
                 id="organization-create-error-summary"
                 items={
                   nameError

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 
 import {
   Badge,
@@ -8,6 +8,7 @@ import {
   ConfirmDialog,
   EmptyState,
   ErrorSummary,
+  useErrorSummaryFocus,
   Notice,
   TextField,
 } from "@/components";
@@ -54,6 +55,7 @@ export function VariantManagement({
   product: ProductDTO;
   onProductRefreshed: (product: ProductDTO) => void;
 }) {
+  const focusErrorSummary = useErrorSummaryFocus();
   const [createName, setCreateName] = useState("");
   const [createPrice, setCreatePrice] = useState("");
   const [createNameError, setCreateNameError] = useState<
@@ -81,8 +83,6 @@ export function VariantManagement({
 
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
-  const createErrorSummaryRef = useRef<HTMLDivElement>(null);
-  const editErrorSummaryRef = useRef<HTMLDivElement>(null);
 
   const variants = product.variants ?? [];
   const activeCount = variants.filter(
@@ -116,7 +116,7 @@ export function VariantManagement({
     setNotice(null);
 
     if (!validation.valid || !validation.values) {
-      requestAnimationFrame(() => createErrorSummaryRef.current?.focus());
+      focusErrorSummary(`variant-create-error-summary-${product.productId}`);
       return;
     }
 
@@ -175,7 +175,9 @@ export function VariantManagement({
     setNotice(null);
 
     if (!validation.valid || !validation.values) {
-      requestAnimationFrame(() => editErrorSummaryRef.current?.focus());
+      focusErrorSummary(
+        `variant-edit-error-summary-${editingVariant.variantId}`,
+      );
       return;
     }
 
@@ -360,7 +362,6 @@ export function VariantManagement({
                         noValidate
                       >
                         <ErrorSummary
-                          ref={editErrorSummaryRef}
                           id={`variant-edit-error-summary-${variant.variantId}`}
                           items={[
                             ...(editNameError
@@ -455,7 +456,6 @@ export function VariantManagement({
             <strong>เพิ่มตัวเลือกใหม่</strong>
           </div>
           <ErrorSummary
-            ref={createErrorSummaryRef}
             id={`variant-create-error-summary-${product.productId}`}
             items={[
               ...(createNameError

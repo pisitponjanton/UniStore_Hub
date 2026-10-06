@@ -200,7 +200,10 @@ export function MyPaymentView() {
     return () => controller.abort();
   }, [loadAttempt]);
 
-  function handleFileChange(file: File | null) {
+  function handleFileChange(
+    file: File | null,
+    input?: HTMLInputElement,
+  ) {
     setSelectedFile(file);
     setFileError(null);
     setServerError(null);
@@ -214,6 +217,9 @@ export function MyPaymentView() {
 
     if (!validation.ok) {
       setSelectedFile(null);
+      if (input) {
+        input.value = "";
+      }
       setFileError(
         validation.reason === "UNSUPPORTED_TYPE"
           ? "รองรับเฉพาะไฟล์ JPEG, PNG หรือ WebP"
@@ -472,7 +478,10 @@ export function MyPaymentView() {
                 error={fileError ?? undefined}
                 accept="image/jpeg,image/png,image/webp"
                 onChange={(event) =>
-                  handleFileChange(event.target.files?.[0] ?? null)
+                  handleFileChange(
+                    event.target.files?.[0] ?? null,
+                    event.currentTarget,
+                  )
                 }
                 disabled={stage !== "idle"}
                 required

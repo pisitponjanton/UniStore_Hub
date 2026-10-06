@@ -7,6 +7,9 @@
 
 # testing
 /coverage
+/playwright-report
+/test-results
+/blob-report
 
 # local environment files
 .env*

@@ -7,3 +7,4 @@ export * from "./media";
 export * from "./operational";
 export * from "./state-panel";
 export * from "./table";
+export * from "./use-error-summary-focus";

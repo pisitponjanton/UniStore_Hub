@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import {
   Button,
   ErrorState,
@@ -11,6 +11,7 @@ import {
   Notice,
   TaskStatus,
   TextField,
+  useErrorSummaryFocus,
 } from "@/components";
 import {
   authSession,
@@ -68,6 +69,7 @@ type OrderCreateState =
     };
 
 export function OrderCreateView() {
+  const focusErrorSummary = useErrorSummaryFocus();
   const [state, setState] = useState<OrderCreateState>({
     status: "loading",
   });
@@ -75,7 +77,6 @@ export function OrderCreateView() {
   const [loadAttempt, setLoadAttempt] = useState(0);
   const [quantityTouched, setQuantityTouched] = useState(false);
   const [submitAttempted, setSubmitAttempted] = useState(false);
-  const errorSummaryRef = useRef<HTMLDivElement>(null);
   const [pending, setPending] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [campaignNotOpen, setCampaignNotOpen] = useState(false);
@@ -203,7 +204,7 @@ export function OrderCreateView() {
     setServerError(null);
 
     if (orderContext.quantity === null) {
-      requestAnimationFrame(() => errorSummaryRef.current?.focus());
+      focusErrorSummary("order-create-error-summary");
       return;
     }
 
@@ -535,6 +536,7 @@ export function OrderCreateView() {
             className={styles.confirmPanel}
             onSubmit={handleSubmit}
             aria-labelledby="confirm-heading"
+            noValidate
           >
             <div className={styles.confirmHeading}>
               <h2 id="confirm-heading">จำนวนและยอดประมาณการ</h2>
@@ -542,7 +544,6 @@ export function OrderCreateView() {
             </div>
 
             <ErrorSummary
-              ref={errorSummaryRef}
               id="order-create-error-summary"
               items={
                 quantityError
@@ -563,7 +564,11 @@ export function OrderCreateView() {
                 setQuantityInput(event.target.value);
                 setServerError(null);
               }}
-              onBlur={() => setQuantityTouched(true)}
+              onBlur={() => {
+                window.setTimeout(() => {
+                  setQuantityTouched(true);
+                }, 0);
+              }}
               error={quantityError}
               announceError={false}
               hint="ต้องเป็นจำนวนเต็มตั้งแต่ 1 ขึ้นไป"
@@ -619,8 +624,21 @@ export function OrderCreateView() {
             <div className={styles.actions}>
               <Button
                 type="submit"
+                formNoValidate
                 size="large"
                 pending={pending}
+                onClick={(event) => {
+                  if (orderContext?.quantity !== null) {
+                    return;
+                  }
+
+                  event.preventDefault();
+                  setSubmitAttempted(true);
+                  setServerError(null);
+                  focusErrorSummary(
+                    "order-create-error-summary",
+                  );
+                }}
                 pendingLabel="กำลังสร้างคำสั่งซื้อ"
                 disabled={campaignNotOpen || !selection}
               >

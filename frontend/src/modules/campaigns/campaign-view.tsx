@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 
 import {
   Badge,
@@ -8,6 +8,7 @@ import {
   EmptyState,
   ErrorState,
   ErrorSummary,
+  useErrorSummaryFocus,
   LoadingState,
   Notice,
   SelectField,
@@ -183,6 +184,7 @@ export function CampaignManagementView({
 }: {
   organizationId: string;
 }) {
+  const focusErrorSummary = useErrorSummaryFocus();
   const [state, setState] = useState<CampaignState>({
     status: "loading",
   });
@@ -214,8 +216,6 @@ export function CampaignManagementView({
   const [inlineError, setInlineError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [listFeedback, setListFeedback] = useState<string | null>(null);
-  const createErrorSummaryRef = useRef<HTMLDivElement>(null);
-  const editErrorSummaryRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -428,7 +428,7 @@ export function CampaignManagementView({
     setNotice(null);
 
     if (!validation.valid || !validation.values) {
-      requestAnimationFrame(() => createErrorSummaryRef.current?.focus());
+      focusErrorSummary("campaign-create-error-summary");
       return;
     }
 
@@ -516,7 +516,7 @@ export function CampaignManagementView({
     setNotice(null);
 
     if (!validation.valid || !validation.values) {
-      requestAnimationFrame(() => editErrorSummaryRef.current?.focus());
+      focusErrorSummary("campaign-edit-error-summary");
       return;
     }
 
@@ -890,7 +890,6 @@ export function CampaignManagementView({
 
             <form className={styles.form} onSubmit={handleCreate} noValidate>
               <ErrorSummary
-                ref={createErrorSummaryRef}
                 id="campaign-create-error-summary"
                 items={campaignErrorItems("campaign-create", createErrors)}
               />
@@ -1050,7 +1049,6 @@ export function CampaignManagementView({
 
                   <form className={styles.form} onSubmit={handleSave} noValidate>
                     <ErrorSummary
-                      ref={editErrorSummaryRef}
                       id="campaign-edit-error-summary"
                       items={campaignErrorItems("campaign-edit", editErrors)}
                     />

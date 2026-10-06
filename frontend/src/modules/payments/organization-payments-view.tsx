@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
 import {
   Badge,
@@ -17,6 +17,7 @@ import {
   TextareaField,
   TextField,
   UnauthorizedState,
+  useErrorSummaryFocus,
 } from "@/components";
 import {
   authSession,
@@ -114,6 +115,7 @@ export function OrganizationPaymentsView({
 }: {
   organizationId: string;
 }) {
+  const focusErrorSummary = useErrorSummaryFocus();
   const [state, setState] = useState<PaymentsState>({
     status: "loading",
   });
@@ -149,7 +151,6 @@ export function OrganizationPaymentsView({
   const [inlineError, setInlineError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [listFeedback, setListFeedback] = useState<string | null>(null);
-  const rejectErrorSummaryRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -520,7 +521,9 @@ export function OrganizationPaymentsView({
     setRejectReasonError(validation.error);
 
     if (!validation.valid) {
-      requestAnimationFrame(() => rejectErrorSummaryRef.current?.focus());
+      focusErrorSummary(
+        "payment-reject-error-summary",
+      );
       return;
     }
 
@@ -1155,7 +1158,15 @@ export function OrganizationPaymentsView({
                       <Button
                         variant="secondary"
                         disabled={reviewPending !== null}
-                        onClick={() => setRejectOpen(false)}
+                        onPointerDown={(event) => {
+                          event.preventDefault();
+                          setRejectReasonError(undefined);
+                          setRejectOpen(false);
+                        }}
+                        onClick={() => {
+                          setRejectReasonError(undefined);
+                          setRejectOpen(false);
+                        }}
                       >
                         กลับ
                       </Button>
@@ -1174,7 +1185,6 @@ export function OrganizationPaymentsView({
                 >
                   <div className={styles.dialogBody}>
                     <ErrorSummary
-                      ref={rejectErrorSummaryRef}
                       id="payment-reject-error-summary"
                       items={
                         rejectReasonError
@@ -1198,8 +1208,11 @@ export function OrganizationPaymentsView({
                       error={rejectReasonError}
                       announceError={false}
                       onBlur={() => {
-                        const validation = validateRejectReason(rejectReason);
-                        setRejectReasonError(validation.error);
+                        window.setTimeout(() => {
+                          const validation =
+                            validateRejectReason(rejectReason);
+                          setRejectReasonError(validation.error);
+                        }, 0);
                       }}
                       required
                       disabled={reviewPending === "reject"}
