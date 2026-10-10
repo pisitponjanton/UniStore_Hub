@@ -11,6 +11,7 @@ import {
   LoadingState,
   Skeleton,
 } from "@/components";
+import { buildAuthPagePath, useAuthSession } from "@/modules/auth";
 import { StorefrontHeader } from "./storefront-header";
 import styles from "./storefront-landing.module.css";
 import {
@@ -34,6 +35,7 @@ function storeHref(organizationId: string, storeId: string): string {
 }
 
 export function StorefrontLanding() {
+  const auth = useAuthSession();
   const [state, setState] = useState<LandingState>({ status: "loading" });
   const [loadAttempt, setLoadAttempt] = useState(0);
 
@@ -108,9 +110,26 @@ export function StorefrontLanding() {
               <a className={styles.heroPrimaryAction} href="#storefront-heading">
                 ดูร้านที่เปิดอยู่
               </a>
-              <Link className={styles.heroSecondaryAction} href="/my/orders/">
-                ติดตามคำสั่งซื้อ
-              </Link>
+              {auth.status === "loading" ? (
+                <span
+                  className={`${styles.heroSecondaryAction} ${styles.heroSecondaryActionPending}`}
+                  role="status"
+                  aria-live="polite"
+                >
+                  กำลังตรวจสอบบัญชี
+                </span>
+              ) : (
+                <Link
+                  className={styles.heroSecondaryAction}
+                  href={
+                    auth.status === "authenticated"
+                      ? "/my/orders/"
+                      : buildAuthPagePath("/login/", "/my/orders/")
+                  }
+                >
+                  ติดตามคำสั่งซื้อ
+                </Link>
+              )}
             </div>
 
             {summary ? (

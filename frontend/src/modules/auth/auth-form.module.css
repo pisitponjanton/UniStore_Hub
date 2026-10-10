@@ -646,59 +646,80 @@
   }
 
   .intro {
-    min-height: auto;
-    gap: var(--space-6);
-    padding: var(--space-6) var(--page-gutter) var(--space-8);
-    border-radius: 0 0 var(--radius-hero) var(--radius-hero);
+    min-height: 0;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--page-gutter);
+    border-radius: 0 0 var(--radius-card) var(--radius-card);
+    box-shadow: none;
   }
 
   .introBody {
+    display: block;
     width: 100%;
-    grid-template-columns: minmax(0, 1fr) minmax(180px, 0.46fr);
-    grid-template-areas:
-      "copy visual"
-      "journey journey";
-    gap: var(--space-6);
   }
 
-  .authVisual {
-    min-height: 250px;
-  }
-
-  .introTitle {
-    font-size: clamp(2.1rem, 7vw, 3.4rem);
-  }
-
-  .accountJourneyList {
+  .introCopy {
     gap: var(--space-2);
   }
 
-  .accountJourneyItem {
-    min-height: 104px;
+  .introLabel,
+  .authVisual,
+  .accountJourney {
+    display: none;
+  }
+
+  .introTitle {
+    max-width: none;
+    font-size: clamp(1.5rem, 4.3vw, 2.25rem);
+    line-height: 1.12;
+    letter-spacing: -0.025em;
+  }
+
+  .introDescription {
+    max-width: 65ch;
+    font-size: var(--text-body-sm);
+    line-height: 1.5;
   }
 
   .panel {
-    padding: var(--space-8) var(--page-gutter) var(--space-12);
+    place-items: start center;
+    padding: var(--space-3) var(--page-gutter) var(--space-8);
     border-radius: 0;
+    background: var(--canvas);
     box-shadow: none;
   }
 
   .panelInner {
     width: min(100%, 580px);
+    gap: var(--space-3);
+    padding: var(--space-5);
+  }
+
+  .formShell {
+    gap: var(--space-4);
+  }
+
+  .headingGroup {
+    gap: var(--space-1);
+  }
+
+  .title {
+    font-size: clamp(1.65rem, 5vw, 2.25rem);
+  }
+
+  .description {
+    line-height: 1.55;
   }
 }
 
 @media (max-width: 620px) {
   .intro,
   .panel {
-    padding-left: var(--page-gutter-compact);
-    padding-right: var(--page-gutter-compact);
+    padding-inline: var(--page-gutter-compact);
   }
 
   .intro {
-    gap: var(--space-5);
-    padding-top: var(--space-4);
-    padding-bottom: var(--space-6);
+    padding-block: var(--space-3);
   }
 
   .brand {
@@ -714,59 +735,16 @@
     display: none;
   }
 
-  .introBody {
-    display: grid;
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "copy"
-      "visual";
-    gap: var(--space-5);
-  }
-
-  .introLabel {
-    min-height: 28px;
-  }
-
   .introTitle {
-    max-width: 15ch;
-    font-size: clamp(2rem, 10vw, 2.75rem);
-  }
-
-  .introDescription {
-    font-size: var(--text-body);
-  }
-
-  .authVisual {
-    min-height: 210px;
-    width: min(100%, 340px);
-    justify-self: center;
-  }
-
-  .authVisualIllustration {
-    width: min(100%, 250px);
-    transform: none;
-  }
-
-  .accountJourney {
-    display: none;
-  }
-
-  .panel {
-    padding-top: var(--space-6);
-    padding-bottom: var(--space-10);
+    font-size: clamp(1.45rem, 5.4vw, 1.85rem);
   }
 
   .panelInner {
-    padding: var(--space-5);
-    border-radius: var(--radius-card);
+    padding: var(--space-4);
   }
 
   .formShell {
-    gap: var(--space-5);
-  }
-
-  .title {
-    font-size: clamp(1.75rem, 8vw, 2.25rem);
+    gap: var(--space-3);
   }
 
   .accountActionPrimary,
@@ -776,25 +754,9 @@
 }
 
 @media (max-width: 360px) {
-  .page {
-    padding: 8px;
-  }
-
-  .intro {
-    padding: 22px 18px 24px;
-    border-radius: var(--radius-card);
-  }
-
-  .authVisual {
-    min-height: 180px;
-  }
-
-  .authVisualIllustration {
-    width: min(100%, 210px);
-  }
-
-  .panelInner {
-    padding: var(--space-4);
+  .intro,
+  .panel {
+    padding-inline: var(--space-3);
   }
 }
 

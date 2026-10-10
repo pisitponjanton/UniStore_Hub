@@ -401,6 +401,15 @@
   padding: clamp(40px, 7vw, 80px) var(--page-gutter);
 }
 
+.stateHeading {
+  margin: 0 0 var(--space-5);
+  color: var(--ink);
+  font-size: clamp(1.65rem, 3.5vw, 2.25rem);
+  font-weight: 700;
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+}
+
 .backLink {
   width: fit-content;
   min-height: var(--control-height-lg);

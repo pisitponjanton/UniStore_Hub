@@ -104,6 +104,24 @@ describe("OrganizationPaymentsView", () => {
     mocks.getOrganizationOrder.mockResolvedValue(order());
   });
 
+  it("provides task-first shortcuts without changing review and filter actions", async () => {
+    render(<OrganizationPaymentsView organizationId="org-1" />);
+
+    expect(await screen.findByText("Payment payment-1")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /ดูคิวตรวจสลิป/ }),
+    ).toHaveAttribute("href", "#payment-review-list");
+    expect(
+      screen.getByRole("link", { name: "ตัวกรองรายการ" }),
+    ).toHaveAttribute("href", "#payment-filter-title");
+    expect(
+      screen.getByRole("link", { name: /ดูคิวตรวจสลิป/ }),
+    ).toHaveTextContent("1 รอตรวจสอบ");
+    expect(screen.getByLabelText("สถานะ Payment")).toBeInTheDocument();
+    expect(screen.getByLabelText("Campaign ID")).toBeInTheDocument();
+    expect(screen.getByLabelText("Order ID")).toBeInTheDocument();
+  });
+
   it("announces applied payment queue filters with useful context", async () => {
     mocks.listOrganizationPayments
       .mockResolvedValueOnce({

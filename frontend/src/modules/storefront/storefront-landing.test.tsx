@@ -3,7 +3,15 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   getLanding: vi.fn(),
+  useAuthSession: vi.fn(),
 }));
+
+vi.mock("@/modules/auth", async () => {
+  const actual = await vi.importActual<typeof import("@/modules/auth")>(
+    "@/modules/auth",
+  );
+  return { ...actual, useAuthSession: mocks.useAuthSession };
+});
 
 vi.mock("./storefront-service", () => ({
   storefrontService: {
@@ -20,6 +28,7 @@ import { StorefrontLanding } from "./storefront-landing";
 describe("StorefrontLanding", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.useAuthSession.mockReturnValue({ status: "anonymous" });
   });
 
   it("leads with real discovery actions and renders active organizations and stores", async () => {
@@ -54,9 +63,15 @@ describe("StorefrontLanding", () => {
     expect(
       screen.getByRole("link", { name: "ดูร้านที่เปิดอยู่" }),
     ).toHaveAttribute("href", "#storefront-heading");
-    expect(
-      screen.getByRole("link", { name: "ติดตามคำสั่งซื้อ" }),
-    ).toHaveAttribute("href", "/my/orders");
+    const trackingHref = screen
+      .getByRole("link", { name: "ติดตามคำสั่งซื้อ" })
+      .getAttribute("href");
+    const loginDestination = new URL(
+      trackingHref ?? "",
+      "https://unistore.local",
+    );
+    expect(loginDestination.pathname).toMatch(/^\/login\/?$/);
+    expect(loginDestination.searchParams.get("returnTo")).toBe("/my/orders/");
 
     expect(
       await screen.findByRole("heading", {
@@ -80,6 +95,44 @@ describe("StorefrontLanding", () => {
     );
     expect(screen.getByText("1 ร้าน")).toBeInTheDocument();
     expect(screen.getAllByText("1", { selector: "dd" })).toHaveLength(2);
+  });
+
+  it("sends an authenticated customer straight to their own order history", async () => {
+    mocks.useAuthSession.mockReturnValue({ status: "authenticated" });
+    mocks.getLanding.mockResolvedValue([]);
+
+    render(<StorefrontLanding />);
+
+    expect(
+      screen.getByRole("link", { name: "ติดตามคำสั่งซื้อ" }),
+    ).toHaveAttribute("href", "/my/orders");
+    expect(
+      await screen.findByText("ยังไม่มีร้านค้าที่เปิดให้เข้าชม"),
+    ).toBeInTheDocument();
+  });
+
+  it("holds the tracking link while a stored session is being checked", async () => {
+    mocks.useAuthSession.mockReturnValue({ status: "loading" });
+    mocks.getLanding.mockResolvedValue([]);
+
+    const { rerender } = render(<StorefrontLanding />);
+
+    expect(
+      screen.getByText("กำลังตรวจสอบบัญชี"),
+    ).toHaveTextContent("กำลังตรวจสอบบัญชี");
+    expect(
+      screen.queryByRole("link", { name: "ติดตามคำสั่งซื้อ" }),
+    ).not.toBeInTheDocument();
+
+    mocks.useAuthSession.mockReturnValue({ status: "authenticated" });
+    rerender(<StorefrontLanding />);
+
+    expect(
+      screen.getByRole("link", { name: "ติดตามคำสั่งซื้อ" }),
+    ).toHaveAttribute("href", "/my/orders");
+    expect(
+      await screen.findByText("ยังไม่มีร้านค้าที่เปิดให้เข้าชม"),
+    ).toBeInTheDocument();
   });
 
   it("offers an in-place retry when loading the marketplace fails", async () => {

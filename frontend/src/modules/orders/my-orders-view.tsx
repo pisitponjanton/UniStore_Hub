@@ -152,6 +152,7 @@ export function MyOrdersView() {
     return (
       <div className={styles.page}>
         <main className={styles.stateWrap}>
+          <h1 className={styles.stateHeading}>คำสั่งซื้อของฉัน</h1>
           {state.status === "loading" ? (
             <LoadingState
               title="กำลังโหลดคำสั่งซื้อของคุณ"

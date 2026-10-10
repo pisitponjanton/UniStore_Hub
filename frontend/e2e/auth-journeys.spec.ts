@@ -321,9 +321,10 @@ test("new Customer can register through the real backend and return to the prote
 
   await expect(page).toHaveURL(/\/my\/orders\/$/);
   await expect(
-    page.getByRole("heading", {
-      name: /คำสั่งซื้อของฉัน|ยังไม่มีคำสั่งซื้อ/,
-    }),
+    page.getByRole("heading", { name: "คำสั่งซื้อของฉัน", level: 1 }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "ยังไม่มีคำสั่งซื้อ", level: 2 }),
   ).toBeVisible();
   await expect(
     page.getByRole("button", { name: "ออกจากระบบ" }),
@@ -404,4 +405,42 @@ test("public navigation remains reachable at a 375px mobile viewport", async ({
   ).toBeVisible();
 
   expectNoUnexpectedDiagnostics(qaEvents);
+});
+
+test("auth forms show their first field without scrolling at mobile and tablet widths", async ({
+  page,
+}) => {
+  const viewports = [
+    { width: 320, height: 568 },
+    { width: 360, height: 800 },
+    { width: 375, height: 667 },
+    { width: 390, height: 844 },
+    { width: 430, height: 932 },
+    { width: 768, height: 1024 },
+    { width: 820, height: 1180 },
+    { width: 1024, height: 768 },
+    { width: 1280, height: 800 },
+    { width: 1440, height: 900 },
+    { width: 1920, height: 1080 },
+  ];
+
+  for (const { width, height } of viewports) {
+    await page.setViewportSize({ width, height });
+    for (const [route, fieldId] of [["/login/", "login-email"], ["/register/", "register-name"]] as const) {
+      await page.goto(route);
+      const field = page.locator(`#${fieldId}`);
+      await expect(field).toBeVisible();
+      const box = await field.boundingBox();
+      expect(box).not.toBeNull();
+      if (box && width <= 820) {
+        expect(box.y, `${route} first field must start on-screen at ${width}px`).toBeGreaterThanOrEqual(0);
+        expect(box.y + box.height, `${route} first field must fit within ${width}x${height}`).toBeLessThanOrEqual(height);
+      }
+      const overflow = await page.evaluate(() =>
+        Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) -
+        document.documentElement.clientWidth,
+      );
+      expect(overflow, `${route} must not overflow at ${width}px`).toBeLessThanOrEqual(1);
+    }
+  }
 });

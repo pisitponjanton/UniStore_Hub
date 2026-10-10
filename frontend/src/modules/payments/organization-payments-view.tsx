@@ -629,6 +629,16 @@ export function OrganizationPaymentsView({
           </div>
         </header>
 
+        <nav className={styles.queueShortcuts} aria-label="ทางลัดคิวตรวจสอบการชำระเงิน">
+          <a href="#payment-review-list" className={styles.queueShortcutPrimary}>
+            <span>ดูคิวตรวจสลิป</span>
+            <strong>{pendingReviewCount} รอตรวจสอบ</strong>
+          </a>
+          <a href="#payment-filter-title" className={styles.queueShortcutSecondary}>
+            ตัวกรองรายการ
+          </a>
+        </nav>
+
         <section className={styles.summaryStrip} aria-label="สรุปคิวชำระเงินที่โหลด">
           <div>
             <span className={styles.summaryLabel}>รายการที่โหลด</span>

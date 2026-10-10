@@ -115,6 +115,15 @@
   text-decoration: none;
 }
 
+.heroSecondaryActionPending,
+.heroSecondaryActionPending:hover {
+  opacity: 0.75;
+  cursor: progress;
+  transform: none;
+  border-color: var(--on-dark-border);
+  background: var(--on-dark-surface);
+}
+
 .heroPrimaryAction:focus-visible,
 .heroSecondaryAction:focus-visible {
   outline: 3px solid var(--on-dark);

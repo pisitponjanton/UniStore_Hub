@@ -47,6 +47,39 @@ describe("MyOrdersView", () => {
     vi.clearAllMocks();
   });
 
+  it("keeps a page-level heading above the empty order state", async () => {
+    mocks.listMyOrders.mockResolvedValue({ items: [], nextCursor: null });
+
+    render(<MyOrdersView />);
+
+    expect(
+      await screen.findByRole("heading", { name: "ยังไม่มีคำสั่งซื้อ", level: 2 }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "คำสั่งซื้อของฉัน", level: 1 }),
+    ).toBeVisible();
+    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
+    expect(screen.getAllByRole("main")).toHaveLength(1);
+    expect(screen.getByRole("link", { name: "เลือกสินค้า" })).toHaveAttribute(
+      "href",
+      "/",
+    );
+  });
+
+  it("preserves the page heading while loading and after a recoverable error", async () => {
+    mocks.listMyOrders.mockRejectedValue(new Error("network"));
+
+    render(<MyOrdersView />);
+
+    expect(
+      screen.getByRole("heading", { name: "คำสั่งซื้อของฉัน", level: 1 }),
+    ).toBeVisible();
+    expect(
+      await screen.findByRole("heading", { name: "ไม่สามารถโหลดคำสั่งซื้อได้" }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
+  });
+
   it("prioritizes actionable state and exposes contextual order links", async () => {
     mocks.listMyOrders.mockResolvedValue({
       items: [
@@ -58,9 +91,11 @@ describe("MyOrdersView", () => {
 
     render(<MyOrdersView />);
 
+    expect(await screen.findByText("order-action")).toBeInTheDocument();
     expect(
-      await screen.findByRole("heading", { name: "คำสั่งซื้อของฉัน" }),
-    ).toBeInTheDocument();
+      screen.getByRole("heading", { name: "คำสั่งซื้อของฉัน", level: 1 }),
+    ).toBeVisible();
+    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
 
     expect(screen.getAllByText("รอชำระเงิน").length).toBeGreaterThan(0);
     expect(screen.getAllByText("รับสินค้าแล้ว").length).toBeGreaterThan(0);
