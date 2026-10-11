@@ -34,7 +34,9 @@ type MatrixGroup =
   | "organization-a"
   | "organization-b-ops"
   | "organization-b-audit"
-  | "platform";
+  | "platform-summary"
+  | "platform-organizations"
+  | "platform-users";
 type MatrixRoute = { path: string; label: string };
 type MatrixRecord = {
   group: MatrixGroup;
@@ -105,12 +107,12 @@ function routesFor(group: MatrixGroup, orderId?: string): MatrixRoute[] {
       return [
         { path: `/org/audit/?${organization}`, label: "Audit" },
       ];
-    case "platform":
-      return [
-        { path: "/platform/summary/", label: "Platform summary" },
-        { path: "/platform/organizations/", label: "Organizations" },
-        { path: "/platform/users/", label: "Users" },
-      ];
+    case "platform-summary":
+      return [{ path: "/platform/summary/", label: "Platform summary" }];
+    case "platform-organizations":
+      return [{ path: "/platform/organizations/", label: "Organizations" }];
+    case "platform-users":
+      return [{ path: "/platform/users/", label: "Users" }];
   }
 }
 
@@ -121,7 +123,9 @@ for (const group of [
   "organization-a",
   "organization-b-ops",
   "organization-b-audit",
-  "platform",
+  "platform-summary",
+  "platform-organizations",
+  "platform-users",
 ] as const) {
   test(`role-aware responsive matrix ${group}: all 11 viewport pairs`, async ({
     browser,
@@ -150,7 +154,7 @@ for (const group of [
       } else if (group !== "guest") {
         const role: SeedRole = group.startsWith("organization")
           ? "organizationAdmin"
-          : group === "platform"
+          : group.startsWith("platform")
             ? "platformAdmin"
             : group === "staff"
               ? "staff"
@@ -277,7 +281,8 @@ for (const group of [
                   }>;
                 };
               }).axe;
-              // On the large, accumulated audit table, inspect the page chrome,
+              // On large, accumulated Audit and Platform User tables, inspect
+              // the page chrome,
               // filters and first three records. Other records share table markup;
               // exclude the remainder so axe doesn't stall on old E2E fixtures.
               const scope = boundedAudit
@@ -291,7 +296,7 @@ for (const group of [
                 impact: v.impact,
                 elements: v.nodes.map(n => n.target).slice(0, 8),
               }));
-            }, group === "organization-b-audit");
+            }, group === "organization-b-audit" || group === "platform-users");
             if (violations.length) {
               axeFindings.push({
                 path: route.path, viewport: `${width}x${height}`, violations,

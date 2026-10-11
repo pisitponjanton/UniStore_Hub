@@ -180,11 +180,71 @@ test(
   },
 );
 
-test(
-  'CT-FILE-018 private file bucket/object is not publicly readable',
-  { todo: 'BLOCKED: requires LocalStack/AWS deployed bucket policy/public-access-block verification' },
-  () => {},
-);
+test('CT-FILE-018 private file bucket/object is not publicly readable', async (t) => {
+  // Test only the canonical loopback LocalStack; never infer or use live AWS credentials.
+  const endpoint = 'http://127.0.0.1:4566';
+  const health = await fetch(endpoint + '/_localstack/health', {
+    signal: AbortSignal.timeout(3000),
+  }).catch(() => null);
+  if (!health?.ok) {
+    t.todo('BLOCKED: canonical loopback LocalStack endpoint is unavailable');
+    return;
+  }
+
+  const { randomUUID } = await import('node:crypto');
+  const sdk = requireFromHere('../../backend/node_modules/@aws-sdk/client-s3');
+  const client = new sdk.S3Client({
+    endpoint,
+    region: 'us-east-1',
+    forcePathStyle: true,
+    credentials: { accessKeyId: 'test', secretAccessKey: 'test' },
+  });
+  const bucket = 'unistore-hub-files-local';
+  const key = `phase1-private-qa/${randomUUID()}.png`;
+  const object = { Bucket: bucket, Key: key };
+  const tinyPng = Buffer.from(
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9ZKxkAAAAASUVORK5CYII=',
+    'base64',
+  );
+
+  try {
+    await client.send(new sdk.PutObjectCommand({
+      ...object,
+      Body: tinyPng,
+      ContentType: 'image/png',
+    }));
+    const stored = await client.send(new sdk.HeadObjectCommand(object));
+    assert.equal(stored.ContentType, 'image/png');
+    assert.equal(stored.ContentLength, tinyPng.length);
+
+    const block = await client.send(new sdk.GetPublicAccessBlockCommand({ Bucket: bucket }));
+    for (const name of [
+      'BlockPublicAcls', 'IgnorePublicAcls', 'BlockPublicPolicy', 'RestrictPublicBuckets',
+    ]) {
+      assert.equal(block.PublicAccessBlockConfiguration?.[name], true, name);
+    }
+
+    const anonymous = await fetch(
+      `${endpoint}/${bucket}/${key}`,
+      { signal: AbortSignal.timeout(5000) },
+    );
+    if (anonymous.status === 200) {
+      // LocalStack 3.8.1 accepts unsigned GET despite all four public-access
+      // block flags. Do not misrepresent this as proof of private S3 access.
+      t.todo(
+        'BLOCKED: LocalStack accepts unsigned object GET despite full public access block; verify anonymous access on an authorized isolated AWS S3 bucket before production sign-off',
+      );
+      return;
+    }
+    assert.equal(anonymous.status, 403, 'Unsigned private object GET must be denied');
+  } finally {
+    try {
+      await client.send(new sdk.DeleteObjectCommand(object));
+    } finally {
+      client.destroy();
+    }
+  }
+});
 
 test(
   'CT-FILE-019 binary file transfer occurs Browser-to-S3 and the API does not proxy raw file bodies',

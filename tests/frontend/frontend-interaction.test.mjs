@@ -36,7 +36,7 @@ test('FE-003 public Storefront renders active browse data without JWT while Orde
     ],
     [
       'composes the public storefront landing',
-      'uses only documented public storefront organization/store endpoints',
+      'loads the full active public directory with one aggregate API request',
       'posts the documented create payload to the organization order endpoint with authentication',
     ],
   );

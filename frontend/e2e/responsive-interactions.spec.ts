@@ -316,9 +316,21 @@ for (const viewport of responsiveViewports) {
       viewport.width === 320 ||
       viewport.width === 1440
     ) {
-      await submitPayment.focus();
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Shift+Tab");
+      // Test actual keyboard tab order from the preceding file input:
+      // programmatic focus followed by Tab/Shift+Tab can behave differently
+      // when the browser initially selects its first sequential focus anchor.
+      const forwardTab = testInfo.project.name === "webkit"
+        ? "Alt+Tab"
+        : "Tab";
+      const backwardTab = testInfo.project.name === "webkit"
+        ? "Alt+Shift+Tab"
+        : "Shift+Tab";
+      await slip.focus();
+      await page.keyboard.press(forwardTab);
+      await expect(submitPayment).toBeFocused();
+      await page.keyboard.press(backwardTab);
+      await expect(slip).toBeFocused();
+      await page.keyboard.press(forwardTab);
       await expect(submitPayment).toBeFocused();
 
       const focusVisual =
@@ -510,7 +522,7 @@ for (const viewport of responsiveViewports) {
       );
 
       if (
-        minRendered < 44 ||
+        minRendered < 43.99 ||
         computed.controlHeight.trim() !== "44px" ||
         computed.targetMin.trim() !== "44px"
       ) {
@@ -540,7 +552,9 @@ for (const viewport of responsiveViewports) {
         );
       }
 
-      expect(minRendered).toBeGreaterThanOrEqual(44);
+      // Firefox can report 43.99997px for a 44px CSS target due to
+      // subpixel layout rounding; keep the exact CSS-token assertions.
+      expect(minRendered).toBeGreaterThanOrEqual(43.99);
       expect(computed.controlHeight.trim()).toBe("44px");
       expect(computed.targetMin.trim()).toBe("44px");
     }

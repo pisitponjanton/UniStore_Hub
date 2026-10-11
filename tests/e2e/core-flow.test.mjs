@@ -1,3 +1,4 @@
+import { assertLocalOnlyLiveE2eTarget } from './live-e2e-helpers.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 const tinyPng = Buffer.from(
@@ -106,6 +107,8 @@ test('E2E-CORE-001 canonical register-to-received flow', async (t) => {
     );
     return;
   }
+
+  assertLocalOnlyLiveE2eTarget(baseUrl);
 
   const password = process.env.E2E_TEST_PASSWORD || 'E2e-only-Strong-Password-123!';
   const prefix = `unistore-e2e-${runId}`;

@@ -584,6 +584,100 @@ test('storefront Campaign detail rejects non-OPEN or wrong-store campaigns', asy
   }
 });
 
+test('aggregate public directory includes active stores only and maps safe fields', async () => {
+  const calls = [];
+  const service = createStorefrontService(
+    baseDependencies({
+      organizationRepository: {
+        async listPlatform() {
+          return {
+            items: [
+              makeOrganization(),
+              makeOrganization({ organizationId: 'org-2', name: 'Second Club' }),
+              makeOrganization({ organizationId: 'org-pending', status: ORGANIZATION_STATUS.PENDING }),
+            ],
+            lastEvaluatedKey: null,
+          };
+        },
+      },
+      storeRepository: {
+        async listByOrganization(id) {
+          calls.push(id);
+          if (id === 'org-2') return [];
+          return [
+            makeStore(),
+            makeStore({ storeId: 'hidden', status: STORE_STATUS.INACTIVE }),
+          ];
+        },
+      },
+    }),
+  );
+  const items = await service.listDirectory();
+  assert.deepEqual(calls.sort(), ['org-1', 'org-2']);
+  assert.equal(items.length, 2);
+  assert.deepEqual(items[0].organization, {
+    organizationId: 'org-1', name: 'IT Club',
+    description: 'Student organization', status: ORGANIZATION_STATUS.ACTIVE,
+    createdAt: FIXED_TIME, updatedAt: FIXED_TIME,
+  });
+  assert.deepEqual(items[0].stores, [{
+    storeId: 'store-1', organizationId: 'org-1', name: 'Main Store',
+    description: 'Faculty merchandise', status: STORE_STATUS.ACTIVE,
+    createdAt: FIXED_TIME, updatedAt: FIXED_TIME,
+  }]);
+  assert.deepEqual(items[1].stores, []);
+  assert.equal(JSON.stringify(items).includes('privateNote'), false);
+  assert.equal(JSON.stringify(items).includes('internalSecret'), false);
+});
+
+test('aggregate public directory bounds concurrent store queries for larger datasets', async () => {
+  const organizations = Array.from({ length: 90 }, (_, i) =>
+    makeOrganization({ organizationId: `org-${i}` }),
+  );
+  let inFlight = 0;
+  let peak = 0;
+  const service = createStorefrontService(
+    baseDependencies({
+      organizationRepository: {
+        async listPlatform() {
+          return { items: organizations, lastEvaluatedKey: null };
+        },
+      },
+      storeRepository: {
+        async listByOrganization(id) {
+          inFlight += 1;
+          peak = Math.max(peak, inFlight);
+          await new Promise((resolve) => setTimeout(resolve, 1));
+          inFlight -= 1;
+          return [makeStore({ storeId: `store-${id}`, organizationId: id })];
+        },
+      },
+    }),
+  );
+  const result = await service.listDirectory();
+  assert.equal(result.length, 90);
+  assert.equal(result[89].stores[0].organizationId, 'org-89');
+  assert.ok(peak <= 12 && peak > 1, `expected 2-12 concurrent requests, saw ${peak}`);
+});
+
+test('aggregate public directory is available without credentials and matches success envelope', async () => {
+  const publicEntry = {
+    organization: {
+      organizationId: 'org-1', name: 'IT Club', description: '',
+      status: ORGANIZATION_STATUS.ACTIVE,
+    },
+    stores: [],
+  };
+  const response = await request(createApp({
+    storefront: {
+      storefrontService: {
+        async listDirectory() { return [publicEntry]; },
+      },
+    },
+  })).get('/api/v1/storefront/directory').expect(200);
+  assert.deepEqual(response.body, { success: true, data: [publicEntry] });
+});
+
 test('public storefront routes do not require Bearer authentication', async () => {
   const storefrontService = {
     async listOrganizations() {

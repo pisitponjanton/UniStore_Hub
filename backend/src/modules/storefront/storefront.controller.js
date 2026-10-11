@@ -14,6 +14,14 @@ function createStorefrontController(options = {}) {
     createStorefrontService(options);
 
   return {
+    async listDirectory(req, res, next) {
+      try {
+        return sendSuccess(res, await service.listDirectory());
+      } catch (error) {
+        return next(error);
+      }
+    },
+
     async listOrganizations(req, res, next) {
       try {
         return sendList(

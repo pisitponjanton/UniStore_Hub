@@ -65,11 +65,22 @@ function installDiagnostics(
     const errorText =
       request.failure()?.errorText ?? "unknown request failure";
 
+    // Browser-initiated request cancellation is reported with distinct codes
+    // by Chromium, Gecko and WebKit during immediate client navigation.
+    // Keep diagnostics, but do not treat a cancelled local GET as an outage.
+    const browserAborted =
+      errorText === "net::ERR_ABORTED" ||
+      (
+        request.method() === "GET" &&
+        ["NS_BINDING_ABORTED", "cancelled"].includes(errorText) &&
+        (
+          /^http:\/\/localhost:4000\/api\/v1\//.test(request.url()) ||
+          /^http:\/\/localhost:3000\/_next\/static\//.test(request.url())
+        )
+      );
+
     events.push({
-      kind:
-        errorText === "net::ERR_ABORTED"
-          ? "request-aborted"
-          : "request-failed",
+      kind: browserAborted ? "request-aborted" : "request-failed",
       method: request.method(),
       url: request.url(),
       errorText,

@@ -130,6 +130,20 @@ export function createStorefrontService(
 ): StorefrontService {
   return {
     async getLanding(options = {}) {
+      try {
+        // An additive, public aggregate endpoint eliminates the previous
+        // N+1 HTTP fanout on stores. Preserve compatibility with an older
+        // deployed API until both frontend/backend versions are upgraded.
+        return await client.get<StorefrontLandingOrganization[]>(
+          "/storefront/directory",
+          { signal: options.signal },
+        );
+      } catch (error) {
+        if (!(error instanceof ApiClientError && error.status === 404)) {
+          throw error;
+        }
+      }
+
       const organizations = await getAllPages<StorefrontOrganizationDTO>(
         client,
         "/storefront/organizations",

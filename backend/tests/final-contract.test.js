@@ -110,6 +110,7 @@ test('documented module routers expose only the canonical direct route surface',
   ]);
 
   assertSurface(createStorefrontRouter({}), [
+    'GET /directory',
     'GET /organizations',
     'GET /organizations/:organizationId/stores',
     'GET /organizations/:organizationId/stores/:storeId',

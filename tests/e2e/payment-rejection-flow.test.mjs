@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
+  assertLocalOnlyLiveE2eTarget,
   apiJson,
   listAuditItems,
   registerAndLogin,
@@ -20,6 +21,8 @@ test('E2E-PAYMENT-REJECT-001 reject -> notify -> resubmit -> approve -> PAID wit
     );
     return;
   }
+
+  assertLocalOnlyLiveE2eTarget(baseUrl);
 
   const password = process.env.E2E_TEST_PASSWORD || 'E2e-only-Strong-Password-123!';
   const prefix = `unistore-reject-${runId}`;

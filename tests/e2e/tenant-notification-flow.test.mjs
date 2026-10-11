@@ -4,6 +4,7 @@ import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
 
 import {
+  assertLocalOnlyLiveE2eTarget,
   apiError,
   apiJson,
   markNotificationRead,
@@ -187,6 +188,8 @@ test('E2E-TENANT-001 two-organization cross-tenant denial matrix', async (t) => 
     return;
   }
 
+  assertLocalOnlyLiveE2eTarget(baseUrl);
+
   const password = process.env.E2E_TEST_PASSWORD || 'E2e-only-Strong-Password-123!';
   const prefix = `unistore-tenant-${runId}`;
 
@@ -351,6 +354,8 @@ test('E2E-NOTIFY-001 business event -> SQS -> Worker -> Notification -> mark-rea
     t.todo('BLOCKED: set E2E_API_BASE_URL and deterministic E2E_RUN_ID');
     return;
   }
+
+  assertLocalOnlyLiveE2eTarget(baseUrl);
 
   const password = process.env.E2E_TEST_PASSWORD || 'E2e-only-Strong-Password-123!';
   const prefix = `unistore-notify-${runId}`;
@@ -550,10 +555,15 @@ test('E2E-NOTIFY-001 duplicate delivery maps eventId to notificationId and creat
     return;
   }
 
+  const endpoint = process.env.E2E_AWS_ENDPOINT_URL;
+  if (!endpoint) {
+    t.todo('BLOCKED: E2E_AWS_ENDPOINT_URL must be the canonical local LocalStack endpoint for SQS delivery');
+    return;
+  }
+  assertLocalOnlyLiveE2eTarget(baseUrl, { queueUrl, endpoint });
+
   const eventId = process.env.E2E_DUPLICATE_EVENT_ID || deterministicUuid(`duplicate:${runId}`);
   const occurredAt = new Date().toISOString();
-  const endpoint = process.env.E2E_AWS_ENDPOINT_URL;
-
   const client = createSqsClient({
     ...(endpoint ? { endpoint } : {}),
     region: process.env.E2E_AWS_REGION || 'us-east-1',

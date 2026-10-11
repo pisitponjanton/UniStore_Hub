@@ -17,6 +17,50 @@ function buildApiUrl(baseUrl, route) {
   return `${normalizedBase}${route}`;
 }
 
+/**
+ * These live E2E tests create organizations, orders, files and SQS events.
+ * Lock all destinations to canonical dev ports and routes. Do not allow an
+ * arbitrary localhost service (or inherited AWS/SQS credentials) as a target.
+ */
+export function assertLocalOnlyLiveE2eTarget(baseUrl, { queueUrl, endpoint } = {}) {
+  const parse = (raw) => {
+    try {
+      const url = new URL(raw);
+      if (url.protocol !== 'http:' || url.username || url.password ||
+          url.search || url.hash) return null;
+      return url;
+    } catch {
+      return null;
+    }
+  };
+  const isDevApi = (raw) => {
+    const url = parse(raw);
+    return url &&
+      ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname) &&
+      url.port === '4000' &&
+      ['/api/v1', '/api/v1/'].includes(url.pathname);
+  };
+  const isLocalstack = (raw, requireQueue) => {
+    const url = parse(raw);
+    if (!url || !['localhost', '127.0.0.1', '[::1]', 'localstack'].includes(url.hostname) ||
+        url.port !== '4566') return false;
+    if (requireQueue) {
+      return /^\/\d{12}\/unistore-hub-notifications-local$/.test(url.pathname);
+    }
+    return url.pathname === '/' || url.pathname === '';
+  };
+
+  if (!isDevApi(baseUrl)) {
+    throw new Error('Refusing destructive Live E2E: API base must be the canonical loopback localhost:4000/api/v1');
+  }
+  if (queueUrl && !isLocalstack(queueUrl, true)) {
+    throw new Error('Refusing Live E2E: SQS URL must point to the canonical local notifications queue');
+  }
+  if (endpoint !== undefined && !isLocalstack(endpoint, false)) {
+    throw new Error('Refusing Live E2E: AWS endpoint must point to loopback LocalStack:4566');
+  }
+}
+
 export const tinyPng = Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9ZKxkAAAAASUVORK5CYII=',
   'base64',

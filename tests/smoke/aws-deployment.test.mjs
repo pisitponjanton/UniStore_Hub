@@ -83,7 +83,14 @@ async function detectDeployment() {
   }
 }
 
-const deployment = await detectDeployment();
+// Live AWS smoke must be explicitly opted in for an authorized isolated
+// Learner Lab. Default local quality runs must never probe real AWS accounts.
+const deployment = process.env.TEST_ENABLE_AWS_SMOKE === '1'
+  ? await detectDeployment()
+  : {
+      ready: false,
+      reason: 'Live AWS smoke is disabled by default. Set TEST_ENABLE_AWS_SMOKE=1 only after explicit staging/AWS authorization',
+    };
 
 function requireDeployment(t) {
   if (!deployment.ready) {

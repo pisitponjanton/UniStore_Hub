@@ -28,6 +28,36 @@ Non-local integration targets must expose the same deterministic seed-role email
 - `npm run test:e2e:headed` — headed Chromium run
 - `npm run test:e2e:ui` — Playwright UI mode
 
+### Cross-browser verification (opt-in)
+
+Firefox and WebKit are intentionally **not enabled by default** so ordinary CI/local
+E2E continues to run only Chromium. From `frontend/`:
+
+```bash
+npx playwright install firefox webkit
+E2E_ENABLE_CROSS_BROWSER=1 npx playwright test e2e/route-viewport-matrix.spec.ts --project=firefox
+E2E_ENABLE_CROSS_BROWSER=1 npx playwright test e2e/route-viewport-matrix.spec.ts --project=webkit
+E2E_ENABLE_CROSS_BROWSER=1 npx playwright test e2e/responsive-interactions.spec.ts --project=firefox
+E2E_ENABLE_CROSS_BROWSER=1 npx playwright test e2e/responsive-interactions.spec.ts --project=webkit
+```
+
+The role-aware matrix checks 28 unique routes / 33 route-role surfaces at 11 viewport
+pairs per browser. Very large Audit and Platform Users tables have intentionally
+**sampled** axe accessibility checks; the entire table is not an audited manual
+screen-reader experience. Browser-specific navigation cancellation diagnostics
+(`NS_BINDING_ABORTED`, `cancelled`) are recorded and categorized as aborted
+GETs on local API/static assets, not general network failure.
+
+For WebKit on macOS, `Option+Tab` is used to reach buttons in keyboard tab-order
+when the browser uses text-input-only Tab navigation. This is a test adaptation
+to macOS/WebKit keyboard preferences, not evidence that real Safari preferences
+were manually verified.
+
+**Playwright WebKit is not an actual Safari.app manual session**; no real iOS,
+Android, VoiceOver, TalkBack, Firefox desktop UI, touch-screen or screenshot
+pixel-by-pixel review is implied. Follow the Phase 2 report in `tests/reports`
+for outstanding manual checks.
+
 Failure evidence is stored under ignored `test-results/` and `playwright-report/`.
 
 The harness captures console errors, uncaught page errors, failed requests, and HTTP 4xx/5xx responses. Tests decide which failures are expected for explicit negative scenarios.

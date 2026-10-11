@@ -389,3 +389,43 @@ Earlier Phase 10 Chromium re-verification also passed 36/36 Guest/Customer/Staff
 No blocking code regression or unauthorized path change was found in the reviewed local diff. However, the task review **does not** close the 2 Contract TODO, 13 Smoke TODO or 5 legacy live Cross-system E2E TODO. The original F-17–F-21 scenarios remain PARTIAL for the specific reasons in Section 16.3. Real-device/Safari/Firefox, actual screen-reader use, exhaustive image provenance, WebSocket guarantees and Lighthouse/Core Web Vitals are not independently verified. **Do not classify the system as production-ready solely from this review.**
 
 **Final workspace handling:** All work remains uncommitted for explicit user review and any subsequent commit instruction. The bdxa Workspace Plan completion state is maintained by bdxa, not a root `plan.md`.
+
+---
+
+## 18. Production Readiness & QA Follow-up (2026-10-11)
+
+**This is the later, separate 5-phase Production Readiness review, based on commit `15a8db0`.** Sections 1–17 above are historical results from the original UX/UI audit and must not be interpreted as present-day measurements or a final production acceptance. The evidence and current TODO disposition below supersede the older follow-up statuses.
+
+### Verified changes and evidence
+
+- **P1 — isolated E2E audit and safety:** LocalStack DynamoDB synthetic Order/Payment/Pickup persistence is tested and cleaned up by its own fixture; legacy live Node E2E destinations are pinned to the canonical loopback API and LocalStack queue. A review fix further restricts allowed ports, API paths and queue identity. Only 1 original Smoke TODO became PASS. File privacy LocalStack result is explicitly not a real AWS S3 security verification.
+- **P2 — cross-browser:** Firefox and Playwright WebKit automated matrix passed **33 route/role variants × 11 viewport pairs per engine = 726 responsive measurements**; automated axe scans and focused keyboard/auth/visual/media tests passed in scope. These are emulated browsers, **not** shipping Safari, physical devices or screen reader certification.
+- **P3 — measured performance:** Landing Storefront HTTP calls dropped from **266 to 2** per sampled local Chromium load using the additive `GET /api/v1/storefront/directory`; mean result visibility decreased from **2,056 ms to 1,670 ms** across three developer-machine runs. The aggregate matched the legacy public directory for **264 active Organizations and 225 Stores**. Synthetic browser test searches 2,300 entries without backend writes. Local Next.js **Dev** Lighthouse measured **Performance 69, LCP 9.2s, CLS 0.013**; production performance is **not** established.
+- **P4 — AWS staging dry-run:** Static CloudFormation offline validator passed, Infrastructure **19/19**, Deployment Tooling **50/50**, and prior S3 Website/static export validation **10/10**. No AWS service invocation, deployment or rollback rehearsal occurred. There are **20 CloudFormation resources and 8 outputs** in the checked template.
+- **P5 — final local Diff Review:** Scoped code/security review and the final tests (including restricted E2E targets) passed. No unapproved source changes outside documented Storefront/API, QA Test, evidence and this Audit scope were introduced. Heuristic changed-file secret scan found no candidate keys/private-key blocks; it cannot certify secret absence.
+
+### Latest final local regression snapshot
+
+| Gate | Result |
+| --- | --- |
+| Frontend unit (Vitest) | **294 PASS** |
+| Backend unit | **290 PASS** |
+| Frontend contract | **33 PASS** |
+| Contract | **196 PASS / 2 TODO** |
+| Integration | **36 PASS** |
+| Security | **16 PASS** (includes final safety-guard tests) |
+| Infrastructure | **19 PASS** |
+| Smoke | **12 PASS / 12 TODO** |
+| Legacy live Node E2E | **0 PASS / 5 TODO**, pending isolated run credentials and fixture requirements |
+| Frontend ESLint / TypeScript / Next Static Export | **PASS**, 30 generated app routes |
+| Final Chromium browser regression | **8/8 PASS** |
+| Final Playwright WebKit synthetic large-directory regression | **1/1 PASS** |
+| Deploy / Tooling static checks | **50/50 PASS** |
+
+### Release verdict and outstanding blockers
+
+**Diff/code handoff for this local task: PASS. Real-user production deployment: NO-GO.**
+
+Required before approval: independently verify anonymous GET denial on **real AWS S3 Files**, implement rehearsable frontend deployment rollback and DynamoDB/Files data backup/recovery, assess the **HTTP S3 Website** threat to real user login, review JWT handling in CLI process arguments and effective `LabRole` permissions, verify real API Gateway/Worker/CloudWatch SQS behavior, measure a production-like optimized Web Vitals baseline, and complete or explicitly sign off the **19 remaining TODOs**. Current Learner Lab architecture remains demo-only without an approved HTTPS architecture change. Actual mobile devices, Safari.app and screen readers also remain manually unverified.
+
+Detailed evidence: `tests/reports/production-readiness-phase1-2026-10-11.md`, `production-readiness-phase2-2026-10-11.md`, `production-readiness-phase3-2026-10-11.md`, `production-readiness-phase4-2026-10-11.md` and `production-readiness-phase5-2026-10-11.md`. No Git commit, push, external AWS call, deploy, destroy or production data mutation was authorized or executed under this task.

@@ -39,6 +39,28 @@ if (usesNonLocalTarget) {
   }
 }
 
+// Cross-browser QA is opt-in so ordinary deterministic local E2E runs remain
+// Chromium-only. Explicitly enable it when Firefox/WebKit binaries are present.
+const extraBrowserProjects =
+  process.env.E2E_ENABLE_CROSS_BROWSER === "1"
+    ? ([
+        {
+          name: "firefox",
+          use: {
+            browserName: "firefox" as const,
+            viewport: { width: 1440, height: 900 },
+          },
+        },
+        {
+          name: "webkit",
+          use: {
+            browserName: "webkit" as const,
+            viewport: { width: 1440, height: 900 },
+          },
+        },
+      ] as const)
+    : [];
+
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: false,
@@ -68,5 +90,6 @@ export default defineConfig({
         viewport: { width: 1440, height: 900 },
       },
     },
+    ...extraBrowserProjects,
   ],
 });

@@ -250,6 +250,42 @@ function createStorefrontService(options = {}) {
   }
 
   return {
+    async listDirectory() {
+      // Aggregate only publicly visible records without re-fetching each
+      // already-validated active Organization. Bound concurrent DynamoDB
+      // queries so larger directories do not overwhelm shared tables.
+      const activeOrganizations = (await collectOrganizations()).filter(
+        (organization) => organization.status === ORGANIZATION_STATUS.ACTIVE,
+      );
+      const entries = new Array(activeOrganizations.length);
+      let nextIndex = 0;
+      const worker = async () => {
+        while (nextIndex < activeOrganizations.length) {
+          const index = nextIndex++;
+          const organization = activeOrganizations[index];
+          const stores = await getStoreRepository().listByOrganization(
+            organization.organizationId,
+          );
+          entries[index] = {
+            organization: toStorefrontOrganizationDto(organization),
+            stores: stores
+              .filter((store) => {
+                requireTenantMatch(store, organization.organizationId);
+                return store.status === STORE_STATUS.ACTIVE;
+              })
+              .map(toStorefrontStoreDto),
+          };
+        }
+      };
+      await Promise.all(
+        Array.from(
+          { length: Math.min(12, activeOrganizations.length) },
+          () => worker(),
+        ),
+      );
+      return entries;
+    },
+
     async listOrganizations() {
       const organizations = await collectOrganizations();
 

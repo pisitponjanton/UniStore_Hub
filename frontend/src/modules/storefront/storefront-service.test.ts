@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import { ApiClientError } from "@/services";
+
 import type {
   ApiListData,
   CampaignDTO,
@@ -60,40 +62,66 @@ function emptyPage<T>(): ApiListData<T> {
 }
 
 describe("storefront service", () => {
-  it("uses only documented public storefront organization/store endpoints", async () => {
+  it("loads the full active public directory with one aggregate API request", async () => {
     const calledPaths: string[] = [];
     const client: StorefrontClient = {
-      async get<T>(): Promise<T> {
-        throw new Error("Unexpected detail request");
-      },
-      async getList<T>(path: string): Promise<ApiListData<T>> {
+      async get<T>(path: string): Promise<T> {
         calledPaths.push(path);
-
-        if (path === "/storefront/organizations") {
-          return {
-            items: [organization] as T[],
-            nextCursor: null,
-          };
-        }
-
-        if (path === "/storefront/organizations/org%201/stores") {
-          return {
-            items: [store] as T[],
-            nextCursor: null,
-          };
-        }
-
-        throw new Error(`Unexpected endpoint: ${path}`);
+        if (path !== "/storefront/directory") throw new Error("Unexpected path");
+        return [{ organization, stores: [store] }] as T;
+      },
+      async getList<T>(): Promise<ApiListData<T>> {
+        throw new Error("Aggregate endpoint should avoid per-organization requests");
       },
     };
 
     const result = await createStorefrontService(client).getLanding();
 
     expect(result).toEqual([{ organization, stores: [store] }]);
-    expect(calledPaths).toEqual([
+    expect(calledPaths).toEqual(["/storefront/directory"]);
+  });
+
+  it("falls back to the existing cursor-paginated directory endpoints for an older API", async () => {
+    const paths: string[] = [];
+    const client: StorefrontClient = {
+      async get<T>(path: string): Promise<T> {
+        paths.push(path);
+        throw new ApiClientError({
+          status: 404, code: "INTERNAL_ERROR", kind: "notFound",
+        });
+      },
+      async getList<T>(path: string): Promise<ApiListData<T>> {
+        paths.push(path);
+        if (path === "/storefront/organizations") {
+          return { items: [organization] as T[], nextCursor: null };
+        }
+        return { items: [store] as T[], nextCursor: null };
+      },
+    };
+    expect(await createStorefrontService(client).getLanding()).toEqual([
+      { organization, stores: [store] },
+    ]);
+    expect(paths).toEqual([
+      "/storefront/directory",
       "/storefront/organizations",
       "/storefront/organizations/org%201/stores",
     ]);
+  });
+
+  it("does not mask aggregate directory server errors with the fallback", async () => {
+    const client: StorefrontClient = {
+      async get<T>(): Promise<T> {
+        throw new ApiClientError({
+          status: 503, code: "INTERNAL_ERROR", kind: "server",
+        });
+      },
+      async getList<T>(): Promise<ApiListData<T>> {
+        throw new Error("Must not enter fallback after 503");
+      },
+    };
+    await expect(createStorefrontService(client).getLanding()).rejects.toMatchObject({
+      status: 503, kind: "server",
+    });
   });
 
   it("loads store detail, products, and campaigns from public storefront paths", async () => {
@@ -181,7 +209,9 @@ describe("storefront service", () => {
     const cursors: Array<string | undefined> = [];
     const client: StorefrontClient = {
       async get<T>(): Promise<T> {
-        throw new Error("Unexpected detail request");
+        throw new ApiClientError({
+          status: 404, code: "INTERNAL_ERROR", kind: "notFound",
+        });
       },
       async getList<T>(
         path: string,

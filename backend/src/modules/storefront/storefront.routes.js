@@ -9,6 +9,7 @@ function createStorefrontRouter(options = {}) {
   const router = express.Router();
   const controller = createStorefrontController(options);
 
+  router.get('/directory', controller.listDirectory);
   router.get('/organizations', controller.listOrganizations);
   router.get(
     '/organizations/:organizationId/stores',

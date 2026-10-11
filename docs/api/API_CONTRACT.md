@@ -944,6 +944,7 @@ The source includes a customer Storefront module but does not define dedicated b
 Public read-only storefront endpoints are separated from Organization management endpoints:
 
 ```http
+GET /api/v1/storefront/directory
 GET /api/v1/storefront/organizations
 GET /api/v1/storefront/organizations/:organizationId/stores
 GET /api/v1/storefront/organizations/:organizationId/stores/:storeId
@@ -954,6 +955,22 @@ GET /api/v1/storefront/organizations/:organizationId/stores/:storeId/campaigns/:
 ```
 
 Auth: Public read-only.
+
+**PROJECT DECISION — Phase 3 performance addition (2026-10-11).**
+`GET /api/v1/storefront/directory` provides a single public, read-only
+aggregate envelope with `data` as an ordered array of
+`{ organization: StorefrontOrganizationDTO, stores: StorefrontStoreDTO[] }`.
+It includes every ACTIVE Organization (including those with no visible Store),
+and only ACTIVE Stores in its own Organization. Sensitive fields are filtered
+by the same public DTO mappers as the existing endpoints. The Backend bounds
+concurrent Store queries (12) and omits unnecessary Organization re-reads.
+This endpoint is **additive**: the existing cursor/list routes remain
+unchanged, and Frontend falls back to them **only when aggregate returns 404**
+(e.g. an older deployed Backend), not on other HTTP errors. The aggregate
+currently returns all public records in one JSON payload and is intended for
+moderate campus directories; large future installations should introduce a
+server-side indexed, cursor-paginated search contract rather than assume
+unbounded growth of this response.
 
 Visibility:
 
