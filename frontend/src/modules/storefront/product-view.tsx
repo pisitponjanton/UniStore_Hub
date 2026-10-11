@@ -231,8 +231,8 @@ export function ProductView() {
           {store.name}
         </Link>
 
-        <section className={styles.productDetail}>
-          <div className={styles.productDetailMedia}>
+        <section className={styles.productDetail} data-has-image={product.imageUrl ? "true" : "false"}>
+          <div className={styles.productDetailMedia} data-has-image={product.imageUrl ? "true" : "false"}>
             {product.imageUrl ? (
               // Backend supplies this short-lived Storefront URL for display only.
               // eslint-disable-next-line @next/next/no-img-element

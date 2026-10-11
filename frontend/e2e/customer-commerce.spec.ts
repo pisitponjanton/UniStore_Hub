@@ -37,11 +37,11 @@ test("Customer can select a product, validate quantity, create an Order, and upl
   request,
   qaEvents,
 }) => {
-  await establishSeedRoleSession(
-    context,
+  const checkoutCustomer = await registerDisposableCustomer(
     request,
-    "customer",
+    `checkout-${Date.now()}`,
   );
+  await establishTokenSession(context, checkoutCustomer.token);
 
   const {
     organizationId,
@@ -348,16 +348,18 @@ test("Customer can see READY_FOR_PICKUP QR and Token, then filter and mark the m
 
   const runId =
     `phase5-${Date.now()}-${testInfo.workerIndex}`;
+  // Isolate notifications and pickup mutations from the shared seed user.
+  const pickupCustomer = await registerDisposableCustomer(
+    request,
+    `pickup-${runId}`,
+  );
   const fixture = await createReadyForPickupFixture(
     request,
     runId,
+    { customerToken: pickupCustomer.token },
   );
 
-  await establishSeedRoleSession(
-    context,
-    request,
-    "customer",
-  );
+  await establishTokenSession(context, pickupCustomer.token);
 
   await page.goto(
     `/my/order/?orderId=${fixture.orderId}`,
@@ -442,10 +444,7 @@ test("Customer can see READY_FOR_PICKUP QR and Token, then filter and mark the m
     readNotification.getByText(/อ่านแล้ว/).first(),
   ).toBeVisible();
 
-  const customerToken = await getSeedRoleToken(
-    request,
-    "customer",
-  );
+  const customerToken = pickupCustomer.token;
   const readNotifications = await apiJson<{
     items: Array<{
       notificationId: string;

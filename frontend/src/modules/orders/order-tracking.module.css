@@ -757,7 +757,7 @@
 .itemListHeader {
   padding: var(--space-3) var(--space-4);
   background: var(--surface-muted);
-  color: var(--ink-tertiary);
+  color: var(--ink-secondary);
   font-size: var(--text-caption);
   font-weight: 650;
 }

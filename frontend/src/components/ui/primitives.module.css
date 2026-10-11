@@ -781,7 +781,7 @@
   padding-inline: 10px;
   border-radius: var(--radius-pill);
   background: var(--surface-muted);
-  color: var(--ink-tertiary);
+  color: var(--ink-secondary);
   font-size: var(--text-caption);
   font-weight: 700;
 }

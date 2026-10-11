@@ -96,4 +96,69 @@ describe("storefront presenters", () => {
       "/campaigns/view?organizationId=org-1&campaignId=campaign-1",
     );
   });
+
+  it("does not claim unavailable pricing when the public list omits variants", () => {
+    render(
+      <ProductCard
+        organizationId="org-1"
+        campaignId="campaign-1"
+        product={{ ...product, variants: undefined }}
+      />,
+    );
+
+    expect(screen.getByText("ดูราคาและตัวเลือก")).toBeInTheDocument();
+    expect(screen.getByText("ตรวจสอบตัวเลือกในหน้าสินค้า")).toBeInTheDocument();
+    expect(screen.queryByText("ยังไม่มีราคาที่ใช้งาน")).not.toBeInTheDocument();
+    expect(screen.queryByText("ยังไม่มีตัวเลือกที่ใช้งาน")).not.toBeInTheDocument();
+    expect(screen.queryByText("฿259.00")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /เสื้อชมรม/ })).toHaveAttribute(
+      "href",
+      "/products/view?organizationId=org-1&productId=product-1&campaignId=campaign-1",
+    );
+  });
+
+  it("distinguishes an explicit zero-active-variant result from omitted data", () => {
+    const { rerender } = render(
+      <ProductCard organizationId="org-1" product={{ ...product, variants: [] }} />,
+    );
+
+    expect(screen.getByText("ยังไม่มีราคาที่ใช้งาน")).toBeInTheDocument();
+    expect(screen.getByText("ยังไม่มีตัวเลือกที่ใช้งาน")).toBeInTheDocument();
+    expect(screen.queryByText("ดูราคาและตัวเลือก")).not.toBeInTheDocument();
+
+    rerender(
+      <ProductCard
+        organizationId="org-1"
+        product={{
+          ...product,
+          variants: [{ ...product.variants![0], status: "INACTIVE" }],
+        }}
+      />,
+    );
+    expect(screen.getByText("ยังไม่มีราคาที่ใช้งาน")).toBeInTheDocument();
+    expect(screen.getByText("ยังไม่มีตัวเลือกที่ใช้งาน")).toBeInTheDocument();
+  });
+
+  it("uses only active variants to show the lowest accurate price and option count", () => {
+    const currentVariant = product.variants![0];
+    render(
+      <ProductCard
+        organizationId="org-1"
+        product={{
+          ...product,
+          variants: [
+            currentVariant,
+            { ...currentVariant, variantId: "variant-3", name: "S", price: 19900 },
+            { ...currentVariant, variantId: "variant-4", name: "XL", price: 39900 },
+            { ...currentVariant, variantId: "variant-5", name: "Archived", price: 100, status: "INACTIVE" },
+          ],
+        }}
+      />,
+    );
+    expect(screen.getByText("3 ตัวเลือก")).toBeInTheDocument();
+    expect(screen.getByText("฿199.00")).toBeInTheDocument();
+    expect(screen.queryByText("฿1.00")).not.toBeInTheDocument();
+    expect(screen.queryByText("ดูราคาและตัวเลือก")).not.toBeInTheDocument();
+  });
+
 });

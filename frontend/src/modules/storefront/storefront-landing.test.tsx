@@ -155,4 +155,69 @@ describe("StorefrontLanding", () => {
       }),
     ).toBeInTheDocument();
   });
+
+
+  it("shows a bounded list while keeping every store searchable across pages", async () => {
+    mocks.getLanding.mockResolvedValue([
+      {
+        organization: {
+          organizationId: "org-1",
+          name: "มหาวิทยาลัยทดสอบ",
+          description: "",
+          status: "ACTIVE",
+        },
+        stores: Array.from({ length: 30 }, (_, index) => ({
+          storeId: `store-${index}`,
+          organizationId: "org-1",
+          name: `ร้าน-${index}`,
+          description: "",
+          status: "ACTIVE",
+        })),
+      },
+    ]);
+
+    render(<StorefrontLanding />);
+    expect(await screen.findByText("หน้า 1 จาก 3")).toBeInTheDocument();
+    // Twelve paged directory rows plus four unchanged featured store links.
+    expect(screen.getAllByRole("link", { name: /ร้าน-\d+/ })).toHaveLength(16);
+    fireEvent.click(screen.getByRole("button", { name: "ถัดไป" }));
+    expect(screen.getByText("หน้า 2 จาก 3")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "ร้าน-12" })).toBeInTheDocument();
+
+    fireEvent.change(
+      screen.getByRole("searchbox", { name: "ค้นหาร้านค้าหรือหน่วยงาน" }),
+      { target: { value: "ร้าน-29" } },
+    );
+    expect(screen.getByRole("heading", { name: "ร้าน-29" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "ถัดไป" })).not.toBeInTheDocument();
+    expect(screen.getByText(/แสดง 1–1 จาก 1 รายการ/)).toBeInTheDocument();
+  });
+
+  it("supports empty results, a no-store filter and clearing filters", async () => {
+    mocks.getLanding.mockResolvedValue([
+      {
+        organization: { organizationId: "org-1", name: "ชมรมไอที", description: "", status: "ACTIVE" },
+        stores: [{ storeId: "store-1", organizationId: "org-1", name: "IT Shop", description: "", status: "ACTIVE" }],
+      },
+      {
+        organization: { organizationId: "org-2", name: "ชมรมถ่ายภาพ", description: "", status: "ACTIVE" },
+        stores: [],
+      },
+    ]);
+
+    render(<StorefrontLanding />);
+    expect(await screen.findByText("1 หน่วยงานที่ยังไม่มีร้าน", { exact: false })).toBeInTheDocument();
+    fireEvent.change(screen.getByRole("searchbox", { name: "ค้นหาร้านค้าหรือหน่วยงาน" }), {
+      target: { value: "not here" },
+    });
+    expect(screen.getByText("ไม่พบร้านค้าหรือหน่วยงานที่ตรงกับการค้นหา")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "แสดงรายการทั้งหมด" }));
+    expect(screen.getByRole("searchbox", { name: "ค้นหาร้านค้าหรือหน่วยงาน" })).toHaveValue("");
+    fireEvent.change(screen.getByRole("combobox", { name: "แสดงรายการ" }), {
+      target: { value: "without-stores" },
+    });
+    expect(screen.getByRole("heading", { name: "ชมรมถ่ายภาพ" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "IT Shop" })).not.toBeInTheDocument();
+  });
+
 });

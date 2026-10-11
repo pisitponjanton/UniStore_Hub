@@ -156,10 +156,13 @@ export function ProductCard({
   product: StorefrontProductDTO;
   campaignId?: string;
 }) {
+  // Public list responses may omit variants entirely. Missing data is not
+  // evidence that a product has no purchasable options.
+  const hasVariantDetails = Array.isArray(product.variants);
   const activeVariantCount = (product.variants ?? []).filter(
     (variant) => variant.status === "ACTIVE",
   ).length;
-  const price = productPrice(product);
+  const price = hasVariantDetails ? productPrice(product) : null;
 
   return (
     <Link
@@ -205,7 +208,9 @@ export function ProductCard({
 
       <div className={styles.productFooter}>
         <div>
-          {price ? (
+          {!hasVariantDetails ? (
+            <span className={styles.priceUnavailable}>ดูราคาและตัวเลือก</span>
+          ) : price ? (
             <>
               <span className={styles.priceLabel}>ราคาเริ่มต้น</span>
               <strong className={styles.price}>{price}</strong>
@@ -214,9 +219,11 @@ export function ProductCard({
             <span className={styles.priceUnavailable}>ยังไม่มีราคาที่ใช้งาน</span>
           )}
           <span className={styles.productAvailability} data-numeric>
-            {activeVariantCount > 0
-              ? `${activeVariantCount} ตัวเลือก`
-              : "ยังไม่มีตัวเลือกที่ใช้งาน"}
+            {!hasVariantDetails
+              ? "ตรวจสอบตัวเลือกในหน้าสินค้า"
+              : activeVariantCount > 0
+                ? `${activeVariantCount} ตัวเลือก`
+                : "ยังไม่มีตัวเลือกที่ใช้งาน"}
           </span>
         </div>
         <span className={styles.cardAction}>ดูสินค้า</span>

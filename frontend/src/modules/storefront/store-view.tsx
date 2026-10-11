@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 
 import { ErrorState, LoadingState } from "@/components";
 import { ApiClientError } from "@/services";
@@ -17,6 +17,23 @@ import {
   storefrontService,
   type StorefrontStoreView,
 } from "./storefront-service";
+
+/**
+ * Scroll to store sections without adding a fragment history entry.
+ * A fragment history entry can prevent Next's client navigation state from
+ * restoring the Store view after visiting an item and pressing Back.
+ */
+function focusStoreSection(
+  event: MouseEvent<HTMLAnchorElement>,
+  headingId: "campaign-heading" | "product-heading",
+) {
+  const heading = document.getElementById(headingId);
+  if (!heading) return;
+
+  event.preventDefault();
+  heading.scrollIntoView({ behavior: "auto", block: "start" });
+  heading.focus({ preventScroll: true });
+}
 
 type StoreViewState =
   | { status: "loading" }
@@ -117,7 +134,7 @@ export function StoreView() {
     <div className={styles.page}>
       <StorefrontHeader />
 
-      <main className={styles.main}>
+      <main className={`${styles.main} ${styles.storeMain}`}>
         <Link href="/" className={styles.backLink}>
           ร้านค้าทั้งหมด
         </Link>
@@ -132,6 +149,14 @@ export function StoreView() {
                 เลือกดูสินค้าและแคมเปญที่ร้านนี้เปิดให้เข้าชม
               </p>
             )}
+            <nav className={styles.storeQuickLinks} aria-label="ทางลัดไปรายการในร้าน">
+              <a href="#campaign-heading" className={styles.storeQuickLinkPrimary} onClick={(event) => focusStoreSection(event, "campaign-heading")}>
+                ดูแคมเปญ
+              </a>
+              <a href="#product-heading" className={styles.storeQuickLinkSecondary} onClick={(event) => focusStoreSection(event, "product-heading")}>
+                ดูสินค้า
+              </a>
+            </nav>
           </div>
 
           <div className={styles.storeHeroAside}>
@@ -163,7 +188,7 @@ export function StoreView() {
         <section className={styles.section} aria-labelledby="campaign-heading">
           <div className={styles.sectionHeader}>
             <div>
-              <h2 className={styles.sectionTitle} id="campaign-heading">
+              <h2 className={styles.sectionTitle} id="campaign-heading" tabIndex={-1}>
                 แคมเปญของร้าน
               </h2>
             </div>
@@ -191,7 +216,7 @@ export function StoreView() {
         <section className={styles.section} aria-labelledby="product-heading">
           <div className={styles.sectionHeader}>
             <div>
-              <h2 className={styles.sectionTitle} id="product-heading">
+              <h2 className={styles.sectionTitle} id="product-heading" tabIndex={-1}>
                 สินค้าของร้าน
               </h2>
             </div>

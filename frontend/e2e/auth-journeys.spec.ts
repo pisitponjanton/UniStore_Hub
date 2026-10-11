@@ -444,3 +444,50 @@ test("auth forms show their first field without scrolling at mobile and tablet w
     }
   }
 });
+
+test("guest purchase entry survives login with its product, campaign and variant intact", async ({
+  page,
+  qaEvents,
+}) => {
+  const { organizationId, productId, variantId, campaignId } =
+    LOCAL_SEED_ENTITY_IDS;
+
+  await page.goto(
+    `/products/view/?organizationId=${organizationId}&productId=${productId}&campaignId=${campaignId}`,
+  );
+
+  await expect(
+    page.getByRole("link", { name: "เข้าสู่ระบบเพื่อสั่งซื้อ" }),
+  ).toBeVisible();
+  await page.getByRole("link", { name: "เข้าสู่ระบบเพื่อสั่งซื้อ" }).click();
+
+  await expect(page).toHaveURL((url) => url.pathname.startsWith("/login") && url.searchParams.has("returnTo"));
+  const destination = new URL(page.url()).searchParams.get("returnTo");
+  expect(destination).toBeTruthy();
+  const returnUrl = new URL(destination ?? "", "http://localhost:3000");
+  expect(["/orders/new", "/orders/new/"]).toContain(returnUrl.pathname);
+  expect(returnUrl.searchParams.get("organizationId")).toBe(organizationId);
+  expect(returnUrl.searchParams.get("productId")).toBe(productId);
+  expect(returnUrl.searchParams.get("variantId")).toBe(variantId);
+  expect(returnUrl.searchParams.get("campaignId")).toBe(campaignId);
+
+  const credentials = getSeedRoleCredentials("customer");
+  await page.getByLabel("อีเมล").fill(credentials.email);
+  await page.getByLabel("รหัสผ่าน").fill(credentials.password);
+  await page.getByRole("button", { name: "เข้าสู่ระบบ" }).click();
+
+  await expect(page).toHaveURL((url) => url.pathname.startsWith("/orders/new"));
+  await expect(
+    page.getByRole("heading", { name: "ตรวจสอบคำสั่งซื้อ", level: 1 }),
+  ).toBeVisible();
+  for (const [key, value] of [
+    ["organizationId", organizationId],
+    ["productId", productId],
+    ["variantId", variantId],
+    ["campaignId", campaignId],
+  ] as const) {
+    expect(new URL(page.url()).searchParams.get(key)).toBe(value);
+  }
+
+  expectNoUnexpectedDiagnostics(qaEvents);
+});

@@ -404,7 +404,7 @@
 }
 
 .reviewFacts dt {
-  color: var(--ink-tertiary);
+  color: var(--ink-secondary);
   font-size: var(--text-caption);
   font-weight: 650;
 }
@@ -431,7 +431,7 @@
   padding: var(--space-4) var(--space-4) var(--space-4) calc(var(--space-4) + 18px);
   border-radius: var(--radius-card);
   background: var(--surface-muted);
-  color: var(--ink-tertiary);
+  color: var(--ink-secondary);
   font-size: var(--text-caption);
   line-height: 1.6;
 }

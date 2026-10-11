@@ -90,7 +90,7 @@
 .summaryLabel,
 .meta,
 .sectionMeta {
-  color: var(--ink-tertiary);
+  color: var(--ink-secondary);
   font-size: .78rem;
 }
 
@@ -461,7 +461,7 @@
 }
 
 .itemMeta {
-  color: var(--ink-tertiary);
+  color: var(--ink-secondary);
   font-variant-numeric: tabular-nums;
 }
 

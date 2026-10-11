@@ -167,6 +167,7 @@ export async function createSeedPendingOrder(
 export async function createReadyForPickupFixture(
   request: APIRequestContext,
   runId: string,
+  options: { customerToken?: string } = {},
 ): Promise<{
   organizationId: string;
   orderId: string;
@@ -175,43 +176,16 @@ export async function createReadyForPickupFixture(
   notificationId: string;
   notificationTitle: string;
 }> {
-  const [
-    platformToken,
-    adminToken,
-    staffToken,
-    customerToken,
-  ] = await Promise.all([
-    getSeedRoleToken(request, "platformAdmin"),
-    getSeedRoleToken(request, "organizationAdmin"),
-    getSeedRoleToken(request, "staff"),
-    getSeedRoleToken(request, "customer"),
-  ]);
+  const [platformToken, adminToken, staffToken, customerToken] =
+    await Promise.all([
+      getSeedRoleToken(request, "platformAdmin"),
+      getSeedRoleToken(request, "organizationAdmin"),
+      getSeedRoleToken(request, "staff"),
+      options.customerToken ?? getSeedRoleToken(request, "customer"),
+    ]);
 
-  const existingUnread = await apiJson<{
-    items: Array<{
-      notificationId: string;
-      type: string;
-    }>;
-  }>(
-    request,
-    "/notifications?read=false",
-    { token: customerToken },
-  );
-
-  for (const notification of existingUnread.items) {
-    if (notification.type === "READY_FOR_PICKUP") {
-      await apiJson(
-        request,
-        `/notifications/${notification.notificationId}/read`,
-        {
-          method: "PATCH",
-          token: customerToken,
-          expectedStatus: 200,
-        },
-      );
-    }
-  }
-
+  // Never mark the shared seed account's existing notifications as read.
+  // Snapshot their IDs and match only this fixture's newly created event.
   const baselineNotifications = await apiJson<{
     items: Array<{ notificationId: string }>;
   }>(

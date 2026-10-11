@@ -359,6 +359,47 @@ test('storefront Product list includes only ACTIVE Products from the requested S
   ]);
 });
 
+test('public Product list omits unknown variants while detail keeps authoritative active prices', async () => {
+  const service = createStorefrontService(
+    baseDependencies({
+      productRepository: {
+        async listVariants() {
+          return [
+            makeVariant({ variantId: 'variant-base', price: 25000 }),
+            makeVariant({ variantId: 'variant-cheaper', price: 19900 }),
+            makeVariant({
+              variantId: 'variant-inactive',
+              price: 100,
+              status: VARIANT_STATUS.INACTIVE,
+            }),
+            makeVariant({
+              variantId: 'variant-other-product',
+              productId: 'another-product',
+              price: 100,
+            }),
+          ];
+        },
+      },
+    }),
+  );
+
+  const list = await service.listProducts('org-1', 'store-1');
+  const detail = await service.getProduct('org-1', 'store-1', 'product-1');
+
+  assert.equal(list.length, 1);
+  assert.equal(Object.hasOwn(list[0], 'variants'), false);
+  assert.equal(detail.productId, list[0].productId);
+  assert.deepEqual(
+    detail.variants.map(({ variantId, price }) => ({ variantId, price })),
+    [
+      { variantId: 'variant-base', price: 25000 },
+      { variantId: 'variant-cheaper', price: 19900 },
+    ],
+  );
+  assert.equal('imageKey' in detail, false);
+  assert.equal(JSON.stringify(detail).includes('internalSecret'), false);
+});
+
 test('storefront signs only the stored Product imageKey and ignores arbitrary client query keys', async () => {
   const signed = [];
   const storefrontService = createStorefrontService(

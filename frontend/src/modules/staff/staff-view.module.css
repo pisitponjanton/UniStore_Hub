@@ -108,7 +108,7 @@
 }
 
 .summaryLabel {
-  color: var(--ink-tertiary);
+  color: var(--ink-secondary);
   font-size: var(--text-caption);
 }
 

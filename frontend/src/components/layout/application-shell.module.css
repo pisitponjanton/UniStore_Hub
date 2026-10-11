@@ -365,7 +365,7 @@
 }
 
 .userLabel {
-  color: var(--ink-tertiary);
+  color: var(--ink-secondary);
   font-size: var(--text-caption);
 }
 
@@ -380,7 +380,7 @@
 
 .userEmail {
   overflow: hidden;
-  color: var(--ink-tertiary);
+  color: var(--ink-secondary);
   font-size: var(--text-caption);
   text-overflow: ellipsis;
   white-space: nowrap;
