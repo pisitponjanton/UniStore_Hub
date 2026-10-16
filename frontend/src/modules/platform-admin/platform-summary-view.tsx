@@ -99,16 +99,33 @@ export function PlatformSummaryView() {
     return () => controller.abort();
   }, []);
 
-  if (state.status !== "success") {
+  if (state.status === "loading") {
     return (
       <div className={styles.page}>
-        <main className={styles.stateWrap}>
-          {state.status === "loading" ? (
+        <main className={styles.main}>
+          <header className={styles.header}>
+            <div className={styles.headerCopy}>
+              <h1 className={styles.title}>ภาพรวม Platform</h1>
+              <p className={styles.description}>
+                ตรวจสถานะหน่วยงานและผู้ใช้จากข้อมูลระดับ Platform
+              </p>
+            </div>
+          </header>
+          <section aria-label="กำลังโหลดข้อมูลภาพรวม">
             <LoadingState
               title="กำลังโหลดภาพรวม Platform"
               description="กำลังสรุปสถานะหน่วยงานและผู้ใช้"
             />
-          ) : null}
+          </section>
+        </main>
+      </div>
+    );
+  }
+
+  if (state.status !== "success") {
+    return (
+      <div className={styles.page}>
+        <main className={styles.stateWrap}>
           {state.status === "unauthorized" ? (
             <UnauthorizedState />
           ) : null}

@@ -1,4 +1,6 @@
 import { mkdir, writeFile } from "node:fs/promises";
+import { randomUUID } from "node:crypto";
+import { request as standaloneRequest } from "@playwright/test";
 import { join } from "node:path";
 
 import {
@@ -167,12 +169,13 @@ async function readControls(page: import("@playwright/test").Page) {
   );
 }
 
-test("inventory every user-facing route and role surface", async ({
-  browser,
-  request,
-}) => {
-  test.setTimeout(55_000);
-  const orderId = await createPendingOrder(request);
+// Exactly one disposable Order per inventory run. No historical IDs are touched.
+const inventoryOutputDirectory = "test-results";
+const inventoryRoles: InventoryRole[] = [
+  "anonymous", "customer", "organizationAdmin", "staff", "platformAdmin",
+];
+
+function buildRoutes(orderId: string): RouteCase[] {
   const {
     organizationId,
     storeId,
@@ -181,7 +184,7 @@ test("inventory every user-facing route and role surface", async ({
     campaignId,
   } = LOCAL_SEED_ENTITY_IDS;
 
-  const routes: RouteCase[] = [
+  return [
     { route: "/", role: "anonymous", label: "Storefront landing" },
     { route: "/login/", role: "anonymous", label: "Login" },
     { route: "/register/", role: "anonymous", label: "Register" },
@@ -328,122 +331,213 @@ test("inventory every user-facing route and role surface", async ({
       label: "Platform users",
     },
   ];
+}
 
+test.describe.serial("Inventory of canonical routes and role surfaces", () => {
+  let orderId: string | null = null;
+  let ownershipJournal: string | null = null;
+  let runId: string | null = null;
+  let orderCreatedAt: string | null = null;
   const snapshots: RouteSnapshot[] = [];
-  const contexts = new Map<
-    InventoryRole,
-    Awaited<ReturnType<typeof browser.newContext>>
-  >();
 
-  try {
-    for (const routeCase of routes) {
-      let context = contexts.get(routeCase.role);
-
-      if (!context) {
-        context = await browser.newContext();
-
-        if (routeCase.role !== "anonymous") {
-          await establishSeedRoleSession(
-            context,
-            request,
-            routeCase.role,
-          );
-        }
-
-        contexts.set(routeCase.role, context);
-      }
-
-      const page = await context.newPage();
-      const diagnostics: QaDiagnosticEvent[] = [];
-
-      page.on("console", (message) => {
-        if (message.type() === "error") {
-          diagnostics.push({
-            kind: "console-error",
-            message: message.text(),
-          });
-        }
-      });
-      page.on("pageerror", (error) => {
-        diagnostics.push({
-          kind: "page-error",
-          message: error.message,
-        });
-      });
-      page.on("requestfailed", (failedRequest) => {
-        const errorText =
-          failedRequest.failure()?.errorText ?? "unknown request failure";
-
-        diagnostics.push({
-          kind:
-            errorText === "net::ERR_ABORTED"
-              ? "request-aborted"
-              : "request-failed",
-          method: failedRequest.method(),
-          url: failedRequest.url(),
-          errorText,
-        });
-      });
-      page.on("response", (response) => {
-        if (response.status() >= 400) {
-          diagnostics.push({
-            kind: "http-error",
-            method: response.request().method(),
-            url: response.url(),
-            status: response.status(),
-          });
-        }
-      });
-
-      await page.goto(routeCase.route, {
-        waitUntil: "domcontentloaded",
-      });
-      await expect(page.locator("body")).toBeVisible();
-      await page.waitForTimeout(600);
-
-      snapshots.push({
-        ...routeCase,
-        title: await page.title(),
-        finalUrl: page.url(),
-        controls: await readControls(page),
-        diagnostics,
-      });
-
-      await page.close();
+  test.beforeAll(async () => {
+    test.setTimeout(60_000);
+    const setup = await standaloneRequest.newContext({ timeout: 30_000 });
+    try {
+      await mkdir(inventoryOutputDirectory, { recursive: true });
+      orderId = await createPendingOrder(setup);
+      runId = randomUUID();
+      orderCreatedAt = new Date().toISOString();
+      ownershipJournal = join(
+        inventoryOutputDirectory,
+        "interaction-inventory-owned-order-" + runId + ".json",
+      );
+      await writeFile(ownershipJournal, JSON.stringify({
+        runId,
+        createdAt: orderCreatedAt,
+        orderId,
+        organizationId: LOCAL_SEED_ENTITY_IDS.organizationId,
+        ownerRole: "customer",
+        cleanupStatus: "pending",
+      }, null, 2));
+    } finally {
+      await setup.dispose();
     }
-  } finally {
-    for (const context of contexts.values()) {
-      try {
-        await context.close();
-      } catch {
-        // Inventory cleanup must not prevent disposable order cleanup.
+  });
+
+  test.afterAll(async () => {
+    test.setTimeout(90_000);
+    if (!orderId) return;
+
+    // Independent context remains available after the test request fixture closes.
+    const cleanup = await standaloneRequest.newContext({ timeout: 30_000 });
+    let cleanupStatus = "failed";
+    let cleanupError: string | undefined;
+    try {
+      await cancelPendingOrder(cleanup, orderId);
+      const token = await getSeedRoleToken(cleanup, "customer");
+      const response = await cleanup.get(
+        apiBaseUrl + "/me/orders/" + encodeURIComponent(orderId),
+        { headers: { Authorization: "Bearer " + token } },
+      );
+      if (!response.ok()) {
+        throw new Error("Order cleanup verification HTTP " + response.status());
+      }
+      const result = (await response.json()) as {
+        data?: { status?: string };
+      };
+      if (result.data?.status !== "CANCELLED") {
+        throw new Error("Cleanup verification returned " + (result.data?.status ?? "no status"));
+      }
+      cleanupStatus = "verified-cancelled";
+    } catch (error) {
+      cleanupError = error instanceof Error ? error.message : String(error);
+      throw error;
+    } finally {
+      await cleanup.dispose();
+      if (ownershipJournal) {
+        await writeFile(ownershipJournal, JSON.stringify({
+          runId,
+          createdAt: orderCreatedAt,
+          updatedAt: new Date().toISOString(),
+          orderId,
+          organizationId: LOCAL_SEED_ENTITY_IDS.organizationId,
+          ownerRole: "customer",
+          cleanupStatus,
+          ...(cleanupError ? { cleanupError } : {}),
+        }, null, 2));
       }
     }
 
-    await cancelPendingOrder(request, orderId);
-  }
+    const expectedRoutes = buildRoutes(orderId);
+    if (snapshots.length !== expectedRoutes.length) {
+      return; // Incomplete runs must not publish a misleading inventory.
+    }
+    const uniquePaths = new Set(snapshots.map((snap) =>
+      new URL(snap.finalUrl).pathname,
+    ));
+    if (uniquePaths.size !== 28) {
+      throw new Error("Expected 28 canonical routes, got " + uniquePaths.size);
+    }
 
-  await mkdir("test-results", { recursive: true });
-  await writeFile(
-    join("test-results", "interaction-inventory.json"),
-    JSON.stringify(
-      {
+    await writeFile(
+      join(inventoryOutputDirectory, "interaction-inventory.json"),
+      JSON.stringify({
         generatedAt: new Date().toISOString(),
+        runId,
         canonicalUserFacingRouteCount: 28,
         snapshotCount: snapshots.length,
         orderIdUsed: orderId,
+        cleanupStatus,
         snapshots,
-      },
-      null,
-      2,
-    ),
-  );
+      }, null, 2),
+    );
+  });
 
-  expect(
-    new Set(
-      snapshots.map((snapshot) =>
-        new URL(snapshot.finalUrl).pathname,
-      ),
-    ).size,
-  ).toBe(28);
+  for (const role of inventoryRoles) {
+    test("capture " + role + " route controls", async ({ browser, request }) => {
+      test.setTimeout(90_000);
+      if (!orderId) throw new Error("Inventory fixture Order was not created");
+      // Opt-in local teardown proof; never activated in normal CI/E2E runs.
+      if (process.env.E2E_INVENTORY_FORCE_TEST_TIMEOUT_ROLE === role) {
+        test.setTimeout(1_000);
+        await new Promise((resolve) => setTimeout(resolve, 2_000));
+      }
+      const roleCases = buildRoutes(orderId).filter((item) =>
+        item.role === role,
+      );
+      const context = await browser.newContext();
+      try {
+        if (role !== "anonymous") {
+          await establishSeedRoleSession(context, request, role);
+        }
+        for (const routeCase of roleCases) {
+          const page = await context.newPage();
+          const diagnostics: QaDiagnosticEvent[] = [];
+
+          page.on("console", (message) => {
+            if (message.type() === "error") {
+              diagnostics.push({
+                kind: "console-error",
+                message: message.text(),
+              });
+            }
+          });
+          page.on("pageerror", (error) => {
+            diagnostics.push({
+              kind: "page-error",
+              message: error.message,
+            });
+          });
+          page.on("requestfailed", (failedRequest) => {
+            const errorText =
+              failedRequest.failure()?.errorText ?? "unknown request failure";
+
+            diagnostics.push({
+              kind:
+                errorText === "net::ERR_ABORTED"
+                  ? "request-aborted"
+                  : "request-failed",
+              method: failedRequest.method(),
+              url: failedRequest.url(),
+              errorText,
+            });
+          });
+          page.on("response", (response) => {
+            if (response.status() >= 400) {
+              diagnostics.push({
+                kind: "http-error",
+                method: response.request().method(),
+                url: response.url(),
+                status: response.status(),
+              });
+            }
+          });
+
+          await page.goto(routeCase.route, {
+            waitUntil: "domcontentloaded",
+          });
+          // Do not snapshot an unhydrated/loading route as an empty inventory.
+          await expect(page.locator("main").first()).toBeVisible({
+            timeout: 25_000,
+          });
+          await expect(page.locator("main h1").first()).toBeVisible({
+            timeout: 25_000,
+          });
+          await expect.poll(
+            () => page.locator("main [role=status]")
+              .filter({ hasText: /กำลัง|loading/i }).count(),
+            {
+              timeout: 25_000,
+              message: "Route did not finish loading: " + routeCase.label,
+            },
+          ).toBe(0);
+          await expect.poll(
+            async () => (await readControls(page)).length,
+            {
+              timeout: 25_000,
+              message: "Route has no visible controls: " + routeCase.label,
+            },
+          ).toBeGreaterThan(0);
+          const controls = await readControls(page);
+          expect(controls.length).toBeGreaterThan(0);
+
+          snapshots.push({
+            ...routeCase,
+            title: await page.title(),
+            finalUrl: page.url(),
+            controls,
+            diagnostics,
+          });
+
+          await page.close();
+        }
+      } finally {
+        await context.close();
+      }
+      expect(snapshots.filter((item) => item.role === role)).toHaveLength(
+        roleCases.length,
+      );
+    });
+  }
 });

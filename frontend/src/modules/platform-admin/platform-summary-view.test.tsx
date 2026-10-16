@@ -41,6 +41,17 @@ describe("PlatformSummaryView", () => {
     mocks.getSummary.mockResolvedValue(summary);
   });
 
+  it("keeps a meaningful page heading visible while the API is loading", () => {
+    mocks.getSummary.mockImplementation(() => new Promise(() => {}));
+    render(<PlatformSummaryView />);
+
+    expect(screen.getByRole("heading", {
+      name: "ภาพรวม Platform",
+      level: 1,
+    })).toBeInTheDocument();
+    expect(screen.getByText("กำลังโหลดภาพรวม Platform")).toBeInTheDocument();
+  });
+
   it("shows Platform summary counts and priority totals from the documented response", async () => {
     render(<PlatformSummaryView />);
 

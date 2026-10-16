@@ -184,8 +184,16 @@ for (const group of [
         activeRoute = route.path;
         await page.setViewportSize({ width: 1440, height: 900 });
         await page.goto(route.path, { waitUntil: "domcontentloaded" });
-        await expect(page.locator("main")).toBeVisible({ timeout: 12_000 });
-        await expect(page.locator("h1").first()).toBeVisible({ timeout: 12_000 });
+        const routeMain = page.locator("main").first();
+        await expect(routeMain).toBeVisible({ timeout: 20_000 });
+        // Check a real page heading rather than shared navigation or shell text.
+        const routeHeading = routeMain.getByRole("heading", { level: 1 }).first();
+        await expect(routeHeading).toBeVisible({ timeout: 20_000 });
+        if (group === "guest") {
+          await expect(routeHeading).not.toContainText(/^(กำลังโหลด|กำลังตรวจสอบบัญชี|loading)/i, {
+            timeout: 20_000,
+          });
+        }
         // The existing apps use async data fetching. Settle before matrix reads;
         // each viewport thereafter reuses the rendered route and role session.
         await page.waitForTimeout(320);

@@ -2,6 +2,7 @@
 
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const {
+  BatchGetCommand,
   DeleteCommand,
   DynamoDBDocumentClient,
   GetCommand,
@@ -60,6 +61,22 @@ function createDynamoRepository(options = {}) {
       );
 
       return response.Item ?? null;
+    },
+
+    async batchGet({ Keys }) {
+      const response = await client.send(
+        new BatchGetCommand({
+          RequestItems: {
+            [tableName]: { Keys },
+          },
+        }),
+      );
+
+      return {
+        items: response.Responses?.[tableName] ?? [],
+        unprocessedKeys:
+          response.UnprocessedKeys?.[tableName]?.Keys ?? [],
+      };
     },
 
     async put(params) {

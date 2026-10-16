@@ -94,16 +94,33 @@ export function PlatformUsersView() {
     return () => controller.abort();
   }, []);
 
-  if (state.status !== "success") {
+  if (state.status === "loading") {
     return (
       <div className={styles.page}>
-        <main className={styles.stateWrap}>
-          {state.status === "loading" ? (
+        <main className={styles.main}>
+          <header className={styles.header}>
+            <div className={styles.headerCopy}>
+              <h1 className={styles.title}>ผู้ใช้ระดับ Platform</h1>
+              <p className={styles.description}>
+                ตรวจสอบสถานะผู้ใช้และ Platform role ที่บันทึกอยู่ในระบบ
+              </p>
+            </div>
+          </header>
+          <section aria-label="กำลังโหลดรายการผู้ใช้">
             <LoadingState
               title="กำลังโหลดผู้ใช้ทั้งหมด"
               description="กำลังดึงสถานะและ Platform role ล่าสุด"
             />
-          ) : null}
+          </section>
+        </main>
+      </div>
+    );
+  }
+
+  if (state.status !== "success") {
+    return (
+      <div className={styles.page}>
+        <main className={styles.stateWrap}>
           {state.status === "unauthorized" ? (
             <UnauthorizedState />
           ) : null}

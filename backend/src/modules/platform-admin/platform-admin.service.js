@@ -130,8 +130,8 @@ function createPlatformAdminService(options = {}) {
             exclusiveStartKey,
           }),
     );
-    const users = [];
-
+    // Validate the entire index before starting profile lookups.
+    // Preserve index order and bound DynamoDB read concurrency.
     for (const link of links) {
       if (
         link.entityType !==
@@ -146,13 +146,19 @@ function createPlatformAdminService(options = {}) {
           httpStatus: 500,
         });
       }
+    }
 
-      const user =
-        await getUserRepository().getById(
-          link.userId,
-        );
+    const userRepository = getUserRepository();
 
-      if (!user) {
+    if (typeof userRepository.getManyByIds === 'function') {
+      const users = await userRepository.getManyByIds(
+        links.map((link) => link.userId),
+      );
+
+      if (
+        users.length !== links.length ||
+        users.some((user) => !user)
+      ) {
         throw new AppError({
           code: 'INTERNAL_ERROR',
           message:
@@ -161,7 +167,42 @@ function createPlatformAdminService(options = {}) {
         });
       }
 
-      users.push(user);
+      return users;
+    }
+
+    // Keep the bounded single-read fallback for injected repositories
+    // in existing tests and integrations.
+    const users = [];
+    const readConcurrency = 12;
+
+    for (
+      let offset = 0;
+      offset < links.length;
+      offset += readConcurrency
+    ) {
+      const batch = links.slice(
+        offset,
+        offset + readConcurrency,
+      );
+      const profiles = await Promise.all(
+        batch.map(async (link) => {
+          const user = await userRepository.getById(
+            link.userId,
+          );
+
+          if (!user) {
+            throw new AppError({
+              code: 'INTERNAL_ERROR',
+              message:
+                'Platform user index references a missing User',
+              httpStatus: 500,
+            });
+          }
+
+          return user;
+        }),
+      );
+      users.push(...profiles);
     }
 
     return users;

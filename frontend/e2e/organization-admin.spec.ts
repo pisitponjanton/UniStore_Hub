@@ -1148,8 +1148,27 @@ test("Organization Admin can perform Admin-only Order cancellation and use opera
   await expect(
     page.getByText(
       "อนุมัติการชำระเงินเรียบร้อยแล้ว",
+      { exact: false },
     ),
-  ).toBeVisible();
+  ).toBeVisible({ timeout: 15_000 });
+
+  // The success notice is valuable UX, but the Backend is authoritative.
+  // A delayed detail refresh must not silently re-submit an approved Payment.
+  const reviewAdminToken = await getSeedRoleToken(request, "organizationAdmin");
+  const reviewedPayment = await apiJson<{ status: string }>(
+    request,
+    "/organizations/" + LOCAL_SEED_ENTITY_IDS.organizationId +
+      "/payments/" + paymentFixture.paymentId,
+    { token: reviewAdminToken, expectedStatus: 200 },
+  );
+  const reviewedOrder = await apiJson<{ status: string }>(
+    request,
+    "/organizations/" + LOCAL_SEED_ENTITY_IDS.organizationId +
+      "/orders/" + paymentFixture.orderId,
+    { token: reviewAdminToken, expectedStatus: 200 },
+  );
+  expect(reviewedPayment.status).toBe("APPROVED");
+  expect(reviewedOrder.status).toBe("PAID");
 
   const pickupFixture =
     await createReadyForPickupFixture(

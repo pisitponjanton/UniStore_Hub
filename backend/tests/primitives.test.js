@@ -472,6 +472,20 @@ test('DynamoDB repository injects the configured table and exposes no Scan opera
   assert.equal(result.count, 1);
 });
 
+test('BatchGet scopes keys to the selected table and exposes unprocessed keys',async()=>{
+  const key={PK:'USER#test',SK:'PROFILE'};
+  const client=createFakeClient(command=>{
+    assert.equal(command.constructor.name,'BatchGetCommand');
+    assert.deepEqual(command.input.RequestItems,{'unistore-test':{Keys:[key]}});
+    return {Responses:{'unistore-test':[{...key,userId:'test'}]},
+      UnprocessedKeys:{'unistore-test':{Keys:[key]}}};
+  });
+  const repo=createDynamoRepository({client,tableName:'unistore-test'});
+  const data=await repo.batchGet({Keys:[key]});
+  assert.equal(data.items[0].userId,'test');
+  assert.deepEqual(data.unprocessedKeys,[key]);
+});
+
 test('DynamoDB transaction helper injects the same application table into every operation', async () => {
   const client = createFakeClient();
   const repository = createDynamoRepository({

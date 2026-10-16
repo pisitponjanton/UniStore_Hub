@@ -255,7 +255,9 @@
   justify-content: center;
 }
 
-@media (max-width: 1000px) {
+/* The authenticated shell has a sidebar: at 1024px the content width is
+   much narrower than the viewport, so four 160px filters overflow. */
+@media (max-width: 1180px) {
   .filters {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

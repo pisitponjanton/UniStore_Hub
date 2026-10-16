@@ -1,4 +1,5 @@
 import {
+  act,
   fireEvent,
   render,
   screen,
@@ -20,13 +21,14 @@ const mocks = vi.hoisted(() => ({
   rejectPayment: vi.fn(),
   getOrganizationOrder: vi.fn(),
   logout: vi.fn(),
+  isDefinitiveSessionFailure: vi.fn(),
 }));
 
 vi.mock("@/modules/auth", () => ({
   authSession: {
     logout: mocks.logout,
   },
-  isDefinitiveSessionFailure: () => false,
+  isDefinitiveSessionFailure: mocks.isDefinitiveSessionFailure,
 }));
 
 vi.mock("@/modules/orders", async () => {
@@ -96,6 +98,9 @@ function order(
 describe("OrganizationPaymentsView", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.isDefinitiveSessionFailure.mockImplementation(
+      (error: unknown) => error instanceof Error && error.message === "TOKEN_EXPIRED",
+    );
     mocks.listOrganizationPayments.mockResolvedValue({
       items: [payment()],
       nextCursor: null,
@@ -268,6 +273,148 @@ describe("OrganizationPaymentsView", () => {
       screen.queryByRole("button", { name: "อนุมัติการชำระเงิน" }),
     ).not.toBeInTheDocument();
   });
+
+  it("announces committed approval before the follow-up read completes", async () => {
+    const approved = payment({ status: "APPROVED" });
+    let finishRefresh!: (value: PaymentDTO) => void;
+    const pendingRefresh = new Promise<PaymentDTO>((resolve) => {
+      finishRefresh = resolve;
+    });
+    mocks.getOrganizationPayment
+      .mockResolvedValueOnce(payment())
+      .mockReturnValueOnce(pendingRefresh);
+    mocks.approvePayment.mockResolvedValue(approved);
+
+    render(<OrganizationPaymentsView organizationId="org-1" />);
+    await screen.findByText("Payment payment-1");
+    fireEvent.click(screen.getByRole("button", {
+      name: "ตรวจสอบ การชำระเงิน payment-1",
+    }));
+    await screen.findByText("Order order-1");
+
+    fireEvent.click(screen.getByRole("button", {
+      name: "อนุมัติการชำระเงิน",
+    }));
+    fireEvent.click(screen.getByRole("button", { name: "ยืนยันอนุมัติ" }));
+
+    // The page must acknowledge the successful mutation *before* readback.
+    expect(await screen.findByText("อนุมัติการชำระเงินเรียบร้อยแล้ว"))
+      .toBeInTheDocument();
+    expect(mocks.approvePayment).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole("button", {
+      name: "อนุมัติการชำระเงิน",
+    })).not.toBeInTheDocument();
+    await act(async () => {
+      finishRefresh(approved);
+    });
+  });
+
+  it("preserves approval success when the post-approval refresh fails", async () => {
+    const approved = payment({ status: "APPROVED" });
+    mocks.getOrganizationPayment
+      .mockResolvedValueOnce(payment())
+      .mockRejectedValueOnce(new Error("Post-approval readback unavailable"));
+    mocks.approvePayment.mockResolvedValue(approved);
+
+    render(<OrganizationPaymentsView organizationId="org-1" />);
+    await screen.findByText("Payment payment-1");
+    fireEvent.click(screen.getByRole("button", {
+      name: "ตรวจสอบ การชำระเงิน payment-1",
+    }));
+    await screen.findByText("Order order-1");
+    fireEvent.click(screen.getByRole("button", {
+      name: "อนุมัติการชำระเงิน",
+    }));
+    fireEvent.click(screen.getByRole("button", { name: "ยืนยันอนุมัติ" }));
+
+    expect(await screen.findByText(
+      /อนุมัติการชำระเงินเรียบร้อยแล้ว แต่ยังโหลดรายละเอียดล่าสุดไม่ได้/,
+    )).toBeInTheDocument();
+    expect(mocks.approvePayment).toHaveBeenCalledTimes(1);
+    expect(screen.queryByText("ดำเนินการไม่สำเร็จ")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", {
+      name: "อนุมัติการชำระเงิน",
+    })).not.toBeInTheDocument();
+  });
+
+  it("retains committed rejection feedback if the detail refresh fails", async () => {
+    const rejected = payment({ status: "REJECTED", rejectReason: "Invalid proof" });
+    mocks.getOrganizationPayment
+      .mockResolvedValueOnce(payment())
+      .mockRejectedValueOnce(new Error("readback offline"));
+    mocks.rejectPayment.mockResolvedValue(rejected);
+
+    render(<OrganizationPaymentsView organizationId="org-1" />);
+    await screen.findByText("Payment payment-1");
+    fireEvent.click(screen.getByRole("button", {
+      name: "ตรวจสอบ การชำระเงิน payment-1",
+    }));
+    await screen.findByText("Order order-1");
+    fireEvent.click(screen.getByRole("button", {
+      name: "ปฏิเสธการชำระเงิน",
+    }));
+    fireEvent.change(screen.getByLabelText(/เหตุผลที่ปฏิเสธ/), {
+      target: { value: "Invalid proof" },
+    });
+    fireEvent.click(screen.getByRole("button", {
+      name: "ยืนยันปฏิเสธ",
+    }));
+
+    expect(await screen.findByText(
+      /ปฏิเสธการชำระเงินและบันทึกเหตุผลแล้ว แต่ยังโหลดรายละเอียดล่าสุดไม่ได้/,
+    )).toBeInTheDocument();
+    expect(mocks.rejectPayment).toHaveBeenCalledTimes(1);
+    expect(screen.queryByText("ดำเนินการไม่สำเร็จ")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", {
+      name: "ปฏิเสธการชำระเงิน",
+    })).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ["approve", "APPROVED"],
+    ["reject", "REJECTED"],
+  ] as const)(
+    "logs out on expired session during committed %s readback without repeating mutation",
+    async (action, status) => {
+      const reviewed = payment({ status, rejectReason: action === "reject" ? "Expired session" : null });
+      mocks.getOrganizationPayment
+        .mockResolvedValueOnce(payment())
+        .mockRejectedValueOnce(new Error("TOKEN_EXPIRED"));
+      if (action === "approve") {
+        mocks.approvePayment.mockResolvedValue(reviewed);
+      } else {
+        mocks.rejectPayment.mockResolvedValue(reviewed);
+      }
+
+      render(<OrganizationPaymentsView organizationId="org-1" />);
+      await screen.findByText("Payment payment-1");
+      fireEvent.click(screen.getByRole("button", {
+        name: "ตรวจสอบ การชำระเงิน payment-1",
+      }));
+      await screen.findByText("Order order-1");
+
+      if (action === "approve") {
+        fireEvent.click(screen.getByRole("button", { name: "อนุมัติการชำระเงิน" }));
+        fireEvent.click(screen.getByRole("button", { name: "ยืนยันอนุมัติ" }));
+      } else {
+        fireEvent.click(screen.getByRole("button", { name: "ปฏิเสธการชำระเงิน" }));
+        fireEvent.change(screen.getByLabelText(/เหตุผลที่ปฏิเสธ/), {
+          target: { value: "Expired session" },
+        });
+        fireEvent.click(screen.getByRole("button", { name: "ยืนยันปฏิเสธ" }));
+      }
+
+      await waitFor(() => expect(mocks.logout).toHaveBeenCalledTimes(1));
+      expect(
+        action === "approve"
+          ? mocks.approvePayment
+          : mocks.rejectPayment,
+      ).toHaveBeenCalledTimes(1);
+      expect(screen.queryByText(/แต่ยังโหลดรายละเอียดล่าสุดไม่ได้/))
+        .not.toBeInTheDocument();
+      expect(screen.queryByText("ดำเนินการไม่สำเร็จ")).not.toBeInTheDocument();
+    },
+  );
 
   it("requires a reject reason, trims it, and refreshes the rejected result", async () => {
     const rejected = payment({

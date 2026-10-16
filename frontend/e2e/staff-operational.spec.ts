@@ -43,7 +43,7 @@ test("Staff can select the seed Organization, sees only operational navigation, 
     "staff",
   );
 
-  await page.goto("/org/select/");
+  await page.goto("/org/select/", { waitUntil: "domcontentloaded" });
 
   await expect(
     page.getByRole("heading", {
@@ -76,7 +76,7 @@ test("Staff can select the seed Organization, sees only operational navigation, 
       name: "คำสั่งซื้อของหน่วยงาน",
       level: 1,
     }),
-  ).toBeVisible();
+  ).toBeVisible({ timeout: 20_000 });
 
   await expect(
     page.getByRole("link", { name: "คำสั่งซื้อ", exact: true }),

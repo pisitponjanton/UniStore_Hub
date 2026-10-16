@@ -45,6 +45,9 @@ require_file "${BACKEND_ARTIFACT_DIR}/src/lambda.js"
 require_file "${BACKEND_ARTIFACT_DIR}/src/worker.js"
 require_directory "${BACKEND_ARTIFACT_DIR}/node_modules"
 require_deployment_secret
+# Retain the shell variable but prevent accidental inheritance by validation,
+# package or other AWS CLI subprocesses. Only the Node JSON writer gets it.
+export -n JWT_SECRET
 validate_deployment_baseline
 validate_aws_identity
 
@@ -54,8 +57,26 @@ ensure_packaging_bucket "${ARTIFACT_BUCKET}"
 log_info "Validating CloudFormation template"
 aws cloudformation validate-template   --template-body "file://${INFRA_TEMPLATE}"   --region "${AWS_REGION}" >/dev/null   || die "CloudFormation template validation failed: ${INFRA_TEMPLATE}"
 
+# Keep deployment parameters private and ephemeral. The JSON file
+# is passed by path, never JWT_SECRET on the AWS CLI command line.
+umask 077
 cleanup_dir="$(mktemp -d "${SCRIPTS_DIR}/.deploy-infra.XXXXXX")"
 PACKAGED_TEMPLATE="${cleanup_dir}/packaged-template.yaml"
+DEPLOY_PARAMETERS="${cleanup_dir}/parameters.json"
+
+# JSON.stringify preserves JWT input safely even with spaces and quotes.
+# Pass the verified secret to Node even if the caller did not export it;
+# only the JSON-writing child needs this environment variable.
+require_command node
+STAGE_NAME="${STAGE_NAME}" JWT_SECRET="${JWT_SECRET}" JWT_EXPIRES_IN="${JWT_EXPIRES_IN}" node - "${DEPLOY_PARAMETERS}" <<'NODE'
+const fs = require('node:fs');
+const file = process.argv[2];
+fs.writeFileSync(file, JSON.stringify([
+  { ParameterKey: 'StageName', ParameterValue: process.env.STAGE_NAME },
+  { ParameterKey: 'JWTSecret', ParameterValue: process.env.JWT_SECRET },
+  { ParameterKey: 'JWTExpiresIn', ParameterValue: process.env.JWT_EXPIRES_IN },
+]), { mode: 0o600, flag: 'wx' });
+NODE
 
 log_info "Packaging CloudFormation template"
 aws cloudformation package   --template-file "${INFRA_TEMPLATE}"   --s3-bucket "${ARTIFACT_BUCKET}"   --output-template-file "${PACKAGED_TEMPLATE}"   --region "${AWS_REGION}"   || die "CloudFormation package failed for stack ${STACK_NAME} in ${AWS_REGION}."
@@ -63,7 +84,9 @@ aws cloudformation package   --template-file "${INFRA_TEMPLATE}"   --s3-bucket "
 require_file "${PACKAGED_TEMPLATE}"
 
 log_info "Deploying CloudFormation stack ${STACK_NAME} in ${AWS_REGION}"
-aws cloudformation deploy   --template-file "${PACKAGED_TEMPLATE}"   --stack-name "${STACK_NAME}"   --region "${AWS_REGION}"   --parameter-overrides     "StageName=${STAGE_NAME}"     "JWTSecret=${JWT_SECRET}"     "JWTExpiresIn=${JWT_EXPIRES_IN}"   --no-fail-on-empty-changeset   || die "CloudFormation deploy failed for stack ${STACK_NAME} in ${AWS_REGION}. The stack was not automatically deleted."
+# CLI v2 supports file:// JSON parameter overrides. Do not forward the
+# secret in the AWS CLI child process environment.
+env -u JWT_SECRET aws cloudformation deploy   --template-file "${PACKAGED_TEMPLATE}"   --stack-name "${STACK_NAME}"   --region "${AWS_REGION}"   --parameter-overrides "file://${DEPLOY_PARAMETERS}"   --no-fail-on-empty-changeset   || die "CloudFormation deploy failed for stack ${STACK_NAME} in ${AWS_REGION}. The stack was not automatically deleted."
 
 load_stack_outputs
 

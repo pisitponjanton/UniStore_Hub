@@ -53,6 +53,17 @@ describe("PlatformUsersView", () => {
     });
   });
 
+  it("keeps a meaningful page heading visible while the API is loading", () => {
+    mocks.listUsers.mockImplementation(() => new Promise(() => {}));
+    render(<PlatformUsersView />);
+
+    expect(screen.getByRole("heading", {
+      name: "ผู้ใช้ระดับ Platform",
+      level: 1,
+    })).toBeInTheDocument();
+    expect(screen.getByText("กำลังโหลดผู้ใช้ทั้งหมด")).toBeInTheDocument();
+  });
+
   it("renders persisted user status and platformRole as a read-only list", async () => {
     render(<PlatformUsersView />);
 

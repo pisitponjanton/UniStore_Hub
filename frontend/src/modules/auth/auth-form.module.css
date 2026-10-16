@@ -202,7 +202,8 @@
 }
 
 .authVisualIllustration {
-  width: min(100%, 310px);
+  /* Leave room for the rotated corners inside the two-column panel. */
+  width: min(calc(100% - 12px), 310px);
   box-shadow: var(--shadow-media-strong);
   transform: rotate(-2deg);
 }

@@ -781,20 +781,69 @@
     background: var(--canvas);
   }
 
+  /* Prioritize shopping: hero -> first real store -> paged directory.
+     The guide contains no interactive elements and follows the directory
+     visually on small screens; desktop keeps its original composition. */
+  .page main {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .hero {
+    order: 0;
+  }
+
+  .discovery {
+    order: 1;
+  }
+
+  .catalog {
+    order: 2;
+  }
+
+  .heroGuide {
+    order: 3;
+  }
+
   .hero {
     width: calc(100% - 24px);
     margin-top: 12px;
-    padding: 28px 20px;
-    gap: 28px;
+    padding: 22px 20px;
+    gap: 16px;
     border-radius: 24px;
   }
 
   .heroTitle {
-    font-size: clamp(2.35rem, 12vw, 3.2rem);
+    font-size: clamp(2rem, 9vw, 2.65rem);
+    line-height: 1.08;
+  }
+
+  .heroMain {
+    gap: 14px;
+  }
+
+  .heroDescription {
+    font-size: var(--text-body-sm);
+    line-height: 1.5;
   }
 
   .heroActions {
     display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .heroActions a {
+    min-height: 46px;
+    padding-inline: 8px;
+    text-align: center;
+    font-size: var(--text-body-sm);
+  }
+
+  .heroSummary {
+    gap: 20px;
+    padding-top: 12px;
   }
 
   .heroPrimaryAction,
@@ -803,10 +852,8 @@
   }
 
   .heroScene {
-    min-height: 250px;
-    border-radius: 22px;
+    display: none;
   }
-
 
   .heroGuide {
     gap: 14px;
@@ -833,7 +880,8 @@
   }
 
   .discovery {
-    padding-top: 48px;
+    padding-top: 16px;
+    gap: 12px;
   }
 
   .discoveryHeader {
@@ -857,7 +905,13 @@
   }
 
   .discoveryCard:first-child {
-    min-height: 260px;
+    min-height: 176px;
+  }
+
+  /* The remaining featured shops are available in the full directory.
+     One featured card prevents burying actual search results below a carousel. */
+  .discoveryCard:not(:first-child) {
+    display: none;
   }
 
   .loadingFeature {
@@ -865,8 +919,8 @@
   }
 
   .catalog {
-    padding-top: 56px;
-    padding-bottom: 72px;
+    padding-top: 24px;
+    padding-bottom: 48px;
   }
 
   .catalogTitle {
@@ -899,6 +953,10 @@
 }
 
 @media (max-width: 360px) {
+  .heroActions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .hero {
     width: calc(100% - 16px);
     margin-top: 8px;
@@ -1087,6 +1145,11 @@
   .heroSearch {
     grid-template-columns: minmax(0, 1fr);
     padding: var(--space-3);
+    gap: 10px;
+  }
+
+  .searchJump {
+    display: none;
   }
 
   .searchJump {

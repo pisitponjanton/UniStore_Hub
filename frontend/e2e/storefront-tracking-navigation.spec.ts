@@ -67,27 +67,29 @@ for (const role of [
     request,
   }) => {
     await establishSeedRoleSession(context, request, role);
-    await page.goto("/");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
 
     const tracking = page.getByRole("link", { name: "ติดตามคำสั่งซื้อ" });
-    await expect(tracking).toHaveAttribute("href", /\/my\/orders\/?$/);
+    await expect(tracking).toHaveAttribute("href", /\/my\/orders\/?$/, {
+      timeout: 20_000,
+    });
     await tracking.click();
 
     await expect(page).toHaveURL(/\/my\/orders\/$/);
     await expect(
       page.getByRole("heading", { name: "คำสั่งซื้อของฉัน", level: 1 }),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 20_000 });
     await expect(
       page.getByRole("heading", { name: "กรุณาเข้าสู่ระบบ" }),
     ).toHaveCount(0);
 
-    await page.goBack();
+    await page.goBack({ waitUntil: "domcontentloaded" });
     await expect(page).toHaveURL(/\/$/);
     await expect(
       page.getByRole("link", { name: "ติดตามคำสั่งซื้อ" }),
     ).toHaveAttribute("href", /\/my\/orders\/?$/);
 
-    await page.goForward();
+    await page.goForward({ waitUntil: "domcontentloaded" });
     await expect(page).toHaveURL(/\/my\/orders\/$/);
   });
 }

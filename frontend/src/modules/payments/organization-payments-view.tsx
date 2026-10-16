@@ -480,13 +480,26 @@ export function OrganizationPaymentsView({
       );
       updatePaymentInList(approved);
 
-      await refreshSelected(
-        approved.paymentId,
-        approved.orderId,
-      );
-
       setDownload(null);
       setNotice("อนุมัติการชำระเงินเรียบร้อยแล้ว");
+
+      // The mutation is already committed. A slow/failed readback must
+      // not hide successful approval or invite a duplicate review action.
+      try {
+        await refreshSelected(
+          approved.paymentId,
+          approved.orderId,
+        );
+      } catch (error) {
+        if (isDefinitiveSessionFailure(error)) {
+          authSession.logout();
+          return;
+        }
+
+        setNotice(
+          "อนุมัติการชำระเงินเรียบร้อยแล้ว แต่ยังโหลดรายละเอียดล่าสุดไม่ได้ กรุณารีเฟรชข้อมูล",
+        );
+      }
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();
@@ -548,16 +561,27 @@ export function OrganizationPaymentsView({
       );
       updatePaymentInList(rejected);
 
-      await refreshSelected(
-        rejected.paymentId,
-        rejected.orderId,
-      );
-
       setRejectOpen(false);
       setRejectReason("");
       setRejectReasonError(undefined);
       setDownload(null);
       setNotice("ปฏิเสธการชำระเงินและบันทึกเหตุผลแล้ว");
+
+      try {
+        await refreshSelected(
+          rejected.paymentId,
+          rejected.orderId,
+        );
+      } catch (error) {
+        if (isDefinitiveSessionFailure(error)) {
+          authSession.logout();
+          return;
+        }
+
+        setNotice(
+          "ปฏิเสธการชำระเงินและบันทึกเหตุผลแล้ว แต่ยังโหลดรายละเอียดล่าสุดไม่ได้ กรุณารีเฟรชข้อมูล",
+        );
+      }
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();

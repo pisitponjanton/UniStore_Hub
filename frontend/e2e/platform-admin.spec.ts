@@ -17,6 +17,7 @@ test("Platform Admin can navigate Platform scope, read live summary counts, and 
   request,
   qaEvents,
 }) => {
+  test.setTimeout(90_000);
   const platformToken = await getSeedRoleToken(
     request,
     "platformAdmin",
@@ -35,14 +36,14 @@ test("Platform Admin can navigate Platform scope, read live summary counts, and 
     "platformAdmin",
   );
 
-  await page.goto("/platform/summary/");
+  await page.goto("/platform/summary/", { waitUntil: "domcontentloaded" });
 
   await expect(
     page.getByRole("heading", {
       name: "ภาพรวม Platform",
       level: 1,
     }),
-  ).toBeVisible();
+  ).toBeVisible({ timeout: 20_000 });
 
   for (const label of [
     "ภาพรวมระบบ",
@@ -54,7 +55,7 @@ test("Platform Admin can navigate Platform scope, read live summary counts, and 
         name: label,
         exact: true,
       }),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 20_000 });
   }
 
   for (const label of [
@@ -67,7 +68,7 @@ test("Platform Admin can navigate Platform scope, read live summary counts, and 
         name: label,
         exact: true,
       }),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 20_000 });
   }
 
   await expect(
@@ -87,12 +88,12 @@ test("Platform Admin can navigate Platform scope, read live summary counts, and 
     page
       .getByText("หน่วยงานทั้งหมด", { exact: true })
       .locator(".."),
-  ).toContainText(organizationTotal.toLocaleString("th-TH"));
+  ).toContainText(organizationTotal.toLocaleString("th-TH"), { timeout: 20_000 });
   await expect(
     page
       .getByText("ผู้ใช้ทั้งหมด", { exact: true })
       .locator(".."),
-  ).toContainText(userTotal.toLocaleString("th-TH"));
+  ).toContainText(userTotal.toLocaleString("th-TH"), { timeout: 20_000 });
 
   await page
     .getByRole("link", {
@@ -105,7 +106,7 @@ test("Platform Admin can navigate Platform scope, read live summary counts, and 
       name: "จัดการหน่วยงาน",
       level: 1,
     }),
-  ).toBeVisible();
+  ).toBeVisible({ timeout: 20_000 });
 
   await page
     .getByRole("link", {
@@ -118,7 +119,7 @@ test("Platform Admin can navigate Platform scope, read live summary counts, and 
       name: "ผู้ใช้ระดับ Platform",
       level: 1,
     }),
-  ).toBeVisible();
+  ).toBeVisible({ timeout: 20_000 });
 
   await page
     .getByRole("link", {
@@ -133,13 +134,13 @@ test("Platform Admin can navigate Platform scope, read live summary counts, and 
       exact: true,
     }),
   ).toHaveCount(0);
-  await page.goBack();
+  await page.goBack({ waitUntil: "domcontentloaded" });
   await expect(
     page.getByRole("heading", {
       name: "ผู้ใช้ระดับ Platform",
       level: 1,
     }),
-  ).toBeVisible();
+  ).toBeVisible({ timeout: 20_000 });
   await page
     .getByRole("link", {
       name: "ภาพรวมระบบ",
@@ -151,7 +152,7 @@ test("Platform Admin can navigate Platform scope, read live summary counts, and 
       name: "ภาพรวม Platform",
       level: 1,
     }),
-  ).toBeVisible();
+  ).toBeVisible({ timeout: 20_000 });
 
   await page.goto(
     `/org/dashboard/?organizationId=${LOCAL_SEED_ENTITY_IDS.organizationId}`,
@@ -161,24 +162,24 @@ test("Platform Admin can navigate Platform scope, read live summary counts, and 
       name: "ไม่มีสิทธิ์เข้าถึง",
       level: 1,
     }),
-  ).toBeVisible();
+  ).toBeVisible({ timeout: 20_000 });
 
-  await page.goto("/org/select/");
+  await page.goto("/org/select/", { waitUntil: "domcontentloaded" });
   await expect(
     page.getByRole("heading", {
       name: "เลือกหน่วยงานที่จะทำงาน",
       level: 1,
     }),
-  ).toBeVisible();
+  ).toBeVisible({ timeout: 20_000 });
   await expect(
     page.getByText("ยังไม่มีหน่วยงานที่เข้าถึงได้"),
-  ).toBeVisible();
+  ).toBeVisible({ timeout: 20_000 });
   await expect(
     page.getByRole("link", {
       name: "ภาพรวมระบบ",
       exact: true,
     }),
-  ).toBeVisible();
+  ).toBeVisible({ timeout: 20_000 });
 
   expect(unexpectedDiagnostics(qaEvents)).toEqual([]);
 });

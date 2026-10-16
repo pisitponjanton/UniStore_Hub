@@ -66,6 +66,9 @@ require_file "$(repo_path frontend/package.json)"
 require_file "$(repo_path frontend/package-lock.json)"
 
 require_deployment_secret
+# Keep the JWT value for the infrastructure step, but do not propagate it
+# to backend npm/build commands, account checks or the frontend build.
+export -n JWT_SECRET
 validate_deployment_baseline
 
 # Validate the active Learner Lab session before any AWS-changing step.
@@ -75,7 +78,7 @@ log_info "Step 1/5: build and verify Backend/Worker artifact"
 bash "${SCRIPT_DIR}/build-backend.sh"
 
 log_info "Step 2/5: package and deploy AWS infrastructure"
-bash "${SCRIPT_DIR}/deploy-infra.sh"
+JWT_SECRET="${JWT_SECRET}" bash "${SCRIPT_DIR}/deploy-infra.sh"
 
 log_info "Step 3/5: load deployed stack outputs"
 load_stack_outputs

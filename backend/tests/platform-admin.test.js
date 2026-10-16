@@ -342,6 +342,173 @@ test('platform list Users resolves PlatformUserLink to sanitized UserDTO', async
   );
 });
 
+test('platform User reads are concurrency-bounded, preserve index ordering and sanitize output', async () => {
+  const userRecords = Array.from(
+    { length: 29 },
+    (_, index) => makeUser({
+      userId: `user-${index}`,
+      email: `user-${index}@example.com`,
+      name: `User ${index}`,
+      createdAt: new Date(
+        Date.UTC(2026, 8, 29, 10, index),
+      ).toISOString(),
+    }),
+  );
+  let activeReads = 0;
+  let maxReads = 0;
+  let completedReads = 0;
+  const service = createPlatformAdminService({
+    userRepository: {
+      async listPlatformLinksPage({ exclusiveStartKey }) {
+        if (!exclusiveStartKey) {
+          return {
+            items: userRecords.slice(0, 17).map(
+              (user) => makePlatformUserLink(user),
+            ),
+            lastEvaluatedKey: { PK: 'next', SK: 'cursor' },
+          };
+        }
+        return {
+          items: userRecords.slice(17).map(
+            (user) => makePlatformUserLink(user),
+          ),
+          lastEvaluatedKey: null,
+        };
+      },
+      async getById(userId) {
+        activeReads += 1;
+        maxReads = Math.max(maxReads, activeReads);
+        try {
+          const index = Number(userId.slice('user-'.length));
+          await new Promise((resolve) => {
+            setTimeout(resolve, (index % 4) + 2);
+          });
+          completedReads += 1;
+          return userRecords[index];
+        } finally {
+          activeReads -= 1;
+        }
+      },
+    },
+  });
+
+  const users = await service.listUsers();
+
+  assert.equal(completedReads, userRecords.length);
+  assert.ok(maxReads > 1, 'lookups should overlap');
+  assert.ok(maxReads <= 12, 'lookups must remain bounded');
+  assert.deepEqual(
+    users.map((user) => user.userId),
+    userRecords.map((user) => user.userId),
+  );
+  assert.ok(users.every((user) =>
+    !Object.hasOwn(user, 'passwordHash') &&
+    !Object.hasOwn(user, 'PK')
+  ));
+});
+
+test('platform user index validation fails closed before profile reads', async () => {
+  let lookupCalls = 0;
+  const service = createPlatformAdminService({
+    userRepository: {
+      async listPlatformLinksPage() {
+        return {
+          items: [
+            makePlatformUserLink(makeUser()),
+            { entityType: 'Other', userId: 'invalid' },
+          ],
+          lastEvaluatedKey: null,
+        };
+      },
+      async getById() {
+        lookupCalls += 1;
+        return makeUser();
+      },
+    },
+  });
+
+  await assert.rejects(
+    service.listUsers(),
+    (error) => error.code === 'INTERNAL_ERROR' && error.httpStatus === 500,
+  );
+  assert.equal(lookupCalls, 0);
+});
+
+test('platform user lookup fails closed for missing linked profile', async () => {
+  const service = createPlatformAdminService({
+    userRepository: {
+      async listPlatformLinksPage() {
+        return {
+          items: [makePlatformUserLink(makeUser())],
+          lastEvaluatedKey: null,
+        };
+      },
+      async getById() {
+        return null;
+      },
+    },
+  });
+
+  await assert.rejects(
+    service.listUsers(),
+    (error) => error.code === 'INTERNAL_ERROR' && error.httpStatus === 500,
+  );
+});
+
+test('Platform batching preserves User DTOs and current status counts', async () => {
+  const users = Array.from({length: 4}, (_, i) => makeUser({
+    userId: 'batch-' + i, status: i===3 ? USER_STATUS.DISABLED : USER_STATUS.ACTIVE,
+  }));
+  let calls=0;
+  const service = createPlatformAdminService({
+    organizationRepository: {listPlatform: async()=>({items:[],lastEvaluatedKey:null})},
+    userRepository: {
+      listPlatformLinksPage: async()=>({
+        items:users.map(makePlatformUserLink),lastEvaluatedKey:null,
+      }),
+      getManyByIds: async ids=>{
+        calls++;
+        return ids.map(id=>users.find(user=>user.userId===id));
+      },
+      getById: async()=>assert.fail('Should use BatchGet'),
+    },
+  });
+  const list=await service.listUsers();
+  assert.deepEqual(list.map(u=>u.userId),users.map(u=>u.userId));
+  assert.ok(list.every(u=>!Object.hasOwn(u,'passwordHash')));
+  assert.deepEqual((await service.getSummary()).usersByStatus,{ACTIVE:3,DISABLED:1});
+  assert.equal(calls,2);
+});
+
+test('User BatchGet partitions 103 keys, retries unprocessed keys and reorders response', async()=>{
+  const chunks=[];
+  const repo=createUserRepository({repository:{
+    async batchGet({Keys}){
+      chunks.push(Keys.map(key=>key.PK));
+      const remaining=chunks.length===1?Keys.slice(0,1):[];
+      const returned=chunks.length===1?Keys.slice(1):Keys;
+      return {items:returned.map(k=>makeUser({userId:k.PK.slice(5)})).reverse(),
+        unprocessedKeys:remaining};
+    },
+  }});
+  const ids=Array.from({length:103},(_,i)=>'test-'+i);
+  assert.deepEqual((await repo.getManyByIds(ids)).map(u=>u.userId),ids);
+  assert.deepEqual(chunks.map(c=>c.length),[100,1,3]);
+});
+
+test('Missing BatchGet profile results fail closed for Platform Admin',async()=>{
+  const u=makeUser();
+  const repo=createUserRepository({repository:{
+    batchGet:async()=>({items:[],unprocessedKeys:[]}),
+  }});
+  assert.deepEqual(await repo.getManyByIds([u.userId]),[null]);
+  const service=createPlatformAdminService({userRepository:{
+    listPlatformLinksPage:async()=>({items:[makePlatformUserLink(u)],lastEvaluatedKey:null}),
+    getManyByIds:repo.getManyByIds,
+  }});
+  await assert.rejects(service.listUsers(),e=>e.code==='INTERNAL_ERROR'&&e.httpStatus===500);
+});
+
 test('platform summary counts canonical Organization and User statuses across pages', async () => {
   const activeUser = makeUser();
   const disabledUser = makeUser({

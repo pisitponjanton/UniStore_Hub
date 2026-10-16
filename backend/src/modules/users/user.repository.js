@@ -25,6 +25,45 @@ function createUserRepository(options = {}) {
       });
     },
 
+    async getManyByIds(userIds) {
+      const ids = [...new Set(userIds)];
+      const byId = new Map();
+
+      // DynamoDB BatchGetItem allows at most 100 distinct keys per call.
+      for (let offset = 0; offset < ids.length; offset += 100) {
+        const batch = ids.slice(offset, offset + 100);
+        let keys = batch.map(userProfileKey);
+        let attempt = 0;
+
+        while (keys.length > 0) {
+          const result = await getRepository().batchGet({
+            Keys: keys,
+          });
+
+          for (const user of result.items) {
+            byId.set(user.userId, user);
+          }
+
+          keys = result.unprocessedKeys;
+          if (keys.length > 0) {
+            if (attempt >= 6) {
+              throw new Error(
+                'DynamoDB BatchGet could not read all User profiles',
+              );
+            }
+            await new Promise((resolve) => {
+              setTimeout(resolve, 25 * 2 ** attempt);
+            });
+            attempt += 1;
+          }
+        }
+      }
+
+      // BatchGet does not guarantee item ordering. Missing profiles
+      // remain null and the Platform service must reject them.
+      return userIds.map((userId) => byId.get(userId) ?? null);
+    },
+
     async findByEmail(normalizedEmail) {
       const result = await getRepository().query({
         IndexName: 'GSI1',
