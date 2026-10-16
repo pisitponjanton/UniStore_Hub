@@ -102,7 +102,18 @@ test("tablet and desktop retain original hero and featured store composition", a
     expect(layout.heroArtVisible).toBe(true);
     expect(layout.heroIsGrid).toBe(true);
     expect(layout.guideY!).toBeLessThan(layout.featuredY!);
-    expect(layout.cardCount).toBe(4);
+    // Local Dev suppresses explicitly marked QA organizations by default;
+    // the user can restore all four featured stores without modifying data.
+    const showFixtures = page.getByRole("button", {
+      name: /แสดงข้อมูล E2E\/QA/,
+    });
+    if (await showFixtures.count()) {
+      expect(layout.cardCount).toBeGreaterThan(0);
+      await showFixtures.click();
+      await expect(page.locator('a[class*="discoveryCard"]')).toHaveCount(4);
+    } else {
+      expect(layout.cardCount).toBe(4);
+    }
     expect(layout.overflow).toBeLessThanOrEqual(1);
   }
 });

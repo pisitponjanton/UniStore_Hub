@@ -38,7 +38,11 @@ export function OrganizationOrdersRoute() {
   }, []);
 
   if (organizationId === undefined) {
-    return <LoadingState title="กำลังเตรียมรายการคำสั่งซื้อ" />;
+    return (
+      <main aria-label="รายการคำสั่งซื้อของหน่วยงาน">
+        <LoadingState title="กำลังเตรียมรายการคำสั่งซื้อ" headingLevel={1} />
+      </main>
+    );
   }
 
   return (

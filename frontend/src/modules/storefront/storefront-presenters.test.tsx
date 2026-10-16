@@ -89,6 +89,9 @@ describe("storefront presenters", () => {
     render(<CampaignCard campaign={campaign} />);
 
     expect(screen.getByText("เปิดรับคำสั่งซื้อ")).toBeInTheDocument();
+    expect(screen.getByText("รอบพรีออเดอร์")).toBeInTheDocument();
+    // The no-photo campaign banner communicates its actual name, not a fake product image.
+    expect(screen.getAllByText("รอบตุลาคม")).toHaveLength(2);
     expect(screen.getByText("เริ่มรับ")).toBeInTheDocument();
     expect(screen.getByText("ปิดรับ")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /รอบตุลาคม/ })).toHaveAttribute(

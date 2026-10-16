@@ -227,6 +227,29 @@
   font-weight: 600;
 }
 
+.workspaceTechnical {
+  position: relative;
+  z-index: 1;
+  margin-top: var(--space-2);
+  color: var(--ink-secondary);
+  font-size: var(--text-caption);
+}
+
+.workspaceTechnical summary {
+  width: fit-content;
+  cursor: pointer;
+  color: var(--shell-accent-strong);
+  font-weight: 650;
+}
+
+.workspaceTechnical code {
+  display: block;
+  padding-top: var(--space-2);
+  overflow-wrap: anywhere;
+  user-select: all;
+  font-family: var(--font-technical);
+}
+
 .navigation {
   min-height: 0;
   flex: 1;

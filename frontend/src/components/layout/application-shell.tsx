@@ -44,6 +44,7 @@ export function ApplicationShell({
   userEmail,
   contextLabel,
   contextValue,
+  contextId,
   contextMeta,
   showOrganizationSwitcher = false,
   onLogout,
@@ -54,6 +55,7 @@ export function ApplicationShell({
   userEmail: string;
   contextLabel?: string;
   contextValue?: string;
+  contextId?: string;
   contextMeta?: string;
   showOrganizationSwitcher?: boolean;
   onLogout: () => void;
@@ -282,6 +284,12 @@ export function ApplicationShell({
                   <span>{contextLabel ?? "บริบทปัจจุบัน"}</span>
                   <strong>{contextValue}</strong>
                 </span>
+              ) : null}
+              {contextId ? (
+                <details className={styles.workspaceTechnical}>
+                  <summary>ดูรหัสหน่วยงาน</summary>
+                  <code>{contextId}</code>
+                </details>
               ) : null}
             </section>
 

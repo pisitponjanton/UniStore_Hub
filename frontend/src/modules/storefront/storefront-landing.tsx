@@ -17,6 +17,7 @@ import {
   DIRECTORY_PAGE_SIZE,
   filterDirectoryEntries,
   groupDirectoryPage,
+  separateAutomationFixtures,
   type DirectoryFilter,
 } from "./storefront-directory";
 import { StorefrontHeader } from "./storefront-header";
@@ -48,6 +49,8 @@ export function StorefrontLanding() {
   const [searchQuery, setSearchQuery] = useState("");
   const [availabilityFilter, setAvailabilityFilter] = useState<DirectoryFilter>("all");
   const [currentPage, setCurrentPage] = useState(1);
+  const [showAutomationFixtures, setShowAutomationFixtures] = useState(false);
+  const localQaDirectory = process.env.NODE_ENV === "development";
 
   useEffect(() => {
     const controller = new AbortController();
@@ -75,35 +78,47 @@ export function StorefrontLanding() {
     return () => controller.abort();
   }, [loadAttempt]);
 
+  const directoryData = useMemo(() => {
+    if (state.status !== "success") return [];
+    if (!localQaDirectory) return state.data;
+    const { regular, fixtures } = separateAutomationFixtures(state.data);
+    return showAutomationFixtures ? [...regular, ...fixtures] : regular;
+  }, [state, localQaDirectory, showAutomationFixtures]);
+
+  const fixtureCount = useMemo(() => {
+    if (!localQaDirectory || state.status !== "success") return 0;
+    return separateAutomationFixtures(state.data).fixtures.length;
+  }, [state, localQaDirectory]);
+
   const summary = useMemo(() => {
     if (state.status !== "success") {
       return null;
     }
 
     return {
-      organizationCount: state.data.length,
-      storeCount: state.data.reduce(
+      organizationCount: directoryData.length,
+      storeCount: directoryData.reduce(
         (total, organization) => total + organization.stores.length,
         0,
       ),
     };
-  }, [state]);
+  }, [state, directoryData]);
 
   const discoveryStores = useMemo(() => {
     if (state.status !== "success") {
       return [];
     }
 
-    return state.data
+    return directoryData
       .flatMap(({ organization, stores }) =>
         stores.map((store) => ({ organization, store })),
       )
       .slice(0, 4);
-  }, [state]);
+  }, [state, directoryData]);
 
   const directoryEntries = useMemo(
-    () => (state.status === "success" ? buildDirectoryEntries(state.data) : []),
-    [state],
+    () => buildDirectoryEntries(directoryData),
+    [directoryData],
   );
   const filteredEntries = useMemo(
     () => filterDirectoryEntries(directoryEntries, searchQuery, availabilityFilter),
@@ -329,6 +344,21 @@ export function StorefrontLanding() {
                     ? ` · แสดง ${start + 1}–${start + visibleEntries.length} จาก ${filteredEntries.length} รายการ`
                     : ""}
                 </p>
+                {fixtureCount > 0 ? (
+                  <button
+                    className={styles.clearFilters}
+                    type="button"
+                    aria-pressed={showAutomationFixtures}
+                    onClick={() => {
+                      setShowAutomationFixtures((current) => !current);
+                      setCurrentPage(1);
+                    }}
+                  >
+                    {showAutomationFixtures
+                      ? "ซ่อนข้อมูล E2E/QA"
+                      : `แสดงข้อมูล E2E/QA (${fixtureCount} หน่วยงาน)`}
+                  </button>
+                ) : null}
                 {hasActiveFilters ? (
                   <button className={styles.clearFilters} type="button" onClick={clearFilters}>
                     ล้างตัวกรอง

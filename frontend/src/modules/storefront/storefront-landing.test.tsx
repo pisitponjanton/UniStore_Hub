@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   getLanding: vi.fn(),
@@ -29,6 +29,10 @@ describe("StorefrontLanding", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.useAuthSession.mockReturnValue({ status: "anonymous" });
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
   it("leads with real discovery actions and renders active organizations and stores", async () => {
@@ -95,6 +99,42 @@ describe("StorefrontLanding", () => {
     );
     expect(screen.getByText("1 ร้าน")).toBeInTheDocument();
     expect(screen.getAllByText("1", { selector: "dd" })).toHaveLength(2);
+  });
+
+  it("keeps explicit QA fixtures opt-in only in Dev and restores them on request", async () => {
+    vi.stubEnv("NODE_ENV", "development");
+    mocks.getLanding.mockResolvedValue([
+      {
+        organization: {
+          organizationId: "real-org", name: "Campus Club", description: "", status: "ACTIVE",
+        },
+        stores: [{
+          storeId: "real-store", organizationId: "real-org",
+          name: "Official Campus Store", description: "", status: "ACTIVE",
+        }],
+      },
+      {
+        organization: {
+          organizationId: "test-org", name: "QA Commerce Org phase5-123-1",
+          description: "", status: "ACTIVE",
+        },
+        stores: [{
+          storeId: "test-store", organizationId: "test-org",
+          name: "Temporary Shop", description: "", status: "ACTIVE",
+        }],
+      },
+    ]);
+    render(<StorefrontLanding />);
+    const show = await screen.findByRole("button", { name: /แสดงข้อมูล E2E\/QA/ });
+    expect(screen.getAllByText("Official Campus Store").length).toBeGreaterThan(0);
+    expect(screen.queryByText("Temporary Shop")).not.toBeInTheDocument();
+    expect(show).toHaveAttribute("aria-pressed", "false");
+    fireEvent.click(show);
+    expect(screen.getAllByText("Temporary Shop").length).toBeGreaterThan(0);
+    const hide = screen.getByRole("button", { name: "ซ่อนข้อมูล E2E/QA" });
+    expect(hide).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(hide);
+    expect(screen.queryByText("Temporary Shop")).not.toBeInTheDocument();
   });
 
   it("sends an authenticated customer straight to their own order history", async () => {

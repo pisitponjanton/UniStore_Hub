@@ -117,10 +117,12 @@ export function OrganizationBoundary({
 
   if (auth.status === "loading") {
     return (
-      <LoadingState
-        headingLevel={1}
-        title="กำลังตรวจสอบสิทธิ์ของหน่วยงาน"
-      />
+      <main aria-label="กำลังตรวจสอบสิทธิ์ของหน่วยงาน">
+        <LoadingState
+          headingLevel={1}
+          title="กำลังตรวจสอบสิทธิ์ของหน่วยงาน"
+        />
+      </main>
     );
   }
 

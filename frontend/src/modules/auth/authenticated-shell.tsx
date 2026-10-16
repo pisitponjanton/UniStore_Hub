@@ -1,11 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import { ApplicationShell, LoadingState } from "@/components";
 
 import { buildNavigationGroups, getActiveMembership } from "./navigation";
+import { organizationService } from "@/modules/organizations/organization-service";
 import { authSession } from "./session";
 import { useAuthSession } from "./use-auth-session";
 
@@ -18,6 +19,26 @@ export function AuthenticatedShell({
 }) {
   const auth = useAuthSession();
   const router = useRouter();
+  const [organizationLabel, setOrganizationLabel] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+
+  useEffect(() => {
+    if (auth.status !== "authenticated" || !organizationId) return;
+    const controller = new AbortController();
+    // Display friendly information when authorized, without delaying navigation.
+    void organizationService.get(organizationId, { signal: controller.signal })
+      .then((organization) => {
+        if (!controller.signal.aborted) {
+          setOrganizationLabel({ id: organizationId, name: organization.name });
+        }
+      })
+      .catch(() => {
+        // A failed secondary label request never changes RBAC or hides the page.
+      });
+    return () => controller.abort();
+  }, [auth.status, organizationId]);
 
   if (auth.status === "loading") {
     return (
@@ -50,7 +71,14 @@ export function AuthenticatedShell({
       userName={auth.user.name}
       userEmail={auth.user.email}
       contextLabel={membership ? "หน่วยงานปัจจุบัน" : undefined}
-      contextValue={membership?.organizationId}
+      contextValue={
+        membership
+          ? organizationLabel?.id === membership.organizationId
+            ? organizationLabel.name
+            : "หน่วยงานที่เลือก"
+          : undefined
+      }
+      contextId={membership?.organizationId}
       contextMeta={
         membership
           ? membership.role === "ORGANIZATION_ADMIN"

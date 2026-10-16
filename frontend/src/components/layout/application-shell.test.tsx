@@ -46,6 +46,29 @@ describe("ApplicationShell accessibility", () => {
     expect(mainContent).toHaveAttribute("tabindex", "-1");
   });
 
+  it("keeps a technical organization identifier collapsed in accessible details", () => {
+    render(
+      <ApplicationShell
+        groups={[{
+          label: "งานของหน่วยงาน",
+          items: [{ label: "คำสั่งซื้อ", href: "/org/orders/" }],
+        }]}
+        userName="User"
+        userEmail="user@example.com"
+        contextLabel="หน่วยงานปัจจุบัน"
+        contextValue="IT Club"
+        contextId="org-technical-id-1234"
+        onLogout={vi.fn()}
+      >
+        <p>พื้นที่ทำงาน</p>
+      </ApplicationShell>,
+    );
+    expect(screen.getByText("IT Club")).toBeInTheDocument();
+    const details = screen.getByText("ดูรหัสหน่วยงาน").closest("details");
+    expect(details).not.toHaveAttribute("open");
+    expect(within(details!).getByText("org-technical-id-1234")).toBeInTheDocument();
+  });
+
   it("returns focus to the mobile menu trigger when Escape closes the disclosure", () => {
     render(
       <ApplicationShell

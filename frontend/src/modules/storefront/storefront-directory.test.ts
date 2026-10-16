@@ -6,6 +6,8 @@ import {
   DIRECTORY_PAGE_SIZE,
   filterDirectoryEntries,
   groupDirectoryPage,
+  isExplicitAutomationFixture,
+  separateAutomationFixtures,
 } from "./storefront-directory";
 
 const organizations: StorefrontLandingOrganization[] = [
@@ -29,6 +31,29 @@ const organizations: StorefrontLandingOrganization[] = [
 ];
 
 describe("public storefront directory", () => {
+  it("separates explicitly marked E2E fixtures without discarding ambiguous real tenants", () => {
+    expect(isExplicitAutomationFixture("Reject E2E Organization")).toBe(true);
+    expect(isExplicitAutomationFixture("E2E Organization")).toBe(true);
+    expect(isExplicitAutomationFixture("QA Fixture Store")).toBe(true);
+    expect(isExplicitAutomationFixture("Tenant Org B")).toBe(false);
+    expect(isExplicitAutomationFixture("Tenant Org B harness-phase5-1721")).toBe(true);
+    expect(isExplicitAutomationFixture("QA Commerce Org staff-normal-123-0")).toBe(true);
+    expect(isExplicitAutomationFixture("QA Admin Org product-123-0")).toBe(true);
+    expect(isExplicitAutomationFixture("Golden Org golden-123-0")).toBe(true);
+    expect(isExplicitAutomationFixture("IT Club Store")).toBe(false);
+    const dataset = [
+      ...organizations,
+      {
+        organization: { organizationId: "fixture-1", name: "E2E Organization", description: "", status: "ACTIVE" as const },
+        stores: [],
+      },
+    ];
+    const partition = separateAutomationFixtures(dataset);
+    expect(partition.regular).toHaveLength(3);
+    expect(partition.fixtures.map(x => x.organization.organizationId)).toEqual(["fixture-1"]);
+    expect([...partition.regular, ...partition.fixtures]).toHaveLength(4);
+  });
+
   it("preserves all active stores and keeps empty organizations reachable", () => {
     const entries = buildDirectoryEntries(organizations);
     expect(entries).toHaveLength(4);

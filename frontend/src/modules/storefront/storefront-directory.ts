@@ -6,6 +6,31 @@ import type {
 
 export const DIRECTORY_PAGE_SIZE = 12;
 
+/**
+ * Local QA display-only heuristic. Never delete tenants or apply it on the
+ * Backend; legitimate organizations remain discoverable via the toggle.
+ * Avoid broad matching of generic names such as "Tenant Org B".
+ */
+export function isExplicitAutomationFixture(name: string): boolean {
+  return (
+    /(?:^|[\s_(-])(?:e2e|qa fixture|test fixture|automated test)(?:$|[\s_)-])/i.test(name) ||
+    /^(?:QA (?:Admin|Commerce) Org\b|Golden Org golden-)/i.test(name) ||
+    /\bharness-phase\d+(?:-|$)/i.test(name)
+  );
+}
+
+export function separateAutomationFixtures(
+  data: StorefrontLandingOrganization[],
+): { regular: StorefrontLandingOrganization[]; fixtures: StorefrontLandingOrganization[] } {
+  const regular: StorefrontLandingOrganization[] = [];
+  const fixtures: StorefrontLandingOrganization[] = [];
+  for (const item of data) {
+    (isExplicitAutomationFixture(item.organization.name) ? fixtures : regular).push(item);
+  }
+  return { regular, fixtures };
+}
+
+
 export type DirectoryFilter = "all" | "with-stores" | "without-stores";
 
 export interface DirectoryEntry {
