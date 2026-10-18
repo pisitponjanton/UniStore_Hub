@@ -62,11 +62,13 @@ export function AuthenticatedBoundary({
 
   if (auth.status === "loading") {
     return (
-      <LoadingState
-        headingLevel={1}
-        title="กำลังตรวจสอบบัญชี"
-        description="กำลังตรวจสอบ Session ก่อนเปิดหน้านี้"
-      />
+      <main aria-label="กำลังตรวจสอบบัญชี">
+        <LoadingState
+          headingLevel={1}
+          title="กำลังตรวจสอบบัญชี"
+          description="กำลังตรวจสอบ Session ก่อนเปิดหน้านี้"
+        />
+      </main>
     );
   }
 

@@ -222,4 +222,51 @@ describe("PlatformOrganizationsView", () => {
       }),
     ).not.toBeInTheDocument();
   });
+  it("searches an organization beyond the first 24 cards among 326 loaded rows without mutating status", async () => {
+    const items = Array.from({ length: 326 }, (_, index) =>
+      organization({
+        organizationId: "org-" + index,
+        name: index === 325 ? "Final Research Store" : "Campus Organization " + index,
+        status: index === 325 ? "PENDING" : "ACTIVE",
+      }),
+    );
+    mocks.listOrganizations.mockResolvedValueOnce({ items, nextCursor: null });
+    render(<PlatformOrganizationsView />);
+    await screen.findByText("Campus Organization 0");
+    const rows = screen.getByLabelText("รายการหน่วยงานทั้งหมด").querySelectorAll("article");
+    expect(rows).toHaveLength(24);
+    // PENDING is deliberately prioritized ahead of ACTIVE records, irrespective of original array position.
+    expect(screen.getByText("Final Research Store")).toBeInTheDocument();
+    const search = screen.getByRole("searchbox", { name: "ค้นหาหน่วยงานที่โหลดแล้ว" });
+    fireEvent.change(search, { target: { value: "campus organization 250" } });
+    expect(screen.getByText("Campus Organization 250")).toBeInTheDocument();
+    expect(screen.queryByText("Campus Organization 0")).not.toBeInTheDocument();
+    expect(screen.queryByText("Final Research Store")).not.toBeInTheDocument();
+    fireEvent.change(search, { target: { value: "final research" } });
+    expect(screen.getByText("Final Research Store")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "อนุมัติ" })).toBeInTheDocument();
+    expect(mocks.approveOrganization).not.toHaveBeenCalled();
+    expect(mocks.suspendOrganization).not.toHaveBeenCalled();
+    expect(mocks.listOrganizations).toHaveBeenCalledTimes(1);
+  });
+
+  it("filters loaded statuses, supports 24-row progressive render and preserves action gates", async () => {
+    const items = Array.from({ length: 50 }, (_, i) => organization({
+      organizationId: "test-" + i,
+      name: "Test Org " + i,
+      status: i < 30 ? "ACTIVE" : "SUSPENDED",
+    }));
+    mocks.listOrganizations.mockResolvedValueOnce({ items, nextCursor: null });
+    render(<PlatformOrganizationsView />);
+    await screen.findByText("Test Org 0");
+    expect(screen.getByLabelText("รายการหน่วยงานทั้งหมด").querySelectorAll("article")).toHaveLength(24);
+    fireEvent.click(screen.getByRole("button", { name: /แสดงเพิ่มอีก 24 รายการจากที่โหลด/ }));
+    expect(screen.getByLabelText("รายการหน่วยงานทั้งหมด").querySelectorAll("article")).toHaveLength(48);
+    fireEvent.click(screen.getByRole("button", { name: /ถูกระงับ 20/ }));
+    expect(screen.getByLabelText("รายการหน่วยงานทั้งหมด").querySelectorAll("article")).toHaveLength(20);
+    expect(screen.queryByRole("button", { name: "อนุมัติ" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "ระงับหน่วยงาน" })).not.toBeInTheDocument();
+    expect(mocks.listOrganizations).toHaveBeenCalledTimes(1);
+  });
+
 });

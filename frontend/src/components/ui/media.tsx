@@ -81,12 +81,9 @@ export function BrandIllustration({
       role={hidden ? undefined : "img"}
       aria-label={hidden ? undefined : label}
     >
-      <span className={styles.illustrationBackdrop} />
-      <span className={styles.illustrationObject}>
-        <span className={styles.illustrationObjectDetail} />
+      <span className={styles.illustrationSymbol} aria-hidden="true">
+        {variant === "notification" ? "!" : variant === "payment" ? "฿" : variant === "pickup" ? "✓" : "U"}
       </span>
-      <span className={styles.illustrationAccent} />
-      <span className={styles.illustrationTag} />
     </span>
   );
 }
@@ -109,7 +106,7 @@ export function MediaFallback({
 
   return (
     <div {...props} className={classes}>
-      <BrandIllustration variant={variant} decorative />
+      <span className={styles.mediaFallbackGlyph} data-fallback-variant={variant} aria-hidden="true">—</span>
       <span className={styles.mediaFallbackLabel}>{label}</span>
     </div>
   );

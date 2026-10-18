@@ -1,7 +1,7 @@
 "use client";
 
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import type { ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
 
 import { Button } from "./button";
 import styles from "./primitives.module.css";
@@ -10,6 +10,7 @@ export interface DialogProps {
   trigger?: ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  onCloseAutoFocus?: ComponentProps<typeof DialogPrimitive.Content>["onCloseAutoFocus"];
   title: ReactNode;
   description?: ReactNode;
   children?: ReactNode;
@@ -21,6 +22,7 @@ export function Dialog({
   trigger,
   open,
   onOpenChange,
+  onCloseAutoFocus,
   title,
   description,
   children,
@@ -34,7 +36,7 @@ export function Dialog({
       ) : null}
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className={styles.overlay} />
-        <DialogPrimitive.Content className={styles.dialogContent}>
+        <DialogPrimitive.Content className={styles.dialogContent} aria-modal="true" onCloseAutoFocus={onCloseAutoFocus}>
           <div className={styles.dialogHeader}>
             <DialogPrimitive.Title className={styles.dialogTitle}>
               {title}
@@ -58,6 +60,9 @@ export function Dialog({
 
 export interface ConfirmDialogProps {
   trigger: ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  onCloseAutoFocus?: ComponentProps<typeof DialogPrimitive.Content>["onCloseAutoFocus"];
   title: ReactNode;
   description: ReactNode;
   confirmLabel?: string;
@@ -69,6 +74,9 @@ export interface ConfirmDialogProps {
 
 export function ConfirmDialog({
   trigger,
+  open,
+  onOpenChange,
+  onCloseAutoFocus,
   title,
   description,
   confirmLabel = "ยืนยัน",
@@ -78,12 +86,14 @@ export function ConfirmDialog({
   onConfirm,
 }: ConfirmDialogProps) {
   return (
-    <DialogPrimitive.Root>
+    <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Trigger asChild>{trigger}</DialogPrimitive.Trigger>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className={styles.overlay} />
         <DialogPrimitive.Content
           className={styles.dialogContent}
+          aria-modal="true"
+          onCloseAutoFocus={onCloseAutoFocus}
           onEscapeKeyDown={(event) => {
             if (pending) {
               event.preventDefault();

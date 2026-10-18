@@ -5,7 +5,7 @@
 > **Purpose:** Handoff for a future separately authorized test on an **isolated AWS Academy Learner Lab** environment.
 > **Workspace:** `UniStore_Hub`
 > **Canonical architecture:** `SPEC.md`, `docs/architecture/AWS_ARCHITECTURE.md`, `docs/deployment/DEPLOYMENT_SPEC.md`, `docs/specs/00-shared-contracts.md`
-> **Prior audit evidence:** tests/reports/local-audit-remediation-phase1-2026-10-16.md, tests/reports/local-audit-remediation-phase7-2026-10-16.md and tests/reports/production-readiness-phase4-2026-10-11.md (root audit removed by request)
+> **Prior audit evidence:** tests/reports/local-ux-audit-2026-10-16.md#record-01-local-audit-remediation-2026-10-16, tests/reports/local-ux-audit-2026-10-16.md#record-07-local-audit-remediation-2026-10-16 and tests/reports/production-readiness-2026-10-11.md#record-04-production-readiness-2026-10-11 (root audit removed by request)
 > **Owners:** AWS/Infrastructure for service proof; Deployment/Tooling for rollout/rollback; Testing for evidence; Integration for contract, security and release gate
 
 ## 0. Scope and strict safety boundary
@@ -40,7 +40,7 @@ These can reveal identifiers; sanitize outputs before sharing. Non-existent stac
 
 ## 1. AWS-001 … AWS-009 — existing live smoke suite
 
-The repository already provides `tests/smoke/aws-deployment.test.mjs` and documented `TEST_AWS_REGION=us-east-1`, `TEST_AWS_STACK_NAME=unistore-hub-dev`. The historical `tests/reports/phase-07-aws-smoke-qualification.md` lists these nine checks as blocked when AWS CLI/credentials were unavailable; status below **has not changed**.
+The repository already provides `tests/smoke/aws-deployment.test.mjs` and documented `TEST_AWS_REGION=us-east-1`, `TEST_AWS_STACK_NAME=unistore-hub-dev`. The historical `tests/reports/aws-smoke-qualification.md` lists these nine checks as blocked when AWS CLI/credentials were unavailable; status below **has not changed**.
 
 | ID | Real-AWS proof to obtain | Minimum PASS evidence (redacted) | Current status |
 |---|---|---|---|
@@ -178,7 +178,7 @@ Copy one row per test ID (never overwrite historical evidence):
 
 ## 8. Phase 7 full local regression — AWS status unchanged (2026-10-16)
 
-- **Local Chromium:** 75/75 tests PASS, 0 retry, 17 spec files; this is evidence for local Browser paths, **not a live AWS smoke/production PASS**. Detailed results: tests/reports/local-audit-remediation-phase7-2026-10-16.md.
+- **Local Chromium:** 75/75 tests PASS, 0 retry, 17 spec files; this is evidence for local Browser paths, **not a live AWS smoke/production PASS**. Detailed results: tests/reports/local-ux-audit-2026-10-16.md#record-07-local-audit-remediation-2026-10-16.
 - **Local supporting checks:** Backend 297/297 (isolated twice; initial concurrent attempt exited 1), Frontend 299/299, Contract 196 PASS/2 TODO, Security 16/16, Integration 36/36, Infrastructure 19/19, Static Export 33/33, Dev Smoke 12 PASS/12 TODO, Deployment Mock 6/6.
 - **Separate opt-in Cross-System E2E:** 5 TODO due to missing dedicated local fixture/env prerequisites; these tests were enumerated but not run. Do not treat an opted-out TODO as PASS.
 - **No live AWS access:** all AWS-001–AWS-009, AWS-SEC, AWS-REL, AWS-DATA, AWS-OPS, AWS-E2E and AWS-PERF gates remain **NOT RUN / BLOCKED**. IAM effective rights, actual anonymous S3 privacy, real Worker/SQS, backup/restore, rollback, credits and HTTPS real-user architecture require separate authorization and recorded AWS evidence.
@@ -192,4 +192,4 @@ Copy one row per test ID (never overwrite historical evidence):
 - **AWS production gates do not change:** cloud IAM/effective permissions, actual AWS CLI v2 parameter override, account/region/credits, private S3 anonymity, HTTPS for real identities, real Lambda/SQS/CloudWatch, rollback recovery, DynamoDB PITR and Files S3 backups, measured restore RTO/RPO are **NOT RUN**, and require explicit authorization.
 - **Separate TODOs remain:** env-gated Cross-System E2E 5, Smoke 12, Contract 2. Any initial intermittent Backend parallelism behavior needs a controlled CI stress run before claiming arbitrary concurrency stability.
 
-**Final local/offline Review Diff status:** PASS. **Real AWS/production release decision:** NO-GO / NOT CERTIFIED. See `tests/reports/local-audit-remediation-phase8-2026-10-16.md` and prior AWS recovery runbooks. No AWS modification, Commit, Push, LocalStack reset, or historical-data cleanup has been performed.
+**Final local/offline Review Diff status:** PASS. **Real AWS/production release decision:** NO-GO / NOT CERTIFIED. See `tests/reports/local-ux-audit-2026-10-16.md#record-08-local-audit-remediation-2026-10-16` and prior AWS recovery runbooks. No AWS modification, Commit, Push, LocalStack reset, or historical-data cleanup has been performed.

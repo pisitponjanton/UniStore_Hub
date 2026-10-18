@@ -83,9 +83,8 @@ describe("DashboardView", () => {
     );
 
     expect(mocks.getSummary).toHaveBeenCalledTimes(2);
-    expect(
-      await screen.findByRole("heading", { name: "ภาพรวมหน่วยงาน" }),
-    ).toBeInTheDocument();
+    await screen.findByText("฿25,000.00");
+    expect(screen.getByRole("heading", { name: "ภาพรวมหน่วยงาน", level: 1 })).toBeInTheDocument();
   });
 
   it("trims and submits only campaignId/storeId report filters", async () => {

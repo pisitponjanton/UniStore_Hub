@@ -1,12 +1,16 @@
 "use client";
 
+import { AsyncPageFallback } from "@/components/ui/async-page";
+import { LoadedDirectoryControls } from "@/modules/organization-directory/loaded-directory-controls";
+import { searchLoadedItems, visibleLoadedItems } from "@/modules/organization-directory/loaded-directory-helpers";
+
+import Link from "next/link";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 
 import {
   Badge,
   Button,
   EmptyState,
-  ErrorState,
   ErrorSummary,
   useErrorSummaryFocus,
   LoadingState,
@@ -19,6 +23,7 @@ import {
   isDefinitiveSessionFailure,
 } from "@/modules/auth";
 import { storeService } from "@/modules/stores";
+import { productionHref } from "@/modules/production/production-helpers";
 import { ApiClientError } from "@/services";
 import {
   CAMPAIGN_STATUSES,
@@ -185,6 +190,8 @@ export function CampaignManagementView({
   organizationId: string;
 }) {
   const focusErrorSummary = useErrorSummaryFocus();
+  const [directoryQuery, setDirectoryQuery] = useState("");
+  const [directoryLimit, setDirectoryLimit] = useState(24);
   const [state, setState] = useState<CampaignState>({
     status: "loading",
   });
@@ -312,21 +319,7 @@ export function CampaignManagementView({
     setInlineError(null);
   }
 
-  function validateCreateField(field: keyof CampaignFormValues) {
-    const validation = validateCampaignForm(createValues);
-    setCreateErrors((current) => ({
-      ...current,
-      [field]: validation.errors[field],
-    }));
-  }
 
-  function validateEditField(field: keyof CampaignFormValues) {
-    const validation = validateCampaignForm(editValues);
-    setEditErrors((current) => ({
-      ...current,
-      [field]: validation.errors[field],
-    }));
-  }
 
   async function replaceList(
     storeId: string,
@@ -578,17 +571,15 @@ export function CampaignManagementView({
     return (
       <div className={styles.page}>
         <main className={styles.stateWrap}>
-          {state.status === "loading" ? (
-            <LoadingState
-              title="กำลังโหลดแคมเปญ"
-              description="กำลังดึงรายการ ร้านค้า และสถานะล่าสุด"
-            />
-          ) : (
-            <ErrorState
-              title="ไม่สามารถโหลดแคมเปญได้"
-              description="กรุณาลองโหลดหน้านี้ใหม่อีกครั้ง"
-            />
-          )}
+          <AsyncPageFallback
+            status={state.status}
+            pageTitle="แคมเปญ"
+            pageDescription="ติดตามรอบการขายและสถานะแคมเปญ"
+            loadingTitle="กำลังโหลดแคมเปญ"
+            errorTitle="ไม่สามารถโหลดแคมเปญได้"
+            backHref="/org/select/"
+            backLabel="กลับไปพื้นที่ทำงาน"
+          />
         </main>
       </div>
     );
@@ -609,6 +600,9 @@ export function CampaignManagementView({
   const selectedDirty =
     selectedCampaign?.status === "DRAFT" &&
     formChanged(editValues, selectedCampaign);
+
+  const directoryMatches = searchLoadedItems(state.campaigns, directoryQuery, campaign => [campaign.name, campaign.campaignId, storeNames.get(campaign.storeId), campaign.status]);
+  const directoryVisible = visibleLoadedItems(directoryMatches, directoryLimit);
 
   return (
     <div className={styles.page}>
@@ -641,32 +635,9 @@ export function CampaignManagementView({
           </div>
         </section>
 
-        <section
-          className={styles.flowContext}
-          aria-labelledby="campaign-flow-context"
-        >
-          <h2 className={styles.flowContextTitle} id="campaign-flow-context">
-            แคมเปญเชื่อมงานขายอย่างไร
-          </h2>
-          <ul className={styles.flowStrip}>
-            <li>
-              <strong>ร้านค้าและสินค้า</strong>
-              <span>แคมเปญอยู่ภายใต้ร้านค้า และเป็นบริบทของสินค้าที่เปิดขายในรอบนั้น</span>
-            </li>
-            <li>
-              <strong>คำสั่งซื้อ</strong>
-              <span>สถานะแคมเปญกำหนดว่ารอบนั้นรับคำสั่งซื้อใหม่ได้หรือกำลังเดินงานต่อจากรายการเดิม</span>
-            </li>
-            <li>
-              <strong>ผลิตและรับสินค้า</strong>
-              <span>หลังปิดรอบ ระบบเดินผ่านการผลิตและพร้อมรับสินค้าโดยใช้การยืนยันสถานะจริง</span>
-            </li>
-          </ul>
-        </section>
 
-        <Notice tone="info" title="วันเวลาเป็นข้อมูลวางแผน">
-          การถึงวันเวลาเปิด ปิด ชำระเงิน หรือรับสินค้า จะไม่เปลี่ยนสถานะแคมเปญอัตโนมัติ การเปลี่ยนสถานะเกิดขึ้นเมื่อผู้ดูแลสั่งดำเนินการและระบบยืนยันเท่านั้น
-        </Notice>
+
+
 
         {inlineError ? (
           <Notice tone="danger" role="alert" title="ดำเนินการไม่สำเร็จ">
@@ -764,6 +735,17 @@ export function CampaignManagementView({
               </p>
             ) : null}
 
+          <LoadedDirectoryControls
+            id="campaigns-directory-search"
+            label="ค้นหาแคมเปญ"
+            query={directoryQuery}
+            onQueryChange={value => { setDirectoryQuery(value); setDirectoryLimit(24); }}
+            loadedCount={state.campaigns.length}
+            matchingCount={directoryMatches.length}
+            visibleCount={directoryVisible.length}
+            onShowMore={() => setDirectoryLimit(limit => limit + 24)}
+          />
+
             {listLoading ? (
               <LoadingState
                 title="กำลังโหลดรายการแคมเปญ"
@@ -780,7 +762,7 @@ export function CampaignManagementView({
               />
             ) : (
               <div className={styles.list}>
-                {state.campaigns.map((campaign) => {
+                {directoryVisible.map((campaign) => {
                   const selected =
                     selectedCampaign?.campaignId === campaign.campaignId;
                   const loading =
@@ -853,6 +835,15 @@ export function CampaignManagementView({
                               ? "ดูและแก้ไข"
                               : "ดูรายละเอียด"}
                         </Button>
+                        {["PRODUCING", "READY_FOR_PICKUP", "COMPLETED"].includes(campaign.status) ? (
+                          <Link
+                            className={styles.productionLink}
+                            href={productionHref(organizationId, campaign.campaignId)}
+                            aria-label={"เปิดสรุปงานผลิต แคมเปญ " + campaign.name}
+                          >
+                            ดูยอดผลิต
+                          </Link>
+                        ) : null}
                       </div>
                     </article>
                   );
@@ -902,7 +893,6 @@ export function CampaignManagementView({
                 }
                 error={createErrors.storeId}
                 announceError={false}
-                onBlur={() => validateCreateField("storeId")}
                 required
                 disabled={creating || state.stores.length === 0}
               >
@@ -926,7 +916,6 @@ export function CampaignManagementView({
                 }
                 error={createErrors.name}
                 announceError={false}
-                onBlur={() => validateCreateField("name")}
                 required
                 disabled={creating}
               />
@@ -941,7 +930,6 @@ export function CampaignManagementView({
                   onChange={(value) =>
                     updateCreateField("openAt", value)
                   }
-                  onBlur={() => validateCreateField("openAt")}
                 />
                 <DateField
                   id="campaign-create-close"
@@ -952,7 +940,6 @@ export function CampaignManagementView({
                   onChange={(value) =>
                     updateCreateField("closeAt", value)
                   }
-                  onBlur={() => validateCreateField("closeAt")}
                 />
                 <DateField
                   id="campaign-create-payment"
@@ -963,7 +950,6 @@ export function CampaignManagementView({
                   onChange={(value) =>
                     updateCreateField("paymentDeadline", value)
                   }
-                  onBlur={() => validateCreateField("paymentDeadline")}
                 />
                 <DateField
                   id="campaign-create-pickup"
@@ -974,7 +960,6 @@ export function CampaignManagementView({
                   onChange={(value) =>
                     updateCreateField("pickupAt", value)
                   }
-                  onBlur={() => validateCreateField("pickupAt")}
                 />
               </div>
 
@@ -1064,7 +1049,6 @@ export function CampaignManagementView({
                       }
                       error={editErrors.storeId}
                       announceError={false}
-                      onBlur={() => validateEditField("storeId")}
                       required
                       disabled={
                         savingCampaignId === selectedCampaign.campaignId
@@ -1092,7 +1076,6 @@ export function CampaignManagementView({
                       }
                       error={editErrors.name}
                       announceError={false}
-                      onBlur={() => validateEditField("name")}
                       required
                       disabled={
                         savingCampaignId === selectedCampaign.campaignId
@@ -1111,7 +1094,6 @@ export function CampaignManagementView({
                         onChange={(value) =>
                           updateEditField("openAt", value)
                         }
-                        onBlur={() => validateEditField("openAt")}
                       />
                       <DateField
                         id="campaign-edit-close"
@@ -1124,7 +1106,6 @@ export function CampaignManagementView({
                         onChange={(value) =>
                           updateEditField("closeAt", value)
                         }
-                        onBlur={() => validateEditField("closeAt")}
                       />
                       <DateField
                         id="campaign-edit-payment"
@@ -1137,7 +1118,6 @@ export function CampaignManagementView({
                         onChange={(value) =>
                           updateEditField("paymentDeadline", value)
                         }
-                        onBlur={() => validateEditField("paymentDeadline")}
                       />
                       <DateField
                         id="campaign-edit-pickup"
@@ -1150,7 +1130,6 @@ export function CampaignManagementView({
                         onChange={(value) =>
                           updateEditField("pickupAt", value)
                         }
-                        onBlur={() => validateEditField("pickupAt")}
                       />
                     </div>
 
@@ -1281,6 +1260,33 @@ export function CampaignManagementView({
             )}
           </section>
         ) : null}
+        {/** Optional explainer and scheduling caveat follow the actual campaign workspace. */}
+        <section
+          className={styles.flowContext}
+          aria-labelledby="campaign-flow-context"
+        >
+          <h2 className={styles.flowContextTitle} id="campaign-flow-context">
+            แคมเปญเชื่อมงานขายอย่างไร
+          </h2>
+          <ul className={styles.flowStrip}>
+            <li>
+              <strong>ร้านค้าและสินค้า</strong>
+              <span>แคมเปญอยู่ภายใต้ร้านค้า และเป็นบริบทของสินค้าที่เปิดขายในรอบนั้น</span>
+            </li>
+            <li>
+              <strong>คำสั่งซื้อ</strong>
+              <span>สถานะแคมเปญกำหนดว่ารอบนั้นรับคำสั่งซื้อใหม่ได้หรือกำลังเดินงานต่อจากรายการเดิม</span>
+            </li>
+            <li>
+              <strong>ผลิตและรับสินค้า</strong>
+              <span>หลังปิดรอบ ระบบเดินผ่านการผลิตและพร้อมรับสินค้าโดยใช้การยืนยันสถานะจริง</span>
+            </li>
+          </ul>
+        </section>
+
+        <Notice tone="info" title="วันเวลาเป็นข้อมูลวางแผน">
+          การถึงวันเวลาเปิด ปิด ชำระเงิน หรือรับสินค้า จะไม่เปลี่ยนสถานะแคมเปญอัตโนมัติ การเปลี่ยนสถานะเกิดขึ้นเมื่อผู้ดูแลสั่งดำเนินการและระบบยืนยันเท่านั้น
+        </Notice>
       </main>
     </div>
   );

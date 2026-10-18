@@ -4,6 +4,8 @@ import type { OrderStatus } from "@/types";
 
 import {
   canCustomerCancelOrder,
+  customerOrderBucket,
+  prioritizeLoadedOrders,
   getCustomerOrderGuidance,
   getOrderJourneySteps,
   myOrderHref,
@@ -79,4 +81,21 @@ describe("customer order tracking helpers", () => {
       "/my/order/?orderId=order+1",
     );
   });
+  it("groups by real documented statuses and prioritizes actions among loaded records", () => {
+    const rows = [
+      { orderId: "done", status: "RECEIVED" as const, updatedAt: "2026-10-04" },
+      { orderId: "in-progress", status: "IN_PRODUCTION" as const, updatedAt: "2026-10-05" },
+      { orderId: "pay", status: "PENDING_PAYMENT" as const, updatedAt: "2026-10-01" },
+      { orderId: "pickup", status: "READY_FOR_PICKUP" as const, updatedAt: "2026-10-06" },
+      { orderId: "reject", status: "PAYMENT_REJECTED" as const, updatedAt: "2026-10-03" },
+    ];
+    const snapshot = rows.map(x => x.orderId);
+    expect(prioritizeLoadedOrders(rows).map(x => x.orderId)).toEqual([
+      "pickup", "reject", "pay", "in-progress", "done",
+    ]);
+    expect(rows.map(x => x.orderId)).toEqual(snapshot);
+    expect(customerOrderBucket("PAYMENT_REVIEW")).toBe("progress");
+    expect(customerOrderBucket("CANCELLED")).toBe("finished");
+  });
+
 });

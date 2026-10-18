@@ -1,7 +1,9 @@
 "use client";
 
+import { PageLoadingRows, PageStateHeading } from "@/components/ui/async-page";
+
 import Link from "next/link";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import {
   Button,
   ErrorState,
@@ -70,6 +72,8 @@ type OrderCreateState =
 
 export function OrderCreateView() {
   const focusErrorSummary = useErrorSummaryFocus();
+  const retryFocusRequested = useRef(false);
+  const submitFocusRequested = useRef(false);
   const [state, setState] = useState<OrderCreateState>({
     status: "loading",
   });
@@ -80,6 +84,40 @@ export function OrderCreateView() {
   const [pending, setPending] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [campaignNotOpen, setCampaignNotOpen] = useState(false);
+
+  // Only move keyboard focus for explicit Retry or Submit; initial hydration
+  // should not unexpectedly pull focus from the user's current control.
+  useEffect(() => {
+    if (!retryFocusRequested.current || state.status === "loading") return;
+    retryFocusRequested.current = false;
+    const frame = window.requestAnimationFrame(() => {
+      const heading = document.querySelector<HTMLElement>("main h1");
+      // PageStateHeading is not programmatically focusable. A second 503
+      // must land on the local landmark rather than leave focus on a removed button.
+      const target = heading?.hasAttribute("tabindex")
+        ? heading
+        : document.querySelector<HTMLElement>("main");
+      target?.focus();
+      target?.scrollIntoView({ block: "start", behavior: "instant" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [state.status, loadAttempt]);
+
+  useEffect(() => {
+    if (!submitFocusRequested.current || pending) return;
+    if (state.status !== "success" && !serverError) return;
+    submitFocusRequested.current = false;
+    const frame = window.requestAnimationFrame(() => {
+      const result = document.getElementById(
+        state.status === "success"
+          ? "order-create-success-title"
+          : "order-create-submit-feedback",
+      );
+      result?.focus();
+      result?.scrollIntoView({ block: "nearest", behavior: "instant" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [state.status, serverError, pending]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -208,6 +246,7 @@ export function OrderCreateView() {
       return;
     }
 
+    submitFocusRequested.current = true;
     setPending(true);
 
     const request = buildCreateOrderRequest({
@@ -262,7 +301,9 @@ export function OrderCreateView() {
     return (
       <div className={styles.page}>
         <StorefrontHeader />
-        <main className={styles.stateWrap}>
+        <main className={styles.stateWrap} tabIndex={-1}>
+          <PageStateHeading title="สร้างคำสั่งซื้อ" description="ตรวจสอบสินค้า ตัวเลือก และรอบการขายก่อนสั่งซื้อ" />
+          {state.status === "loading" ? <PageLoadingRows /> : null}
           {state.status === "loading" ? (
             <LoadingState
               title="กำลังเตรียมคำสั่งซื้อ"
@@ -291,6 +332,7 @@ export function OrderCreateView() {
                 <>
                   <Button
                     onClick={() => {
+                      retryFocusRequested.current = true;
                       setState({ status: "loading" });
                       setLoadAttempt((attempt) => attempt + 1);
                     }}
@@ -321,7 +363,7 @@ export function OrderCreateView() {
           <div className={styles.successMarker} aria-hidden="true" />
 
           <header className={styles.successHeading}>
-            <h1 className={styles.successTitle}>สร้างคำสั่งซื้อสำเร็จ</h1>
+            <h1 id="order-create-success-title" tabIndex={-1} className={styles.successTitle}>สร้างคำสั่งซื้อสำเร็จ</h1>
             <p className={styles.description}>
               ยอดและสถานะด้านล่างมาจากข้อมูลที่ระบบบันทึกไว้จริง
               ใช้ขั้นตอนถัดไปเพื่อดำเนินรายการต่อ
@@ -419,7 +461,7 @@ export function OrderCreateView() {
 
         <header className={styles.header}>
           <div className={styles.headerCopy}>
-            <h1 className={styles.title}>ตรวจสอบคำสั่งซื้อ</h1>
+            <h1 tabIndex={-1} className={styles.title}>ตรวจสอบคำสั่งซื้อ</h1>
             <p className={styles.description}>
               สินค้าและตัวเลือกถูกส่งมาจากหน้าสินค้าแล้ว
               ระบุจำนวนและตรวจสอบยอดประมาณการก่อนยืนยัน
@@ -541,6 +583,11 @@ export function OrderCreateView() {
             <div className={styles.confirmHeading}>
               <h2 id="confirm-heading">จำนวนและยอดประมาณการ</h2>
               <p>ตรวจจำนวนด้านล่างให้ถูกต้องก่อนกดยืนยัน</p>
+              {selection ? (
+                <p className={styles.confirmContext} aria-label="สินค้าที่กำลังสั่ง">
+                  {product.name} · {selection.variant.name} · {selection.campaign.name}
+                </p>
+              ) : null}
             </div>
 
             <ErrorSummary
@@ -612,13 +659,15 @@ export function OrderCreateView() {
             ) : null}
 
             {serverError ? (
-              <Notice
-                tone="danger"
-                role="alert"
-                title="สร้างคำสั่งซื้อไม่สำเร็จ"
-              >
-                {serverError}
-              </Notice>
+              <div id="order-create-submit-feedback" tabIndex={-1}>
+                <Notice
+                  tone="danger"
+                  role="alert"
+                  title="สร้างคำสั่งซื้อไม่สำเร็จ"
+                >
+                  {serverError}
+                </Notice>
+              </div>
             ) : null}
 
             <div className={styles.actions}>

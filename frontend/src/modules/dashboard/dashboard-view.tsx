@@ -1,5 +1,7 @@
 "use client";
 
+import { PageLoadingRows, PageStateHeading } from "@/components/ui/async-page";
+
 import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
 
@@ -208,6 +210,8 @@ export function DashboardView({
     return (
       <div className={styles.page}>
         <main className={styles.stateWrap}>
+          <PageStateHeading title="ภาพรวมหน่วยงาน" description="ข้อมูลล่าสุดและงานที่ต้องดำเนินการ" />
+          {state.status === "loading" ? <PageLoadingRows /> : null}
           {state.status === "loading" ? (
             <LoadingState
               title="กำลังโหลดแดชบอร์ดหน่วยงาน"
@@ -320,6 +324,15 @@ export function DashboardView({
             </span>
           </article>
         </section>
+
+        <nav className={styles.adminShortcuts} aria-label="ทางลัดงานผู้ดูแลหน่วยงาน">
+          <span>ไปจัดการงาน</span>
+          <Link href={organizationHref("/org/staff/", organizationId)}>สมาชิกและสิทธิ์</Link>
+          <Link href={organizationHref("/org/campaigns/", organizationId)}>แคมเปญ</Link>
+          <Link href={organizationHref("/org/production/", organizationId)}>สรุปงานผลิต</Link>
+          <Link href={organizationHref("/org/pickups/", organizationId)}>จุดรับสินค้า</Link>
+          <Link href={organizationHref("/org/audit/", organizationId)}>ประวัติการทำรายการ</Link>
+        </nav>
 
         <section className={styles.resourceStrip} aria-label="ทรัพยากรในขอบเขตที่เลือก">
           <div>

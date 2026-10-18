@@ -66,11 +66,12 @@ describe("MyOrderView", () => {
 
     render(<MyOrderView />);
 
-    expect(
-      await screen.findByRole("heading", {
-        name: "รายละเอียดคำสั่งซื้อ",
-      }),
-    ).toBeInTheDocument();
+    // The H1 is present while loading; wait for loaded order data first.
+    await screen.findByText("เสื้อชมรม");
+    expect(screen.getByRole("heading", {
+      name: "รายละเอียดคำสั่งซื้อ",
+      level: 1,
+    })).toBeInTheDocument();
     expect(screen.getAllByText("กำลังผลิตสินค้า").length).toBeGreaterThan(0);
     expect(screen.getByText("เสื้อชมรม")).toBeInTheDocument();
     expect(screen.getAllByText("฿500.00").length).toBeGreaterThan(0);
@@ -95,9 +96,8 @@ describe("MyOrderView", () => {
     );
 
     expect(mocks.getMyOrder).toHaveBeenCalledTimes(2);
-    expect(
-      await screen.findByRole("heading", { name: "รายละเอียดคำสั่งซื้อ" }),
-    ).toBeInTheDocument();
+    await screen.findByText("เสื้อชมรม");
+    expect(screen.getByRole("heading", { name: "รายละเอียดคำสั่งซื้อ", level: 1 })).toBeInTheDocument();
   });
 
   it("refreshes authoritative state when cancellation conflicts with a newer backend status", async () => {

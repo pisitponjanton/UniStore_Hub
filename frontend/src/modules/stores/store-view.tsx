@@ -1,5 +1,9 @@
 "use client";
 
+import { AsyncPageFallback } from "@/components/ui/async-page";
+import { LoadedDirectoryControls } from "@/modules/organization-directory/loaded-directory-controls";
+import { searchLoadedItems, visibleLoadedItems } from "@/modules/organization-directory/loaded-directory-helpers";
+
 import { useEffect, useState, type FormEvent } from "react";
 
 import {
@@ -7,10 +11,8 @@ import {
   Button,
   ConfirmDialog,
   EmptyState,
-  ErrorState,
   ErrorSummary,
   useErrorSummaryFocus,
-  LoadingState,
   Notice,
   TextareaField,
   TextField,
@@ -57,6 +59,8 @@ export function StoreManagementView({
   organizationId: string;
 }) {
   const focusErrorSummary = useErrorSummaryFocus();
+  const [directoryQuery, setDirectoryQuery] = useState("");
+  const [directoryLimit, setDirectoryLimit] = useState(24);
   const [state, setState] = useState<StoreState>({ status: "loading" });
 
   const [createName, setCreateName] = useState("");
@@ -300,17 +304,15 @@ export function StoreManagementView({
     return (
       <div className={styles.page}>
         <main className={styles.stateWrap}>
-          {state.status === "loading" ? (
-            <LoadingState
-              title="กำลังโหลดร้านค้า"
-              description="กำลังดึงร้านค้าและสถานะล่าสุดของหน่วยงาน"
-            />
-          ) : (
-            <ErrorState
-              title="ไม่สามารถโหลดร้านค้าได้"
-              description="กรุณาลองโหลดหน้านี้ใหม่อีกครั้ง"
-            />
-          )}
+          <AsyncPageFallback
+            status={state.status}
+            pageTitle="ร้านค้า"
+            pageDescription="ดูสถานะและจัดการร้านค้าของหน่วยงาน"
+            loadingTitle="กำลังโหลดร้านค้า"
+            errorTitle="ไม่สามารถโหลดร้านค้าได้"
+            backHref="/org/select/"
+            backLabel="กลับไปพื้นที่ทำงาน"
+          />
         </main>
       </div>
     );
@@ -324,6 +326,9 @@ export function StoreManagementView({
     selectedStore !== null &&
     (editName !== selectedStore.name ||
       editDescription !== selectedStore.description);
+
+  const directoryMatches = searchLoadedItems(state.stores, directoryQuery, store => [store.name, store.description, store.storeId, store.status]);
+  const directoryVisible = visibleLoadedItems(directoryMatches, directoryLimit);
 
   return (
     <div className={styles.page}>
@@ -380,6 +385,17 @@ export function StoreManagementView({
               </span>
             </div>
 
+          <LoadedDirectoryControls
+            id="stores-directory-search"
+            label="ค้นหาร้านค้า"
+            query={directoryQuery}
+            onQueryChange={value => { setDirectoryQuery(value); setDirectoryLimit(24); }}
+            loadedCount={state.stores.length}
+            matchingCount={directoryMatches.length}
+            visibleCount={directoryVisible.length}
+            onShowMore={() => setDirectoryLimit(limit => limit + 24)}
+          />
+
             {state.stores.length === 0 ? (
               <EmptyState
                 title="ยังไม่มีร้านค้า"
@@ -387,7 +403,7 @@ export function StoreManagementView({
               />
             ) : (
               <div className={styles.list}>
-                {state.stores.map((store) => {
+                {directoryVisible.map((store) => {
                   const loading = loadingStoreId === store.storeId;
                   const changingStatus = statusStoreId === store.storeId;
                   const busy =
@@ -508,13 +524,6 @@ export function StoreManagementView({
                 }}
                 error={createNameError}
                 announceError={false}
-                onBlur={() => {
-                  const validation = validateStoreForm({
-                    name: createName,
-                    description: createDescription,
-                  });
-                  setCreateNameError(validation.errors.name);
-                }}
                 required
                 disabled={creating}
               />
@@ -586,13 +595,6 @@ export function StoreManagementView({
                 }}
                 error={editNameError}
                 announceError={false}
-                onBlur={() => {
-                  const validation = validateStoreForm({
-                    name: editName,
-                    description: editDescription,
-                  });
-                  setEditNameError(validation.errors.name);
-                }}
                 required
                 disabled={savingStoreId === selectedStore.storeId}
               />

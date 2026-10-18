@@ -26,3 +26,6 @@ pnpm-debug.log*
 
 # TypeScript
 *.tsbuildinfo
+
+# Local UXQA screenshots and action proof (not source files)
+/quality-audit/.evidence/

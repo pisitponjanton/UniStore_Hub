@@ -50,7 +50,8 @@ test("large public directory remains searchable and paginated without a network 
     }));
 
     expect(metrics.overflow).toBeLessThanOrEqual(1);
-    expect(metrics.links).toBeLessThanOrEqual(16);
+    // Twelve directory rows, four discovery cards and one real-store spotlight.
+    expect(metrics.links).toBeLessThanOrEqual(17);
     expect(metrics.renderedElements).toBeLessThan(850);
 
     // Search must include the last store in the complete 2,300-entry directory,

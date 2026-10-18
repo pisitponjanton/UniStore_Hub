@@ -9,7 +9,7 @@ test("localhost and 127 loopback hosts both render the public storefront", async
     const errors: string[] = [];
     page.on("pageerror", (error) => errors.push(error.message));
     await page.goto("http://" + host + ":3000/", { waitUntil: "domcontentloaded" });
-    await expect(page.locator('a[href*="/stores/view"]').first()).toBeVisible({
+    await expect(page.locator('a[class*="discoveryCard"]').first()).toBeVisible({
       timeout: 20_000,
     });
     await expect(

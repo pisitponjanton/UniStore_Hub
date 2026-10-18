@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { UserDTO } from "@/types";
@@ -95,4 +95,29 @@ describe("PlatformUsersView", () => {
       signal: expect.any(AbortSignal),
     });
   });
+  it("searches 300+ loaded users, filters by actual Platform role, without exposing edit actions", async () => {
+    const many: UserDTO[] = Array.from({ length: 328 }, (_, index) => ({
+      ...users[0]!,
+      userId: "user-" + index,
+      name: index === 327 ? "Target Operator" : "Test User " + index,
+      email: "operator" + index + "@example.com",
+      platformRole: index === 327 ? "PLATFORM_ADMIN" : null,
+      status: index % 2 === 0 ? "ACTIVE" : "DISABLED",
+    }));
+    mocks.listUsers.mockResolvedValueOnce({ items: many, nextCursor: null });
+    render(<PlatformUsersView />);
+    await screen.findByText("Test User 0");
+    expect(screen.getByRole("table").querySelectorAll("tbody tr")).toHaveLength(24);
+    const search = screen.getByRole("searchbox", { name: "ค้นหาผู้ใช้ที่โหลดแล้ว" });
+    fireEvent.change(search, { target: { value: "target operator" } });
+    expect(screen.getByText("Target Operator")).toBeInTheDocument();
+    expect(screen.queryByText("Test User 0")).not.toBeInTheDocument();
+    fireEvent.change(search, { target: { value: "" } });
+    fireEvent.click(screen.getByRole("button", { name: /Platform Admin 1/ }));
+    expect(screen.getByText("Target Operator")).toBeInTheDocument();
+    expect(screen.getByRole("table").querySelectorAll("tbody tr")).toHaveLength(1);
+    expect(screen.queryByRole("button", { name: /ระงับ|ลบผู้ใช้|แก้ไขสิทธิ์/ })).not.toBeInTheDocument();
+    expect(mocks.listUsers).toHaveBeenCalledTimes(1);
+  });
+
 });

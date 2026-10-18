@@ -1,14 +1,13 @@
 "use client";
 
+import { AsyncPageFallback } from "@/components/ui/async-page";
+
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import {
   Badge,
-  ErrorState,
-  ForbiddenState,
-  LoadingState,
   Notice,
-  UnauthorizedState,
 } from "@/components";
 import {
   authSession,
@@ -99,45 +98,20 @@ export function PlatformSummaryView() {
     return () => controller.abort();
   }, []);
 
-  if (state.status === "loading") {
-    return (
-      <div className={styles.page}>
-        <main className={styles.main}>
-          <header className={styles.header}>
-            <div className={styles.headerCopy}>
-              <h1 className={styles.title}>ภาพรวม Platform</h1>
-              <p className={styles.description}>
-                ตรวจสถานะหน่วยงานและผู้ใช้จากข้อมูลระดับ Platform
-              </p>
-            </div>
-          </header>
-          <section aria-label="กำลังโหลดข้อมูลภาพรวม">
-            <LoadingState
-              title="กำลังโหลดภาพรวม Platform"
-              description="กำลังสรุปสถานะหน่วยงานและผู้ใช้"
-            />
-          </section>
-        </main>
-      </div>
-    );
-  }
 
   if (state.status !== "success") {
     return (
       <div className={styles.page}>
         <main className={styles.stateWrap}>
-          {state.status === "unauthorized" ? (
-            <UnauthorizedState />
-          ) : null}
-          {state.status === "forbidden" ? (
-            <ForbiddenState />
-          ) : null}
-          {state.status === "error" ? (
-            <ErrorState
-              title="ไม่สามารถโหลดภาพรวม Platform ได้"
-              description="กรุณาลองโหลดหน้านี้ใหม่อีกครั้ง"
-            />
-          ) : null}
+          <AsyncPageFallback
+            status={state.status}
+            pageTitle="ภาพรวม Platform"
+            pageDescription="ตรวจสอบสถานะภาพรวมของระบบ"
+            loadingTitle="กำลังโหลดภาพรวม Platform"
+            errorTitle="ไม่สามารถโหลดภาพรวม Platform ได้"
+            backHref="/"
+            backLabel="กลับไปพื้นที่ทำงาน"
+          />
         </main>
       </div>
     );
@@ -170,6 +144,13 @@ export function PlatformSummaryView() {
             <span>สิทธิ์ระดับ Platform ทั้งระบบ</span>
           </div>
         </header>
+
+        <nav className={styles.platformShortcuts} aria-label="งานระดับ Platform">
+          <Link className={styles.platformPrimaryLink} href="/platform/organizations/">
+            ตรวจสอบหน่วยงานรออนุมัติ ({count(pendingOrganizations)})
+          </Link>
+          <Link href="/platform/users/">ค้นหารายชื่อผู้ใช้</Link>
+        </nav>
 
         <Notice tone="neutral" title="ขอบเขตสิทธิ์ Platform">
           หน้านี้ใช้สิทธิ์จาก User.platformRole = PLATFORM_ADMIN

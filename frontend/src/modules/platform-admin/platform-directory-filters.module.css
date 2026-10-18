@@ -1,0 +1,11 @@
+.filters { display: flex; flex-wrap: wrap; gap: var(--space-2); min-width: 0; }
+.filters button {
+  min-height: 44px; display: inline-flex; gap: var(--space-2); align-items: center;
+  padding: var(--space-2) var(--space-3); cursor: pointer; font: inherit; font-weight: 650;
+  color: var(--ink-secondary); border: 1px solid var(--line-soft);
+  background: var(--surface); border-radius: var(--radius-control);
+}
+.filters button[aria-pressed="true"] { color: var(--brand-on); background: var(--brand); border-color: var(--brand); }
+.filters button:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.filters button span { font-size: var(--text-caption); font-variant-numeric: tabular-nums; }
+@media(max-width:620px) { .filters { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); } .filters button { min-width: 0; justify-content: center; padding-inline: var(--space-1); } }

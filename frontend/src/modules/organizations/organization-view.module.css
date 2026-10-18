@@ -608,3 +608,44 @@
     width: 100%;
   }
 }
+
+/* Phase 4: Organization overview and settings prioritize identity and forms. */
+.page { background: var(--canvas); }
+.workspaceHeader, .settingsHeader {
+  padding: clamp(18px, 2.8vw, 30px);
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-feature);
+  box-shadow: none;
+}
+.workspaceHeader::before, .workspaceHeader::after,
+.settingsHeader::before, .settingsHeader::after {
+  content: none;
+  display: none;
+}
+.title {
+  max-width: 22ch;
+  color: var(--ink);
+  font-size: clamp(1.85rem, 3vw, 2.7rem);
+}
+.description { color: var(--ink-secondary); }
+.headerSummary, .statusBlock {
+  min-height: 0;
+  background: var(--surface-muted);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-control);
+  box-shadow: none;
+}
+.headerSummaryLabel, .statusLabel { color: var(--ink-secondary); }
+.headerSummary strong { color: var(--ink); }
+.headerSummary span:last-child { color: var(--ink-secondary); }
+@media (max-width: 620px) {
+  .workspaceHeader,.settingsHeader { padding: 18px; }
+  .title { font-size: clamp(1.65rem, 7vw, 2.2rem); }
+}
+
+/* Phase 4: working list precedes the optional creation panel on mobile. */
+@media (max-width: 920px) {
+  .workspaceGrid > .organizationSection { order: -1; }
+  .workspaceGrid > .createPanel { order: 0; }
+}

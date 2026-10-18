@@ -1,18 +1,19 @@
 "use client";
 
+import { AsyncPageFallback } from "@/components/ui/async-page";
+import { useQueueFilterFeedback } from "@/modules/operations/use-queue-filter-feedback";
+import { QueuePriorityControls, QueueFilterEmpty } from "@/modules/operations/queue-priority-controls";
+import { prioritizeLoadedQueue, visibleLoadedQueue } from "@/modules/operations/queue-priority";
+
 import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
 
 import {
   Button,
   EmptyState,
-  ErrorState,
-  ForbiddenState,
-  LoadingState,
   Notice,
   SelectField,
   TextField,
-  UnauthorizedState,
 } from "@/components";
 import {
   authSession,
@@ -81,8 +82,11 @@ export function OrganizationOrdersView({
     useState<AppliedFilters>(EMPTY_FILTERS);
   const [filtering, setFiltering] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [queueView, setQueueView] = useState<"all" | "action">("all");
+  const [visibleLimit, setVisibleLimit] = useState(30);
   const [inlineError, setInlineError] = useState<string | null>(null);
   const [listFeedback, setListFeedback] = useState<string | null>(null);
+  const { successRef, errorRef, announceCompletion } = useQueueFilterFeedback(filtering, inlineError);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -171,6 +175,7 @@ export function OrganizationOrdersView({
       setListFeedback(
         `แสดง ${result.items.length.toLocaleString("th-TH")} คำสั่งซื้อ${nextFilters.status ? ` · ${getOrderStatusLabel(nextFilters.status)}` : ""}`,
       );
+      announceCompletion();
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();
@@ -178,6 +183,7 @@ export function OrganizationOrdersView({
       }
 
       setInlineError(requestErrorMessage(error));
+      announceCompletion();
     } finally {
       setFiltering(false);
     }
@@ -209,6 +215,7 @@ export function OrganizationOrdersView({
       setListFeedback(
         `แสดงคำสั่งซื้อทั้งหมดที่โหลด ${result.items.length.toLocaleString("th-TH")} รายการ`,
       );
+      announceCompletion();
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();
@@ -216,6 +223,7 @@ export function OrganizationOrdersView({
       }
 
       setInlineError(requestErrorMessage(error));
+      announceCompletion();
     } finally {
       setFiltering(false);
     }
@@ -270,17 +278,15 @@ export function OrganizationOrdersView({
     return (
       <div className={styles.page}>
         <main className={styles.stateWrap}>
-          {state.status === "loading" ? (
-            <LoadingState title="กำลังโหลดคำสั่งซื้อของหน่วยงาน" />
-          ) : null}
-          {state.status === "unauthorized" ? <UnauthorizedState /> : null}
-          {state.status === "forbidden" ? <ForbiddenState /> : null}
-          {state.status === "error" ? (
-            <ErrorState
-              title="ไม่สามารถโหลดคำสั่งซื้อได้"
-              description="กรุณาลองโหลดหน้านี้ใหม่อีกครั้ง"
-            />
-          ) : null}
+          <AsyncPageFallback
+            status={state.status}
+            pageTitle="คำสั่งซื้อของหน่วยงาน"
+            pageDescription="ดูและค้นหาคำสั่งซื้อภายในหน่วยงาน"
+            loadingTitle="กำลังโหลดคำสั่งซื้อของหน่วยงาน"
+            errorTitle="ไม่สามารถโหลดคำสั่งซื้อได้"
+            backHref="/org/select/"
+            backLabel="กลับไปพื้นที่ทำงาน"
+          />
         </main>
       </div>
     );
@@ -305,6 +311,11 @@ export function OrganizationOrdersView({
     ].includes(order.status),
   ).length;
 
+  const isActionable = (order: OrderDTO) => order.status === "PAYMENT_REVIEW";
+  const sortedRows = prioritizeLoadedQueue(state.orders, isActionable, item => item.updatedAt);
+  const queueRows = visibleLoadedQueue(sortedRows, queueView, isActionable);
+  const visibleRows = queueRows.slice(0, visibleLimit);
+
   return (
     <div className={styles.page}>
       <main className={styles.main}>
@@ -316,7 +327,151 @@ export function OrganizationOrdersView({
             </p>
           </div>
         </header>
+        <QueuePriorityControls
+          heading="คำสั่งซื้อที่ต้องตรวจ"
+          actionLabel="คำสั่งซื้อรอตรวจการชำระเงิน"
+          countLabel="รอตรวจสลิป"
+          actionCount={paymentReviewCount}
+          loadedCount={state.orders.length}
+          mode={queueView}
+          onChange={(next) => { setQueueView(next); setVisibleLimit(30); }}
+          listId="orders-list"
+          filterId="order-filter-title"
+        />
 
+
+
+
+
+
+        {listFeedback ? (
+          <p
+            ref={successRef}
+            tabIndex={-1}
+            data-queue-filter-feedback="success"
+            className={`${styles.listFeedback} ${styles.focusableFeedback}`}
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {listFeedback}
+          </p>
+        ) : null}
+
+        {inlineError ? (
+          <div ref={errorRef} tabIndex={-1} data-queue-filter-feedback="error" className={styles.focusableFeedback}>
+            <Notice tone="danger" role="alert" title="โหลดรายการไม่สำเร็จ">
+              {inlineError}
+            </Notice>
+          </div>
+        ) : null}
+
+        <section className={styles.section} aria-labelledby="orders-list">
+          <div className={styles.sectionHeading}>
+            <div>
+              <h2 className={styles.sectionTitle} id="orders-list">
+                รายการคำสั่งซื้อ
+              </h2>
+              <p className={styles.sectionDescription}>
+                สถานะและยอดรวมในแต่ละรายการเป็นข้อมูลล่าสุดที่โหลดจากระบบ
+              </p>
+            </div>
+            <span className={styles.sectionMeta}>
+              {state.orders.length.toLocaleString("th-TH")} รายการ
+            </span>
+          </div>
+
+          {state.orders.length === 0 ? (
+            <EmptyState
+              title="ไม่พบคำสั่งซื้อ"
+              description={
+                hasFilters
+                  ? "ไม่มีคำสั่งซื้อที่ตรงกับตัวกรองปัจจุบัน"
+                  : "หน่วยงานนี้ยังไม่มีคำสั่งซื้อ"
+              }
+            />
+          ) : (
+            <div className={styles.list}>
+              {visibleRows.length === 0 ? <QueueFilterEmpty onShowAll={() => setQueueView("all")} /> : null}
+                {visibleRows.map((order) => (
+                <article
+                  className={styles.row}
+                  data-attention={order.status === "PAYMENT_REVIEW" || undefined}
+                  aria-label={`คำสั่งซื้อ ${order.orderId} · ${getOrderStatusLabel(order.status)}`}
+                  key={order.orderId}
+                >
+                  <div className={styles.rowMain}>
+                    <div className={styles.rowHeading}>
+                      <h3 className={styles.cardTitle} title={`Order ${order.orderId}`}>
+                        Order {order.orderId.slice(0, 12)}
+                      </h3>
+                      <OrderStatusBadge status={order.status} />
+                    </div>
+                    <div className={styles.metaRow}>
+                      <span className={styles.meta} title={`Customer: ${order.customerId}`}>
+                        Customer: {order.customerId.slice(0, 12)}
+                      </span>
+                      <span className={styles.meta} title={`Campaign: ${order.campaignId}`}>
+                        Campaign: {order.campaignId.slice(0, 12)}
+                      </span>
+                      <time className={styles.meta} dateTime={order.createdAt}>
+                        สร้างเมื่อ {formatIsoDateTime(order.createdAt)}
+                      </time>
+                    </div>
+
+                    {order.status === "PAYMENT_REVIEW" ? (
+                      <div className={styles.taskPriority} role="note">
+                        <span className={styles.taskPriorityLabel}>
+                          ต้องดำเนินการ
+                        </span>
+                        <strong>ตรวจหลักฐานการชำระเงิน</strong>
+                      </div>
+                    ) : null}
+                  </div>
+
+                  <div className={styles.rowAside}>
+                    <span className={styles.total} data-numeric>
+                      {formatSatang(order.total)}
+                    </span>
+                    <Link
+                      className={styles.detailLink}
+                      href={organizationOrderHref(
+                        organizationId,
+                        order.orderId,
+                      )}
+                      aria-label={`ดูรายละเอียดคำสั่งซื้อ ${order.orderId}`}
+                    >
+                      ดูรายละเอียด
+                    </Link>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+
+          {queueRows.length > visibleLimit ? (
+            <div className={styles.loadMore}>
+              <Button type="button" variant="secondary" onClick={() => setVisibleLimit(limit => limit + 30)}>
+                แสดงอีก {Math.min(30, queueRows.length - visibleLimit)} รายการจากชุดที่โหลด
+              </Button>
+            </div>
+          ) : null}
+
+          {state.nextCursor && queueRows.length <= visibleLimit ? (
+            <div className={styles.loadMore}>
+              <Button
+                variant="secondary"
+                pending={loadingMore}
+                pendingLabel="กำลังโหลดเพิ่มเติม"
+                onClick={() => {
+                  void loadMore();
+                }}
+              >
+                โหลดเพิ่มเติม
+              </Button>
+            </div>
+          ) : null}
+        </section>
         <section className={styles.summaryStrip} aria-label="สรุปคำสั่งซื้อที่โหลด">
           <div>
             <span className={styles.summaryLabel}>รายการที่โหลด</span>
@@ -441,121 +596,6 @@ export function OrganizationOrdersView({
               </Button>
             </div>
           </form>
-        </section>
-
-        {listFeedback ? (
-          <p
-            className={styles.listFeedback}
-            role="status"
-            aria-live="polite"
-            aria-atomic="true"
-          >
-            {listFeedback}
-          </p>
-        ) : null}
-
-        {inlineError ? (
-          <Notice tone="danger" role="alert" title="โหลดรายการไม่สำเร็จ">
-            {inlineError}
-          </Notice>
-        ) : null}
-
-        <section className={styles.section} aria-labelledby="orders-list">
-          <div className={styles.sectionHeading}>
-            <div>
-              <h2 className={styles.sectionTitle} id="orders-list">
-                รายการคำสั่งซื้อ
-              </h2>
-              <p className={styles.sectionDescription}>
-                สถานะและยอดรวมในแต่ละรายการเป็นข้อมูลล่าสุดที่โหลดจากระบบ
-              </p>
-            </div>
-            <span className={styles.sectionMeta}>
-              {state.orders.length.toLocaleString("th-TH")} รายการ
-            </span>
-          </div>
-
-          {state.orders.length === 0 ? (
-            <EmptyState
-              title="ไม่พบคำสั่งซื้อ"
-              description={
-                hasFilters
-                  ? "ไม่มีคำสั่งซื้อที่ตรงกับตัวกรองปัจจุบัน"
-                  : "หน่วยงานนี้ยังไม่มีคำสั่งซื้อ"
-              }
-            />
-          ) : (
-            <div className={styles.list}>
-              {state.orders.map((order) => (
-                <article
-                  className={styles.row}
-                  data-attention={order.status === "PAYMENT_REVIEW" || undefined}
-                  aria-label={`คำสั่งซื้อ ${order.orderId} · ${getOrderStatusLabel(order.status)}`}
-                  key={order.orderId}
-                >
-                  <div className={styles.rowMain}>
-                    <div className={styles.rowHeading}>
-                      <h3 className={styles.cardTitle}>
-                        Order {order.orderId}
-                      </h3>
-                      <OrderStatusBadge status={order.status} />
-                    </div>
-                    <div className={styles.metaRow}>
-                      <span className={styles.meta}>
-                        Customer: {order.customerId}
-                      </span>
-                      <span className={styles.meta}>
-                        Campaign: {order.campaignId}
-                      </span>
-                      <time className={styles.meta} dateTime={order.createdAt}>
-                        สร้างเมื่อ {formatIsoDateTime(order.createdAt)}
-                      </time>
-                    </div>
-
-                    {order.status === "PAYMENT_REVIEW" ? (
-                      <div className={styles.taskPriority} role="note">
-                        <span className={styles.taskPriorityLabel}>
-                          ต้องดำเนินการ
-                        </span>
-                        <strong>ตรวจหลักฐานการชำระเงิน</strong>
-                      </div>
-                    ) : null}
-                  </div>
-
-                  <div className={styles.rowAside}>
-                    <span className={styles.total} data-numeric>
-                      {formatSatang(order.total)}
-                    </span>
-                    <Link
-                      className={styles.detailLink}
-                      href={organizationOrderHref(
-                        organizationId,
-                        order.orderId,
-                      )}
-                      aria-label={`ดูรายละเอียดคำสั่งซื้อ ${order.orderId}`}
-                    >
-                      ดูรายละเอียด
-                    </Link>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
-
-          {state.nextCursor ? (
-            <div className={styles.loadMore}>
-              <Button
-                variant="secondary"
-                pending={loadingMore}
-                pendingLabel="กำลังโหลดเพิ่มเติม"
-                onClick={() => {
-                  void loadMore();
-                }}
-              >
-                โหลดเพิ่มเติม
-              </Button>
-            </div>
-          ) : null}
         </section>
       </main>
     </div>

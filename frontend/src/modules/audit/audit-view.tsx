@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { AsyncPageFallback } from "@/components/ui/async-page";
+import { LoadedDirectoryControls } from "@/modules/organization-directory/loaded-directory-controls";
+import { searchLoadedItems, visibleLoadedItems } from "@/modules/organization-directory/loaded-directory-helpers";
+
+import { useEffect, useRef, useState, type FormEvent } from "react";
 
 import {
   Button,
   EmptyState,
-  ErrorState,
-  ForbiddenState,
-  LoadingState,
   Notice,
   Table,
   TableBody,
@@ -16,7 +17,6 @@ import {
   TableHeaderCell,
   TableRow,
   TextField,
-  UnauthorizedState,
 } from "@/components";
 import {
   authSession,
@@ -69,6 +69,8 @@ export function AuditView({
 }: {
   organizationId: string;
 }) {
+  const [directoryQuery, setDirectoryQuery] = useState("");
+  const [directoryLimit, setDirectoryLimit] = useState(24);
   const [state, setState] = useState<AuditState>({
     status: "loading",
   });
@@ -86,6 +88,21 @@ export function AuditView({
     null,
   );
   const [listFeedback, setListFeedback] = useState<string | null>(null);
+  const [filterFeedbackRevision, setFilterFeedbackRevision] = useState(0);
+  const successFeedbackRef = useRef<HTMLParagraphElement>(null);
+  const errorFeedbackRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (filtering || filterFeedbackRevision === 0) return;
+    const target = inlineError ? errorFeedbackRef.current : successFeedbackRef.current;
+    if (!target) return;
+    const frame = requestAnimationFrame(() => {
+      target.focus({ preventScroll: true });
+      target.scrollIntoView?.({ block: "start", behavior: "instant" });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [filtering, filterFeedbackRevision, inlineError]);
+
 
   useEffect(() => {
     const controller = new AbortController();
@@ -172,6 +189,7 @@ export function AuditView({
           ? `แสดง ${result.items.length.toLocaleString("th-TH")} เหตุการณ์ตามตัวกรอง`
           : `แสดง Audit Log ทั้งหมดที่โหลด ${result.items.length.toLocaleString("th-TH")} รายการ`,
       );
+      setFilterFeedbackRevision(revision => revision + 1);
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();
@@ -187,6 +205,7 @@ export function AuditView({
       }
 
       setInlineError(errorMessage(error));
+      setFilterFeedbackRevision(revision => revision + 1);
     } finally {
       setFiltering(false);
     }
@@ -275,24 +294,15 @@ export function AuditView({
     return (
       <div className={styles.page}>
         <main className={styles.stateWrap}>
-          {state.status === "loading" ? (
-            <LoadingState
-              title="กำลังโหลดประวัติการทำรายการ"
-              description="กำลังดึง Audit Log ล่าสุดของหน่วยงาน"
-            />
-          ) : null}
-          {state.status === "unauthorized" ? (
-            <UnauthorizedState />
-          ) : null}
-          {state.status === "forbidden" ? (
-            <ForbiddenState />
-          ) : null}
-          {state.status === "error" ? (
-            <ErrorState
-              title="ไม่สามารถโหลดประวัติการทำรายการได้"
-              description="กรุณาลองโหลดหน้านี้ใหม่อีกครั้ง"
-            />
-          ) : null}
+          <AsyncPageFallback
+            status={state.status}
+            pageTitle="ประวัติการทำรายการ"
+            pageDescription="ติดตามกิจกรรมและการเปลี่ยนแปลงของหน่วยงาน"
+            loadingTitle="กำลังโหลดประวัติการทำรายการ"
+            errorTitle="ไม่สามารถโหลดประวัติการทำรายการได้"
+            backHref="/org/select/"
+            backLabel="กลับไปพื้นที่ทำงาน"
+          />
         </main>
       </div>
     );
@@ -308,6 +318,9 @@ export function AuditView({
     Boolean(draftAction.trim()) ||
     Boolean(draftResourceType.trim()) ||
     Boolean(draftResourceId.trim());
+
+  const directoryMatches = searchLoadedItems(state.items, directoryQuery, item => [item.action, item.actorId, item.resourceType, item.resourceId]);
+  const directoryVisible = visibleLoadedItems(directoryMatches, directoryLimit);
 
   return (
     <div className={styles.page}>
@@ -326,9 +339,138 @@ export function AuditView({
           </div>
         </header>
 
+        <nav className={styles.auditShortcuts} aria-label="การสำรวจ Audit Log">
+          <a href="#audit-list-title">ดูเหตุการณ์ล่าสุดที่โหลด</a>
+          <a href="#audit-filter-title">ตัวกรองขั้นสูง (ค้นหาจากเซิร์ฟเวอร์)</a>
+        </nav>
         <Notice tone="neutral" title="Audit Log เป็นข้อมูลอ่านอย่างเดียว">
           หน้านี้ไม่มี action แก้ไขหรือลบ Audit Log และ metadata ที่แสดงคือข้อมูลที่ระบบส่งกลับสำหรับรายการนั้น
         </Notice>
+
+
+
+        {listFeedback ? (
+          <p
+            id="audit-search-success"
+            ref={successFeedbackRef}
+            tabIndex={-1}
+            className={`${styles.listFeedback} ${styles.focusableFeedback}`}
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {listFeedback}
+          </p>
+        ) : null}
+
+        {inlineError ? (
+          <div
+            id="audit-search-error"
+            ref={errorFeedbackRef}
+            tabIndex={-1}
+            className={styles.focusableFeedback}
+          >
+            <Notice tone="danger" role="alert" title="โหลดรายการไม่สำเร็จ">
+              {inlineError}
+            </Notice>
+          </div>
+        ) : null}
+
+        <section
+          className={styles.section}
+          aria-labelledby="audit-list-title"
+        >
+          <div className={styles.sectionHeading}>
+            <div>
+              <h2 className={styles.sectionTitle} id="audit-list-title">
+                เหตุการณ์ที่บันทึกไว้
+              </h2>
+              <p className={styles.sectionDescription}>
+                รายการเรียงตามผลลัพธ์ที่ API ส่งกลับและใช้ cursor สำหรับโหลดต่อ
+              </p>
+            </div>
+            <span className={styles.sectionMeta}>
+              {state.items.length.toLocaleString("th-TH")} รายการ
+            </span>
+          </div>
+
+          <LoadedDirectoryControls
+            id="audit-directory-search"
+            label="ค้นหากิจกรรมที่โหลด"
+            query={directoryQuery}
+            onQueryChange={value => { setDirectoryQuery(value); setDirectoryLimit(24); }}
+            loadedCount={state.items.length}
+            matchingCount={directoryMatches.length}
+            visibleCount={directoryVisible.length}
+            onShowMore={() => setDirectoryLimit(limit => limit + 24)}
+          />
+
+          {state.items.length === 0 ? (
+            <EmptyState
+              title="ไม่พบ Audit Log"
+              description={
+                hasFilters
+                  ? "ไม่มีเหตุการณ์ที่ตรงกับตัวกรองปัจจุบัน"
+                  : "หน่วยงานนี้ยังไม่มี Audit Log"
+              }
+            />
+          ) : (
+            <Table
+              caption="รายการ Audit Log ของหน่วยงาน"
+              density="compact"
+              className={styles.auditTable}
+            >
+              <TableHead>
+                <TableRow>
+                  <TableHeaderCell>เวลา</TableHeaderCell>
+                  <TableHeaderCell>การทำรายการ</TableHeaderCell>
+                  <TableHeaderCell>Actor</TableHeaderCell>
+                  <TableHeaderCell>Resource</TableHeaderCell>
+                  <TableHeaderCell>Metadata</TableHeaderCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {directoryVisible.map((item) => (
+                  <TableRow key={item.auditId}>
+                    <TableCell>
+                      <time className={styles.time} dateTime={item.createdAt}>
+                        {formatIsoDateTime(item.createdAt)}
+                      </time>
+                    </TableCell>
+                    <TableCell>
+                      <span className={styles.action}>
+                        {item.action}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className={styles.code}>
+                        {item.actorId}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <div className={styles.resource}>
+                        <strong>{item.resourceType}</strong>
+                        <span className={styles.code}>
+                          {item.resourceId}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <details className={styles.metadataDetails}>
+                        <summary>
+                          ดู metadata ของ {item.resourceType} {item.resourceId}
+                        </summary>
+                        <pre className={styles.metadata}>
+                          {formatAuditMetadata(item.metadata)}
+                        </pre>
+                      </details>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </section>
 
         <section
           className={styles.filterPanel}
@@ -441,108 +583,6 @@ export function AuditView({
               </Button>
             </div>
           </form>
-        </section>
-
-        {listFeedback ? (
-          <p
-            className={styles.listFeedback}
-            role="status"
-            aria-live="polite"
-            aria-atomic="true"
-          >
-            {listFeedback}
-          </p>
-        ) : null}
-
-        {inlineError ? (
-          <Notice tone="danger" role="alert" title="โหลดรายการไม่สำเร็จ">
-            {inlineError}
-          </Notice>
-        ) : null}
-
-        <section
-          className={styles.section}
-          aria-labelledby="audit-list-title"
-        >
-          <div className={styles.sectionHeading}>
-            <div>
-              <h2 className={styles.sectionTitle} id="audit-list-title">
-                เหตุการณ์ที่บันทึกไว้
-              </h2>
-              <p className={styles.sectionDescription}>
-                รายการเรียงตามผลลัพธ์ที่ API ส่งกลับและใช้ cursor สำหรับโหลดต่อ
-              </p>
-            </div>
-            <span className={styles.sectionMeta}>
-              {state.items.length.toLocaleString("th-TH")} รายการ
-            </span>
-          </div>
-
-          {state.items.length === 0 ? (
-            <EmptyState
-              title="ไม่พบ Audit Log"
-              description={
-                hasFilters
-                  ? "ไม่มีเหตุการณ์ที่ตรงกับตัวกรองปัจจุบัน"
-                  : "หน่วยงานนี้ยังไม่มี Audit Log"
-              }
-            />
-          ) : (
-            <Table
-              caption="รายการ Audit Log ของหน่วยงาน"
-              density="compact"
-              className={styles.auditTable}
-            >
-              <TableHead>
-                <TableRow>
-                  <TableHeaderCell>เวลา</TableHeaderCell>
-                  <TableHeaderCell>การทำรายการ</TableHeaderCell>
-                  <TableHeaderCell>Actor</TableHeaderCell>
-                  <TableHeaderCell>Resource</TableHeaderCell>
-                  <TableHeaderCell>Metadata</TableHeaderCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {state.items.map((item) => (
-                  <TableRow key={item.auditId}>
-                    <TableCell>
-                      <time className={styles.time} dateTime={item.createdAt}>
-                        {formatIsoDateTime(item.createdAt)}
-                      </time>
-                    </TableCell>
-                    <TableCell>
-                      <span className={styles.action}>
-                        {item.action}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <span className={styles.code}>
-                        {item.actorId}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <div className={styles.resource}>
-                        <strong>{item.resourceType}</strong>
-                        <span className={styles.code}>
-                          {item.resourceId}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <details className={styles.metadataDetails}>
-                        <summary>
-                          ดู metadata ของ {item.resourceType} {item.resourceId}
-                        </summary>
-                        <pre className={styles.metadata}>
-                          {formatAuditMetadata(item.metadata)}
-                        </pre>
-                      </details>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
         </section>
 
         {state.nextCursor ? (

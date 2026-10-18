@@ -380,3 +380,42 @@
     transform: none;
   }
 }
+
+/* Phase 4: quiet operational layout, task data over decorative pastel. */
+.page { background: var(--canvas); }
+.header {
+  padding: clamp(18px, 2.8vw, 28px);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-feature);
+  background: var(--surface);
+  box-shadow: none;
+}
+.header::before, .header::after {
+  content: none;
+  display: none;
+}
+.title {
+  font-size: clamp(1.85rem, 3vw, 2.7rem);
+  line-height: 1.13;
+}
+.summaryStrip > div,
+.summaryStrip > div:nth-child(n) {
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-card);
+  box-shadow: none;
+}
+@media (max-width: 620px) {
+  .header { padding: 18px; }
+  .title { font-size: clamp(1.65rem, 7vw, 2.15rem); }
+}
+
+/* Phase 4: working list precedes the optional creation panel on mobile. */
+@media (max-width: 920px) {
+  .grid > .memberSection { order: -1; }
+  .grid > .panel { order: 0; }
+}
+
+/* After async member operations, announce and reveal off-screen errors. */
+.operationFeedback { scroll-margin-top: 108px; outline: none; }
+.operationFeedback:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }

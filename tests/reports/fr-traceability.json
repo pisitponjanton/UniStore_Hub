@@ -17,9 +17,9 @@
         "E2E-CORE-001"
       ],
       "artifacts": [
-        "reports/phase-04-backend-security-modernization.md",
-        "reports/phase-06-local-dev-e2e-qualification.md",
-        "reports/harness-phase-05-live-e2e-after-s3-fix.md"
+        "reports/backend-security-modernization.md",
+        "reports/local-dev-e2e-qualification.md",
+        "reports/test-harness-validation.md#record-05-harness-live-e2e-after-s3-fix"
       ],
       "status": "PASS",
       "recordedResults": [
@@ -42,9 +42,9 @@
         "E2E-CORE-001"
       ],
       "artifacts": [
-        "reports/phase-04-backend-security-modernization.md",
-        "reports/phase-06-local-dev-e2e-qualification.md",
-        "reports/harness-phase-05-live-e2e-after-s3-fix.md"
+        "reports/backend-security-modernization.md",
+        "reports/local-dev-e2e-qualification.md",
+        "reports/test-harness-validation.md#record-05-harness-live-e2e-after-s3-fix"
       ],
       "status": "PASS",
       "recordedResults": [
@@ -67,9 +67,9 @@
         "E2E-TENANT-001"
       ],
       "artifacts": [
-        "reports/phase-04-backend-security-modernization.md",
-        "reports/phase-06-local-dev-e2e-qualification.md",
-        "reports/harness-phase-05-live-e2e-after-s3-fix.md"
+        "reports/backend-security-modernization.md",
+        "reports/local-dev-e2e-qualification.md",
+        "reports/test-harness-validation.md#record-05-harness-live-e2e-after-s3-fix"
       ],
       "status": "PASS",
       "recordedResults": [
@@ -92,9 +92,9 @@
         "E2E-TENANT-001"
       ],
       "artifacts": [
-        "reports/phase-04-backend-security-modernization.md",
-        "reports/phase-06-local-dev-e2e-qualification.md",
-        "reports/harness-phase-05-live-e2e-after-s3-fix.md"
+        "reports/backend-security-modernization.md",
+        "reports/local-dev-e2e-qualification.md",
+        "reports/test-harness-validation.md#record-05-harness-live-e2e-after-s3-fix"
       ],
       "status": "PASS",
       "recordedResults": [
@@ -119,8 +119,8 @@
         "DATA-011"
       ],
       "artifacts": [
-        "reports/phase-04-backend-security-modernization.md",
-        "reports/phase-05-frontend-modernization.md"
+        "reports/backend-security-modernization.md",
+        "reports/frontend-modernization.md"
       ],
       "status": "PASS",
       "recordedResults": [
@@ -143,9 +143,9 @@
         "E2E-CORE-001"
       ],
       "artifacts": [
-        "reports/phase-04-backend-security-modernization.md",
-        "reports/phase-06-local-dev-e2e-qualification.md",
-        "reports/harness-phase-05-live-e2e-after-s3-fix.md"
+        "reports/backend-security-modernization.md",
+        "reports/local-dev-e2e-qualification.md",
+        "reports/test-harness-validation.md#record-05-harness-live-e2e-after-s3-fix"
       ],
       "status": "PASS",
       "recordedResults": [
@@ -171,9 +171,9 @@
         "E2E-CORE-001"
       ],
       "artifacts": [
-        "reports/phase-04-backend-security-modernization.md",
-        "reports/phase-06-local-dev-e2e-qualification.md",
-        "reports/harness-phase-05-live-e2e-after-s3-fix.md"
+        "reports/backend-security-modernization.md",
+        "reports/local-dev-e2e-qualification.md",
+        "reports/test-harness-validation.md#record-05-harness-live-e2e-after-s3-fix"
       ],
       "status": "PASS",
       "recordedResults": [
@@ -203,10 +203,10 @@
         "E2E-PAYMENT-REJECT-001"
       ],
       "artifacts": [
-        "reports/phase-04-backend-security-modernization.md",
-        "reports/phase-05-frontend-modernization.md",
-        "reports/phase-06-local-dev-e2e-qualification.md",
-        "reports/harness-phase-05-live-e2e-after-s3-fix.md"
+        "reports/backend-security-modernization.md",
+        "reports/frontend-modernization.md",
+        "reports/local-dev-e2e-qualification.md",
+        "reports/test-harness-validation.md#record-05-harness-live-e2e-after-s3-fix"
       ],
       "status": "PASS",
       "recordedResults": [
@@ -235,9 +235,9 @@
         "E2E-CORE-001"
       ],
       "artifacts": [
-        "reports/phase-04-backend-security-modernization.md",
-        "reports/phase-05-frontend-modernization.md",
-        "reports/harness-phase-05-live-e2e-after-s3-fix.md"
+        "reports/backend-security-modernization.md",
+        "reports/frontend-modernization.md",
+        "reports/test-harness-validation.md#record-05-harness-live-e2e-after-s3-fix"
       ],
       "status": "PASS",
       "recordedResults": [
@@ -263,9 +263,9 @@
         "E2E-CORE-001"
       ],
       "artifacts": [
-        "reports/phase-04-backend-security-modernization.md",
-        "reports/phase-05-frontend-modernization.md",
-        "reports/harness-phase-05-live-e2e-after-s3-fix.md"
+        "reports/backend-security-modernization.md",
+        "reports/frontend-modernization.md",
+        "reports/test-harness-validation.md#record-05-harness-live-e2e-after-s3-fix"
       ],
       "status": "PASS",
       "recordedResults": [
@@ -291,8 +291,8 @@
         "FE-020"
       ],
       "artifacts": [
-        "reports/phase-04-backend-security-modernization.md",
-        "reports/phase-05-frontend-modernization.md"
+        "reports/backend-security-modernization.md",
+        "reports/frontend-modernization.md"
       ],
       "status": "PASS",
       "recordedResults": [
@@ -317,9 +317,9 @@
         "E2E-PAYMENT-REJECT-001"
       ],
       "artifacts": [
-        "reports/phase-04-backend-security-modernization.md",
-        "reports/phase-06-local-dev-e2e-qualification.md",
-        "reports/harness-phase-05-live-e2e-after-s3-fix.md"
+        "reports/backend-security-modernization.md",
+        "reports/local-dev-e2e-qualification.md",
+        "reports/test-harness-validation.md#record-05-harness-live-e2e-after-s3-fix"
       ],
       "status": "PASS",
       "recordedResults": [
@@ -344,10 +344,10 @@
         "E2E-NOTIFY-001"
       ],
       "artifacts": [
-        "reports/phase-04-backend-security-modernization.md",
-        "reports/phase-05-frontend-modernization.md",
-        "reports/phase-06-local-dev-e2e-qualification.md",
-        "reports/harness-phase-05-live-e2e-after-s3-fix.md"
+        "reports/backend-security-modernization.md",
+        "reports/frontend-modernization.md",
+        "reports/local-dev-e2e-qualification.md",
+        "reports/test-harness-validation.md#record-05-harness-live-e2e-after-s3-fix"
       ],
       "status": "PASS",
       "recordedResults": [
@@ -376,8 +376,8 @@
         "CT-GOV-020"
       ],
       "artifacts": [
-        "reports/phase-04-backend-security-modernization.md",
-        "reports/phase-05-frontend-modernization.md"
+        "reports/backend-security-modernization.md",
+        "reports/frontend-modernization.md"
       ],
       "status": "PASS",
       "recordedResults": [
@@ -399,10 +399,10 @@
         "AWS-004"
       ],
       "artifacts": [
-        "reports/phase-04-backend-security-modernization.md",
-        "reports/phase-06-local-dev-e2e-qualification.md",
-        "reports/phase-07-aws-smoke-qualification.md",
-        "reports/harness-phase-05-live-e2e-after-s3-fix.md"
+        "reports/backend-security-modernization.md",
+        "reports/local-dev-e2e-qualification.md",
+        "reports/aws-smoke-qualification.md",
+        "reports/test-harness-validation.md#record-05-harness-live-e2e-after-s3-fix"
       ],
       "status": "BLOCKED",
       "recordedResults": [

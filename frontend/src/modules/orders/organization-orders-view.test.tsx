@@ -147,4 +147,20 @@ describe("OrganizationOrdersView", () => {
       cursor: "opaque-next",
     });
   });
+  it("renders at most 30 loaded records initially and reveals more without another API request", async () => {
+    mocks.listOrganizationOrders.mockResolvedValueOnce({
+      items: Array.from({ length: 35 }, (_, index) => ({
+        ...order,
+        orderId: "order-" + String(index).padStart(2, "0"),
+      })),
+      nextCursor: null,
+    });
+    render(<OrganizationOrdersView organizationId="org-1" />);
+    expect(await screen.findByText("Order order-00")).toBeInTheDocument();
+    expect(screen.queryByText("Order order-34")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "แสดงอีก 5 รายการจากชุดที่โหลด" }));
+    expect(screen.getByText("Order order-34")).toBeInTheDocument();
+    expect(mocks.listOrganizationOrders).toHaveBeenCalledTimes(1);
+  });
+
 });

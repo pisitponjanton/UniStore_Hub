@@ -1,5 +1,9 @@
 "use client";
 
+import { AsyncPageFallback } from "@/components/ui/async-page";
+import { LoadedDirectoryControls } from "@/modules/organization-directory/loaded-directory-controls";
+import { searchLoadedItems, visibleLoadedItems } from "@/modules/organization-directory/loaded-directory-helpers";
+
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 
 import {
@@ -7,7 +11,6 @@ import {
   Button,
   ConfirmDialog,
   EmptyState,
-  ErrorState,
   ErrorSummary,
   useErrorSummaryFocus,
   LoadingState,
@@ -76,6 +79,8 @@ export function ProductManagementView({
   organizationId: string;
 }) {
   const focusErrorSummary = useErrorSummaryFocus();
+  const [directoryQuery, setDirectoryQuery] = useState("");
+  const [directoryLimit, setDirectoryLimit] = useState(24);
   const [state, setState] = useState<ProductState>({
     status: "loading",
   });
@@ -449,17 +454,15 @@ export function ProductManagementView({
     return (
       <div className={styles.page}>
         <main className={styles.stateWrap}>
-          {state.status === "loading" ? (
-            <LoadingState
-              title="กำลังโหลดสินค้า"
-              description="กำลังดึงรายการสินค้า ร้านค้า และข้อมูลที่ใช้จัดการ"
-            />
-          ) : (
-            <ErrorState
-              title="ไม่สามารถโหลดสินค้าได้"
-              description="กรุณาลองโหลดหน้านี้ใหม่อีกครั้ง"
-            />
-          )}
+          <AsyncPageFallback
+            status={state.status}
+            pageTitle="สินค้าและตัวเลือก"
+            pageDescription="จัดการสินค้า ตัวเลือก และข้อมูลของร้านค้า"
+            loadingTitle="กำลังโหลดสินค้า"
+            errorTitle="ไม่สามารถโหลดสินค้าได้"
+            backHref="/org/select/"
+            backLabel="กลับไปพื้นที่ทำงาน"
+          />
         </main>
       </div>
     );
@@ -476,6 +479,9 @@ export function ProductManagementView({
     selectedProduct !== null &&
     (editName !== selectedProduct.name ||
       editDescription !== selectedProduct.description);
+
+  const directoryMatches = searchLoadedItems(state.products, directoryQuery, product => [product.name, product.description, product.productId, storeNames.get(product.storeId), product.status]);
+  const directoryVisible = visibleLoadedItems(directoryMatches, directoryLimit);
 
   return (
     <div className={styles.page}>
@@ -568,6 +574,17 @@ export function ProductManagementView({
               </Button>
             </div>
 
+          <LoadedDirectoryControls
+            id="products-directory-search"
+            label="ค้นหาสินค้า"
+            query={directoryQuery}
+            onQueryChange={value => { setDirectoryQuery(value); setDirectoryLimit(24); }}
+            loadedCount={state.products.length}
+            matchingCount={directoryMatches.length}
+            visibleCount={directoryVisible.length}
+            onShowMore={() => setDirectoryLimit(limit => limit + 24)}
+          />
+
             {listLoading ? (
               <LoadingState
                 title="กำลังโหลดรายการสินค้า"
@@ -584,7 +601,7 @@ export function ProductManagementView({
               />
             ) : (
               <div className={styles.list}>
-                {state.products.map((product) => {
+                {directoryVisible.map((product) => {
                   const loading =
                     loadingProductId === product.productId;
                   const saving =
@@ -754,14 +771,6 @@ export function ProductManagementView({
                 }}
                 error={createStoreError}
                 announceError={false}
-                onBlur={() => {
-                  const validation = validateProductForm({
-                    storeId: createStoreId,
-                    name: createName,
-                    description: createDescription,
-                  });
-                  setCreateStoreError(validation.errors.storeId);
-                }}
                 required
                 disabled={creating || state.stores.length === 0}
               >
@@ -786,14 +795,6 @@ export function ProductManagementView({
                 }}
                 error={createNameError}
                 announceError={false}
-                onBlur={() => {
-                  const validation = validateProductForm({
-                    storeId: createStoreId,
-                    name: createName,
-                    description: createDescription,
-                  });
-                  setCreateNameError(validation.errors.name);
-                }}
                 required
                 disabled={creating}
               />
@@ -900,14 +901,6 @@ export function ProductManagementView({
                     }}
                     error={editNameError}
                     announceError={false}
-                    onBlur={() => {
-                      const validation = validateProductForm({
-                        storeId: selectedProduct.storeId,
-                        name: editName,
-                        description: editDescription,
-                      });
-                      setEditNameError(validation.errors.name);
-                    }}
                     required
                     disabled={
                       savingProductId === selectedProduct.productId
@@ -948,6 +941,7 @@ export function ProductManagementView({
 
               <section className={styles.editorSection}>
                 <ProductImageUploadView
+                  key={organizationId + ":" + selectedProduct.productId}
                   organizationId={organizationId}
                   product={selectedProduct}
                   onProductRefreshed={(refreshed) => {

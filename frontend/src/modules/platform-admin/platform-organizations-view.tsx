@@ -1,17 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { AsyncPageFallback } from "@/components/ui/async-page";
+import { LoadedDirectoryControls } from "@/modules/organization-directory/loaded-directory-controls";
+import { searchLoadedItems, visibleLoadedItems } from "@/modules/organization-directory/loaded-directory-helpers";
+import { PlatformDirectoryFilters } from "./platform-directory-filters";
+
+import { useEffect, useRef, useState } from "react";
 
 import {
   Badge,
   Button,
   ConfirmDialog,
   EmptyState,
-  ErrorState,
-  ForbiddenState,
-  LoadingState,
   Notice,
-  UnauthorizedState,
 } from "@/components";
 import {
   authSession,
@@ -65,10 +66,28 @@ export function PlatformOrganizationsView() {
     status: "loading",
   });
   const [pending, setPending] = useState<PendingAction>(null);
+  const [openDialog, setOpenDialog] = useState<PendingAction>(null);
+  const [directoryQuery, setDirectoryQuery] = useState("");
+  const [directoryLimit, setDirectoryLimit] = useState(24);
+  const [statusFilter, setStatusFilter] = useState<"all" | "PENDING" | "ACTIVE" | "SUSPENDED">("all");
   const [inlineError, setInlineError] = useState<string | null>(
     null,
   );
   const [notice, setNotice] = useState<string | null>(null);
+
+  const feedbackRef = useRef<HTMLDivElement>(null);
+  const focusFeedbackOnCloseRef = useRef<PendingAction>(null);
+
+  useEffect(() => {
+    if (openDialog || pending || (!notice && !inlineError)) return;
+    // The dialog is closed before moving focus, so the user can read feedback
+    // rather than remain scrolled down to the original action button.
+    const frame = requestAnimationFrame(() => {
+      feedbackRef.current?.focus({ preventScroll: true });
+      feedbackRef.current?.scrollIntoView?.({ block: "start", behavior: "instant" });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [openDialog, pending, notice, inlineError]);
 
   async function refreshOrganizations() {
     const result = await platformAdminService.listOrganizations();
@@ -206,6 +225,10 @@ export function PlatformOrganizationsView() {
       }
     } finally {
       setPending(null);
+      // Defer focus until Radix has finished closing: Firefox otherwise
+      // restores focus to the trigger after the feedback effect has run.
+      focusFeedbackOnCloseRef.current = { organizationId: organization.organizationId, action };
+      setOpenDialog(null);
     }
   }
 
@@ -213,24 +236,15 @@ export function PlatformOrganizationsView() {
     return (
       <div className={styles.page}>
         <main className={styles.stateWrap}>
-          {state.status === "loading" ? (
-            <LoadingState
-              title="กำลังโหลดหน่วยงานทั้งหมด"
-              description="กำลังดึงสถานะล่าสุดจาก Platform"
-            />
-          ) : null}
-          {state.status === "unauthorized" ? (
-            <UnauthorizedState />
-          ) : null}
-          {state.status === "forbidden" ? (
-            <ForbiddenState />
-          ) : null}
-          {state.status === "error" ? (
-            <ErrorState
-              title="ไม่สามารถโหลดหน่วยงานได้"
-              description="กรุณาลองโหลดหน้านี้ใหม่อีกครั้ง"
-            />
-          ) : null}
+          <AsyncPageFallback
+            status={state.status}
+            pageTitle="จัดการหน่วยงาน"
+            pageDescription="ตรวจสอบและจัดการสถานะหน่วยงาน"
+            loadingTitle="กำลังโหลดหน่วยงานทั้งหมด"
+            errorTitle="ไม่สามารถโหลดหน่วยงานได้"
+            backHref="/platform/summary/"
+            backLabel="กลับไปพื้นที่ทำงาน"
+          />
         </main>
       </div>
     );
@@ -250,6 +264,13 @@ export function PlatformOrganizationsView() {
       Number(right.status === "PENDING") -
       Number(left.status === "PENDING"),
   );
+
+  const matchingOrganizations = searchLoadedItems(
+    prioritizedOrganizations.filter(org => statusFilter === "all" || org.status === statusFilter),
+    directoryQuery,
+    org => [org.name, org.description, org.organizationId, org.createdBy, org.status],
+  );
+  const displayedOrganizations = visibleLoadedItems(matchingOrganizations, directoryLimit);
 
   return (
     <div className={styles.page}>
@@ -280,51 +301,26 @@ export function PlatformOrganizationsView() {
           </div>
         </header>
 
-        <section
-          className={styles.priorityStrip}
-          aria-label="สรุปหน่วยงานที่ต้องดูแล"
-        >
-          <article className={styles.priorityItem} data-attention={pendingCount > 0 || undefined}>
-            <span className={styles.metricLabel}>รออนุมัติ</span>
-            <strong className={styles.priorityValue} data-numeric>
-              {pendingCount.toLocaleString("th-TH")}
-            </strong>
-            <span className={styles.metricHint}>
-              รายการที่ต้องตรวจและตัดสินใจจากสถานะ PENDING
-            </span>
-          </article>
 
-          <article className={styles.priorityItem}>
-            <span className={styles.metricLabel}>ใช้งานอยู่</span>
-            <strong className={styles.priorityValue} data-numeric>
-              {activeCount.toLocaleString("th-TH")}
-            </strong>
-            <span className={styles.metricHint}>
-              หน่วยงานที่อยู่ในสถานะ ACTIVE
-            </span>
-          </article>
 
-          <article className={styles.priorityItem}>
-            <span className={styles.metricLabel}>ถูกระงับ</span>
-            <strong className={styles.priorityValue} data-numeric>
-              {suspendedCount.toLocaleString("th-TH")}
-            </strong>
-            <span className={styles.metricHint}>
-              หน่วยงานที่อยู่ในสถานะ SUSPENDED
-            </span>
-          </article>
-        </section>
-
-        {notice ? (
-          <Notice tone="success" role="status" title="อัปเดตสถานะแล้ว">
-            {notice}
-          </Notice>
-        ) : null}
-
-        {inlineError ? (
-          <Notice tone="danger" role="alert" title="เปลี่ยนสถานะไม่สำเร็จ">
-            {inlineError}
-          </Notice>
+        {notice || inlineError ? (
+          <div
+            id="platform-action-feedback"
+            ref={feedbackRef}
+            className={styles.actionFeedback}
+            tabIndex={-1}
+          >
+            {notice ? (
+              <Notice tone="success" role="status" title="อัปเดตสถานะแล้ว">
+                {notice}
+              </Notice>
+            ) : null}
+            {inlineError ? (
+              <Notice tone="danger" role="alert" title="เปลี่ยนสถานะไม่สำเร็จ">
+                {inlineError}
+              </Notice>
+            ) : null}
+          </div>
         ) : null}
 
         <Notice tone="warning" title="ตรวจสอบก่อนเปลี่ยนสถานะ">
@@ -350,6 +346,29 @@ export function PlatformOrganizationsView() {
             </div>
           </div>
 
+          <PlatformDirectoryFilters
+            label="กรองหน่วยงานตามสถานะที่โหลดแล้ว"
+            options={[
+              { value: "all", label: "ทั้งหมด", count: state.organizations.length },
+              { value: "PENDING", label: "รออนุมัติ", count: pendingCount },
+              { value: "ACTIVE", label: "ใช้งานอยู่", count: activeCount },
+              { value: "SUSPENDED", label: "ถูกระงับ", count: suspendedCount },
+            ]}
+            value={statusFilter}
+            onChange={value => { setStatusFilter(value); setDirectoryLimit(24); }}
+          />
+          <LoadedDirectoryControls
+            id="platform-organizations-search"
+            label="ค้นหาหน่วยงานที่โหลดแล้ว"
+            query={directoryQuery}
+            onQueryChange={value => { setDirectoryQuery(value); setDirectoryLimit(24); }}
+            loadedCount={state.organizations.length}
+            matchingCount={matchingOrganizations.length}
+            visibleCount={displayedOrganizations.length}
+            onShowMore={() => setDirectoryLimit(limit => limit + 24)}
+            placeholder="ชื่อหน่วยงาน ผู้สร้าง หรือ Organization ID"
+          />
+
           {state.organizations.length === 0 ? (
             <EmptyState
               title="ยังไม่มีหน่วยงาน"
@@ -360,7 +379,7 @@ export function PlatformOrganizationsView() {
               className={styles.organizationList}
               aria-label="รายการหน่วยงานทั้งหมด"
             >
-              {prioritizedOrganizations.map((organization) => {
+              {displayedOrganizations.map((organization) => {
                 const isPending =
                   pending?.organizationId ===
                   organization.organizationId;
@@ -454,8 +473,38 @@ export function PlatformOrganizationsView() {
                         <div className={styles.actions}>
                           {canApprove ? (
                             <ConfirmDialog
+                              open={openDialog?.organizationId === organization.organizationId && openDialog?.action === "approve"}
+                              onOpenChange={(next) => {
+                                if (pending) return;
+                                if (next) focusFeedbackOnCloseRef.current = null;
+                                setOpenDialog(next ? { organizationId: organization.organizationId, action: "approve" } : null);
+                              }}
+                              onCloseAutoFocus={(event) => {
+                                const completed = focusFeedbackOnCloseRef.current;
+                                if (completed?.organizationId !== organization.organizationId || completed.action !== "approve") {
+                                  // Safari/WebKit may not restore focus after a previously
+                                  // completed dialog removed its old trigger from the DOM.
+                                  // Explicitly return to THIS still-mounted dialog trigger.
+                                  event.preventDefault();
+                                  const triggerKey = `${organization.organizationId}:approve`;
+                                  requestAnimationFrame(() => {
+                                    const button = [...document.querySelectorAll<HTMLButtonElement>("[data-platform-action-trigger]")]
+                                      .find(node => node.dataset.platformActionTrigger === triggerKey);
+                                    button?.focus({ preventScroll: true });
+                                  });
+                                  return;
+                                }
+                                focusFeedbackOnCloseRef.current = null;
+                                if (!feedbackRef.current) return;
+                                event.preventDefault();
+                                feedbackRef.current.focus({ preventScroll: true });
+                                feedbackRef.current.scrollIntoView?.({ block: "start", behavior: "instant" });
+                              }}
                               trigger={
-                                <Button disabled={pending !== null}>
+                                <Button
+                                  disabled={pending !== null}
+                                  data-platform-action-trigger={`${organization.organizationId}:approve`}
+                                >
                                   อนุมัติ
                                 </Button>
                               }
@@ -477,10 +526,38 @@ export function PlatformOrganizationsView() {
 
                           {canSuspend ? (
                             <ConfirmDialog
+                              open={openDialog?.organizationId === organization.organizationId && openDialog?.action === "suspend"}
+                              onOpenChange={(next) => {
+                                if (pending) return;
+                                if (next) focusFeedbackOnCloseRef.current = null;
+                                setOpenDialog(next ? { organizationId: organization.organizationId, action: "suspend" } : null);
+                              }}
+                              onCloseAutoFocus={(event) => {
+                                const completed = focusFeedbackOnCloseRef.current;
+                                if (completed?.organizationId !== organization.organizationId || completed.action !== "suspend") {
+                                  // Safari/WebKit may not restore focus after a previously
+                                  // completed dialog removed its old trigger from the DOM.
+                                  // Explicitly return to THIS still-mounted dialog trigger.
+                                  event.preventDefault();
+                                  const triggerKey = `${organization.organizationId}:suspend`;
+                                  requestAnimationFrame(() => {
+                                    const button = [...document.querySelectorAll<HTMLButtonElement>("[data-platform-action-trigger]")]
+                                      .find(node => node.dataset.platformActionTrigger === triggerKey);
+                                    button?.focus({ preventScroll: true });
+                                  });
+                                  return;
+                                }
+                                focusFeedbackOnCloseRef.current = null;
+                                if (!feedbackRef.current) return;
+                                event.preventDefault();
+                                feedbackRef.current.focus({ preventScroll: true });
+                                feedbackRef.current.scrollIntoView?.({ block: "start", behavior: "instant" });
+                              }}
                               trigger={
                                 <Button
                                   variant="danger"
                                   disabled={pending !== null}
+                                  data-platform-action-trigger={`${organization.organizationId}:suspend`}
                                 >
                                   ระงับหน่วยงาน
                                 </Button>
@@ -514,6 +591,41 @@ export function PlatformOrganizationsView() {
             </div>
           )}
         </section>
+        <section
+          className={styles.priorityStrip}
+          aria-label="สรุปหน่วยงานที่ต้องดูแล"
+        >
+          <article className={styles.priorityItem} data-attention={pendingCount > 0 || undefined}>
+            <span className={styles.metricLabel}>รออนุมัติ</span>
+            <strong className={styles.priorityValue} data-numeric>
+              {pendingCount.toLocaleString("th-TH")}
+            </strong>
+            <span className={styles.metricHint}>
+              รายการที่ต้องตรวจและตัดสินใจจากสถานะ PENDING
+            </span>
+          </article>
+
+          <article className={styles.priorityItem}>
+            <span className={styles.metricLabel}>ใช้งานอยู่</span>
+            <strong className={styles.priorityValue} data-numeric>
+              {activeCount.toLocaleString("th-TH")}
+            </strong>
+            <span className={styles.metricHint}>
+              หน่วยงานที่อยู่ในสถานะ ACTIVE
+            </span>
+          </article>
+
+          <article className={styles.priorityItem}>
+            <span className={styles.metricLabel}>ถูกระงับ</span>
+            <strong className={styles.priorityValue} data-numeric>
+              {suspendedCount.toLocaleString("th-TH")}
+            </strong>
+            <span className={styles.metricHint}>
+              หน่วยงานที่อยู่ในสถานะ SUSPENDED
+            </span>
+          </article>
+        </section>
+
       </main>
     </div>
   );

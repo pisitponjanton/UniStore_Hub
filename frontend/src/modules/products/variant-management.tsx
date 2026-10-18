@@ -392,13 +392,6 @@ export function VariantManagement({
                           }}
                           error={editNameError}
                           announceError={false}
-                          onBlur={() => {
-                            const validation = validateVariantForm({
-                              name: editName,
-                              priceThb: editPrice,
-                            });
-                            setEditNameError(validation.errors.name);
-                          }}
                           required
                           disabled={saving}
                         />
@@ -413,13 +406,6 @@ export function VariantManagement({
                           }}
                           error={editPriceError}
                           announceError={false}
-                          onBlur={() => {
-                            const validation = validateVariantForm({
-                              name: editName,
-                              priceThb: editPrice,
-                            });
-                            setEditPriceError(validation.errors.priceThb);
-                          }}
                           hint="ใส่ทศนิยมได้ไม่เกิน 2 ตำแหน่ง"
                           required
                           disabled={saving}
@@ -486,13 +472,6 @@ export function VariantManagement({
             }}
             error={createNameError}
             announceError={false}
-            onBlur={() => {
-              const validation = validateVariantForm({
-                name: createName,
-                priceThb: createPrice,
-              });
-              setCreateNameError(validation.errors.name);
-            }}
             placeholder="เช่น Size M"
             required
             disabled={creating}
@@ -509,13 +488,6 @@ export function VariantManagement({
             }}
             error={createPriceError}
             announceError={false}
-            onBlur={() => {
-              const validation = validateVariantForm({
-                name: createName,
-                priceThb: createPrice,
-              });
-              setCreatePriceError(validation.errors.priceThb);
-            }}
             hint="ใส่ทศนิยมได้ไม่เกิน 2 ตำแหน่ง"
             required
             disabled={creating}

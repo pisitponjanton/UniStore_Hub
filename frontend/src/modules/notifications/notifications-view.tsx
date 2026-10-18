@@ -1,6 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import { myOrderHref } from "@/modules/orders/order-tracking-helpers";
+import { myPaymentHref } from "@/modules/payments/payment-helpers";
+import { myPickupHref } from "@/modules/pickups/pickup-helpers";
 
 import {
   BrandIllustration,
@@ -58,6 +62,17 @@ export function NotificationsView() {
   const [markingId, setMarkingId] = useState<string | null>(null);
   const [inlineError, setInlineError] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
+
+  const actionErrorRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!inlineError) return;
+    const frame = window.requestAnimationFrame(() => {
+      actionErrorRef.current?.focus({ preventScroll: true });
+      actionErrorRef.current?.scrollIntoView?.({ block: "start", behavior: "instant" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [inlineError]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -354,6 +369,19 @@ export function NotificationsView() {
           </div>
         ) : null}
 
+        {inlineError ? (
+          <div
+            ref={actionErrorRef}
+            data-notifications-action-error
+            className={styles.actionError}
+            tabIndex={-1}
+          >
+            <Notice tone="danger" role="alert" title="ดำเนินการไม่สำเร็จ">
+              {inlineError}
+            </Notice>
+          </div>
+        ) : null}
+
         {state.status === "loading" ? (
           <LoadingState
             title="กำลังโหลดการแจ้งเตือน"
@@ -436,6 +464,22 @@ export function NotificationsView() {
                   </div>
 
                   <div className={styles.actions}>
+                    {notification.resourceType === "ORDER" ? (
+                      <Link
+                        className={styles.notificationNextAction}
+                        href={notification.type === "PAYMENT_REJECTED"
+                          ? myPaymentHref(notification.resourceId)
+                          : notification.type === "READY_FOR_PICKUP"
+                            ? myPickupHref(notification.resourceId)
+                            : myOrderHref(notification.resourceId)}
+                      >
+                        {notification.type === "PAYMENT_REJECTED"
+                          ? "ตรวจสอบและส่งหลักฐานใหม่"
+                          : notification.type === "READY_FOR_PICKUP"
+                            ? "เปิดข้อมูลรับสินค้า"
+                            : "ดูสถานะคำสั่งซื้อ"}
+                      </Link>
+                    ) : null}
                     {unread ? (
                       <Button
                         variant="secondary"
@@ -459,11 +503,6 @@ export function NotificationsView() {
           </section>
         ) : null}
 
-        {inlineError ? (
-          <Notice tone="danger" role="alert" title="ดำเนินการไม่สำเร็จ">
-            {inlineError}
-          </Notice>
-        ) : null}
 
         {state.status === "success" && state.nextCursor ? (
           <div className={styles.loadMore}>

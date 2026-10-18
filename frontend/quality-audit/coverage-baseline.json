@@ -1,0 +1,5246 @@
+{
+  "schemaVersion": 1,
+  "source": "frontend/interaction-coverage-matrix.md",
+  "sourceSha256": "3baafe3868f3056bb45aec0aae0267f72dc78d7a7881f759276ed37f393c939f",
+  "policy": "No status becomes PASS without specific current test evidence",
+  "statuses": [
+    "NOT_TESTED",
+    "PASS",
+    "FAIL",
+    "BLOCKED"
+  ],
+  "routeCount": 28,
+  "routeActionCount": 207,
+  "shellActionCount": 50,
+  "routes": [
+    {
+      "index": 1,
+      "route": "/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "declaredActionCount": 6
+    },
+    {
+      "index": 2,
+      "route": "/login/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "declaredActionCount": 10
+    },
+    {
+      "index": 3,
+      "route": "/register/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "declaredActionCount": 11
+    },
+    {
+      "index": 4,
+      "route": "/stores/view/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "declaredActionCount": 4
+    },
+    {
+      "index": 5,
+      "route": "/products/view/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "declaredActionCount": 7
+    },
+    {
+      "index": 6,
+      "route": "/campaigns/view/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "declaredActionCount": 3
+    },
+    {
+      "index": 7,
+      "route": "/orders/new/",
+      "roles": [
+        "customer"
+      ],
+      "declaredActionCount": 8
+    },
+    {
+      "index": 8,
+      "route": "/my/orders/",
+      "roles": [
+        "customer"
+      ],
+      "declaredActionCount": 4
+    },
+    {
+      "index": 9,
+      "route": "/my/order/",
+      "roles": [
+        "customer"
+      ],
+      "declaredActionCount": 6
+    },
+    {
+      "index": 10,
+      "route": "/my/payment/",
+      "roles": [
+        "customer"
+      ],
+      "declaredActionCount": 5
+    },
+    {
+      "index": 11,
+      "route": "/my/pickup/",
+      "roles": [
+        "customer"
+      ],
+      "declaredActionCount": 4
+    },
+    {
+      "index": 12,
+      "route": "/notifications/",
+      "roles": [
+        "customer"
+      ],
+      "declaredActionCount": 7
+    },
+    {
+      "index": 13,
+      "route": "/org/select/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "declaredActionCount": 5
+    },
+    {
+      "index": 14,
+      "route": "/org/dashboard/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "declaredActionCount": 12
+    },
+    {
+      "index": 15,
+      "route": "/org/settings/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "declaredActionCount": 6
+    },
+    {
+      "index": 16,
+      "route": "/org/staff/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "declaredActionCount": 6
+    },
+    {
+      "index": 17,
+      "route": "/org/stores/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "declaredActionCount": 9
+    },
+    {
+      "index": 18,
+      "route": "/org/products/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "declaredActionCount": 24
+    },
+    {
+      "index": 19,
+      "route": "/org/campaigns/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "declaredActionCount": 26
+    },
+    {
+      "index": 20,
+      "route": "/org/orders/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "declaredActionCount": 7
+    },
+    {
+      "index": 21,
+      "route": "/org/orders/view/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "declaredActionCount": 2
+    },
+    {
+      "index": 22,
+      "route": "/org/payments/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "declaredActionCount": 14
+    },
+    {
+      "index": 23,
+      "route": "/org/production/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "declaredActionCount": 2
+    },
+    {
+      "index": 24,
+      "route": "/org/pickups/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "declaredActionCount": 9
+    },
+    {
+      "index": 25,
+      "route": "/org/audit/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "declaredActionCount": 8
+    },
+    {
+      "index": 26,
+      "route": "/platform/summary/",
+      "roles": [
+        "platformAdmin"
+      ],
+      "declaredActionCount": 0
+    },
+    {
+      "index": 27,
+      "route": "/platform/organizations/",
+      "roles": [
+        "platformAdmin"
+      ],
+      "declaredActionCount": 2
+    },
+    {
+      "index": 28,
+      "route": "/platform/users/",
+      "roles": [
+        "platformAdmin"
+      ],
+      "declaredActionCount": 0
+    }
+  ],
+  "actions": [
+    {
+      "id": "FE-UX-01-01",
+      "routeIndex": 1,
+      "route": "/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "action": "hero jump to open stores",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-01-02",
+      "routeIndex": 1,
+      "route": "/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "action": "track orders",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-01-03",
+      "routeIndex": 1,
+      "route": "/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "action": "discovery jump to all stores",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-01-04",
+      "routeIndex": 1,
+      "route": "/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "action": "discovery store links",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-01-05",
+      "routeIndex": 1,
+      "route": "/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "action": "catalog store links",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-01-06",
+      "routeIndex": 1,
+      "route": "/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "action": "retry on load error",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-02-01",
+      "routeIndex": 2,
+      "route": "/login/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "action": "email",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-02-02",
+      "routeIndex": 2,
+      "route": "/login/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "action": "password",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-02-03",
+      "routeIndex": 2,
+      "route": "/login/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "action": "show/hide password",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-02-04",
+      "routeIndex": 2,
+      "route": "/login/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "action": "submit",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-02-05",
+      "routeIndex": 2,
+      "route": "/login/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "action": "register",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-02-06",
+      "routeIndex": 2,
+      "route": "/login/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "action": "back/return",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-02-07",
+      "routeIndex": 2,
+      "route": "/login/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "action": "authenticated My Orders",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-02-08",
+      "routeIndex": 2,
+      "route": "/login/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "action": "authenticated Notifications",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-02-09",
+      "routeIndex": 2,
+      "route": "/login/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "action": "conditional Organization area",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-02-10",
+      "routeIndex": 2,
+      "route": "/login/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "action": "authenticated back home",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-03-01",
+      "routeIndex": 3,
+      "route": "/register/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "action": "display name",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-03-02",
+      "routeIndex": 3,
+      "route": "/register/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "action": "email",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-03-03",
+      "routeIndex": 3,
+      "route": "/register/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "action": "password",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-03-04",
+      "routeIndex": 3,
+      "route": "/register/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "action": "show/hide password",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-03-05",
+      "routeIndex": 3,
+      "route": "/register/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "action": "submit",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-03-06",
+      "routeIndex": 3,
+      "route": "/register/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "action": "login",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-03-07",
+      "routeIndex": 3,
+      "route": "/register/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "action": "back/return",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-03-08",
+      "routeIndex": 3,
+      "route": "/register/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "action": "authenticated My Orders",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-03-09",
+      "routeIndex": 3,
+      "route": "/register/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "action": "authenticated Notifications",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-03-10",
+      "routeIndex": 3,
+      "route": "/register/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "action": "conditional Organization area",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-03-11",
+      "routeIndex": 3,
+      "route": "/register/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "action": "authenticated back home",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-04-01",
+      "routeIndex": 4,
+      "route": "/stores/view/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "action": "back to all stores",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-04-02",
+      "routeIndex": 4,
+      "route": "/stores/view/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "action": "campaign-card navigation",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-04-03",
+      "routeIndex": 4,
+      "route": "/stores/view/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "action": "product-card navigation",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-04-04",
+      "routeIndex": 4,
+      "route": "/stores/view/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "action": "invalid/not-found/error recovery link",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-05-01",
+      "routeIndex": 5,
+      "route": "/products/view/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "action": "back to store",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-05-02",
+      "routeIndex": 5,
+      "route": "/products/view/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "action": "variant select",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-05-03",
+      "routeIndex": 5,
+      "route": "/products/view/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "action": "campaign select",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-05-04",
+      "routeIndex": 5,
+      "route": "/products/view/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "action": "quantity",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-05-05",
+      "routeIndex": 5,
+      "route": "/products/view/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "action": "campaign detail",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-05-06",
+      "routeIndex": 5,
+      "route": "/products/view/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "action": "authenticated order CTA",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-05-07",
+      "routeIndex": 5,
+      "route": "/products/view/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "action": "anonymous login-to-order CTA",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-06-01",
+      "routeIndex": 6,
+      "route": "/campaigns/view/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "action": "back to store",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-06-02",
+      "routeIndex": 6,
+      "route": "/campaigns/view/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "action": "product-card navigation",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-06-03",
+      "routeIndex": 6,
+      "route": "/campaigns/view/",
+      "roles": [
+        "guest",
+        "customer"
+      ],
+      "action": "invalid/not-found/error recovery link",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-07-01",
+      "routeIndex": 7,
+      "route": "/orders/new/",
+      "roles": [
+        "customer"
+      ],
+      "action": "back to product",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-07-02",
+      "routeIndex": 7,
+      "route": "/orders/new/",
+      "roles": [
+        "customer"
+      ],
+      "action": "quantity",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-07-03",
+      "routeIndex": 7,
+      "route": "/orders/new/",
+      "roles": [
+        "customer"
+      ],
+      "action": "create order",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-07-04",
+      "routeIndex": 7,
+      "route": "/orders/new/",
+      "roles": [
+        "customer"
+      ],
+      "action": "retry load",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-07-05",
+      "routeIndex": 7,
+      "route": "/orders/new/",
+      "roles": [
+        "customer"
+      ],
+      "action": "error back to storefront",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-07-06",
+      "routeIndex": 7,
+      "route": "/orders/new/",
+      "roles": [
+        "customer"
+      ],
+      "action": "success payment",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-07-07",
+      "routeIndex": 7,
+      "route": "/orders/new/",
+      "roles": [
+        "customer"
+      ],
+      "action": "success order detail",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-07-08",
+      "routeIndex": 7,
+      "route": "/orders/new/",
+      "roles": [
+        "customer"
+      ],
+      "action": "success product return",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-08-01",
+      "routeIndex": 8,
+      "route": "/my/orders/",
+      "roles": [
+        "customer"
+      ],
+      "action": "choose more products",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-08-02",
+      "routeIndex": 8,
+      "route": "/my/orders/",
+      "roles": [
+        "customer"
+      ],
+      "action": "retry",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-08-03",
+      "routeIndex": 8,
+      "route": "/my/orders/",
+      "roles": [
+        "customer"
+      ],
+      "action": "per-order contextual detail/continue",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-08-04",
+      "routeIndex": 8,
+      "route": "/my/orders/",
+      "roles": [
+        "customer"
+      ],
+      "action": "load more",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "empty",
+        "no-match",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-09-01",
+      "routeIndex": 9,
+      "route": "/my/order/",
+      "roles": [
+        "customer"
+      ],
+      "action": "back to My Orders",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-09-02",
+      "routeIndex": 9,
+      "route": "/my/order/",
+      "roles": [
+        "customer"
+      ],
+      "action": "retry",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-09-03",
+      "routeIndex": 9,
+      "route": "/my/order/",
+      "roles": [
+        "customer"
+      ],
+      "action": "payment link",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-09-04",
+      "routeIndex": 9,
+      "route": "/my/order/",
+      "roles": [
+        "customer"
+      ],
+      "action": "pickup link",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-09-05",
+      "routeIndex": 9,
+      "route": "/my/order/",
+      "roles": [
+        "customer"
+      ],
+      "action": "cancel-order dialog trigger",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "dialog-open",
+        "dialog-cancel",
+        "dialog-pending",
+        "dialog-server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-09-06",
+      "routeIndex": 9,
+      "route": "/my/order/",
+      "roles": [
+        "customer"
+      ],
+      "action": "cancel-order confirmation",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "dialog-open",
+        "dialog-cancel",
+        "dialog-pending",
+        "dialog-server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-10-01",
+      "routeIndex": 10,
+      "route": "/my/payment/",
+      "roles": [
+        "customer"
+      ],
+      "action": "back to order",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-10-02",
+      "routeIndex": 10,
+      "route": "/my/payment/",
+      "roles": [
+        "customer"
+      ],
+      "action": "retry/error recovery",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-10-03",
+      "routeIndex": 10,
+      "route": "/my/payment/",
+      "roles": [
+        "customer"
+      ],
+      "action": "payment-slip file input",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-10-04",
+      "routeIndex": 10,
+      "route": "/my/payment/",
+      "roles": [
+        "customer"
+      ],
+      "action": "submit slip",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-10-05",
+      "routeIndex": 10,
+      "route": "/my/payment/",
+      "roles": [
+        "customer"
+      ],
+      "action": "rejected-state resubmit action",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "dialog-open",
+        "dialog-cancel",
+        "dialog-pending",
+        "dialog-server-error",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-11-01",
+      "routeIndex": 11,
+      "route": "/my/pickup/",
+      "roles": [
+        "customer"
+      ],
+      "action": "back to order",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-11-02",
+      "routeIndex": 11,
+      "route": "/my/pickup/",
+      "roles": [
+        "customer"
+      ],
+      "action": "check latest status",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-11-03",
+      "routeIndex": 11,
+      "route": "/my/pickup/",
+      "roles": [
+        "customer"
+      ],
+      "action": "retry",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-11-04",
+      "routeIndex": 11,
+      "route": "/my/pickup/",
+      "roles": [
+        "customer"
+      ],
+      "action": "error/back recovery",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-12-01",
+      "routeIndex": 12,
+      "route": "/notifications/",
+      "roles": [
+        "customer"
+      ],
+      "action": "refresh",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-12-02",
+      "routeIndex": 12,
+      "route": "/notifications/",
+      "roles": [
+        "customer"
+      ],
+      "action": "All filter",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "empty",
+        "no-match",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-12-03",
+      "routeIndex": 12,
+      "route": "/notifications/",
+      "roles": [
+        "customer"
+      ],
+      "action": "Unread filter",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "empty",
+        "no-match",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-12-04",
+      "routeIndex": 12,
+      "route": "/notifications/",
+      "roles": [
+        "customer"
+      ],
+      "action": "Read filter",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "empty",
+        "no-match",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-12-05",
+      "routeIndex": 12,
+      "route": "/notifications/",
+      "roles": [
+        "customer"
+      ],
+      "action": "retry",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-12-06",
+      "routeIndex": 12,
+      "route": "/notifications/",
+      "roles": [
+        "customer"
+      ],
+      "action": "mark-read per item",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-12-07",
+      "routeIndex": 12,
+      "route": "/notifications/",
+      "roles": [
+        "customer"
+      ],
+      "action": "load more",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "empty",
+        "no-match",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-13-01",
+      "routeIndex": 13,
+      "route": "/org/select/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "action": "retry",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-13-02",
+      "routeIndex": 13,
+      "route": "/org/select/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "action": "select Organization",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-13-03",
+      "routeIndex": 13,
+      "route": "/org/select/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "action": "Organization name",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-13-04",
+      "routeIndex": 13,
+      "route": "/org/select/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "action": "description",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-13-05",
+      "routeIndex": 13,
+      "route": "/org/select/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "action": "create Organization",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-14-01",
+      "routeIndex": 14,
+      "route": "/org/dashboard/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "retry",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-14-02",
+      "routeIndex": 14,
+      "route": "/org/dashboard/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "Settings shortcut",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-14-03",
+      "routeIndex": 14,
+      "route": "/org/dashboard/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "Payment queue shortcut",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-14-04",
+      "routeIndex": 14,
+      "route": "/org/dashboard/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "Orders shortcut",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-14-05",
+      "routeIndex": 14,
+      "route": "/org/dashboard/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "Stores shortcut",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-14-06",
+      "routeIndex": 14,
+      "route": "/org/dashboard/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "Products shortcut",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-14-07",
+      "routeIndex": 14,
+      "route": "/org/dashboard/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "Campaign ID filter",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "empty",
+        "no-match",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-14-08",
+      "routeIndex": 14,
+      "route": "/org/dashboard/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "Store ID filter",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "empty",
+        "no-match",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-14-09",
+      "routeIndex": 14,
+      "route": "/org/dashboard/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "apply filter",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "empty",
+        "no-match",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-14-10",
+      "routeIndex": 14,
+      "route": "/org/dashboard/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "clear filter",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "empty",
+        "no-match",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-14-11",
+      "routeIndex": 14,
+      "route": "/org/dashboard/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "Campaigns shortcut",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-14-12",
+      "routeIndex": 14,
+      "route": "/org/dashboard/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "Orders shortcut from summary",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-15-01",
+      "routeIndex": 15,
+      "route": "/org/settings/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "retry",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-15-02",
+      "routeIndex": 15,
+      "route": "/org/settings/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "back/select Organization",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-15-03",
+      "routeIndex": 15,
+      "route": "/org/settings/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "name",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-15-04",
+      "routeIndex": 15,
+      "route": "/org/settings/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "description",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-15-05",
+      "routeIndex": 15,
+      "route": "/org/settings/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "save",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-15-06",
+      "routeIndex": 15,
+      "route": "/org/settings/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "switch Organization",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-16-01",
+      "routeIndex": 16,
+      "route": "/org/staff/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "member role select",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-16-02",
+      "routeIndex": 16,
+      "route": "/org/staff/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "role-change dialog trigger/confirm",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "dialog-open",
+        "dialog-cancel",
+        "dialog-pending",
+        "dialog-server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-16-03",
+      "routeIndex": 16,
+      "route": "/org/staff/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "remove-member dialog trigger/confirm",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "dialog-open",
+        "dialog-cancel",
+        "dialog-pending",
+        "dialog-server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-16-04",
+      "routeIndex": 16,
+      "route": "/org/staff/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "add-member email",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-16-05",
+      "routeIndex": 16,
+      "route": "/org/staff/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "add-member initial role",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-16-06",
+      "routeIndex": 16,
+      "route": "/org/staff/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "submit add",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-17-01",
+      "routeIndex": 17,
+      "route": "/org/stores/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "edit store",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-17-02",
+      "routeIndex": 17,
+      "route": "/org/stores/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "activate/deactivate dialog",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "dialog-open",
+        "dialog-cancel",
+        "dialog-pending",
+        "dialog-server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-17-03",
+      "routeIndex": 17,
+      "route": "/org/stores/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "create name",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-17-04",
+      "routeIndex": 17,
+      "route": "/org/stores/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "create description",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-17-05",
+      "routeIndex": 17,
+      "route": "/org/stores/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "create",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-17-06",
+      "routeIndex": 17,
+      "route": "/org/stores/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "close editor",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-17-07",
+      "routeIndex": 17,
+      "route": "/org/stores/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "edit name",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-17-08",
+      "routeIndex": 17,
+      "route": "/org/stores/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "edit description",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-17-09",
+      "routeIndex": 17,
+      "route": "/org/stores/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "save",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-18-01",
+      "routeIndex": 18,
+      "route": "/org/products/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "store filter",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "empty",
+        "no-match",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-18-02",
+      "routeIndex": 18,
+      "route": "/org/products/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "clear filter",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "empty",
+        "no-match",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-18-03",
+      "routeIndex": 18,
+      "route": "/org/products/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "edit Product",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-18-04",
+      "routeIndex": 18,
+      "route": "/org/products/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "deactivate Product dialog",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "dialog-open",
+        "dialog-cancel",
+        "dialog-pending",
+        "dialog-server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-18-05",
+      "routeIndex": 18,
+      "route": "/org/products/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "load more",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "empty",
+        "no-match",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-18-06",
+      "routeIndex": 18,
+      "route": "/org/products/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "create Store select",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-18-07",
+      "routeIndex": 18,
+      "route": "/org/products/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "create Product name",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-18-08",
+      "routeIndex": 18,
+      "route": "/org/products/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "create Product description",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-18-09",
+      "routeIndex": 18,
+      "route": "/org/products/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "create Product submit",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-18-10",
+      "routeIndex": 18,
+      "route": "/org/products/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "close editor",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-18-11",
+      "routeIndex": 18,
+      "route": "/org/products/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "edit Product name",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-18-12",
+      "routeIndex": 18,
+      "route": "/org/products/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "edit Product description",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-18-13",
+      "routeIndex": 18,
+      "route": "/org/products/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "save Product",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-18-14",
+      "routeIndex": 18,
+      "route": "/org/products/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "image file",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-18-15",
+      "routeIndex": 18,
+      "route": "/org/products/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "image upload",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-18-16",
+      "routeIndex": 18,
+      "route": "/org/products/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "Variant edit",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-18-17",
+      "routeIndex": 18,
+      "route": "/org/products/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "deactivate Variant dialog",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "dialog-open",
+        "dialog-cancel",
+        "dialog-pending",
+        "dialog-server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-18-18",
+      "routeIndex": 18,
+      "route": "/org/products/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "Variant edit name",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-18-19",
+      "routeIndex": 18,
+      "route": "/org/products/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "Variant edit price",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-18-20",
+      "routeIndex": 18,
+      "route": "/org/products/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "Variant save",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-18-21",
+      "routeIndex": 18,
+      "route": "/org/products/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "Variant cancel",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "dialog-open",
+        "dialog-cancel",
+        "dialog-pending",
+        "dialog-server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-18-22",
+      "routeIndex": 18,
+      "route": "/org/products/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "new Variant name",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-18-23",
+      "routeIndex": 18,
+      "route": "/org/products/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "new Variant price",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-18-24",
+      "routeIndex": 18,
+      "route": "/org/products/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "add Variant",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-19-01",
+      "routeIndex": 19,
+      "route": "/org/campaigns/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "Store filter",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "empty",
+        "no-match",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-19-02",
+      "routeIndex": 19,
+      "route": "/org/campaigns/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "Status filter",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "empty",
+        "no-match",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-19-03",
+      "routeIndex": 19,
+      "route": "/org/campaigns/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "clear",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-19-04",
+      "routeIndex": 19,
+      "route": "/org/campaigns/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "view detail",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-19-05",
+      "routeIndex": 19,
+      "route": "/org/campaigns/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "load more",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "empty",
+        "no-match",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-19-06",
+      "routeIndex": 19,
+      "route": "/org/campaigns/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "create Campaign Store",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-19-07",
+      "routeIndex": 19,
+      "route": "/org/campaigns/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "create Campaign Name",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-19-08",
+      "routeIndex": 19,
+      "route": "/org/campaigns/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "create Campaign Open date",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-19-09",
+      "routeIndex": 19,
+      "route": "/org/campaigns/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "create Campaign Close date",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-19-10",
+      "routeIndex": 19,
+      "route": "/org/campaigns/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "create Campaign Payment deadline",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-19-11",
+      "routeIndex": 19,
+      "route": "/org/campaigns/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "create Campaign Pickup dates",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-19-12",
+      "routeIndex": 19,
+      "route": "/org/campaigns/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "create Campaign submit",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-19-13",
+      "routeIndex": 19,
+      "route": "/org/campaigns/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "close detail",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-19-14",
+      "routeIndex": 19,
+      "route": "/org/campaigns/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "draft edit Store",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-19-15",
+      "routeIndex": 19,
+      "route": "/org/campaigns/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "draft edit Name",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-19-16",
+      "routeIndex": 19,
+      "route": "/org/campaigns/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "draft edit Open date",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-19-17",
+      "routeIndex": 19,
+      "route": "/org/campaigns/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "draft edit Close date",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-19-18",
+      "routeIndex": 19,
+      "route": "/org/campaigns/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "draft edit Payment deadline",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-19-19",
+      "routeIndex": 19,
+      "route": "/org/campaigns/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "draft edit Pickup dates",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-19-20",
+      "routeIndex": 19,
+      "route": "/org/campaigns/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "save draft Campaign",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-19-21",
+      "routeIndex": 19,
+      "route": "/org/campaigns/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "confirm DRAFT to OPEN",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "dialog-open",
+        "dialog-cancel",
+        "dialog-pending",
+        "dialog-server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-19-22",
+      "routeIndex": 19,
+      "route": "/org/campaigns/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "confirm OPEN to CLOSED",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "dialog-open",
+        "dialog-cancel",
+        "dialog-pending",
+        "dialog-server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-19-23",
+      "routeIndex": 19,
+      "route": "/org/campaigns/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "confirm CLOSED to PRODUCING",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "dialog-open",
+        "dialog-cancel",
+        "dialog-pending",
+        "dialog-server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-19-24",
+      "routeIndex": 19,
+      "route": "/org/campaigns/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "confirm PRODUCING to READY_FOR_PICKUP",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "dialog-open",
+        "dialog-cancel",
+        "dialog-pending",
+        "dialog-server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-19-25",
+      "routeIndex": 19,
+      "route": "/org/campaigns/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "confirm READY_FOR_PICKUP to COMPLETED",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "dialog-open",
+        "dialog-cancel",
+        "dialog-pending",
+        "dialog-server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-19-26",
+      "routeIndex": 19,
+      "route": "/org/campaigns/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "confirm cancel when eligible",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "dialog-open",
+        "dialog-cancel",
+        "dialog-pending",
+        "dialog-server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-20-01",
+      "routeIndex": 20,
+      "route": "/org/orders/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "action": "Campaign ID",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-20-02",
+      "routeIndex": 20,
+      "route": "/org/orders/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "action": "Customer ID",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-20-03",
+      "routeIndex": 20,
+      "route": "/org/orders/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "action": "Order Status",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-20-04",
+      "routeIndex": 20,
+      "route": "/org/orders/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "action": "apply filters",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "empty",
+        "no-match",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-20-05",
+      "routeIndex": 20,
+      "route": "/org/orders/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "action": "clear filters",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "empty",
+        "no-match",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-20-06",
+      "routeIndex": 20,
+      "route": "/org/orders/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "action": "per-order detail",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-20-07",
+      "routeIndex": 20,
+      "route": "/org/orders/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "action": "load more",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "empty",
+        "no-match",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-21-01",
+      "routeIndex": 21,
+      "route": "/org/orders/view/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "action": "back to list",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-21-02",
+      "routeIndex": 21,
+      "route": "/org/orders/view/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "action": "Admin-only cancel-order confirm flow",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "dialog-open",
+        "dialog-cancel",
+        "dialog-pending",
+        "dialog-server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-22-01",
+      "routeIndex": 22,
+      "route": "/org/payments/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "action": "Payment Status filter",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "empty",
+        "no-match",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-22-02",
+      "routeIndex": 22,
+      "route": "/org/payments/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "action": "Campaign ID filter",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "empty",
+        "no-match",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-22-03",
+      "routeIndex": 22,
+      "route": "/org/payments/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "action": "Order ID filter",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "empty",
+        "no-match",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-22-04",
+      "routeIndex": 22,
+      "route": "/org/payments/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "action": "apply filters",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "empty",
+        "no-match",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-22-05",
+      "routeIndex": 22,
+      "route": "/org/payments/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "action": "clear filters",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "empty",
+        "no-match",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-22-06",
+      "routeIndex": 22,
+      "route": "/org/payments/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "action": "select payment",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-22-07",
+      "routeIndex": 22,
+      "route": "/org/payments/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "action": "load more",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "empty",
+        "no-match",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-22-08",
+      "routeIndex": 22,
+      "route": "/org/payments/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "action": "request slip",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-22-09",
+      "routeIndex": 22,
+      "route": "/org/payments/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "action": "open temporary slip link",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-22-10",
+      "routeIndex": 22,
+      "route": "/org/payments/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "action": "approve confirm",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "dialog-open",
+        "dialog-cancel",
+        "dialog-pending",
+        "dialog-server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-22-11",
+      "routeIndex": 22,
+      "route": "/org/payments/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "action": "reject dialog trigger",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "dialog-open",
+        "dialog-cancel",
+        "dialog-pending",
+        "dialog-server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-22-12",
+      "routeIndex": 22,
+      "route": "/org/payments/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "action": "reject reason",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "dialog-open",
+        "dialog-cancel",
+        "dialog-pending",
+        "dialog-server-error",
+        "validation-error",
+        "pending",
+        "success",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-22-13",
+      "routeIndex": 22,
+      "route": "/org/payments/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "action": "reject back",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "error",
+        "dialog-open",
+        "dialog-cancel",
+        "dialog-pending",
+        "dialog-server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-22-14",
+      "routeIndex": 22,
+      "route": "/org/payments/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "action": "reject confirm",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "dialog-open",
+        "dialog-cancel",
+        "dialog-pending",
+        "dialog-server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-23-01",
+      "routeIndex": 23,
+      "route": "/org/production/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "Campaign ID",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-23-02",
+      "routeIndex": 23,
+      "route": "/org/production/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "load summary",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-24-01",
+      "routeIndex": 24,
+      "route": "/org/pickups/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "action": "Pickup token filter",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "empty",
+        "no-match",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-24-02",
+      "routeIndex": 24,
+      "route": "/org/pickups/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "action": "Order ID filter",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "empty",
+        "no-match",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-24-03",
+      "routeIndex": 24,
+      "route": "/org/pickups/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "action": "Campaign ID filter",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "empty",
+        "no-match",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-24-04",
+      "routeIndex": 24,
+      "route": "/org/pickups/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "action": "Pickup Status filter",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "empty",
+        "no-match",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-24-05",
+      "routeIndex": 24,
+      "route": "/org/pickups/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "action": "apply filters",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "empty",
+        "no-match",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-24-06",
+      "routeIndex": 24,
+      "route": "/org/pickups/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "action": "clear filters",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "empty",
+        "no-match",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-24-07",
+      "routeIndex": 24,
+      "route": "/org/pickups/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "action": "select pickup",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-24-08",
+      "routeIndex": 24,
+      "route": "/org/pickups/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "action": "load more",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "empty",
+        "no-match",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-24-09",
+      "routeIndex": 24,
+      "route": "/org/pickups/",
+      "roles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "action": "READY pickup confirm dialog",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "dialog-open",
+        "dialog-cancel",
+        "dialog-pending",
+        "dialog-server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-25-01",
+      "routeIndex": 25,
+      "route": "/org/audit/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "Actor ID filter",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "empty",
+        "no-match",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-25-02",
+      "routeIndex": 25,
+      "route": "/org/audit/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "Action filter",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "empty",
+        "no-match",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-25-03",
+      "routeIndex": 25,
+      "route": "/org/audit/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "Resource Type filter",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "empty",
+        "no-match",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-25-04",
+      "routeIndex": 25,
+      "route": "/org/audit/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "Resource ID filter",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "empty",
+        "no-match",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-25-05",
+      "routeIndex": 25,
+      "route": "/org/audit/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "search",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "empty",
+        "no-match",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-25-06",
+      "routeIndex": 25,
+      "route": "/org/audit/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "clear",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-25-07",
+      "routeIndex": 25,
+      "route": "/org/audit/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "metadata details expand/collapse",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-25-08",
+      "routeIndex": 25,
+      "route": "/org/audit/",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "load more",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "empty",
+        "no-match",
+        "server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-27-01",
+      "routeIndex": 27,
+      "route": "/platform/organizations/",
+      "roles": [
+        "platformAdmin"
+      ],
+      "action": "approve Organization confirm",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "dialog-open",
+        "dialog-cancel",
+        "dialog-pending",
+        "dialog-server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    },
+    {
+      "id": "FE-UX-27-02",
+      "routeIndex": 27,
+      "route": "/platform/organizations/",
+      "roles": [
+        "platformAdmin"
+      ],
+      "action": "suspend Organization confirm",
+      "risk": "mutation-or-conditional-review",
+      "statesToTest": [
+        "loaded",
+        "dialog-open",
+        "dialog-cancel",
+        "dialog-pending",
+        "dialog-server-error"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Inventory only, not a current PASS"
+    }
+  ],
+  "shellActions": [
+    {
+      "id": "FE-UX-SHELL-GUEST-01",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "guest"
+      ],
+      "action": "brand",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-GUEST-02",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "guest"
+      ],
+      "action": "stores",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-GUEST-03",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "guest"
+      ],
+      "action": "login",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-GUEST-04",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "guest"
+      ],
+      "action": "register",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-CUSTOMER-01",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "customer"
+      ],
+      "action": "brand",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-CUSTOMER-02",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "customer"
+      ],
+      "action": "storefront",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-CUSTOMER-03",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "customer"
+      ],
+      "action": "my orders",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-CUSTOMER-04",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "customer"
+      ],
+      "action": "notifications",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-CUSTOMER-05",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "customer"
+      ],
+      "action": "skip link",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-CUSTOMER-06",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "customer"
+      ],
+      "action": "logout",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-CUSTOMER-07",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "customer"
+      ],
+      "action": "mobile menu open",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-CUSTOMER-08",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "customer"
+      ],
+      "action": "mobile close",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-CUSTOMER-09",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "customer"
+      ],
+      "action": "mobile Escape/focus return",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-STAFF-01",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "staff"
+      ],
+      "action": "brand",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-STAFF-02",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "staff"
+      ],
+      "action": "skip link",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-STAFF-03",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "staff"
+      ],
+      "action": "orders",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-STAFF-04",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "staff"
+      ],
+      "action": "payments",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-STAFF-05",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "staff"
+      ],
+      "action": "pickups",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-STAFF-06",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "staff"
+      ],
+      "action": "organization switch",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-STAFF-07",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "staff"
+      ],
+      "action": "logout",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-STAFF-08",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "staff"
+      ],
+      "action": "mobile menu open",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-STAFF-09",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "staff"
+      ],
+      "action": "mobile close",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-STAFF-10",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "staff"
+      ],
+      "action": "mobile Escape/focus return",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-ORGANIZATIONADMIN-01",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "brand",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-ORGANIZATIONADMIN-02",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "skip link",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-ORGANIZATIONADMIN-03",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "dashboard",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-ORGANIZATIONADMIN-04",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "settings",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-ORGANIZATIONADMIN-05",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "staff",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-ORGANIZATIONADMIN-06",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "stores",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-ORGANIZATIONADMIN-07",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "products",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-ORGANIZATIONADMIN-08",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "campaigns",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-ORGANIZATIONADMIN-09",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "orders",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-ORGANIZATIONADMIN-10",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "payments",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-ORGANIZATIONADMIN-11",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "pickups",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-ORGANIZATIONADMIN-12",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "production",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-ORGANIZATIONADMIN-13",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "audit",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-ORGANIZATIONADMIN-14",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "organization switch",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-ORGANIZATIONADMIN-15",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "logout",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-ORGANIZATIONADMIN-16",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "mobile menu open",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-ORGANIZATIONADMIN-17",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "mobile close",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-ORGANIZATIONADMIN-18",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "organizationAdmin"
+      ],
+      "action": "mobile Escape/focus return",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-PLATFORMADMIN-01",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "platformAdmin"
+      ],
+      "action": "brand",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-PLATFORMADMIN-02",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "platformAdmin"
+      ],
+      "action": "skip link",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-PLATFORMADMIN-03",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "platformAdmin"
+      ],
+      "action": "platform summary",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-PLATFORMADMIN-04",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "platformAdmin"
+      ],
+      "action": "organizations",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-PLATFORMADMIN-05",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "platformAdmin"
+      ],
+      "action": "users",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-PLATFORMADMIN-06",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "platformAdmin"
+      ],
+      "action": "logout",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-PLATFORMADMIN-07",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "platformAdmin"
+      ],
+      "action": "mobile menu open",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-PLATFORMADMIN-08",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "platformAdmin"
+      ],
+      "action": "mobile close",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    },
+    {
+      "id": "FE-UX-SHELL-PLATFORMADMIN-09",
+      "routeIndex": null,
+      "route": "shared-shell",
+      "roles": [
+        "platformAdmin"
+      ],
+      "action": "mobile Escape/focus return",
+      "risk": "read-only-or-local-ui",
+      "statesToTest": [
+        "loaded",
+        "keyboard",
+        "mobile"
+      ],
+      "status": "NOT_TESTED",
+      "testRunId": null,
+      "evidence": [],
+      "notes": "Shell inventory, outside 207 route actions"
+    }
+  ]
+}

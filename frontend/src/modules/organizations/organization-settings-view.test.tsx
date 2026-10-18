@@ -90,9 +90,8 @@ describe("OrganizationSettingsView", () => {
     );
 
     expect(mocks.get).toHaveBeenCalledTimes(2);
-    expect(
-      await screen.findByRole("heading", { name: "ตั้งค่าหน่วยงาน" }),
-    ).toBeInTheDocument();
+    await screen.findByLabelText(/ชื่อหน่วยงาน/);
+    expect(screen.getByRole("heading", { name: "ตั้งค่าหน่วยงาน", level: 1 })).toBeInTheDocument();
   });
 
   it("reports invalid editable data through a focusable error summary", async () => {

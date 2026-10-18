@@ -1126,3 +1126,265 @@
     padding-top: var(--space-2);
   }
 }
+
+/* MotionSites-inspired editorial task surface: keep order/status semantics,
+   put real instructions and actions ahead of decorative gradient blocks. */
+.page {
+  background: var(--canvas);
+}
+.main {
+  gap: clamp(18px, 2.8vw, 30px);
+}
+.header {
+  padding: clamp(20px, 2.8vw, 34px);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-feature);
+  background: var(--surface);
+  box-shadow: none;
+}
+.header::before,
+.header::after {
+  content: none;
+  display: none;
+}
+.title {
+  color: var(--ink);
+  max-width: 22ch;
+  font-size: clamp(1.85rem, 3.4vw, 3rem);
+  line-height: 1.15;
+  letter-spacing: -0.035em;
+}
+.header .description,
+.description {
+  color: var(--ink-secondary);
+  font-size: var(--text-body);
+  line-height: 1.55;
+}
+@media (max-width: 620px) {
+  .header {
+    padding: 20px;
+    gap: 12px;
+  }
+  .title { font-size: clamp(1.7rem, 8vw, 2.25rem); }
+}
+
+.headerAction {
+  background: var(--brand-soft);
+  border: 1px solid var(--line);
+  color: var(--brand-strong);
+}
+.headerAction:hover { background: var(--brand-soft-strong); }
+
+/* Customer order ledger and detail, with no fake artwork or pastel statistics. */
+.overviewPrimary,
+.overviewDescription,
+.overviewLoaded,
+.overviewPrimary[data-has-attention="true"],
+.contextLead {
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-card);
+  box-shadow: none;
+  min-height: 112px;
+}
+.overviewPrimary[data-has-attention="true"] {
+  border-left: 3px solid var(--warning);
+}
+.overviewPrimary::after { content: none; display: none; }
+.detailHero {
+  padding: clamp(20px, 3vw, 32px);
+  border: 1px solid var(--line-soft);
+  background: var(--surface);
+  box-shadow: none;
+  border-radius: var(--radius-feature);
+}
+.detailHero::before, .detailHero::after { content: none; display: none; }
+.detailHero .title { color: var(--ink); }
+.detailHero .orderCode {
+  color: var(--ink-secondary);
+  background: var(--surface-muted);
+  border-color: var(--line);
+}
+.detailAmount {
+  min-height: 0;
+  padding: 16px;
+  background: var(--surface-muted);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  box-shadow: none;
+}
+.detailAmount .summaryLabel,
+.detailAmount .detailUpdated { color: var(--ink-secondary); }
+.detailAmount .totalValue { color: var(--ink); }
+@media (max-width: 620px) {
+  .detailHero { padding: 20px; }
+  .overviewPrimary, .overviewDescription, .overviewLoaded { min-height: 88px; }
+}
+
+/* Do not reduce text contrast when the next journey step is upcoming. */
+.journeyStep[data-state="upcoming"] {
+  opacity: 1;
+  border: 1px solid var(--line-soft);
+}
+.journeyStep[data-state="upcoming"] .journeyStateLabel {
+  color: var(--ink-secondary);
+}
+
+/* Phase 2: customer tasks are grouped and visible before optional history. */
+.customerOrderFilters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+.customerOrderFilter {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--ink-secondary);
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+.customerOrderFilter[data-active="true"] {
+  background: var(--brand);
+  color: var(--brand-on);
+  border-color: var(--brand);
+}
+.customerOrderFilter:focus-visible,
+.filteredEmpty button:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+.customerOrderFilter span {
+  font-size: var(--text-caption);
+  font-variant-numeric: tabular-nums;
+}
+.orderRowActions {
+  min-width: 0;
+  display: grid;
+  gap: var(--space-2);
+  justify-items: stretch;
+}
+.filteredEmpty {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  color: var(--ink-secondary);
+}
+.filteredEmpty button {
+  min-height: 44px;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  background: var(--brand-soft);
+  color: var(--brand-strong);
+  font: inherit;
+  cursor: pointer;
+}
+.orderOverview {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  border-bottom: 1px solid var(--line-soft);
+  padding-bottom: var(--space-3);
+}
+.overviewPrimary,
+.overviewLoaded,
+.overviewDescription,
+.overviewPrimary[data-has-attention="true"] {
+  min-height: 0;
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.overviewPrimary::after { display: none; }
+.overviewDescription { grid-column: 1 / -1; grid-row: 2; padding: 0; }
+.overviewPrimary strong { font-size: var(--text-title-sm); }
+.orderLedger { gap: var(--space-3); }
+.ledgerHeading { grid-template-columns: 1fr; gap: var(--space-1); }
+.ledgerHint { text-align: left; }
+.orderRow { grid-template-columns: minmax(0, 1fr) minmax(120px, 0.24fr) minmax(152px, 0.22fr); gap: var(--space-3); padding: var(--space-4); }
+.orderRowActions .detailLink,
+.orderRowActions .detailLinkPrimary { width: 100%; }
+@media (max-width: 760px) {
+  .orderRow { grid-template-columns: minmax(0, 1fr); }
+  .orderRowActions { grid-column: 1; width: 100%; grid-template-columns: 1fr 1fr; }
+  .orderOverview { grid-template-columns: 1fr auto; }
+  .overviewDescription { min-height: 0; }
+}
+@media (max-width: 420px) {
+  .customerOrderFilters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .customerOrderFilter { justify-content: center; padding-inline: var(--space-2); }
+  .orderRowActions { grid-template-columns: 1fr; }
+}
+
+/* Compact mobile order inbox: first real task must appear without multiple summary screens. */
+@media (max-width: 620px) {
+  .main { gap: var(--space-3); padding-top: var(--space-3); }
+  .header { padding: var(--space-4); gap: var(--space-2); }
+  .headerCopy { gap: var(--space-2); }
+  .title { font-size: clamp(1.7rem, 8vw, 2.1rem); line-height: 1.15; }
+  .headerAction { min-height: 40px; justify-self: start; }
+  .orderOverview { padding-bottom: var(--space-2); }
+  .overviewPrimary, .overviewLoaded { min-height: 0; padding: var(--space-1); }
+  .overviewDescription { display: none; }
+  .orderLedger { gap: var(--space-2); }
+  .customerOrderFilters {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: var(--space-2);
+    overflow-x: auto;
+    padding-block: 3px;
+    scrollbar-width: thin;
+    overscroll-behavior-x: contain;
+  }
+  .customerOrderFilter { flex: 0 0 auto; }
+  .ledgerHeading h2 { font-size: var(--text-title-sm); }
+  .ledgerHint { display: none; }
+  .orderRow { padding: var(--space-3); gap: var(--space-2); }
+  .orderRowActions { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 360px) {
+  .orderRowActions { grid-template-columns: 1fr; }
+}
+
+/* Phase 6 a11y polish: all four customer order status tabs remain visible
+   and focusable instead of being clipped inside a hidden horizontal scroller. */
+@media (max-width: 620px) {
+  .customerOrderFilters {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow: visible;
+    gap: var(--space-2);
+    scrollbar-width: auto;
+  }
+  .customerOrderFilter {
+    flex: initial;
+    min-width: 0;
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+}
+
+
+/* Make pagination errors discoverable when the load-more request fails. */
+.focusableQueueFeedback { scroll-margin-top: 108px; outline: none; }
+.focusableQueueFeedback:focus-visible { outline: 3px solid currentColor; outline-offset: 3px; }
+
+
+/* Keep terminal customer cancellation feedback visible after modal exit. */
+.focusableOrderFeedback { scroll-margin-top: 108px; outline: none; }
+.focusableOrderFeedback:focus-visible { outline: 3px solid currentColor; outline-offset: 3px; }

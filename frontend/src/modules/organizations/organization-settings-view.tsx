@@ -1,7 +1,9 @@
 "use client";
 
+import { PageLoadingRows, PageStateHeading } from "@/components/ui/async-page";
+
 import Link from "next/link";
-import { useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 
 import {
   Badge,
@@ -66,16 +68,48 @@ export function OrganizationSettingsView({
   organizationId: string;
 }) {
   const focusErrorSummary = useErrorSummaryFocus();
+  const [invalidSubmitRevision, setInvalidSubmitRevision] = useState(0);
+  const invalidSummaryRef = useCallback((node: HTMLDivElement | null) => {
+    // Attach focus in the commit that mounts/updates the invalid summary.
+    // This avoids cross-browser races between blur, React rendering and RAF.
+    if (node && invalidSubmitRevision > 0) {
+      node.focus({ preventScroll: false });
+    }
+  }, [invalidSubmitRevision]);
   const [state, setState] = useState<SettingsState>({
     status: "loading",
   });
   const [loadAttempt, setLoadAttempt] = useState(0);
+  const retryFocusRequested = useRef(false);
+
+  useEffect(() => {
+    if (!retryFocusRequested.current || state.status === "loading") return;
+    retryFocusRequested.current = false;
+    const frame = window.requestAnimationFrame(() => {
+      const target = document.querySelector<HTMLElement>("[data-organization-settings-result]");
+      target?.focus();
+      target?.scrollIntoView({ behavior: "instant", block: "start" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [state.status]);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [nameError, setNameError] = useState<string | undefined>();
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    if (!invalidSubmitRevision || !nameError) return;
+    // Deferred blur validation may settle after commit-time ref focus on Firefox.
+    // Restore focus once, after that blur update, only for an invalid submit.
+    const timeout = window.setTimeout(() => {
+      document.getElementById("organization-settings-error-summary")?.focus();
+    }, 100);
+    return () => window.clearTimeout(timeout);
+  }, [invalidSubmitRevision, nameError]);
+
+
 
   useEffect(() => {
     const controller = new AbortController();
@@ -150,9 +184,11 @@ export function OrganizationSettingsView({
     setSaved(false);
 
     if (!validation.valid) {
-      focusErrorSummary(
-        "organization-settings-error-summary",
-      );
+      focusErrorSummary("organization-settings-error-summary");
+      // Firefox may deliver the input blur/render after the shared RAF focus.
+      // A post-event focus ensures the newly mounted summary remains the
+      // keyboard destination, rather than leaving focus on the submit button.
+      setInvalidSubmitRevision(value => value + 1);
       return;
     }
 
@@ -193,7 +229,9 @@ export function OrganizationSettingsView({
   if (state.status !== "success") {
     return (
       <div className={styles.page}>
-        <main className={styles.stateWrap}>
+        <main className={styles.stateWrap} tabIndex={-1} data-organization-settings-result>
+          <PageStateHeading title="ตั้งค่าหน่วยงาน" description="ตรวจสอบและจัดการข้อมูลหน่วยงาน" />
+          {state.status === "loading" ? <PageLoadingRows /> : null}
           {state.status === "loading" ? (
             <LoadingState
               title="กำลังโหลดข้อมูลหน่วยงาน"
@@ -217,6 +255,7 @@ export function OrganizationSettingsView({
                 <>
                   <Button
                     onClick={() => {
+                      retryFocusRequested.current = true;
                       setState({ status: "loading" });
                       setLoadAttempt((attempt) => attempt + 1);
                     }}
@@ -243,7 +282,7 @@ export function OrganizationSettingsView({
       <main className={styles.main}>
         <header className={styles.settingsHeader} data-organization-status={organization.status}>
           <div className={styles.headerCopy}>
-            <h1 className={styles.title}>ตั้งค่าหน่วยงาน</h1>
+            <h1 className={styles.title} tabIndex={-1} data-organization-settings-result>ตั้งค่าหน่วยงาน</h1>
             <p className={styles.description}>
               แก้ไขข้อมูลที่ผู้ใช้เห็นได้ โดยไม่กระทบสถานะอนุมัติ สิทธิ์สมาชิก หรือขอบเขตอำนาจของ Platform Admin
             </p>
@@ -297,6 +336,7 @@ export function OrganizationSettingsView({
 
             <form className={styles.settingsForm} onSubmit={handleSubmit} noValidate>
               <ErrorSummary
+                ref={invalidSummaryRef}
                 id="organization-settings-error-summary"
                 items={
                   nameError
@@ -315,22 +355,13 @@ export function OrganizationSettingsView({
                 value={name}
                 onChange={(event) => {
                   setName(event.target.value);
+                  setInvalidSubmitRevision(0);
                   setNameError(undefined);
                   setSaved(false);
                   setSaveError(null);
                 }}
                 error={nameError}
                 announceError={false}
-                onBlur={() => {
-                  window.setTimeout(() => {
-                    const validation =
-                      validateOrganizationForm({
-                        name,
-                        description,
-                      });
-                    setNameError(validation.errors.name);
-                  }, 0);
-                }}
                 required
                 disabled={saving}
               />
@@ -359,6 +390,12 @@ export function OrganizationSettingsView({
                 </Notice>
               ) : null}
 
+              {isDirty ? (
+                <p className={styles.unsavedHint} role="status">
+                  มีข้อมูลที่แก้ไขแต่ยังไม่ได้บันทึก การคืนค่าจะยกเลิกเฉพาะข้อมูลในฟอร์มนี้
+                </p>
+              ) : null}
+
               <div className={styles.settingsActions}>
                 <Button
                   type="submit"
@@ -369,6 +406,22 @@ export function OrganizationSettingsView({
                 >
                   บันทึกการเปลี่ยนแปลง
                 </Button>
+                {isDirty ? (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    disabled={saving}
+                    onClick={() => {
+                      setName(organization.name);
+                      setDescription(organization.description);
+                      setNameError(undefined);
+                      setSaveError(null);
+                      setSaved(false);
+                    }}
+                  >
+                    คืนค่าที่ยังไม่บันทึก
+                  </Button>
+                ) : null}
                 <Link href="/org/select/" className={styles.secondaryLink}>
                   เปลี่ยนหน่วยงาน
                 </Link>

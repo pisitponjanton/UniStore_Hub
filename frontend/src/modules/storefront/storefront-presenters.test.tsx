@@ -81,7 +81,7 @@ describe("storefront presenters", () => {
     expect(screen.getByText("ยังไม่มีรูปสินค้า")).toBeInTheDocument();
     expect(screen.queryByRole("img")).not.toBeInTheDocument();
     expect(
-      document.querySelector('[data-illustration="product"]'),
+      document.querySelector('[data-fallback-variant="product"]'),
     ).toHaveAttribute("aria-hidden", "true");
   });
 

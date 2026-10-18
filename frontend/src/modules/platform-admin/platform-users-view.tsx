@@ -1,13 +1,15 @@
 "use client";
 
+import { AsyncPageFallback } from "@/components/ui/async-page";
+import { LoadedDirectoryControls } from "@/modules/organization-directory/loaded-directory-controls";
+import { searchLoadedItems, visibleLoadedItems } from "@/modules/organization-directory/loaded-directory-helpers";
+import { PlatformDirectoryFilters } from "./platform-directory-filters";
+
 import { useEffect, useState } from "react";
 
 import {
   Badge,
   EmptyState,
-  ErrorState,
-  ForbiddenState,
-  LoadingState,
   Notice,
   Table,
   TableBody,
@@ -15,7 +17,6 @@ import {
   TableHead,
   TableHeaderCell,
   TableRow,
-  UnauthorizedState,
 } from "@/components";
 import {
   authSession,
@@ -40,6 +41,9 @@ type UsersState =
   | { status: "success"; users: UserDTO[] };
 
 export function PlatformUsersView() {
+  const [directoryQuery, setDirectoryQuery] = useState("");
+  const [directoryLimit, setDirectoryLimit] = useState(24);
+  const [viewFilter, setViewFilter] = useState<"all" | "ACTIVE" | "DISABLED" | "admin">("all");
   const [state, setState] = useState<UsersState>({
     status: "loading",
   });
@@ -94,45 +98,20 @@ export function PlatformUsersView() {
     return () => controller.abort();
   }, []);
 
-  if (state.status === "loading") {
-    return (
-      <div className={styles.page}>
-        <main className={styles.main}>
-          <header className={styles.header}>
-            <div className={styles.headerCopy}>
-              <h1 className={styles.title}>ผู้ใช้ระดับ Platform</h1>
-              <p className={styles.description}>
-                ตรวจสอบสถานะผู้ใช้และ Platform role ที่บันทึกอยู่ในระบบ
-              </p>
-            </div>
-          </header>
-          <section aria-label="กำลังโหลดรายการผู้ใช้">
-            <LoadingState
-              title="กำลังโหลดผู้ใช้ทั้งหมด"
-              description="กำลังดึงสถานะและ Platform role ล่าสุด"
-            />
-          </section>
-        </main>
-      </div>
-    );
-  }
 
   if (state.status !== "success") {
     return (
       <div className={styles.page}>
         <main className={styles.stateWrap}>
-          {state.status === "unauthorized" ? (
-            <UnauthorizedState />
-          ) : null}
-          {state.status === "forbidden" ? (
-            <ForbiddenState />
-          ) : null}
-          {state.status === "error" ? (
-            <ErrorState
-              title="ไม่สามารถโหลดผู้ใช้ได้"
-              description="กรุณาลองโหลดหน้านี้ใหม่อีกครั้ง"
-            />
-          ) : null}
+          <AsyncPageFallback
+            status={state.status}
+            pageTitle="ผู้ใช้ระดับ Platform"
+            pageDescription="ตรวจสอบผู้ใช้และบทบาทระดับ Platform"
+            loadingTitle="กำลังโหลดผู้ใช้ทั้งหมด"
+            errorTitle="ไม่สามารถโหลดผู้ใช้ได้"
+            backHref="/platform/summary/"
+            backLabel="กลับไปพื้นที่ทำงาน"
+          />
         </main>
       </div>
     );
@@ -147,6 +126,15 @@ export function PlatformUsersView() {
   const disabledCount = state.users.filter(
     (user) => user.status === "DISABLED",
   ).length;
+
+  const matchingUsers = searchLoadedItems(
+    state.users.filter(user =>
+      viewFilter === "all" || (viewFilter === "admin" ? user.platformRole === "PLATFORM_ADMIN" : user.status === viewFilter)
+    ),
+    directoryQuery,
+    user => [user.userId, user.name, user.email, user.status, user.platformRole],
+  );
+  const displayedUsers = visibleLoadedItems(matchingUsers, directoryLimit);
 
   return (
     <div className={styles.page}>
@@ -177,40 +165,7 @@ export function PlatformUsersView() {
           </div>
         </header>
 
-        <section
-          className={styles.priorityStrip}
-          aria-label="สรุปผู้ใช้ระดับ Platform"
-        >
-          <article className={styles.priorityItem}>
-            <span className={styles.metricLabel}>Platform Admin</span>
-            <strong className={styles.priorityValue} data-numeric>
-              {platformAdminCount.toLocaleString("th-TH")}
-            </strong>
-            <span className={styles.metricHint}>
-              ผู้ใช้ที่มี platformRole = PLATFORM_ADMIN
-            </span>
-          </article>
 
-          <article className={styles.priorityItem}>
-            <span className={styles.metricLabel}>ใช้งานอยู่</span>
-            <strong className={styles.priorityValue} data-numeric>
-              {activeCount.toLocaleString("th-TH")}
-            </strong>
-            <span className={styles.metricHint}>
-              ผู้ใช้ที่มีสถานะ ACTIVE ในรายการที่โหลด
-            </span>
-          </article>
-
-          <article className={styles.priorityItem}>
-            <span className={styles.metricLabel}>ปิดใช้งาน</span>
-            <strong className={styles.priorityValue} data-numeric>
-              {disabledCount.toLocaleString("th-TH")}
-            </strong>
-            <span className={styles.metricHint}>
-              ผู้ใช้ที่มีสถานะ DISABLED ในรายการที่โหลด
-            </span>
-          </article>
-        </section>
 
         <Notice tone="neutral" title="รายการนี้เป็น read-only">
           API ปัจจุบันเปิดให้ Platform Admin ดูรายการผู้ใช้เท่านั้น
@@ -235,6 +190,29 @@ export function PlatformUsersView() {
             </div>
           </div>
 
+          <PlatformDirectoryFilters
+            label="กรองผู้ใช้ตามสถานะและบทบาทที่โหลดแล้ว"
+            options={[
+              { value: "all", label: "ทั้งหมด", count: state.users.length },
+              { value: "ACTIVE", label: "ใช้งานอยู่", count: activeCount },
+              { value: "DISABLED", label: "ปิดใช้งาน", count: disabledCount },
+              { value: "admin", label: "Platform Admin", count: platformAdminCount },
+            ]}
+            value={viewFilter}
+            onChange={value => { setViewFilter(value); setDirectoryLimit(24); }}
+          />
+          <LoadedDirectoryControls
+            id="platform-users-search"
+            label="ค้นหาผู้ใช้ที่โหลดแล้ว"
+            query={directoryQuery}
+            onQueryChange={value => { setDirectoryQuery(value); setDirectoryLimit(24); }}
+            loadedCount={state.users.length}
+            matchingCount={matchingUsers.length}
+            visibleCount={displayedUsers.length}
+            onShowMore={() => setDirectoryLimit(limit => limit + 24)}
+            placeholder="ชื่อผู้ใช้ อีเมล User ID หรือ Platform role"
+          />
+
           {state.users.length === 0 ? (
             <EmptyState
               title="ยังไม่มีผู้ใช้"
@@ -256,7 +234,7 @@ export function PlatformUsersView() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {state.users.map((user) => (
+                {displayedUsers.map((user) => (
                   <TableRow key={user.userId}>
                     <TableCell>
                       <div className={styles.userIdentity}>
@@ -299,6 +277,41 @@ export function PlatformUsersView() {
             </Table>
           )}
         </section>
+        <section
+          className={styles.priorityStrip}
+          aria-label="สรุปผู้ใช้ระดับ Platform"
+        >
+          <article className={styles.priorityItem}>
+            <span className={styles.metricLabel}>Platform Admin</span>
+            <strong className={styles.priorityValue} data-numeric>
+              {platformAdminCount.toLocaleString("th-TH")}
+            </strong>
+            <span className={styles.metricHint}>
+              ผู้ใช้ที่มี platformRole = PLATFORM_ADMIN
+            </span>
+          </article>
+
+          <article className={styles.priorityItem}>
+            <span className={styles.metricLabel}>ใช้งานอยู่</span>
+            <strong className={styles.priorityValue} data-numeric>
+              {activeCount.toLocaleString("th-TH")}
+            </strong>
+            <span className={styles.metricHint}>
+              ผู้ใช้ที่มีสถานะ ACTIVE ในรายการที่โหลด
+            </span>
+          </article>
+
+          <article className={styles.priorityItem}>
+            <span className={styles.metricLabel}>ปิดใช้งาน</span>
+            <strong className={styles.priorityValue} data-numeric>
+              {disabledCount.toLocaleString("th-TH")}
+            </strong>
+            <span className={styles.metricHint}>
+              ผู้ใช้ที่มีสถานะ DISABLED ในรายการที่โหลด
+            </span>
+          </article>
+        </section>
+
       </main>
     </div>
   );

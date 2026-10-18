@@ -1,20 +1,20 @@
 :root {
   color-scheme: light;
 
-  /* Playful Campus Commerce v3 — canonical semantic surfaces */
-  --canvas: #f7f5ff;
+  /* Editorial commerce — restrained semantic surfaces and status tokens */
+  --canvas: #f6f6f4;
   --surface: #ffffff;
-  --surface-raised: #fcfbff;
-  --surface-muted: #f1eef8;
-  --surface-inset: #ece8f5;
-  --surface-strong: #e4deee;
-  --surface-hover: #f4f0fb;
-  --surface-selected: #eee7ff;
+  --surface-raised: #ffffff;
+  --surface-muted: #f0f0ee;
+  --surface-inset: #f8f8f7;
+  --surface-strong: #e5e5e3;
+  --surface-hover: #f3f2f0;
+  --surface-selected: #f0ecfa;
 
   /* Text */
-  --ink: #1f1b2d;
-  --ink-secondary: #5b5668;
-  --ink-tertiary: #736d7f;
+  --ink: #1e1d23;
+  --ink-secondary: #55535f;
+  --ink-tertiary: #716e7c;
   --ink-muted: #817a8e;
   --ink-inverse: #ffffff;
 
@@ -26,11 +26,11 @@
   --control-line-hover: rgb(31 27 45 / 60%);
 
   /* Brand */
-  --brand: #6d3ae0;
-  --brand-hover: #5930c3;
-  --brand-strong: #3b1b78;
-  --brand-soft: #eee7ff;
-  --brand-soft-strong: #ded2ff;
+  --brand: #603bbd;
+  --brand-hover: #4b2d98;
+  --brand-strong: #392073;
+  --brand-soft: #eeeaf8;
+  --brand-soft-strong: #e4dcf5;
   --brand-on: #ffffff;
   --brand-line: #c7b8ef;
 
@@ -85,15 +85,13 @@
   --on-dark-border-strong: rgb(255 255 255 / 48%);
   --on-dark-surface: rgb(255 255 255 / 10%);
   --on-dark-surface-hover: rgb(255 255 255 / 16%);
-  --on-dark-gloss: rgb(255 255 255 / 34%);
-  --media-highlight-line: rgb(255 255 255 / 52%);
 
   /* Controlled gradient families */
-  --gradient-hero: linear-gradient(135deg, #21143f 0%, #4b2d8f 54%, #236188 100%);
+  --gradient-hero: linear-gradient(128deg, #171421 0%, #30223d 58%, #322359 100%);
   --gradient-ambient: linear-gradient(135deg, #f4edff 0%, #eaf7ff 52%, #eaf8f0 100%);
   --gradient-warm: linear-gradient(135deg, #fff1ba 0%, #ffe2d6 52%, #ede7ff 100%);
-  --gradient-premium: linear-gradient(135deg, #21143f 0%, #352064 55%, #19344d 100%);
-  --gradient-brand-soft: linear-gradient(135deg, #eee7ff 0%, #eaf7ff 100%);
+  --gradient-premium: linear-gradient(130deg, #171421 0%, #30243e 100%);
+  --gradient-brand-soft: linear-gradient(135deg, #f6f4fa 0%, #f7f7f6 100%);
   --gradient-product-panel:
     linear-gradient(
       135deg,
@@ -104,25 +102,19 @@
   --gradient-product-stage:
     radial-gradient(circle at 70% 22%, rgb(255 255 255 / 82%), transparent 23%),
     linear-gradient(145deg, #fff1ba 0%, #ffe2d6 45%, #ded2ff 100%);
-  --gradient-clay-stage:
-    radial-gradient(circle at 72% 20%, rgb(255 241 186 / 92%), transparent 28%),
-    linear-gradient(145deg, #dff3ff 0%, #ded2ff 50%, #dff7ec 100%);
-  --gradient-coral-object: linear-gradient(145deg, #ffb68f 0%, #e66a3d 92%);
+
   --gradient-brand-orb: linear-gradient(145deg, #c5b1ff, #6d3ae0);
-  --gradient-surface-subtle: linear-gradient(135deg, #ffffff 0%, #fbf7ff 100%);
+  --gradient-surface-subtle: linear-gradient(135deg, #ffffff 0%, #fafaf9 100%);
   --gradient-attention-row: linear-gradient(90deg, #fff7df 0%, #ffffff 72%);
   --gradient-ops-canvas:
     linear-gradient(180deg, #f7f5ff 0, #f7f5ff 220px, #fbfaff 520px, #f7f5ff 100%);
   --canvas-customer-ambient:
-    radial-gradient(circle at 12% 12%, rgb(223 243 255 / 72%), transparent 30%),
-    radial-gradient(circle at 86% 24%, rgb(237 231 255 / 72%), transparent 32%),
     var(--canvas);
 
   /* Decorative glow/material helpers */
   --hero-glow-brand: rgb(179 156 255 / 18%);
   --hero-glow-sky: rgb(115 200 242 / 16%);
   --brand-glow-soft: rgb(109 58 224 / 13%);
-  --accent-yellow-glass: rgb(255 241 186 / 74%);
 
   /* Spacing — 4px base */
   --space-1: 4px;
@@ -140,15 +132,15 @@
   --space-30: 120px;
 
   /* Shape */
-  --radius-xs: 8px;
-  --radius-sm: 12px;
-  --radius-control: 14px;
-  --radius-md: 14px;
-  --radius-card: 20px;
-  --radius-lg: 20px;
-  --radius-feature: 28px;
-  --radius-xl: 28px;
-  --radius-hero: 32px;
+  --radius-xs: 5px;
+  --radius-sm: 8px;
+  --radius-control: 10px;
+  --radius-md: 10px;
+  --radius-card: 14px;
+  --radius-lg: 16px;
+  --radius-feature: 18px;
+  --radius-xl: 20px;
+  --radius-hero: 22px;
   --radius-pill: 999px;
 
   /* Type */
@@ -205,17 +197,17 @@
   --icon-lg: 24px;
 
   /* Depth */
-  --shadow-subtle: 0 3px 10px rgb(43 28 77 / 5%);
-  --shadow-row: 0 6px 18px rgb(43 28 77 / 5%);
-  --shadow-raised: 0 6px 18px rgb(43 28 77 / 10%);
-  --shadow-feature: 0 16px 40px rgb(43 28 77 / 14%);
+  --shadow-subtle: 0 2px 8px rgb(20 18 33 / 3%);
+  --shadow-row: 0 3px 12px rgb(20 18 33 / 4%);
+  --shadow-raised: 0 5px 18px rgb(20 18 33 / 6%);
+  --shadow-feature: 0 12px 34px rgb(20 18 33 / 9%);
   --shadow-floating: var(--shadow-raised);
   --shadow-overlay: 0 28px 70px rgb(20 14 36 / 24%);
-  --shadow-action: 0 10px 24px rgb(59 27 120 / 18%);
-  --shadow-action-hover: 0 14px 28px rgb(59 27 120 / 22%);
-  --shadow-media: 0 20px 32px rgb(52 30 83 / 18%);
-  --shadow-media-strong: 0 28px 40px rgb(52 30 83 / 22%);
-  --shadow-media-soft: 0 12px 30px rgb(43 28 77 / 10%);
+  --shadow-action: 0 5px 14px rgb(45 28 82 / 12%);
+  --shadow-action-hover: 0 7px 17px rgb(45 28 82 / 17%);
+  --shadow-media: 0 12px 22px rgb(20 18 33 / 9%);
+  --shadow-media-strong: 0 18px 30px rgb(20 18 33 / 12%);
+  --shadow-media-soft: 0 7px 18px rgb(20 18 33 / 7%);
   --drop-shadow-media: drop-shadow(0 20px 28px rgb(43 28 77 / 18%));
 
   /* Motion */
@@ -313,9 +305,7 @@
     --gradient-product-stage:
       radial-gradient(circle at 70% 22%, rgb(245 241 255 / 12%), transparent 23%),
       linear-gradient(145deg, #4a3a18 0%, #472a22 45%, #33264a 100%);
-    --gradient-clay-stage:
-      radial-gradient(circle at 72% 20%, rgb(74 58 24 / 92%), transparent 28%),
-      linear-gradient(145deg, #19344d 0%, #33264a 50%, #19382c 100%);
+
     --gradient-surface-subtle: linear-gradient(135deg, #1b1727 0%, #211c30 100%);
     --gradient-attention-row: linear-gradient(90deg, #342814 0%, #1b1727 72%);
     --gradient-ops-canvas:
@@ -328,7 +318,6 @@
     --hero-glow-brand: rgb(179 156 255 / 14%);
     --hero-glow-sky: rgb(115 200 242 / 12%);
     --brand-glow-soft: rgb(179 156 255 / 13%);
-    --accent-yellow-glass: rgb(74 58 24 / 82%);
 
     --shadow-subtle: 0 3px 10px rgb(0 0 0 / 18%);
     --shadow-raised: 0 6px 18px rgb(0 0 0 / 26%);

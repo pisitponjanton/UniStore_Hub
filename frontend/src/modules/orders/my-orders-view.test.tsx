@@ -91,20 +91,23 @@ describe("MyOrdersView", () => {
 
     render(<MyOrdersView />);
 
-    expect(await screen.findByText("order-action")).toBeInTheDocument();
+    expect(await screen.findByRole("link", { name: "ชำระเงิน คำสั่งซื้อ order-action" })).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: "คำสั่งซื้อของฉัน", level: 1 }),
     ).toBeVisible();
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
 
     expect(screen.getAllByText("รอชำระเงิน").length).toBeGreaterThan(0);
+    expect(screen.queryByText("รับสินค้าแล้ว")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /เสร็จสิ้น 1/ }));
     expect(screen.getAllByText("รับสินค้าแล้ว").length).toBeGreaterThan(0);
+    fireEvent.click(screen.getByRole("button", { name: /ทั้งหมด 2/ }));
 
     expect(
       screen.getByRole("link", {
-        name: "ดำเนินการต่อ คำสั่งซื้อ order-action",
+        name: "ชำระเงิน คำสั่งซื้อ order-action",
       }),
-    ).toHaveAttribute("href", "/my/order?orderId=order-action");
+    ).toHaveAttribute("href", "/my/payment?orderId=order-action");
     expect(
       screen.getByRole("link", {
         name: "ดูรายละเอียด คำสั่งซื้อ order-done",
@@ -131,7 +134,7 @@ describe("MyOrdersView", () => {
     );
 
     expect(mocks.listMyOrders).toHaveBeenCalledTimes(2);
-    expect(await screen.findByText("order-retry")).toBeInTheDocument();
+    expect(await screen.findByText("อ้างอิง order-re")).toBeInTheDocument();
   });
 
   it("announces a meaningful loaded-item count after loading another page", async () => {
@@ -147,7 +150,7 @@ describe("MyOrdersView", () => {
 
     render(<MyOrdersView />);
 
-    expect(await screen.findByText("order-1")).toBeInTheDocument();
+    expect(await screen.findByText("อ้างอิง order-1")).toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent(
       "รายการที่แสดง1 รายการ",
     );
@@ -157,11 +160,13 @@ describe("MyOrdersView", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText("order-2")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /กำลังดำเนินการ 1/ })).toBeInTheDocument();
     });
     expect(screen.getByRole("status")).toHaveTextContent(
       "รายการที่แสดง2 รายการ",
     );
+    fireEvent.click(screen.getByRole("button", { name: /กำลังดำเนินการ 1/ }));
+    expect(screen.getByText("อ้างอิง order-2")).toBeInTheDocument();
     expect(mocks.listMyOrders).toHaveBeenLastCalledWith({
       cursor: "cursor-2",
     });

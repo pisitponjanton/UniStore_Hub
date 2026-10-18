@@ -1,7 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { LoadedDirectoryControls } from "@/modules/organization-directory/loaded-directory-controls";
+import { searchLoadedItems, visibleLoadedItems } from "@/modules/organization-directory/loaded-directory-helpers";
 
 import {
   Badge,
@@ -72,17 +74,44 @@ function membershipRoleLabel(
 
 export function OrganizationSelectView() {
   const focusErrorSummary = useErrorSummaryFocus();
+  const retryFocusRequested = useRef(false);
+  const actionFeedbackFocusRequested = useRef(false);
   const router = useRouter();
   const auth = useAuthSession();
   const [loadState, setLoadState] = useState<LoadState>({
     status: "loading",
   });
   const [loadAttempt, setLoadAttempt] = useState(0);
+  const [directoryQuery, setDirectoryQuery] = useState("");
+  const [directoryLimit, setDirectoryLimit] = useState(24);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [nameError, setNameError] = useState<string | undefined>();
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
+
+  // Only relocate focus following an explicit user action, not hydration.
+  useEffect(() => {
+    if (!retryFocusRequested.current || loadState.status === "loading") return;
+    retryFocusRequested.current = false;
+    const frame = window.requestAnimationFrame(() => {
+      const heading = document.getElementById("organization-select-heading");
+      heading?.focus();
+      heading?.scrollIntoView({ block: "start", behavior: "instant" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [loadState.status]);
+
+  useEffect(() => {
+    if (!actionFeedbackFocusRequested.current || creating || !submitError) return;
+    actionFeedbackFocusRequested.current = false;
+    const frame = window.requestAnimationFrame(() => {
+      const feedback = document.getElementById("organization-action-feedback");
+      feedback?.focus();
+      feedback?.scrollIntoView({ block: "nearest", behavior: "instant" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [submitError, creating]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -132,6 +161,12 @@ export function OrganizationSelectView() {
     );
   }, [auth, loadState]);
 
+  const directoryMatches = searchLoadedItems(accessible, directoryQuery, entry => [
+    entry.organization.name, entry.organization.description,
+    entry.organization.organizationId, entry.membership.role,
+  ]);
+  const directoryVisible = visibleLoadedItems(directoryMatches, directoryLimit);
+
   function handleSelect(
     organizationId: string,
     role: "STAFF" | "ORGANIZATION_ADMIN",
@@ -140,6 +175,7 @@ export function OrganizationSelectView() {
       auth.status !== "authenticated" ||
       !rememberActiveOrganizationId(organizationId, auth.memberships)
     ) {
+      actionFeedbackFocusRequested.current = true;
       setSubmitError(
         "ไม่สามารถเลือกหน่วยงานนี้ได้ กรุณารีเฟรชสิทธิ์แล้วลองใหม่",
       );
@@ -169,6 +205,7 @@ export function OrganizationSelectView() {
       return;
     }
 
+    actionFeedbackFocusRequested.current = true;
     setCreating(true);
 
     try {
@@ -212,7 +249,7 @@ export function OrganizationSelectView() {
       <main className={styles.main}>
         <header className={styles.workspaceHeader} data-workspace-state={loadState.status}>
           <div className={styles.headerCopy}>
-            <h1 className={styles.title}>เลือกหน่วยงานที่จะทำงาน</h1>
+            <h1 id="organization-select-heading" tabIndex={-1} className={styles.title}>เลือกหน่วยงานที่จะทำงาน</h1>
             <p className={styles.description}>
               สิทธิ์ของบัญชีอาจต่างกันในแต่ละหน่วยงาน เลือกพื้นที่ให้ถูกก่อนเริ่มงานเพื่อให้เมนูและข้อมูลอยู่ในบริบทเดียวกัน
             </p>
@@ -233,9 +270,11 @@ export function OrganizationSelectView() {
         </header>
 
         {submitError ? (
-          <Notice tone="danger" role="alert" title="ดำเนินการไม่สำเร็จ">
-            {submitError}
-          </Notice>
+          <div id="organization-action-feedback" tabIndex={-1}>
+            <Notice tone="danger" role="alert" title="ดำเนินการไม่สำเร็จ">
+              {submitError}
+            </Notice>
+          </div>
         ) : null}
 
         <div className={styles.workspaceGrid}>
@@ -268,6 +307,7 @@ export function OrganizationSelectView() {
                 actions={
                   <Button
                     onClick={() => {
+                      retryFocusRequested.current = true;
                       setLoadState({ status: "loading" });
                       setLoadAttempt((attempt) => attempt + 1);
                     }}
@@ -286,8 +326,20 @@ export function OrganizationSelectView() {
             ) : null}
 
             {loadState.status === "success" && accessible.length > 0 ? (
-              <ul className={styles.organizationList}>
-                {accessible.map(({ organization, membership }) => (
+              <>
+                <LoadedDirectoryControls
+                  id="organization-directory-search"
+                  label="ค้นหาหน่วยงานที่เข้าถึงได้"
+                  query={directoryQuery}
+                  onQueryChange={value => { setDirectoryQuery(value); setDirectoryLimit(24); }}
+                  loadedCount={accessible.length}
+                  matchingCount={directoryMatches.length}
+                  visibleCount={directoryVisible.length}
+                  onShowMore={() => setDirectoryLimit(value => value + 24)}
+                  placeholder="ชื่อหน่วยงาน คำอธิบาย หรือรหัส"
+                />
+                <ul className={styles.organizationList}>
+                {directoryVisible.map(({ organization, membership }) => (
                   <li
                     className={styles.organizationRow}
                     key={organization.organizationId}
@@ -340,7 +392,8 @@ export function OrganizationSelectView() {
                     </div>
                   </li>
                 ))}
-              </ul>
+                </ul>
+              </>
             ) : null}
           </section>
 

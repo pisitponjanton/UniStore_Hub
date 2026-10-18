@@ -174,7 +174,7 @@ The isolated Backend/Worker processes were stopped after qualification. The unre
 
 Detailed current live evidence:
 
-- `reports/harness-phase-05-live-e2e-after-s3-fix.md`
+- `reports/test-harness-validation.md#record-05-harness-live-e2e-after-s3-fix`
 
 ## AWS qualification
 
@@ -299,8 +299,8 @@ Current smoke blocker descriptions were refreshed so the resolved LocalStack S3 
 
 Detailed current evidence:
 
-- `reports/runtime-phase-01-reproduction.md`
-- `reports/runtime-phase-02-stress-regression.md`
-- `reports/harness-phase-05-live-e2e-after-s3-fix.md`
+- `reports/runtime-stability-verification.md#record-01-runtime-reproduction`
+- `reports/runtime-stability-verification.md#record-02-runtime-stress-regression`
+- `reports/test-harness-validation.md#record-05-harness-live-e2e-after-s3-fix`
 
-Final review for the current supported-runtime cleanup task: **PASS**. Detailed review: `reports/runtime-phase-04-review.md`.
+Final review for the current supported-runtime cleanup task: **PASS**. Detailed review: `reports/runtime-stability-verification.md#record-03-runtime-review`.

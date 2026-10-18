@@ -1,7 +1,9 @@
 "use client";
 
+import { PageLoadingRows, PageStateHeading, RecoveryActions } from "@/components/ui/async-page";
+
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { ErrorState, LoadingState } from "@/components";
 import { ApiClientError } from "@/services";
@@ -41,6 +43,27 @@ export function CampaignView() {
   const [state, setState] = useState<CampaignViewState>({
     status: "loading",
   });
+
+  const [retryAttempt, setRetryAttempt] = useState(0);
+  const retryFocusRequested = useRef(false);
+
+  function retryDetail() {
+    retryFocusRequested.current = true;
+    setState({ status: "loading" });
+    setRetryAttempt(attempt => attempt + 1);
+  }
+
+  useEffect(() => {
+    if (!retryFocusRequested.current || state.status === "loading") return;
+    retryFocusRequested.current = false;
+    const frame = window.requestAnimationFrame(() => {
+      const target = document.querySelector<HTMLElement>("main h1[tabindex]")
+        ?? document.querySelector<HTMLElement>("main");
+      target?.focus();
+      target?.scrollIntoView({ behavior: "instant", block: "start" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [state.status]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -89,13 +112,15 @@ export function CampaignView() {
     void loadCampaign();
 
     return () => controller.abort();
-  }, []);
+  }, [retryAttempt]);
 
   if (state.status !== "success") {
     return (
       <div className={styles.page}>
         <StorefrontHeader />
-        <main className={styles.stateWrap}>
+        <main className={styles.stateWrap} tabIndex={-1}>
+          <PageStateHeading title="รายละเอียดแคมเปญ" description="ตรวจสอบสถานะและรายละเอียดรอบขาย" />
+          {state.status === "loading" ? <PageLoadingRows /> : null}
           {state.status === "loading" ? (
             <LoadingState title="กำลังโหลดแคมเปญ" />
           ) : null}
@@ -116,8 +141,8 @@ export function CampaignView() {
           {state.status === "error" ? (
             <ErrorState
               title="ไม่สามารถโหลดแคมเปญได้"
-              description="กรุณาลองโหลดหน้านี้ใหม่อีกครั้ง"
-              actions={<Link href="/">กลับไปเลือกร้านค้า</Link>}
+              description="ไม่สามารถดึงข้อมูลล่าสุดได้ ลองใหม่หรือกลับไปเลือกร้านค้า"
+              actions={<RecoveryActions backHref="/" backLabel="กลับไปเลือกร้านค้า" onRetry={retryDetail} />}
             />
           ) : null}
         </main>
@@ -142,7 +167,7 @@ export function CampaignView() {
         <section className={`${styles.hero} ${styles.campaignHero}`}>
           <div className={styles.heroCopy}>
             <span className={styles.contextLine}>รอบขายจาก {store.name}</span>
-            <h1 className={styles.title}>{campaign.name}</h1>
+            <h1 tabIndex={-1} className={styles.title}>{campaign.name}</h1>
             <p className={styles.description}>
               ตรวจสอบสถานะและช่วงเวลาสำคัญของรอบนี้ก่อนเลือกสินค้าที่ต้องการ
             </p>

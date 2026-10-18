@@ -1,7 +1,9 @@
 "use client";
 
+import { PageLoadingRows, PageStateHeading, RecoveryActions } from "@/components/ui/async-page";
+
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ErrorState,
   LoadingState,
@@ -57,6 +59,27 @@ function loginHref(returnTo: string): string {
 export function ProductView() {
   const auth = useAuthSession();
   const [state, setState] = useState<ProductViewState>({ status: "loading" });
+  const [retryAttempt, setRetryAttempt] = useState(0);
+  const retryFocusRequested = useRef(false);
+
+  function retryDetail() {
+    retryFocusRequested.current = true;
+    setState({ status: "loading" });
+    setRetryAttempt(attempt => attempt + 1);
+  }
+
+  useEffect(() => {
+    if (!retryFocusRequested.current || state.status === "loading") return;
+    retryFocusRequested.current = false;
+    const frame = window.requestAnimationFrame(() => {
+      const target = document.querySelector<HTMLElement>("main h1[tabindex]")
+        ?? document.querySelector<HTMLElement>("main");
+      target?.focus();
+      target?.scrollIntoView({ behavior: "instant", block: "start" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [state.status]);
+
   const [selectedVariantId, setSelectedVariantId] = useState("");
   const [selectedCampaignId, setSelectedCampaignId] = useState("");
   const [quantityInput, setQuantityInput] = useState("1");
@@ -138,7 +161,7 @@ export function ProductView() {
     void loadProduct();
 
     return () => controller.abort();
-  }, []);
+  }, [retryAttempt]);
 
   const selection = useMemo(() => {
     if (state.status !== "success") {
@@ -167,7 +190,9 @@ export function ProductView() {
     return (
       <div className={styles.page}>
         <StorefrontHeader />
-        <main className={styles.stateWrap}>
+        <main className={styles.stateWrap} tabIndex={-1}>
+          <PageStateHeading title="รายละเอียดสินค้า" description="เลือกสินค้าและตัวเลือกจากร้านค้าที่เปิดให้เข้าชม" />
+          {state.status === "loading" ? <PageLoadingRows /> : null}
           {state.status === "loading" ? (
             <LoadingState title="กำลังโหลดสินค้า" />
           ) : null}
@@ -188,8 +213,8 @@ export function ProductView() {
           {state.status === "error" ? (
             <ErrorState
               title="ไม่สามารถโหลดสินค้าได้"
-              description="กรุณาลองโหลดหน้านี้ใหม่อีกครั้ง"
-              actions={<Link href="/">กลับไปเลือกร้านค้า</Link>}
+              description="ไม่สามารถดึงข้อมูลล่าสุดได้ ลองใหม่หรือกลับไปเลือกร้านค้า"
+              actions={<RecoveryActions backHref="/" backLabel="กลับไปเลือกร้านค้า" onRetry={retryDetail} />}
             />
           ) : null}
         </main>
@@ -254,7 +279,7 @@ export function ProductView() {
           <div className={styles.productDetailBody}>
             <div className={styles.heroCopy}>
               <span className={styles.contextLine}>สินค้าในร้าน {store.name}</span>
-              <h1 className={styles.title}>{product.name}</h1>
+              <h1 tabIndex={-1} className={styles.title}>{product.name}</h1>
               {product.description ? (
                 <p className={styles.description}>
                   {product.description}

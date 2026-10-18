@@ -1,8 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-import { BrandIllustration } from "@/components";
-
 import styles from "./auth-form.module.css";
 
 export function AuthPageFrame({
@@ -32,14 +30,6 @@ export function AuthPageFrame({
             <span className={styles.introLabel}>บัญชีสำหรับ campus commerce</span>
             <h1 className={styles.introTitle}>{introTitle}</h1>
             <p className={styles.introDescription}>{introDescription}</p>
-          </div>
-
-          <div className={styles.authVisual} aria-hidden="true">
-            <BrandIllustration
-              variant="parcel"
-              className={styles.authVisualIllustration}
-              decorative
-            />
           </div>
 
           <section className={styles.accountJourney} aria-labelledby="account-journey-heading">

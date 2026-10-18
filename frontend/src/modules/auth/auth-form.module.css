@@ -25,30 +25,7 @@
   box-shadow: var(--shadow-feature);
 }
 
-.intro::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  width: min(46vw, 620px);
-  aspect-ratio: 1;
-  right: -24%;
-  top: -26%;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--brand) 24%, transparent);
-  filter: blur(4px);
-}
 
-.intro::after {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  width: min(34vw, 460px);
-  aspect-ratio: 1;
-  left: -16%;
-  bottom: -34%;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--accent-sky-strong) 20%, transparent);
-}
 
 .brand {
   position: relative;
@@ -192,21 +169,7 @@
   line-height: 1.72;
 }
 
-.authVisual {
-  grid-area: visual;
-  position: relative;
-  min-height: clamp(280px, 34vw, 430px);
-  align-self: center;
-  display: grid;
-  place-items: center;
-}
 
-.authVisualIllustration {
-  /* Leave room for the rotated corners inside the two-column panel. */
-  width: min(calc(100% - 12px), 310px);
-  box-shadow: var(--shadow-media-strong);
-  transform: rotate(-2deg);
-}
 
 .accountJourney {
   grid-area: journey;
@@ -628,10 +591,6 @@
       "journey";
   }
 
-  .authVisual {
-    min-height: 250px;
-    width: min(100%, 420px);
-  }
 
   .introTitle {
     max-width: 14ch;
@@ -664,7 +623,6 @@
   }
 
   .introLabel,
-  .authVisual,
   .accountJourney {
     display: none;
   }
@@ -766,4 +724,39 @@
     min-height: 560px;
     align-content: start;
   }
+}
+
+/* Auth is an editorial introduction plus one quiet form, not a 3D product mockup. */
+.page { gap: 0; padding: 0; background: var(--canvas); }
+.intro {
+  border-radius: 0;
+  background: var(--gradient-premium);
+  box-shadow: none;
+  padding: clamp(24px, 4vw, 56px);
+}
+.introBody {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "copy" "journey";
+  max-width: 640px;
+  gap: clamp(28px, 5vw, 58px);
+}
+.introTitle { max-width: 14ch; font-size: clamp(2.5rem, 4.5vw, 4.6rem); line-height: 1.08; }
+.introDescription { line-height: 1.58; }
+.accountJourneyList { gap: 8px; }
+.accountJourneyItem,
+.accountJourneyItem:nth-child(n) {
+  background: transparent;
+  border-color: var(--on-dark-line);
+  min-height: 96px;
+  border-radius: var(--radius-control);
+}
+.panel { background: var(--canvas); box-shadow: none; border-radius: 0; }
+.panelInner { border: 1px solid var(--line-soft); border-radius: var(--radius-feature); box-shadow: none; }
+@media (max-width: 860px) {
+  .introBody { grid-template-areas: "copy"; }
+}
+@media (max-width: 620px) {
+  .intro { padding: 24px 20px; border-radius: 0 0 var(--radius-card) var(--radius-card); }
+  .panel { padding: 16px; }
+  .panelInner { padding: 20px; }
 }

@@ -147,9 +147,34 @@ export function ApplicationShell({
     content?.setAttribute("inert", "");
     document.addEventListener("keydown", handleKeyDown);
     mobileViewport?.addEventListener("change", handleViewportChange);
+    // Preserve immediate keyboard focus when the panel is already focusable.
+    // CSS visibility or hydration can delay it in actual browsers; recover
+    // after painting without stealing focus from someone using the dialog.
     drawerCloseRef.current?.focus();
+    let focusFrame: number | null = null;
+    const visibilityFrame = window.requestAnimationFrame(() => {
+      focusFrame = window.requestAnimationFrame(() => {
+        if (sidebarPanel?.getAttribute("aria-modal") === "true"
+            && !sidebarPanel.contains(document.activeElement)) {
+          drawerCloseRef.current?.focus();
+        }
+      });
+    });
+
+    // Hydration or concurrent route updates can temporarily return focus to
+    // the menu trigger. Recover once, but never steal focus from an already
+    // interactive element inside the open dialog.
+    const focusFallback = window.setTimeout(() => {
+      if (sidebarPanel?.getAttribute("aria-modal") === "true"
+          && !sidebarPanel.contains(document.activeElement)) {
+        drawerCloseRef.current?.focus();
+      }
+    }, 150);
 
     return () => {
+      window.clearTimeout(focusFallback);
+      window.cancelAnimationFrame(visibilityFrame);
+      if (focusFrame !== null) window.cancelAnimationFrame(focusFrame);
       document.body.style.overflow = previousOverflow;
       if (!contentWasInert) {
         content?.removeAttribute("inert");

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
 
 import styles from "./primitives.module.css";
@@ -150,7 +151,7 @@ export function UnauthorizedState({
       kind="unauthorized"
       title="กรุณาเข้าสู่ระบบ"
       description="คุณต้องเข้าสู่ระบบก่อนจึงจะใช้งานส่วนนี้ได้"
-      actions={actions}
+      actions={actions ?? <a href="/login/" className={styles.stateFallbackLink}>เข้าสู่ระบบ</a>}
       headingLevel={headingLevel}
     />
   );
@@ -168,7 +169,7 @@ export function ForbiddenState({
       kind="forbidden"
       title="ไม่มีสิทธิ์เข้าถึง"
       description="บัญชีนี้ไม่มีสิทธิ์ใช้งานส่วนดังกล่าว"
-      actions={actions}
+      actions={actions ?? <Link href="/" className={styles.stateFallbackLink}>กลับหน้าร้าน</Link>}
       headingLevel={headingLevel}
     />
   );

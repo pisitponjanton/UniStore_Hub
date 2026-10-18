@@ -455,3 +455,61 @@
     transition: none;
   }
 }
+
+/* Task-first operational styling: real queues, status and filters take priority. */
+.page { background: var(--canvas); }
+.header {
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-feature);
+  padding: clamp(18px, 2.8vw, 30px);
+  box-shadow: none;
+}
+.header::after { content: none; display: none; }
+.summaryStrip > div,
+.summaryStrip > div:nth-child(n),
+.summaryStrip > div:first-child,
+.summaryStrip > div:last-child {
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-card);
+  box-shadow: none;
+}
+.filterPanel {
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-card);
+  box-shadow: none;
+}
+@media (max-width: 620px) {
+  .header { padding: 18px; }
+}
+
+.headerCount, .section {
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  box-shadow: none;
+  border-radius: var(--radius-card);
+}
+
+/* Phase 4: events first, advanced server filters reachable via a visible anchor. */
+.auditShortcuts {
+  display: flex; flex-wrap: wrap; gap: var(--space-2);
+}
+.auditShortcuts a {
+  min-height: 44px; display: inline-flex; align-items: center;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-control);
+  background: var(--surface); color: var(--brand-strong);
+  font-weight: 650; text-decoration: none;
+}
+.auditShortcuts a:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+@media (max-width: 620px) {
+  .auditShortcuts { display: grid; grid-template-columns: 1fr; }
+  .auditShortcuts a { justify-content: center; text-align: center; }
+}
+
+/* Phase 6: async server-filter feedback is reachable even when its form follows the list. */
+.focusableFeedback { scroll-margin-top: 108px; outline: none; }
+.focusableFeedback:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }

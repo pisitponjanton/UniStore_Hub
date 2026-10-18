@@ -1,7 +1,9 @@
 "use client";
 
+import { PageLoadingRows, PageStateHeading } from "@/components/ui/async-page";
+
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   Badge,
@@ -51,6 +53,28 @@ export function MyPickupView() {
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [loadAttempt, setLoadAttempt] = useState(0);
   const [qrError, setQrError] = useState(false);
+
+  const focusAfterUserRefresh = useRef(false);
+  function refreshStatus() {
+    // Explicit user refresh removes its own button during loading; make the
+    // new status heading the next keyboard destination.
+    focusAfterUserRefresh.current = true;
+    setState({ status: "loading" });
+    setLoadAttempt((attempt) => attempt + 1);
+  }
+
+  useEffect(() => {
+    if (!focusAfterUserRefresh.current || state.status === "loading") return;
+    focusAfterUserRefresh.current = false;
+    const frame = window.requestAnimationFrame(() => {
+      const heading = document.querySelector<HTMLElement>("main h1");
+      if (!heading) return;
+      heading.tabIndex = -1;
+      heading.focus({ preventScroll: true });
+      heading.scrollIntoView?.({ block: "start", behavior: "instant" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [state.status]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -189,8 +213,7 @@ export function MyPickupView() {
               <Button
                 variant="secondary"
                 onClick={() => {
-                  setState({ status: "loading" });
-                  setLoadAttempt((attempt) => attempt + 1);
+                  refreshStatus();
                 }}
               >
                 ตรวจสอบสถานะล่าสุด
@@ -206,6 +229,8 @@ export function MyPickupView() {
     return (
       <div className={styles.page}>
         <main className={styles.stateWrap}>
+          <PageStateHeading title="การรับสินค้า" description="ตรวจสอบสถานะและข้อมูลรับสินค้าล่าสุด" />
+          {state.status === "loading" ? <PageLoadingRows /> : null}
           {state.status === "loading" ? (
             <LoadingState
               title="กำลังโหลดข้อมูลรับสินค้า"
@@ -236,8 +261,7 @@ export function MyPickupView() {
                 <>
                   <Button
                     onClick={() => {
-                      setState({ status: "loading" });
-                      setLoadAttempt((attempt) => attempt + 1);
+                      refreshStatus();
                     }}
                   >
                     ลองโหลดอีกครั้ง

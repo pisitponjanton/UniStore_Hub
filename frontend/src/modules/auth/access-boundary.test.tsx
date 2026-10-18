@@ -25,6 +25,7 @@ vi.mock("./session", async () => {
 });
 
 import {
+  AuthenticatedBoundary,
   OrganizationBoundary,
   PlatformAdminBoundary,
 } from "./access-boundary";
@@ -55,6 +56,14 @@ function authenticatedState(
 describe("role-based access boundaries", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  it("keeps a semantic main and H1 during session verification without showing protected content", () => {
+    mocks.useAuthSession.mockReturnValue({ status: "loading" });
+    render(<AuthenticatedBoundary><div>protected-resource</div></AuthenticatedBoundary>);
+    const main = screen.getByRole("main", { name: "กำลังตรวจสอบบัญชี" });
+    expect(main).toContainElement(screen.getByRole("heading", { level: 1, name: "กำลังตรวจสอบบัญชี" }));
+    expect(screen.queryByText("protected-resource")).not.toBeInTheDocument();
   });
 
   it("hides Organization Admin UI from Staff membership", () => {

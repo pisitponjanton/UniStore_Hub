@@ -20,29 +20,8 @@
 }
 
 .hero::before,
-.hero::after {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  border-radius: 50%;
-  pointer-events: none;
-}
 
-.hero::before {
-  width: min(38vw, 520px);
-  aspect-ratio: 1;
-  top: -38%;
-  right: -12%;
-  background: var(--hero-glow-brand);
-}
 
-.hero::after {
-  width: min(32vw, 420px);
-  aspect-ratio: 1;
-  left: 42%;
-  bottom: -52%;
-  background: var(--hero-glow-sky);
-}
 
 .heroMain {
   min-width: 0;
@@ -158,23 +137,7 @@
   font-weight: 700;
 }
 
-.heroScene {
-  position: relative;
-  min-height: 370px;
-  align-self: stretch;
-  display: grid;
-  place-items: center;
-  padding: clamp(22px, 4vw, 44px);
-  border-radius: var(--radius-feature);
-  background: var(--gradient-clay-stage);
-  box-shadow: inset 0 0 0 1px var(--media-highlight-line);
-}
 
-.heroSceneIllustration {
-  width: min(100%, 360px);
-  box-shadow: var(--shadow-media-strong);
-  transform: rotate(2deg);
-}
 
 
 .heroGuide {
@@ -221,17 +184,8 @@
   box-shadow: var(--shadow-subtle);
 }
 
-.heroGuideList li:nth-child(1) {
-  background: var(--accent-sky);
-}
 
-.heroGuideList li:nth-child(2) {
-  background: var(--accent-mint);
-}
 
-.heroGuideList li:nth-child(3) {
-  background: var(--accent-coral);
-}
 
 .heroGuideList li::before {
   content: "0" counter(guide);
@@ -355,17 +309,6 @@
     box-shadow var(--motion-standard) var(--motion-ease-out);
 }
 
-.discoveryCard::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  width: 152px;
-  aspect-ratio: 1;
-  right: -44px;
-  top: -42px;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--surface) 58%, transparent);
-}
 
 .discoveryCard:nth-child(4n + 1) {
   grid-column: span 6;
@@ -759,9 +702,6 @@
     grid-template-columns: 1fr;
   }
 
-  .heroScene {
-    min-height: 300px;
-  }
 
   .heroGuideList {
     grid-template-columns: 1fr;
@@ -851,9 +791,6 @@
     width: 100%;
   }
 
-  .heroScene {
-    display: none;
-  }
 
   .heroGuide {
     gap: 14px;
@@ -968,15 +905,7 @@
     font-size: clamp(2.05rem, 11vw, 2.7rem);
   }
 
-  .heroScene {
-    min-height: 220px;
-    padding: var(--space-4);
-  }
 
-  .heroSceneIllustration {
-    width: min(100%, 250px);
-    transform: none;
-  }
 
   .organization {
     padding: var(--space-4);
@@ -1057,9 +986,6 @@
   padding-block: clamp(26px, 4vw, 46px);
 }
 
-.hero[data-filtering="true"] .heroScene {
-  display: none;
-}
 
 .page[data-filtering="true"] .catalog {
   padding-top: clamp(30px, 4vw, 48px);
@@ -1169,4 +1095,149 @@
     min-width: 82px;
     padding-inline: var(--space-2);
   }
+}
+
+/* Editorial commerce refresh — real store data replaces decorative clay art. */
+.hero {
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  padding: clamp(28px, 5vw, 60px);
+  background: var(--gradient-hero);
+  border: 1px solid rgb(255 255 255 / 12%);
+  box-shadow: none;
+}
+.heroMain { max-width: 930px; gap: var(--space-6); }
+.heroTitle { max-width: 17ch; font-size: clamp(2.7rem, 5.1vw, 5.2rem); line-height: 1.06; }
+.heroDescription { max-width: 55ch; line-height: 1.6; }
+.heroSearch {
+  width: min(100%, 780px);
+  border-radius: var(--radius-card);
+}
+.heroSummary { width: fit-content; padding-top: var(--space-4); gap: var(--space-8); }
+.heroGuide {
+  padding-top: var(--space-8);
+}
+.heroGuideTitle {
+  background: transparent;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  box-shadow: none;
+}
+.heroGuideList li,
+.heroGuideList li:nth-child(n) {
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  box-shadow: none;
+}
+.discovery { padding-top: clamp(24px, 4vw, 48px); }
+.discoveryGrid { grid-template-columns: repeat(4,minmax(0,1fr)); grid-auto-rows: auto; }
+.discoveryCard,
+.discoveryCard:nth-child(4n + 1),
+.discoveryCard:nth-child(4n + 2),
+.discoveryCard:nth-child(4n + 3),
+.discoveryCard:nth-child(4n + 4) {
+  min-height: 255px;
+  grid-column: span 1;
+  grid-row: auto;
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  box-shadow: none;
+  border-radius: var(--radius-card);
+}
+.discoveryCard:hover {
+  transform: translateY(-3px);
+  border-color: var(--brand-line);
+  box-shadow: var(--shadow-raised);
+}
+.discoveryStoreName,
+.discoveryCard:not([data-size="feature"]) .discoveryStoreName {
+  max-width: 100%;
+  font-size: clamp(1.4rem, 1.75vw, 2rem);
+  letter-spacing: -0.04em;
+}
+.discoveryCardAction { background: var(--brand-soft); box-shadow: none; }
+.discoveryCardIndex { background: transparent; padding-inline: 0; border-radius: 0; }
+.catalog { padding-top: clamp(36px, 5vw, 64px); }
+.organization,.organization:nth-child(3n + 2) {
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  box-shadow: none;
+  border-radius: var(--radius-card);
+}
+@media (max-width: 1024px) {
+  .discoveryGrid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .discoveryCard:nth-child(n) { grid-column: auto; min-height: 210px; }
+}
+@media (max-width: 620px) {
+  .hero { padding: 26px 20px; border-radius: var(--radius-feature); }
+  .heroTitle { font-size: clamp(2.1rem, 9vw, 2.8rem); }
+  .heroMain { gap: 16px; }
+  .heroSummary { gap: 22px; }
+  .discovery { padding-top: 24px; }
+  .discoveryGrid { grid-template-columns: 1fr; }
+  .discoveryCard:nth-child(n) { min-height: 166px; }
+  .heroGuide { padding-top: 28px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .discoveryCard:hover { transform: none; }
+}
+
+/* Featured storefront is real organization data; no invented product imagery. */
+.hero[data-has-preview="true"] {
+  grid-template-columns: minmax(0, 1.08fr) minmax(270px, .62fr);
+  gap: clamp(30px, 4vw, 70px);
+  min-height: 0;
+  align-items: stretch;
+}
+.hero[data-has-preview="true"] .heroMain { align-content: center; }
+.heroSpotlight {
+  min-width: 0;
+  display: grid;
+  align-content: space-between;
+  gap: 32px;
+  padding: clamp(22px, 2.6vw, 36px);
+  border: 1px solid rgb(255 255 255 / 23%);
+  border-radius: var(--radius-card);
+  background: rgb(255 255 255 / 6%);
+  color: #fff;
+  text-decoration: none;
+  transition: border-color var(--motion-standard) var(--motion-ease-out),
+              background-color var(--motion-standard) var(--motion-ease-out);
+}
+.heroSpotlight:hover {
+  border-color: rgb(255 255 255 / 60%);
+  background: rgb(255 255 255 / 10%);
+  text-decoration: none;
+}
+.heroSpotlightEyebrow,.heroSpotlightOrganization {
+  color: rgb(255 255 255 / 70%);
+  font-size: var(--text-body-sm);
+  font-weight: 600;
+}
+.heroSpotlightBody { min-width: 0; display: grid; gap: 12px; }
+.heroSpotlightName {
+  font-size: clamp(2rem, 3vw, 3.5rem);
+  line-height: 1.1;
+  letter-spacing: -.035em;
+  overflow-wrap: anywhere;
+}
+.heroSpotlightDescription { color: rgb(255 255 255 / 76%); line-height: 1.6; }
+.heroSpotlightAction {
+  display: inline-flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  padding-top: 16px;
+  border-top: 1px solid rgb(255 255 255 / 25%);
+  font-weight: 700;
+}
+@media (max-width: 800px) {
+  .hero[data-has-preview="true"] { grid-template-columns: 1fr; }
+  .heroSpotlight { min-height: 164px; gap: 15px; }
+}
+@media (max-width: 620px) {
+  .heroSpotlight { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .heroSpotlight { transition: none; }
 }

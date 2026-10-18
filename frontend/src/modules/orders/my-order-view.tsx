@@ -1,7 +1,9 @@
 "use client";
 
+import { PageLoadingRows, PageStateHeading } from "@/components/ui/async-page";
+
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   ActionBar,
@@ -57,6 +59,39 @@ export function MyOrderView() {
   const [loadAttempt, setLoadAttempt] = useState(0);
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
+
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const cancelFeedbackRef = useRef<HTMLDivElement>(null);
+  const focusAfterRetry = useRef(false);
+
+  useEffect(() => {
+    if ((!actionError && !actionSuccess) || cancelDialogOpen || cancelPending) return;
+    // Focus after Radix releases the confirmation dialog's focus trap.
+    const timeout = window.setTimeout(() => {
+      cancelFeedbackRef.current?.focus({ preventScroll: true });
+      cancelFeedbackRef.current?.scrollIntoView?.({ block: "start", behavior: "instant" });
+    }, 120);
+    return () => window.clearTimeout(timeout);
+  }, [actionError, actionSuccess, cancelDialogOpen, cancelPending]);
+
+  function retryLoad() {
+    focusAfterRetry.current = true;
+    setState({ status: "loading" });
+    setLoadAttempt((attempt) => attempt + 1);
+  }
+
+  useEffect(() => {
+    if (!focusAfterRetry.current || state.status === "loading") return;
+    focusAfterRetry.current = false;
+    const frame = window.requestAnimationFrame(() => {
+      const heading = document.querySelector<HTMLElement>("main h1");
+      if (!heading) return;
+      heading.tabIndex = -1;
+      heading.focus({ preventScroll: true });
+      heading.scrollIntoView?.({ block: "start", behavior: "instant" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [state.status]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -165,6 +200,7 @@ export function MyOrderView() {
       }
     } finally {
       setCancelPending(false);
+      setCancelDialogOpen(false);
     }
   }
 
@@ -172,6 +208,8 @@ export function MyOrderView() {
     return (
       <div className={styles.page}>
         <main className={styles.stateWrap}>
+          <PageStateHeading title="รายละเอียดคำสั่งซื้อ" description="ติดตามสถานะล่าสุดและขั้นตอนถัดไป" />
+          {state.status === "loading" ? <PageLoadingRows /> : null}
           {state.status === "loading" ? (
             <LoadingState
               title="กำลังโหลดรายละเอียดคำสั่งซื้อ"
@@ -201,10 +239,7 @@ export function MyOrderView() {
               actions={
                 <>
                   <Button
-                    onClick={() => {
-                      setState({ status: "loading" });
-                      setLoadAttempt((attempt) => attempt + 1);
-                    }}
+                    onClick={retryLoad}
                   >
                     ลองโหลดอีกครั้ง
                   </Button>
@@ -413,16 +448,19 @@ export function MyOrderView() {
           </div>
         </section>
 
-        {actionSuccess ? (
-          <Notice tone="success" role="status" title="อัปเดตคำสั่งซื้อแล้ว">
-            {actionSuccess}
-          </Notice>
-        ) : null}
-
-        {actionError ? (
-          <Notice tone="danger" role="alert" title="ดำเนินการไม่สำเร็จ">
-            {actionError}
-          </Notice>
+        {actionError || actionSuccess ? (
+          <div ref={cancelFeedbackRef} tabIndex={-1} data-customer-order-action-feedback className={styles.focusableOrderFeedback}>
+            {actionSuccess ? (
+              <Notice tone="success" role="status" title="อัปเดตคำสั่งซื้อแล้ว">
+                {actionSuccess}
+              </Notice>
+            ) : null}
+            {actionError ? (
+              <Notice tone="danger" role="alert" title="ดำเนินการไม่สำเร็จ">
+                {actionError}
+              </Notice>
+            ) : null}
+          </div>
         ) : null}
 
         <section className={styles.orderTools} aria-labelledby="order-tools">
@@ -462,6 +500,18 @@ export function MyOrderView() {
             {cancellable ? (
               <div className={styles.destructiveAction}>
                 <ConfirmDialog
+                  open={cancelDialogOpen}
+                  onOpenChange={(open) => {
+                    if (cancelPending) return;
+                    if (open) {
+                      setActionError(null);
+                      setActionSuccess(null);
+                    }
+                    setCancelDialogOpen(open);
+                  }}
+                  onCloseAutoFocus={(event) => {
+                    if (actionError || actionSuccess) event.preventDefault();
+                  }}
                   trigger={<Button variant="danger">ยกเลิกคำสั่งซื้อ</Button>}
                   title="ยืนยันการยกเลิกคำสั่งซื้อ"
                   description="ยกเลิกได้เฉพาะก่อนการชำระเงินได้รับอนุมัติ เมื่อยืนยันแล้วคำสั่งซื้อจะเปลี่ยนเป็นสถานะยกเลิก"

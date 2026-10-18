@@ -114,3 +114,21 @@ export function myOrderHref(orderId: string): string {
   const params = new URLSearchParams({ orderId });
   return `/my/order/?${params.toString()}`;
 }
+
+export type CustomerOrderViewFilter = "action" | "progress" | "finished" | "all";
+
+export function customerOrderBucket(status: OrderStatus): Exclude<CustomerOrderViewFilter, "all"> {
+  if (guidance[status].action !== null) return "action";
+  if (status === "RECEIVED" || status === "CANCELLED") return "finished";
+  return "progress";
+}
+
+/** Sorting is limited to loaded cursor pages, not unseen backend records. */
+export function prioritizeLoadedOrders<T extends { status: OrderStatus; updatedAt: string; orderId: string }>(orders: readonly T[]): T[] {
+  const priority = { action: 0, progress: 1, finished: 2 } as const;
+  return [...orders].sort((a, b) =>
+    priority[customerOrderBucket(a.status)] - priority[customerOrderBucket(b.status)]
+    || Date.parse(b.updatedAt) - Date.parse(a.updatedAt)
+    || a.orderId.localeCompare(b.orderId),
+  );
+}

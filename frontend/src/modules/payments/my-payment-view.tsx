@@ -1,7 +1,9 @@
 "use client";
 
+import { PageLoadingRows, PageStateHeading } from "@/components/ui/async-page";
+
 import Link from "next/link";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import {
   Button,
   ErrorState,
@@ -110,6 +112,40 @@ export function MyPaymentView() {
   const [submitFeedback, setSubmitFeedback] = useState<string | null>(null);
   const [latestPayment, setLatestPayment] = useState<PaymentDTO | null>(null);
   const [stage, setStage] = useState<SubmitStage>("idle");
+
+  const resultFeedbackRef = useRef<HTMLDivElement>(null);
+
+  const focusAfterUserRetry = useRef(false);
+
+  function retryLoad() {
+    focusAfterUserRetry.current = true;
+    setState({ status: "loading" });
+    setLoadAttempt((attempt) => attempt + 1);
+  }
+
+  useEffect(() => {
+    if (!focusAfterUserRetry.current || state.status === "loading") return;
+    focusAfterUserRetry.current = false;
+    const frame = window.requestAnimationFrame(() => {
+      const heading = document.querySelector<HTMLElement>("main h1");
+      if (!heading) return;
+      heading.tabIndex = -1;
+      heading.focus({ preventScroll: true });
+      heading.scrollIntoView?.({ block: "start", behavior: "instant" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [state.status]);
+
+  useEffect(() => {
+    // A failed upload or completed resubmission may remove the submit button.
+    // Announce the terminal result where keyboard users can actually find it.
+    if (stage !== "idle" || (!serverError && !submitFeedback)) return;
+    const frame = window.requestAnimationFrame(() => {
+      resultFeedbackRef.current?.focus({ preventScroll: true });
+      resultFeedbackRef.current?.scrollIntoView?.({ block: "start", behavior: "instant" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [stage, serverError, submitFeedback]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -323,6 +359,8 @@ export function MyPaymentView() {
     return (
       <div className={styles.page}>
         <main className={styles.stateWrap}>
+          <PageStateHeading title="การชำระเงิน" description="ตรวจสอบคำสั่งซื้อและหลักฐานการชำระเงิน" />
+          {state.status === "loading" ? <PageLoadingRows /> : null}
           {state.status === "loading" ? (
             <LoadingState
               title="กำลังโหลดข้อมูลการชำระเงิน"
@@ -352,10 +390,7 @@ export function MyPaymentView() {
               actions={
                 <>
                   <Button
-                    onClick={() => {
-                      setState({ status: "loading" });
-                      setLoadAttempt((attempt) => attempt + 1);
-                    }}
+                    onClick={retryLoad}
                   >
                     ลองโหลดอีกครั้ง
                   </Button>
@@ -553,9 +588,16 @@ export function MyPaymentView() {
               ) : null}
 
               {serverError ? (
-                <Notice tone="danger" role="alert" title="ส่งหลักฐานไม่สำเร็จ">
-                  {serverError}
-                </Notice>
+                <div
+                  ref={resultFeedbackRef}
+                  tabIndex={-1}
+                  data-payment-operation-error
+                  className={styles.actionFeedback}
+                >
+                  <Notice tone="danger" role="alert" title="ส่งหลักฐานไม่สำเร็จ">
+                    {serverError}
+                  </Notice>
+                </div>
               ) : null}
 
               <div className={styles.actions}>
@@ -578,9 +620,11 @@ export function MyPaymentView() {
         ) : null}
 
         {submitFeedback ? (
-          <Notice tone="success" role="status" title="ส่งหลักฐานสำเร็จ">
-            {submitFeedback}
-          </Notice>
+          <div ref={resultFeedbackRef} tabIndex={-1} data-payment-operation-success className={styles.actionFeedback}>
+            <Notice tone="success" role="status" title="ส่งหลักฐานสำเร็จ">
+              {submitFeedback}
+            </Notice>
+          </div>
         ) : null}
 
         {!canSubmit && latestPayment ? (

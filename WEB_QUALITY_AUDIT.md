@@ -1,368 +1,367 @@
-# Website QA, UX/UI, Layout & Visual Quality Audit Report
+# WEB_QUALITY_AUDIT.md — UniStore Hub (Full UX/UI Re-Audit)
+
+> **Audit date:** 2026-10-17 (Asia/Bangkok)
+> **Project:** `UniStore_Hub` — local BDXA Mac / Docker Compose (Frontend `localhost:3000`, API `localhost:4000`)
+> **Status:** **AUDIT COMPLETE FOR DOCUMENTED COVERAGE — REDESIGN REQUIRED — NO IMPLEMENTATION**
+> **Scope:** real Chromium/Playwright UX, 28 canonical route-role cases, actions, responsive, dialogs, loading/empty/error, authorization and design handoff
+> **Non-goal:** modify UI/API/data, reset the environment, delete assets, commit, push or deploy.
+
+## 0. Executive decision / สรุปสำหรับเริ่มแก้
+
+**ไม่ควรรับรอง UX/UI ในสถานะปัจจุบัน** แม้ระบบหลักและชุดทดสอบที่รันผ่านจะทำงานได้ ปัญหาคือผู้ใช้ต้องแปลรหัสเทคนิคจำนวนมาก เลื่อนหา action สำคัญไกล และบางหน้าที่โหลดผิดพลาดไม่เหลือเส้นทางแก้ไขในหน้า การปรับสี/เงา/ไอคอนอย่างเดียวไม่เพียงพอ ต้องแก้ **information architecture, task flow, density, recoverability และ component states** ก่อน
+
+ข้อค้นพบระดับเร่งด่วน:
+1. **API failure:** simulated 503 state บนมือถือมี **11/28 route cases ไม่มี in-page action** และ **21/28 ไม่มี H1**; ผู้ใช้เห็นเพียงข้อความให้ reload หน้า (หลักฐาน Browser ชุดก่อนหน้า ยืนยันซ้ำด้วยภาพหน้าจอ).
+2. **Staff Payment Queue:** ตัวอย่างข้อมูลใน Local มี **290 payments / 203 pending**; บนมือถือส่วนหัว, KPI และ Filter ยึดพื้นที่เกือบเต็มหน้าก่อนถึงรายการที่จะตรวจ; Desktop แสดง UUID ยาวในรายการและข้อมูลตัดสินใจยังไม่เด่น.
+3. **Org switcher:** **144 organizations** ใน local snapshot; หน้าสำคัญต่อการเลือก context แต่ไม่มีเครื่องมือค้นหาชื่อที่เพียงพอเมื่อข้อมูลเยอะ และมือถือเจอฟอร์มสร้างหน่วยงานก่อนเข้าถึงการค้นหาหน่วยงานเดิม.
+4. **Customer My Orders:** **225 orders / 42 requiring action** ใน snapshot; โครงหน้าใช้การ์ดนับ/คำอธิบายจำนวนมาก แทนให้เห็นคำสั่งซื้อที่ต้องทำต่อทันที.
+5. **Platform Organizations:** **336 organizations** ใน local snapshot; มุมมองจัดการไม่เหมาะกับการหา/จัดการรายการที่ต้องทำงานจริง ปุ่มและสถานะกระจายบน card ยาว.
+6. **Loading:** ก่อนข้อมูลพร้อม หลายหน้ากลายเป็นกล่อง spinner และพื้นที่ว่าง ไม่มีโครงข้อมูลช่วยให้รู้ว่ากำลังเปิดหน้าใด บาง sample ถูกจับก่อนโหลดเสร็จ ต้องระบุว่าเป็น snapshot timing ไม่ใช่ endpoint failure.
+7. **Modal:** ตัวอย่าง Reject Payment เห็น textarea และ Cancel/Confirm ชัด แต่พื้นหลังยังแน่น ต้องทดสอบ reason validation, pending, failure, focus trap, 320px และ long content เพิ่มก่อนอนุมัติ design.
+8. **Visual direction:** หน้าการ์ด/summary ซ้ำซ้อน, neutral panels จำนวนมาก, คำอธิบายยาวและเลย์เอาต์ไม่เน้น next action; ไม่พบหลักฐานเพียงพอให้กล่าวหาว่ารูปไหนเป็น AI หรือให้ลบทรัพย์สินจากภาพลักษณ์ล้วน ๆ.
+
+### 0.1 ภาษาที่ใช้ในรายงาน
+
+- **OBSERVED:** พบจากภาพ/DOM/การกด Browser จริงในหลักฐานที่ระบุ
+- **TEST PASS (limited):** ผ่านเฉพาะเงื่อนไขทดสอบนั้น ไม่ใช่ทุก state
+- **SOURCE REVIEW:** อ่านจากโค้ดหรือ inventory แต่ไม่ได้เปิด state จริง
+- **NOT TESTED:** ไม่ได้ทดสอบ; **ห้ามนับเป็น PASS**
+- **BLOCKED/SKIPPED:** ถูกกันไม่ให้ส่ง mutation หรือยังไม่มี fixture state
+- **P0:** อันตราย/สูญข้อมูลหรือทำงานหลักไม่ได้; **P1:** กระทบงานหลักหนัก; **P2:** ขัดความต่อเนื่อง/การเข้าถึง; **P3:** visual polish
+
+**P0:** ยังไม่มี P0 ที่ยืนยันซ้ำได้ด้วยการตรวจแบบ read-only นี้; ไม่ใช่การรับรองว่าไม่มี P0 ในทุกข้อมูลหรือทุก role.
 
-> **Application:** UniStore Hub — Multi-Tenant Campus Commerce
-> **Audit date:** 2026-10-16 (Asia/Bangkok)
-> **Location:** Root of the BDXA workspace `UniStore_Hub`
-> **Mode:** READ-ONLY application audit; **NO implementation, application edit, data reset, Git commit, or deployment**.
-> **Target:** Local Docker Compose Development / LocalStack, Next.js at `http://localhost:3000`, API at `http://localhost:4000/api/v1`.
-> **Status:** **PARTIALLY COMPLETED**. Most discovered routes have responsive geometry sampling, but CRUD/real payment/production IAM/S3, complete human workflows and accessibility AT coverage remain NOT TESTED/BLOCKED. This report is a fresh audit after commit `1a11f76`, not a resurrection of the deleted historical audit.
-
-## 1. Executive Summary
-
-UniStore Hub เป็นระบบร้านค้าหลายหน่วยงาน (Platform Admin, Organization Admin, Staff, Customer, Guest) สำหรับร้านค้า/สินค้า/แคมเปญพรีออเดอร์ → Order → ตรวจหลักฐาน Payment → Production/Pickup. สถาปัตยกรรมที่อ่านได้จาก `SPEC.md`: Next.js Static Export, Express/Lambda, DynamoDB, S3, SQS และ AWS Learner Lab. **การตรวจครั้งนี้เกิดบน Local Dev เท่านั้น ไม่ได้แตะ AWS จริง**.
-
-### Key findings
-
-| ID | Severity | Evidence-based observation | Impact / status |
-|---|---|---|---|
-| **BUG-001** | **P2**, local-origin specific | เปิด `http://127.0.0.1:3000/` แล้วผ่าน 8–9 วินาที UI ยัง “กำลังตรวจสอบบัญชี/กำลังโหลดร้านค้า”, Store links = 0; Console แจ้ง Next.js HMR WebSocket handshake failures. เปิด `http://localhost:3000/` แสดงร้านได้และโหลดเสร็จ ~1.9 วินาทีในการวัดตัวอย่าง | Environment-origin/Dev-host consistency defect **confirmed**, สาเหตุเชิงเทคนิคยัง INVESTIGATE. ไม่อ้างว่า Production URL เสีย |
-| **UX-001 / LAYOUT-003** | **P2**, Local Demo data | Landing แสดง 245 ร้าน / 287 หน่วยงาน และรายการจำนวนมากใช้ชื่อ `E2E Organization`, `Reject E2E`, `Tenant Org B` ฯลฯ | Demo/test record ปะปนในผลลัพธ์ ทำให้หา Store ที่ต้องการยาก; **ไม่ใช่ข้อพิสูจน์ Production data leakage** |
-| **PERF-001 / LAYOUT-004** | **P2 INVESTIGATE** | Organization Orders Route ไม่พบ `main` ภายใน 4 วินาทีที่ 375, 820, 1440px ใน 3/11 การวัดแรก; เปิดซ้ำรอจนหัวข้อ “คำสั่งซื้อของหน่วยงาน” ขึ้นใช้ ~3,852ms หนึ่งครั้ง | Loading/readiness เป็นช่วงสั้นที่วัดได้; **ยังไม่ใช่ยืนยันว่าหน้าใช้งานไม่ได้** |
-| **LAYOUT-001 / UI-001** | P3 | Sidebar Organization Admin ที่ 1440px แสดง UUID หน่วยงานยาวหลายบรรทัดใน block สรุปหน่วยงาน | ใช้พื้นที่เหนือ Navigation โดยไม่ช่วยทำงาน; ชื่อหน่วยงานควรมาก่อน ID เทคนิค |
-| **LAYOUT-002** | P3, design refinement | หน้า Dashboard Organization Admin ที่ 390×844: Hero ขนาดใหญ่ประมาณ y129–445, KPI แรก y469–652, KPI ลำดับถัดไปเริ่มใกล้ y677 | งาน/ตัวเลขรองต้องเลื่อนลงหลายช่วง; ต้องรักษา KPI งานค้างที่ขึ้นก่อนแล้ว |
-| **ASSET-001** | P3 **subjective / investigate**, not a broken image | Store Campaign Card ใช้ abstract purple/yellow geometry เป็นภาพปกใน Seed Demo | ใช้ได้ใน Demo แต่ภาพสินค้า/กิจกรรมจริงช่วยสื่อความหมายได้ดีกว่า; ไม่พิสูจน์ AI provenance และ **ไม่แนะนำเปลี่ยน Assets โดยไม่มีไฟล์จริง** |
-
-**Positive evidence:** Login validation แสดงทั้ง summary และ field errors; Guest Search zero-results/clear → รายการร้านกลับมา, เข้า Store → Browser Back/Forward ถูกต้อง; 7 unauthorized-route probes ถูกปฏิเสธตามบทบาท; Order Detail/Payment/Pickup ทั้ง 4 route-family ที่ใช้ Order เดิมแสดงหัวข้อ/Controls ครบ 11 viewports; ใน geometry captures ที่สำเร็จทั้งหมด **ไม่พบ document horizontal overflow**.
-
-### Coverage snapshot
-
-- **28 canonical Next.js pages** discovered directly from `frontend/src/app/**/page.tsx`.
-- **29 role/route combinations × 11 mandatory viewport pairs = 319 planned geometry observations**; recorded **316**, remaining **3 timed out** (Organization Admin Orders at the dimensions above). **316/319 = 99.1% viewport *sampling***, **NOT** functional workflow coverage.
-- 272 generic route observations, 44 extra existing-Order detail/payment/pickup observations. Generic sampling occurred shortly after DOM content and many screens still displayed Loading, so geometry-only results are **not equal to completed-state validation**. Later targeted screenshots and ready-state tests cover representative pages.
-- **8 axe-core automated audits**, 4 Guest routes × 390/1440: **0 reported WCAG-tag violations**, **1 incomplete/manual-review result per scan**. Does not certify WCAG 2.2 AA.
-- Guest functional spot checks: Search no-match; reset filters; open Store; Back + Forward; Login empty-submit validation; Login/Register form presence. Role access controls: **7/7 expected access denial**.
-- Existing historical Phase 7 evidence on this workspace recorded 75/75 Chromium E2E PASS; **that suite was NOT rerun as part of this read-only audit** because its test fixtures mutate LocalStack and normal Playwright outputs write inside protected workspace. It is background evidence, not included in the current execution count.
-- **Production readiness:** NOT CERTIFIED. Real AWS IAM, S3 privacy, HTTPS real-user path, SQS, rollback and backups remain outside this local audit.
-
-## 2. Application Inventory
-
-These are 28 discovered route files; a query-sensitive route family must have the required identifiers supplied. "Sampled" means browser layout was sampled, **not every action tested**.
-
-| Route(s) | Archetype / key task | Roles | This audit |
-|---|---|---|---|
-| `/` | Storefront directory, search, store discovery | Guest, all users | Screen sampled 11 viewports, guest interactions tested |
-| `/login/`, `/register/` | Authentication, signup & validation | Guest | 11 viewports each, empty login validation, no account creation |
-| `/stores/view/` | Store detail, campaigns/products | Guest, Customer | 11 viewports, ready screenshot & click-through |
-| `/campaigns/view/` | Campaign details/open period | Guest, Customer | 11 geometry samples, loaded-state tasks not exhaustive |
-| `/products/view/` | Product variants/price/details | Guest, Customer | 11 geometry samples, loaded-state tasks not exhaustive |
-| `/orders/new/` | Customer order creation | Customer | 11 geometry samples; submit **NOT TESTED** |
-| `/my/orders/` | Order list and tracking | Customer | 11 sampled, read-only existing Order navigation |
-| `/my/order/` | Specific Order detail | Customer | 11 ready-state samples using existing Order |
-| `/my/payment/` | Payment/slip UI | Customer | 11 ready-state samples, **upload/submit NOT TESTED** |
-| `/my/pickup/` | Pickup availability/status | Customer | 11 ready-state samples, not completing Pickup |
-| `/notifications/` | Notification list | Customer | 11 samples, read/unread mutation NOT TESTED |
-| `/org/select/` | Organization selection | Staff, Org Admin | 22 samples across two roles |
-| `/org/dashboard/` | Organization overview / KPIs | Org Admin | 11 geometry samples + desktop/mobile ready screenshots |
-| `/org/settings/` | Organization config | Org Admin | 11 samples, Save NOT TESTED |
-| `/org/staff/` | Staff/permissions | Org Admin | 11 samples, CRUD NOT TESTED |
-| `/org/stores/` | Store management | Org Admin | 11 samples, CRUD NOT TESTED |
-| `/org/products/` | Product/variant management | Org Admin | 11 samples, CRUD NOT TESTED |
-| `/org/campaigns/` | Campaign management | Org Admin | 11 samples, CRUD NOT TESTED |
-| `/org/orders/` | Order operations | Staff, Org Admin | 11 staff + 8/11 org captures; 3 short wait timeouts |
-| `/org/orders/view/` | Order detail/operations | Org Admin | 11 ready-state samples with existing Order; mutations NOT TESTED |
-| `/org/payments/` | Manual payment verification queue | Staff | 11 samples; approvals/rejections NOT TESTED |
-| `/org/pickups/` | Pickup queue | Staff | 11 samples, fulfillment action NOT TESTED |
-| `/org/production/` | Campaign production summary | Org Admin | 11 samples |
-| `/org/audit/` | Audit log | Org Admin | 11 samples, ready-state/loading differences observed |
-| `/platform/summary/` | Platform KPIs | Platform Admin | 11 samples |
-| `/platform/organizations/` | Organization review | Platform Admin | 11 samples; approve/reject NOT TESTED |
-| `/platform/users/` | User management | Platform Admin | 11 samples; changes NOT TESTED |
-
-**Architecture and role validation:** code/document inventory reconciled against actual localhost routes; no access to live AWS, third-party bank payment, real customer fixtures or physical device.
-
-## 3. Functional Test Coverage
-
-Status vocabulary: `PASS`, `FAIL`, `BLOCKED`, `NOT TESTED`, `NOT APPLICABLE`. One row can represent an observed scenario family, **not every subcase or path**.
-
-| ID | Route | Feature | Role | Executed scenario | Result |
-|---|---|---|---|---|---|
-| F-01 | `/` | Store search | Guest | Search nonexistent term → no matching links + empty state | PASS |
-| F-02 | `/` | Reset search | Guest | Reset filter → Store links restored (16 currently on rendered view) | PASS |
-| F-03 | `/` → `/stores/view/` | Navigation | Guest | Click real “เข้าร้าน” link → local Seed Store opens | PASS |
-| F-04 | Home↔Store | History | Guest | Back and Forward (rechecked with URL wait) | PASS |
-| F-05 | `/login/` | Input validation | Guest | Empty submit → summary + email/password inline errors | PASS |
-| F-06 | `/login/`, `/register/` | Form structure | Guest | Visible forms: Login 2 inputs, Register 3 inputs | PASS |
-| F-07 | `/platform/users/`, `/my/orders/`, `/org/dashboard/` | Auth gate | Guest | Three restricted routes request Login | PASS (3/3) |
-| F-08 | `/platform/users/`, `/org/settings/` | RBAC | Customer | Both routes deny access | PASS (2/2) |
-| F-09 | `/platform/summary/` | RBAC | Staff | Platform route denies access | PASS (1/1) |
-| F-10 | `/platform/users/` | RBAC | Org Admin | Platform route denies access | PASS (1/1) |
-| F-11 | `/org/orders/` | Authorized route | Org Admin | Existing Org Orders opens after waiting ~3.85s in one sample | PASS |
-| F-12 | `/my/order/`, `/my/payment/`, `/my/pickup/` | Existing Order pages | Customer | Three route families × 11 viewports, loaded headings, controls | PASS (read-only) |
-| F-13 | `/org/orders/view/` | Existing Order detail | Org Admin | 11 viewports, heading and action elements | PASS (read-only) |
-| F-14 | `http://127.0.0.1:3000/` | Alternate local origin | Guest | 8–9 seconds at loading state, zero Store links; HMR errors | **FAIL** (environment-specific) |
-| F-15 | `/register/`, Checkout, Payment, Org CRUD | Persisting data | Authorized roles | Account creation, actual orders/slips/refunds/changes | **NOT TESTED** (read-only safety) |
-| F-16 | Notifications / SQS | Delivery/read state | Customer/Staff | End-to-end asynchronous event | **NOT TESTED** (would mutate data / infrastructure) |
-| F-17 | AWS public URL / private Files S3 | Cloud deployment and privacy | all | Real cloud access, presigned GET/PUT, HTTPS, IAM, rollback | **BLOCKED** (no authorized AWS session) |
-
-**Actual functional coverage percentage:** **NOT COMPUTABLE** because the total number of applicable interactive scenarios was not exhaustively enumerated and many write paths were intentionally unexecuted. The 316/319 count belongs **only** to viewport geometry sampling, not CRUD or E2E functional pass rate.
-
-## 4. Functional Bugs
-
-### BUG-001 — Local `127.0.0.1` origin leaves storefront loading
-
-- **Severity:** P2; Scope: Local Dev / alternate host; **Confirmed**. Browser: Playwright Chromium Headless, 390×844; additionally BDXA Browser.
-- **Route:** `http://127.0.0.1:3000/`; comparison `http://localhost:3000/`.
-- **Steps:** 1) Open fresh Chromium context. 2) Navigate to 127.0.0.1:3000/. 3) Wait 8–9 seconds. 4) Inspect Store results, account header, Console. 5) Repeat with localhost in fresh context.
-- **Actual:** 127 remains “กำลังตรวจสอบบัญชี” and “กำลังโหลดร้านค้า”, zero visible Store links; Browser Console repeats `WebSocket ... /_next/hmr ... ERR_INVALID_HTTP_RESPONSE`. localhost shows Store content and login/register links; a controlled localhost readiness sample observed Home ready in 1,931ms.
-- **Expected:** Either the documented supported Dev host should fully hydrate, or alternate host should show a clear canonical redirect/unsupported-host explanation rather than indefinite loading.
-- **Impact:** Local QA users opening via 127 cannot use the Storefront reliably.
-- **Investigation / fix direction:** Compare public environment API URL, cross-origin and allowed dev-host settings, HMR/proxy handling, hydration/network timing, and expected canonical origin. **Do not assume HMR alone causes data failure**; instrument exact request/re-render events and confirm the actual root cause.
-- **Acceptance criteria:** 127 and localhost either both show header/Store content within the established readiness budget without unexpected Console failures, **or** 127 immediately redirects/communicates unsupported origin. No secret/CORS weakening, no production origin changes solely for a Dev-only bug.
-
-Other route-load observations are tracked under **PERF-001 / LAYOUT-004 as INVESTIGATE**, not falsely classified as a confirmed broken workflow.
-
-## 5. Responsive Test Matrix
-
-Mandatory viewports: `320×568`, `360×800`, `375×667`, `390×844`, `430×932`, `768×1024`, `820×1180`, `1024×768`, `1280×800`, `1440×900`, `1920×1080`.
-
-All 11 pairs were attempted for each of 29 role/route combinations. `G` = geometry recorded; `T` = short-timeout capture not completed; many `G` observations were **initial loading-state captures** (see last column), not end-to-end route success.
-
-| Role / route family | 320 | 360 | 375 | 390 | 430 | 768 | 820 | 1024 | 1280 | 1440 | 1920 | Caution |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Guest: 6 routes (Home/Login/Register/Store/Campaign/Product) | 6G | 6G | 6G | 6G | 6G | 6G | 6G | 6G | 6G | 6G | 6G | 44 of 66 sampled before Loading settled |
-| Customer: My Orders/Notifications/Checkout (3) | 3G | 3G | 3G | 3G | 3G | 3G | 3G | 3G | 3G | 3G | 3G | 11 of 33 showed Loading text |
-| Staff: Select/Orders/Payments/Pickups (4) | 4G | 4G | 4G | 4G | 4G | 4G | 4G | 4G | 4G | 4G | 4G | 20 of 44 Loading |
-| Org Admin: Dashboard/Settings/Staff/Stores/Products/Campaigns/Production/Audit/Orders (9) | 9G | 9G | 8G+1T | 9G | 9G | 9G | 8G+1T | 9G | 9G | 8G+1T | 9G | `/org/orders/` missing `main` within 4s three times |
-| Platform Admin: Summary/Organizations/Users (3) | 3G | 3G | 3G | 3G | 3G | 3G | 3G | 3G | 3G | 3G | 3G | 28 of 33 early Loading |
-| Customer Order Detail/Payment/Pickup (3) | 3G | 3G | 3G | 3G | 3G | 3G | 3G | 3G | 3G | 3G | 3G | Existing Order, headings and controls confirmed |
-| Org Admin Order Detail (1) | G | G | G | G | G | G | G | G | G | G | G | Existing Order, heading and controls confirmed |
-| **Total** | **29G** | **29G** | **28G+1T** | **29G** | **29G** | **29G** | **28G+1T** | **29G** | **29G** | **28G+1T** | **29G** | **316G / 3T / 319 attempts** |
-
-**Geometry results on recorded snapshots:** document horizontal overflow `>2px` = **0/316**; unexpected unscrollable nested overflow by heuristic = **0/272** generic samples; loaded ready-state Order detail observations `>2px` = **0/44**; broken `<img>` naturalWidth=0 in generic captures = **0**. The viewport check is browser emulation, not physical mobile/touch-keyboard validation. **134 of the 272 generic route samples still contained the Thai Loading marker**, and 70 had no `main h1` at capture time. Treat those as state-coverage limits, not automatically accessibility defects.
-
-## 6. Responsive Issues
-
-**RESP-001 — P2 INVESTIGATE:** Three 4-second `/org/orders/` main-content readiness timeouts at 375/820/1440px. Same route later displayed “คำสั่งซื้อของหน่วยงาน” after ~3,852ms. Repeat under controlled warm/cold loads, measure API and hydration completion before judging viewport layout. Acceptance: consistent ready state with heading, proper skeleton and no silent hang at all 11 sizes.
-
-**No confirmed horizontal-overflow defects** in 316 recorded viewport observations. The existing focusable Audit horizontal table is an intentional interaction pattern and should not be flattened without evidence. Physical mobile keyboard, orientation, touch target accuracy and assistive-technology behavior are NOT TESTED.
-
-## 7. UX & User Flow Problems
-
-### UX-001 — E2E/demo records dominate public Store discovery
-- **Priority:** P2 for a shared demo/QA environment; **not proven in Production**.
-- **Evidence:** Loaded `/` displayed “245 ร้าน” / “287 หน่วยงาน”, including obvious `Reject E2E Organization`, `E2E Organization` and `Tenant Org B` records. First page mixes meaningful demo Store with disposable automation names.
-- **Impact:** Users cannot easily determine which listings are real/official. Search and pagination are functional but the information is not trustworthy as a curated campus storefront.
-- **Recommendation:** Keep real account/order ownership intact; add clearly scoped local fixture/test records and an opt-in QA-only directory filter or separate demo dataset. Do **not** blanket-delete historical LocalStack Orders or silently hide production tenants. Show “demo/test” badge for intentionally public test listings if shared QA data must remain.
-- **Acceptance:** A new shopper can identify the university's actual active Store without reading dozens of `E2E` fixtures; QA records remain accessible to authorized testers and no existing tenant data is lost.
-
-### UX-002 — Organization UUID shown as primary sidebar metadata
-- **Priority:** P3; see LAYOUT-001.
-- **Evidence:** `/org/dashboard/` at 1440 screenshot: full UUID wraps across multiple lines in the pale Organization card at sidebar top.
-- **Expected:** Friendly Organization name/status first, and technical identifier only on demand (copy-ID/admin detail).
-- **Acceptance:** No multi-line UUID noise in daily operations and identifier remains retrievable for debugging/Support.
-
-**KEEP / verified good UX patterns:** Store search zero-match + reset; visible Back to Store on Login; required-field errors; authorized vs unauthorized state distinction; approval/pickup operational separation; Guest/Customer/Staff/Org/Platform role-specific route guards. Do not redesign correctly separated transaction stages.
-
-## 8. Visual Design Issues
-
-### UI-001 — Technical sidebar string competes with navigation
-- **Objective observation**, P3, `/org/dashboard/` and shared Organization shell, 1440px: raw UUID creates awkward multi-line text and visual competition with role navigation.
-- **Action:** REFINE Organization summary card typography; show friendly name + status, place ID under collapsible “รายละเอียดเทคนิค” or Copy control. Recheck 390/1440.
-
-### UI-002 — Repeated pastel/gradient hero/card style
-- **Subjective design assessment**, P3, especially Organization Dashboard and Storefront: gradient hero, soft shadow, rounded KPI cards repeat as primary styling. This is coherent and readable, **not evidence of AI generation**; however dense operations screens could use slightly tighter vertical hierarchy.
-- **Action:** REFINE spacing and action prominence, not wholesale redesign. Do not discard brand purple/blue gradient or meaningful status colors.
-
-## 8A. AI-Looking UI, Asset Quality & Free Replacement Research
-
-**Assets/families actually visually inspected:** (1) Brand/logo treatment on Guest and Org shell; (2) Store Campaign abstract banner/placeholder; (3) Auth Hero treatment; (4) Dashboard gradient, geometric backgrounds, small navigation icons. Screens observed at 390 and 1440, plus geometry/DOM checks at 11 sizes. `frontend/public/` contained **0 local files** in this workspace snapshot; much of the visible imagery is CSS/inline vector/placeholder rather than product photography. `<img>` load-error heuristic did not find broken loaded tags; it **cannot certify CSS backgrounds or external assets**.
-
-**Provenance classification:** `UNKNOWN` for all graphics without creator/source provenance. No trustworthy evidence that any image was AI-generated. This section judges usefulness and rendering only, not authorship.
-
-| Asset ID | Route / Component | Observed issue | Origin | Quality vs style | Action | Free source/license | Priority |
-|---|---|---|---|---|---|---|---|
-| **ASSET-001** | `/stores/view/`, Campaign image of “Local Demo Campaign” | Abstract purple circle + pale yellow rounded shape is sharp and correctly cropped but conveys no campaign/product semantics in a seeded demo | UNKNOWN | **Subjective contextual-fit question**, not malformed/blurred media | **INVESTIGATE**: whether it is an intended fallback when no merchant image exists; keep for empty state, use actual merchant-uploaded media if available | No replacement justified/verified; avoid inventing stock imagery or a license | P3 |
-| — | Auth/Header brand SVG & gradients | Legible at 390px, no observed stroke clipping | UNKNOWN | No actionable defect confirmed | **KEEP** | Not required | — |
-| — | Dashboard icon/card graphics | Consistent system shapes; no verified distortion | UNKNOWN | No actionable defect confirmed | **KEEP** | Not required | — |
-
-**Verified free replacement candidates: 0.** No confirmed malformed or broken image currently warrants third-party replacement. Using a generic Pexels/illustration download for real goods could misrepresent products and requires a real media source and license validation. The replacement search protocol is **not triggered** by a mere aesthetic preference. If the team later chooses a replacement, source/license/attribution must be verified for the specific asset first.
-
-Acceptance: source imagery must be crisp at actual device pixel ratio, with correct `object-fit`/crop, accessible alt text where informative, coherent brand palette, no false product representation, and unchanged Store/Checkout behavior.
-
-## 8B. Layout Quality, Template-Like UI & Reference-Based Layout Audit
-
-### 8B.1 Route-family layout inventory and KEEP/REFINE decisions
-
-| Route / page family | Archetype + primary task | Roles | Viewports/states actually inspected | Layout / genericity risk | Reference | LAYOUT issue | Action |
-|---|---|---|---|---|---|---|---|
-| `/` | Search/results & storefront | Guest | 11 sampled; 390 loaded screenshot, search empty/reset, 1440 source sampling | Search-first credible; demo data noise | R1 Etsy, R2 Eventbrite | LAYOUT-003 | **REFINE** test-data presentation |
-| `/login/`, `/register/` | Authentication | Guest | 11; 390 full form, blank submission, 1440 axe | Clear single task with labels/errors; genericity LOW | R1 (navigation only; no matched login inspected) | — | **KEEP** |
-| `/stores/view/`, `/campaigns/view/`, `/products/view/` | Store/Product detail | Guest, Customer | 11 geometry; 390 loaded Store screenshot, detail text; campaign/product Loading in quick matrix | Store information visible; contextual asset issue only | R1 Etsy market (limited) | ASSET-001 | **KEEP / INVESTIGATE** |
-| `/orders/new/` | Checkout wizard/form | Customer | 11 early samples; no submit | Submit interaction NOT TESTED | R1/R3 as domain analogies only | — | **INVESTIGATE** |
-| `/my/orders/`, `/my/order/` | List/detail status | Customer | 11; real existing Order detail fully loaded | Status-first; no documented geometry defect | R3 Shopify official order docs | — | **KEEP** |
-| `/my/payment/`, `/my/pickup/` | Payment/Pickup status detail | Customer | 11 ready-state samples of existing Order; no upload/claim | Appropriate task-separated routes | R3 Shopify, R4 Stripe | — | **KEEP** |
-| `/notifications/` | Inbox | Customer | 11 early samples | No complete interaction evaluation | R4 Stripe search analogy limited | — | **INVESTIGATE** |
-| `/org/select/` | Organization picker | Staff/Admin | 11 each, 22 total | Role selection fits workflow | R3 Shopify settings concept | — | **KEEP** |
-| `/org/dashboard/` | KPI + operation navigation | Org Admin | 11 samples; 1440 and 390 fully loaded screenshots | Brand-coherent, hero consumes mobile attention, medium template-like risk | R3 Shopify/R5 Square docs | LAYOUT-001/002 | **REFINE** |
-| `/org/settings/`, `/org/staff/` | Settings, permissions | Org Admin | 11 each, no save/write | Full forms visible in samples; no confirmed geometry break | R5 Square official docs | LAYOUT-001 (shared shell) | **KEEP shell / REFINE ID** |
-| `/org/stores/`, `/org/products/`, `/org/campaigns/` | Inventory CRUD lists | Org Admin | 11 each, no write | No confirmed clipping; data-entry quality NOT TESTED | R5 Square inventory | — | **KEEP / INVESTIGATE CRUD** |
-| `/org/orders/`, `/org/orders/view/` | Order table + detail | Staff/Admin | 11 Staff + 8 Org quick captures, 11 ready detail | Org Orders sometimes slow to show main | R3 Shopify order filters | LAYOUT-004 | **INVESTIGATE** |
-| `/org/payments/`, `/org/pickups/` | Operational queues | Staff | 11 each, no mutate | Separated by staff task, sensible | R3 Shopify, R4 Stripe | — | **KEEP** |
-| `/org/production/`, `/org/audit/` | Summary + log/table | Org Admin | 11 each, Audit quick load some without h1 | Long table/filters no recorded overflow; loaded Audit state not comprehensively verified | R3/R5 docs | LAYOUT-004 for loading strategy | **KEEP / INVESTIGATE** |
-| `/platform/summary/`, `/platform/organizations/`, `/platform/users/` | Platform KPIs, list/approval | Platform Admin | 11 each; many early loading captures | Shared shell structured, no proven layout break | R3/R4/R5 operational analogies | LAYOUT-004 | **KEEP / INVESTIGATE ready-state** |
-
-**Overall visual system:** Purple → blue palette, light cards and soft shadows form a consistent brand. Desktop sidebar clarifies staff/admin tasks; mobile collapses into header/menu. Status cards are functional. Risk of **generic/template-like layout: MEDIUM** because of repeated large gradient hero blocks and pastel KPI card presentation even on dense operational screens. This is a **subjective product-design risk, not AI authorship detection**. Tasks should take priority over decoration; no need to replace conventional tables, tabs or cards simply because they are familiar.
-
-### 8B.2 Prioritized implementable layout issues
-
-| Layout ID | Actual vs expected | Reference pattern / evidence | User impact | Priority | Action and concrete acceptance |
-|---|---|---|---|---|---|
-| **LAYOUT-001** | Organization sidebar shows a wrapped full technical UUID; users need Organization name/status + navigation. At 1440, the metadata block spans multiple lines | R5 Square inventory docs use contextual item/location identification; not an actual private Dashboard screenshot | Reduces navigation scanability | P3 | **REFINE (small):** Organization name + role/status first, technical ID behind copy/control; same at 390/mobile drawer; preserve ID access for Support |
-| **LAYOUT-002** | At 390, Organization Dashboard Hero takes y≈129–445; first KPI below, next KPI appears near bottom y≈677 | R3 Shopify task-first order views, R5 Square inventory docs; **concept from official docs, not asserted pixel-level layout equality** | Relevant data requires more scrolling than on desktop | P3 | **REFINE (small/medium):** shorten header/role banner on mobile, show outstanding Payment count immediately, preserve all secondary KPIs below; test 320/390/768/1440 |
-| **LAYOUT-003** | Storefront directory displays 245 Stores and 287 Organization entries with many E2E names | R1 Etsy search/product relevance; R2 Eventbrite category/location filters | Search results less credible | P2 **local demo** | **REFINE (medium):** environment-aware QA fixture visibility or clearly mark QA listings; retain search/filter/pagination and do not suppress legitimate tenant results |
-| **LAYOUT-004** | Some async-list routes lack visible `main h1` while data loads, and Org Orders timed out at 4s in 3 viewports | R3 Shopify persistent order navigation/filter framework (official docs); R4 Stripe search status conventions | Potential wait/feedback uncertainty | P2 **INVESTIGATE** | **REFINE only if reproduced:** stable page header and accessible loading status from initial render, then hydrated table. Instrument cold/warm/API p95, test all 11 viewports; avoid counting early loading capture as a fail |
-
-**Desktop/mobile section guidance for implementing agent:**
-- Landing: Brand/navigation → compact search/primary store-discovery controls → first featured real Store → searchable results & pagination → optional explanatory how-it-works content; on desktop preserve multi-card featured arrangement if relevant and effective.
-- Org Dashboard: Mobile header/role compact → Payment queue KPI/CTA → Order/Pickup KPI → Store/Product quick actions → filters/reporting; desktop preserve sidebar + broad KPI grid. Avoid hiding financial status information.
-- Admin order/payment lists: Retain persistent title/status + filters, then rows/actions; prefer visible skeleton or `role=status` during async load. Table scroll must be keyboard reachable.
-
-### 8B.3 Reference-based product fit & score rubric
-
-Only rate inspected major families, rather than inventing values for unseen interaction states. Ratings are **qualitative (1–10)**, NOT WCAG or performance certification.
-
-| Family | Task-first IA | Visual hierarchy | Geometry | Density | Component purpose | Brand | Consistency | Responsive | Interaction | Reference maturity |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| Storefront/Home (390 loaded) | 8 | 8 | 8 | 7 | 8 | 8 | 8 | 8 | 8 | 7 |
-| Auth (390 forms/validation) | 9 | 8 | 9 | 8 | 9 | 8 | 8 | 8 | 8 | NOT TESTED (like-for-like reference login not verified) |
-| Store detail (390 loaded) | 8 | 8 | 8 | 7 | 8 | 8 | 8 | 8 | 7 | 6 (reference page access limited) |
-| Org Dashboard (390+1440 loaded) | 8 | 8 | 8 | 6 | 8 | 8 | 8 | 7 | NOT TESTED (write actions) | 7 (docs-only) |
-| Other administrative lists | NOT TESTED beyond sampled hierarchy | NOT TESTED | 8 (observed width only) | NOT TESTED | NOT TESTED | 8 (shared shell) | 8 (shared shell) | 8 (geometry) | NOT TESTED | NOT TESTED |
-
-**Fix-vs-preserve:** Keep the tenant-based sidebar, shared brand colors, existing transaction separation, focusable Audit table and search/filter controls. No evidence demands a full redesign. Implement only specific defects, with screenshots and regression checks before/after, including session and tenant RBAC.
-
-## 9. External Website Research
-
-Publicly verified references and explicit evidence levels. **No private Shopify/Stripe/Square admin interface was accessed.** Shopify public help article was also inspected with the remote browser. Dynamic Etsy browsing was blocked in the remote browser, so page-content comparison relies on public web result only.
-
-| Ref | Current archetype | Reference website + exact URL | Verified evidence level | Comparable pattern / what to adapt and *not* copy |
-|---|---|---|---|---|
-| **R1** | Storefront search/catalog | **Etsy** marketplace page: https://www.etsy.com/market/handmade_gifts | **LIMITED/UNVERIFIED interactive**: public listing content retrieved from web; remote live browser navigation failed; mobile visual not verified | Clear item/category filtering and relevance sorting; UniStore's tenant-first store directory is more suitable for campus units, so **keep tenant scope**, borrow clarity of curated results, not Etsy brand/images |
-| **R2** | Store/Campaign discovery | **Eventbrite** location-based discovery https://www.eventbrite.com/d/thailand/digital/ | **LIMITED/UNVERIFIED interactive**: live public text/index verified; mobile state not inspected | Prominent filters and location/category alignment; UniStore's small campus focus should use fewer filters than event marketplace; do not copy event cards wholesale |
-| **R3** | Org Orders/Payment/Pickup | **Shopify Help Center — Filtering orders** https://help.shopify.com/en/manual/fulfillment/managing-orders/viewing-orders/filtering-orders | **LIVE PUBLIC HELP ARTICLE INSPECTED via BDXA; official docs only**, not private admin view | Clearly documented saved order views and status filtering; compare functional *principle*, not visual geometry of inaccessible admin UI |
-| **R4** | Platform users/payments search | **Stripe Docs — Dashboard search** https://docs.stripe.com/dashboard/search | **OFFICIAL DOCS**, not Stripe logged-in UI; mobile not verified | Search objects/structured terms/filter group; UniStore's multi-role boundaries are more explicit for staff, preserve RBAC and avoid overwhelming operator with global search without need |
-| **R5** | Organization products/inventory | **Square Support — Adjust inventory levels** https://squareup.com/help/us/en/article/8331-set-up-inventory-tracking | **OFFICIAL DOCS**, not Square private dashboard; mobile not verified | Variation-level inventory actions and keyboard-friendly Manage Stock modal; compare against UniStore variant/status operations, but do not assume Square features apply to pre-order workflows |
-
-**Coverage:** 5 distinct relevant production providers/public references, 1 directly opened official Help page in remote browser, 4 published pages/articles verified via web text, **0 verified private production dashboards**, **0 verified competitor mobile screenshots**. The Protocol goal of two directly inspected comparable screens per archetype was **not fully met**; that gap is transparent. No unverified reference is presented as a pixel-perfect model.
-
-## 10. Accessibility & Performance
-
-**Accessibility method:** axe-core in real Chromium on `/`, `/login/`, `/register/`, `/stores/view/` at 390×844 and 1440×900, using WCAG 2 A/AA, WCAG 2.1 AA and WCAG 2.2 AA tags. **8 scans, 0 reported violations, 8 scan results each with 1 “incomplete” check** needing manual assessment. Missing `main h1` in generic geometry during early Loading is not proof of a semantic failure after load. Keyboard interaction for Audit table was previously exercised in Phase 5; **not rerun in this read-only audit**. No physical iOS, Android, VoiceOver, TalkBack or motor/touch target certification.
-
-**Performance observations (single local Chromium samples; not p95 benchmarks):**
-- `localhost` Home `domcontentloaded` ≈93ms, first real Store link ready ≈1,931ms in a targeted sample at 390px.
-- `localhost` Store Detail `domcontentloaded` ≈76ms, first seeded Store heading ≈194ms in that particular sample.
-- Login `domcontentloaded` ≈51ms, form ≈143ms sample.
-- Organization Orders first h1-ready check ≈3,852ms in one sample, and three 4s missing-`main` matrix timeouts. Not enough to extrapolate production backend p95 or average across users.
-- `127.0.0.1` alternative origin: 8–9s still loading, repeated HMR handshake errors, no Store links. See BUG-001.
-- DevTools `N` bubble in screenshots comes from **Next.js Development UI** and should not be labeled a product design defect or expected production artifact.
-
-**PERF-001** (P2 INVESTIGATE): Log route/navigation transition timing, account session initialization, API status/duration and React loading-to-ready milestones for Org Orders/Audit/Platform Organizations. Compare cold/warm and 1/3/5 concurrent users using non-mutating load; do not “fix” timing by raising timeout alone. Acceptance: stable title/loading state and measured readiness target agreed by the project owner, no missing content and no cross-tenant content flash.
-
-## 11. Design Quality Scorecard
-
-Subjective inspection values for sampled local UI, **not complete compliance scores**:
-
-| Dimension | Indicative score / 10 | Rationale and limitation |
-|---|---:|---|
-| Visual Design | 8 | Consistent purple/blue, deliberate type scale; many gradient hero/card repeats |
-| Layout Quality & Information Hierarchy | 7 | Primary task visible; Dashboard mobile hero and technical UUID add avoidable clutter |
-| Product Identity / Brand Coherence | 8 | Cross-route identity stable; Store demo imagery generic but sharp |
-| Reference-Based Layout Maturity | 6 | Suitable task structures; reference coverage includes docs and no private admin |
-| UX / Usability | 7 | Functional Guest discovery; QA fixture names dilute real Store results |
-| Responsive Design | 8 | 316 geometry captures with no horizontal overflow, but 3 timeouts and loaded-state gaps |
-| Component Consistency | 8 | Auth/shell/cards visually coherent |
-| Accessibility | 7 *provisional* | 8 axe checks zero violations, all 8 have incomplete manual items; AT not tested |
-| Navigation | 8 | Guest Store/Back/Forward and 7 restricted routes behaved as expected |
-| Interaction Quality | 7 *partial* | Validations/search pass; CRUD and real payment not run |
-| Production Readiness | 3 *provisional local gate only* | Actual AWS/HTTPS privacy/backups NOT RUN; **NOT** a verified production security assessment |
-
-## 12. Prioritized Fix Roadmap
-
-1. **P2 — BUG-001 (Dev origin):** Reproduce 127 vs localhost with real network/console/hydration traces; fix allowed/canonical dev-host configuration without disabling CORS/session protections. E2E acceptance on both hostnames or deliberate redirect.
-2. **P2 — UX-001/LAYOUT-003 (Fixture hygiene):** Separate intentionally synthetic demo tenants from user-facing Store discovery; opt-in QA visibility/badge, preserve data ownership and search behavior. No blanket cleanup of LocalStack.
-3. **P2 INVESTIGATE — PERF-001/LAYOUT-004:** Measure cold/warm readiness of Org Orders/Audit/Platform screens; provide persistent accessible page title/skeleton and deterministic waits if truly absent; no arbitrary timeout inflation.
-4. **P3 — LAYOUT-001/UI-001:** Shorten Organization sidebar metadata; keep copyable technical ID outside routine scan path.
-5. **P3 — LAYOUT-002:** Compress Mobile Dashboard Hero before KPI/action list, preserve brand and payment-first prioritization.
-6. **P3 optional — ASSET-001:** Evaluate actual user-uploaded campaign/product imagery before proposing an alternative to demo-only geometric artwork. No stock asset substitution without specific verified rights.
-7. **Separate AWS Release Gate:** Execute existing `tests/reports/aws-live-validation-checklist.md` after **explicit** account/budget/permission approval; real HTTPS, S3 privacy, IAM, backup/restore, SQS, Lambda performance and rollback are distinct from local UI fixes.
-
-## 13. AI Implementation Handoff
-
-The implementing coding agent must **not** use this audit as blanket permission to refactor the application. Review `AGENTS.md`, `SPEC.md`, subsystem contracts and Git status, then plan tiny, independently reversible changes.
-
-| Work package | Files/components to inspect | Implementation intent | Acceptance/regression |
-|---|---|---|---|
-| A: Canonical Dev origin | `frontend/next.config.*`, frontend API base/config, Docker Compose host mapping, startup/hydration and `/api/v1/storefront/directory` fetch | Ensure either both loopback hostnames work or 127 redirects with a clear message; retain strict API origin checks | Chromium 390/1440 read-only Store search after 8s both hosts, no HMR/error spam and no security relaxation |
-| B: Demo Store visibility | Storefront directory API and filtering, source of E2E/seed organizations, `frontend/src/modules/storefront/` | Clearly distinguish QA tenants from public campus Store data; do not delete unknown records | Verify Store list/search/pagination with active, no-store and test Org; authorizations and seed E2E unchanged |
-| C: Loading readiness | `frontend/src/modules/orders/organization-orders-view.tsx`, Org route shell and Platform list views | Stable header/skeleton and status announcements, diagnose performance bottleneck | Repeat exact 11 viewports, 1 worker/no retries, controlled 3-run ready-time distribution, no blocked tab order |
-| D: Technical metadata | Shared Organization sidebar/shell components | Friendly Organization name/status as primary copy; technical ID behind accessible copy/help | 390/768/1440 visual and keyboard check; Support can still retrieve UUID |
-| E: Mobile dashboard density | Dashboard hero & KPI CSS/components | Shorter responsive hero, payment attention CTA/KPI first, preserve overview and store/product actions | Screen capture 320/390/768/1440 plus actual taps/menu, no lost KPIs or actions |
-| F: Visual fallback | Store Campaign banner/product media components | Only if suitable asset exists: genuine Store/Campaign image with correct crop/alt; maintain tasteful abstract fallback for no-image data | No bad aspect ratio/failed image; confirm uploaded file ownership/license and Store interaction integrity |
-
-**Keep:** Backend authoritative role/tenant isolation, Order→manual Payment verification→Production→Pickup separation, exact API DTOs, audited Orders (no arbitrary physical deletion), responsive table scroll, and existing brand colors. Do not copy external brands, marketing illustrations or proprietary visuals.
-
-**Minimum local regression after fixes:** Existing `frontend/e2e` suite (run only in an approved test environment with known data ownership), Backend/Frontend unit, contract/security, read-only responsive/a11y snapshots, and refreshed representative screenshots outside the project workspace. Mutating tests must respect test-order ownership and cleanup journals; never touch production users or data. AWS tests remain separate, approved tasks.
-
-## 14. Testing Limitations
-
-- **Read-only scope**: No Account creation, Order submission, Payment approval/rejection, slips/uploads, Pickup completion, Org/Platform CRUD, Notifications read-state mutations, backend privileged security probes or actual SQS event delivery were performed this audit.
-- **Access:** Local authorized seeded roles through session initialization and API login for read-only route inspection; no end-to-end full UI login success/logout flow or MFA/CAPTCHA. No live Learner Lab account access.
-- **Browser:** Chromium emulation only; no physical devices, Safari/Firefox comparative rendering, touch keyboard or screen-reader.
-- **Timing:** Generic matrix sampled initial pages quickly, frequently during Loading, and should not be misread as completed-state coverage; 3/319 viewport pairs timed out. Four additional existing-Order route families were inspected in ready state.
-- **Audit assets:** Embedded/CSS decorative elements have no reliable generative provenance or separate licensing attribution; no proof of AI creation. No deficient asset was confirmed to justify a third-party replacement.
-- **External websites:** Five real public sources verified, but only Shopify official help page opened in the remote browser; private competitor admin dashboards and mobile behavior not visually inspected. Never claim direct dashboard parity.
-- **Axe:** Automated checks returned 1 incomplete/manual result per page; no full WCAG pass claim.
-- **No real AWS production readiness sign-off:** Static S3 Website remains an HTTP demo architecture per project specification. IAM effective rights, secret handling on AWS, anonymous Files S3 access, RPO/RTO, recovery and actual cloud costs are NOT RUN.
-- **Existing testing history:** Previously reported Phase 7 complete 75/75 pass is context only, not a fresh Playwright run here; ordinary tests could write artifacts or change LocalStack, prohibited by the supplied read-only skill.
-- **Missing benchmark standard:** No owner-provided threshold for readiness p95, user throughput, target devices or acceptable task completion time; no invented pass criteria.
-
-## 15. Workspace Integrity & Cleanup Verification
-
-**Baseline:** Commit `1a11f76` (`chore: finalize local remediation and remove web quality audit`); Git working tree **clean**. Docker frontend/backend/LocalStack healthy, worker active, bootstrap/seed exited 0. `WEB_QUALITY_AUDIT.md` did **not exist** before this audit.
-
-**Operations:** Browser interaction to existing Dev web; source/tests/config/package manifests/lockfiles/DB/Git metadata untouched. No `npm install`, migration, build, Docker restart/reset, production action, data mutation, commit or push. Script/log/test-output artifacts for this audit were placed only in **`/tmp/unistore-readonly-audit-LY6gHH`** on the BDXA Mac; temporary browser sessions were created. In-memory images were used for review; no permanent screenshots in Workspace.
-
-**Final cleanup verification:** VERIFIED: all 15 files in the isolated /tmp/unistore-readonly-audit-LY6gHH working directory were removed, and the directory itself was deleted. The four temporary script process PIDs were not running. The Shopify Browser session returned closed=true; two older temporary browser session IDs returned BROWSER_SESSION_NOT_FOUND when queried. No screenshot files were retained in the workspace. Transient platform image cache expiry is managed by BDXA.
-
-**Protected files unchanged:** YES — verified Git status listed only the new audit report, and git diff --name-only was empty. No tracked application or test files were changed.
-**Temporary artifacts removed:** YES — all 15 known audit-owned files removed and dedicated directory no longer exists; BDXA platform-managed transient image cache retention was not directly controlled.
-**Only permanent file intentionally created:** `WEB_QUALITY_AUDIT.md`.
-**Final status:** PARTIALLY COMPLETED due explicit blocked/incomplete functional, accessibility, comparator and cloud coverage. Confirmed Local findings and route/viewport measurements are preserved above; no implementation attempted.
 ---
 
-## 16. Post-Audit Remediation Results (2026-10-16)
+## 1. Environment, methodology and reproducibility
 
-**The preceding sections preserve pre-fix observations. This section records the current implementation after the user authorized changes.** All figures below are Local Dev, not production certification.
+### 1.1 Current-run verified (this re-audit)
 
-| Finding | Current outcome |
-|---|---|
-| BUG-001 | FIXED. Both localhost:3000 and 127.0.0.1:3000 now load Storefront links. Explicit loopback CORS and Next Dev Origin settings; unrelated external origins remain denied. |
-| UX-001 / LAYOUT-003 | FIXED FOR LOCAL DEMO. Explicitly named E2E/QA/Golden/harness fixtures are hidden from default Dev directory with reversible Show QA control. Default sample: 1 store / 1 organization; toggled: 245 / 287. No database deletion; production output is unaffected by this name heuristic. |
-| PERF-001 / LAYOUT-004 | LOADING UX FIXED; P95 MEASUREMENT OPEN. Route preparation and Organization Boundary now render semantic main and H1 loading state. All full-suite Browser cases passed. No claim that backend latency itself decreased. |
-| LAYOUT-001 / UI-001 | FIXED. Sidebar displays the authorized real organization name and a collapsed accessible technical-ID disclosure; verified at 390 and 1440px. |
-| LAYOUT-002 | FIXED. Mobile Organization Dashboard hero at 390px decreased from ~316px to 202px; Payment KPI visible sooner. Desktop layout retained. |
-| ASSET-001 | FALLBACK IMPROVED. Campaign banner uses the real campaign name and opening date instead of misleading decorative geometry. Genuine photos require merchant-owned source media; no stock product photo was invented. |
+- **Git guardrail:** เจอไฟล์ `WEB_QUALITY_AUDIT.md` และ UI/E2E/CSS อื่น ๆ modified อยู่ก่อนเริ่ม; **ไม่ reset ไม่ checkout ไม่แก้ source code**; เก็บสำเนารายงานก่อนแก้ใน `/tmp/unistore-pre-reaudit-WEB_QUALITY_AUDIT-20261017.md`.
+- **Runtime:** Docker Compose `backend`, `frontend`, `localstack` healthy และ `worker` running; ตรวจ public homepage ด้วย Chromium โดยโหลดข้อมูลจริงสำเร็จ ไม่มี page error/API 4xx-5xx จาก sample นั้น.
+- **Full route recheck:** `/tmp/unistore-live-recheck-20261017/` — **28/28** canonical route-role samples visited at **1440×900**; `matrix.json` reports **0 route-run problems** and customer Order ID found from existing local list.
+- **Action evidence:** **2,346 rendered control instances inventoried**, **88 safe click attempts**. Skipped classifications: 707 duplicate-row controls, 1,484 representative-limit, 16 write-risk controls, 35 editable fields inventoried (not submitted), 10 disabled, 2 hidden, 4 not visible on revisit. These are **not** 2,346 functional PASS results.
+- **Timing caveat:** 2 fresh snapshots (`org-select`, `staff-orders`) still showed some loading; Staff Orders had 0 actions/H1 in that capture. **Do not label route as broken on that basis**; previous completed desktop and earlier E2E coverage show successful loaded state. Re-run with explicit content-ready wait in next QA gate.
+- **Unit/component tests re-run:** `npm test -- --reporter=dot` → **80 files / 304 tests PASS**.
+- **Targeted non-mutating Chromium E2E re-run:** `npx playwright test e2e/audit-remediation.spec.ts --project=chromium --reporter=line` → **3/3 PASS** (localhost/127 reachability, opt-in local QA listings, Org dashboard mobile/desktop geometry).
+- The BDXA isolated browser showed a lingering startup/loading snapshot while a separate local Playwright instance hydrated successfully; **use the local Playwright evidence for actual loaded-state findings**; do not interpret that isolated-browser discrepancy alone as a frontend production defect.
 
-### Verified tests
+### 1.2 Existing same-day deep-audit evidence inspected and retained
 
-- **Playwright Full Chromium:** 78/78 PASS, 18 spec files, 0 fail, 0 retries, 0 skipped, exit 0; duration ~399.8 seconds. Three new Browser regressions cover Dev hosts, QA data toggle and mobile/desktop organization shell.
-- **Frontend Unit 304/304 PASS** (80 files); **Backend 297/297 PASS**; **Security 16/16 PASS**.
-- **API Contract 196 PASS / 2 TODO**; **Infrastructure 19/19 PASS**; **Frontend Static Export and contracts 33/33 PASS**.
-- TypeScript, ESLint, and Git diff whitespace validation passed.
-- CORS checks: localhost and 127 both allowed; https://untrusted.example has no Allow-Origin header.
-- Inventory: 28 canonical routes, 33 snapshots and 9 owned journals marked verified-cancelled.
-- Local proof: /tmp/unistore-fix-all-full/run.json, run.log, exit.txt; read-only targeted Browser tests under /tmp/unistore-audit-fixes-targeted-v3.
+The following **already-recorded real-browser evidence** was inspected and used to fill cross-viewport/state gaps, **not rerun in full in the current pass**:
 
-### Safety, caveats and remaining external work
+| Evidence source on BDXA Mac | Actual prior coverage | Valid inference |
+|---|---|---|
+| `/tmp/unistore-deep-ux-audit-20261017/` | 28 role-routes on 390×844; 2,487 rendered controls; 93 safe clicks; modal, auth, drawer, empty-payment captures | Mobile layout and exercised actions, **not every button** |
+| `/tmp/unistore-deep-ux-desktop-20261017/` | 28 role-routes on 1440×900; 3,178 controls; 94 safe clicks; selected dialogs | Desktop layout and exercised actions |
+| `/tmp/unistore-confirm-dialog-audit-20261017/` | 11 candidate pages; six modal screenshots | Triggers/visible modal/Escape only |
+| `/tmp/unistore-state-loading-20261017/` | 28 role-routes × 2 widths = 56 delayed-GET observations | Simulated loading UI, **not production latency** |
+| `/tmp/unistore-state-error-20261017/` | 28 role-routes × 2 widths = 56 simulated 503 observations | Error UI, no-action pages, page-title behavior |
+| `/tmp/unistore-e2e-final-17/run.log` | Older full suite recorded 78/78 PASS | Historical only; **not rerun now** |
+| `frontend/interaction-coverage-matrix.md` | Inventory of 207 source route-specific interaction families | Scope taxonomy, **not 207 tests passed** |
 
-Only local Backend/Frontend containers were recreated for the Dev Origin change; LocalStack and persistent data were not reset. No broad Order/data cleanup or AWS operation. The local fixture naming heuristic can be replaced later by explicit fixture ownership metadata. Backend p95 profiling, owner-provided real campaign imagery, live AWS IAM/S3/HTTPS/backup/restore, and physical-device/screen-reader review remain pending separate evidence. These edits are **not committed or pushed**.
+Combined **earlier 390+1440 captures** inventoried 5,665 DOM control instances and 187 attempted safe interactions; new 1440 rerun inventoried 2,346 controls/88 clicks. Differences come from data/screenshot timing and repeated controls; **do not sum into unique-feature coverage or fabricate a total PASS rate**.
 
-**Conclusion:** The actionable local findings received implementation and a passing full regression. Outstanding external dependencies are not claimed as fixed or certified.
+### 1.3 Safety and exclusions
 
-### Performance follow-up — non-mutating backend-log sample
+- Browser exploration uses only local seed accounts. Generic sweeping intercepts all non-GET/HEAD/OPTIONS `/api/v1` requests, so risky clicks cannot persist changes. The local unit/E2E suites listed above are non-mutating with respect to real business records.
+- We **did not certify** the final server response for every Create/Update/Delete/Approve/Reject/Confirm Pickup/Upload action in this re-audit, nor run every tenant-role combination, live AWS, real payment, device or screen reader.
+- A visible control inventory is **not** equivalent to pressing every button. Conditional actions depend on entity state; accessing another user's record must be tested under owned fixture data and server-verified RBAC.
+- No real mobile device/Safari/Firefox, 200% zoom, high-contrast mode, all keyboard-only interactions, Light/Dark permutations, every loading race/slow network, every API timeout or every empty tenant is covered here.
+- The screenshots include the **Next.js development indicator** at bottom left; this is a local DEV overlay, not an application production asset. Do not redesign the app to hide this via arbitrary CSS.
+- Claims about “AI-looking design” are subjective aesthetic assessments; image provenance/license checks are **NOT TESTED**. Preserve user-uploaded media and audit licenses before swapping assets.
 
-- Read-only local Backend log sample (recent 45 minutes after the 78-case E2E run): Organization order-list GET **n=8**, median **1,553.2 ms**, approximate sample p95 **2,468.1 ms**; Order-detail GET **n=36**, median **31.2 ms**, approximate sample p95 **102.4 ms**. These are observed request durations, not a representative production load benchmark. Small, test-driven sample sizes and warmed/cold state can affect results.
-- Static inspection confirms the list handler maps each listed Order through `loadOrderDto`, which queries the item's partition with `listItems` per Order. This creates one child Query per listed Order (an N+1 pattern), plausibly contributing to slower list requests; a causal timing breakdown has not been instrumented.
-- A further Backend data-access optimization is **not silently applied** because the published OrderDTO includes complete `items[]`, filters and opaque cursors are contract-sensitive, and removing item queries or adding a DynamoDB Query limit without handling filtered/empty pages could break clients.
-- Next acceptance gate if performance remains a priority: capture number of Order records and child Queries per page, benchmark before/after on identical LocalStack fixtures with filtered + multi-page cursors and cross-tenant security checks, then choose a contract-preserving bounded-query approach. Current loading-state fix and full 78-case regression remain PASS; the latency root cause remains under investigation.
+---
+
+## 2. Test coverage by route & role (28 canonical cases)
+
+Each line means that the route was visited in its permitted role and sampled, **not** that all listed states/actions were passed. Primary E2E follow-up = tasks the next phase must verify with safe disposable fixtures.
+
+| # | Role | Route | What matters for UX / observed or code-reviewed | Next test states NOT CERTIFIED |
+|---:|---|---|---|---|
+| 01 | Guest | `/` | Landing: search, open-store discovery, QA dataset opt-in; loaded public route works | No stores, no matches, slow search, image absence, 503, keyboard |
+| 02 | Guest | `/login/` | Email/password, show/hide, inline invalid form shown on 390/1440 | Wrong credentials, rate limit, pending, redirect, assistive tech |
+| 03 | Guest | `/register/` | Name/email/password, show/hide, empty-submit validation shown | Duplicate email, server rejection, slow submit, success redirect |
+| 04 | Guest | `/stores/view/` | Store information and campaign links visible on loaded sample | Closed/inactive store, no campaigns, 404/503, broken media |
+| 05 | Guest | `/campaigns/view/` | Campaign/product navigation; close date and active state need priority | Draft, ended, canceled, no eligible products, invalid ID |
+| 06 | Guest | `/products/view/` | Variant, price and campaign selection; anonymous order path | Out of stock, variant disabled, no image, quantity constraints |
+| 07 | Customer | `/my/orders/` | 225 total / 42 actionable local sample; overscrolling, same-weight cards | No orders, list pagination, status filter, real action grouping |
+| 08 | Customer | `/my/order/` | Order details and next-step links; cancel modal trigger sampled earlier | All order statuses, cancel denied, double click, stale detail |
+| 09 | Customer | `/my/payment/` | Upload slip, validation and payment status need clear guidance | Unsupported format, upload failure, retry, approved/rejected flows |
+| 10 | Customer | `/my/pickup/` | Ready/Not Ready and pickup code visibility | Already received, expired/invalid token, 503, screen brightness |
+| 11 | Customer | `/notifications/` | Read/unread/all, per-item mark read; repeated notification rows | Empty/unread zero, failed mark-read, load more, optimistic rollback |
+| 12 | Customer | `/orders/new/` | Variant/quantity/order confirmation; avoid accidental duplicate order | Invalid quantity, price changed, timeout, duplicate submit, retry |
+| 13 | Staff | `/org/select/` | 144 organizations; no efficient known-organization lookup in screenshot | No membership, 1000+ orgs, recently used, permission switch |
+| 14 | Staff | `/org/orders/` | Order queue filters, long IDs, busy operational list; one fresh snapshot caught loading | Explicit loaded 390 capture, no results, pagination, 503, unauthorized |
+| 15 | Staff | `/org/payments/` | 290 total/203 pending; queue and filters consume first mobile viewport | Approve/reject all results, stale, double submit, retry, 320px |
+| 16 | Staff | `/org/pickups/` | Token/order lookup, selection, pickup state | Invalid token, duplicate confirm, not-ready, 503 and pending |
+| 17 | Org Admin | `/org/dashboard/` | KPI and shortcuts present; same-weight metrics dilute priority | Empty org, multi-campaign selection, filters, network failure |
+| 18 | Org Admin | `/org/settings/` | Edit name/description; validation requires clear return focus | Save pending, invalid and unchanged data, permission/503 |
+| 19 | Org Admin | `/org/staff/` | Invite/add role/change/remove in compact admin context | Last admin, duplicate account, pending/denied, focus on error |
+| 20 | Org Admin | `/org/stores/` | Create/edit/disable; show dependency before dangerous action | Missing name, inactive items, nested product dependencies |
+| 21 | Org Admin | `/org/products/` | Product/variant/upload flows interleaved; creation panel dominates mobile | Upload limits, variant validation, disabled items, modal and error |
+| 22 | Org Admin | `/org/campaigns/` | Lifecycle and multiple statuses; long explainer cards push real work down | Draft/Open/Closed/Producing/Ready/Completed/Cancelled, modal matrix |
+| 23 | Org Admin | `/org/production/` | Campaign-specific production summary | No campaign, no paid orders, totals reconciliation, 503 |
+| 24 | Org Admin | `/org/audit/` | Actor/resource UUID filter and expanding metadata | No matches, long JSON, 1000+ events, role boundary, 503 |
+| 25 | Org Admin | `/org/orders/view/` | Cancel/admin-only control, order summary | All statuses, unauthorized, stale order, modal submit |
+| 26 | Platform Admin | `/platform/summary/` | Count summary; no actions in main is by design for read-only view | Empty platform, delayed data, 503 with recovery |
+| 27 | Platform Admin | `/platform/organizations/` | 336 organizations; approval/suspension controls and long cards | PENDING/ACTIVE/SUSPENDED, no results, search/pagination, denial |
+| 28 | Platform Admin | `/platform/users/` | User list is read-only; action count 0 is expected on success | Large data, search/sort, stale/503, personal-data handling |
+
+**Role boundary distinction:** 28 is a sample of **route × authorized role** cases, **not** all 28 routes × all role permutations. Some Organization Orders/Payments/Pickups are shared by Staff and Org Admin; role-specific mutation permissions must be tested separately.
+
+---
+
+## 3. P1 / P2 prioritized defect backlog — implementation-ready
+
+| ID | Priority | Evidence | User impact / root UX issue | Proposed correction | Acceptance / reproducibility |
+|---|---|---|---|---|---|
+| **UX-001** | **P1** | OBSERVED 503: 11/28 route samples without in-page action | User stranded on failed data load, only told to reload manually | Shared context-preserving `ErrorState`: H1 + message + **ลองใหม่** + safe **กลับ**; retry same query; status distinction | Force GET 503 on all affected routes → Retry visible → restore backend → recover without re-login |
+| **UX-002** | **P1** | OBSERVED 503: 21/28 no H1; Loading: 19/28 mobile sample no H1 | Page identity disappears on error/slow response, harms confidence and screen-reader headings | Route H1 and context outside data-fetch conditional; stable region status/focus | Every screen has semantic one H1 in loaded/loading/empty/error/forbidden; route navigation visible |
+| **UX-003** | **P1** | OBSERVED Staff Payments 290/203 screenshot (390,1440) | First relevant payment below long summary/filter; scroll to work; UUID visually dominates | **Task-first Payment Inbox**: pending default, compact readable rows, next-action count, query by human reference, selected detail | At 390px first actionable payment can be reached without long scroll; 300-row scenario searchable in a few steps |
+| **UX-004** | **P1** | OBSERVED Org Selector 144, 390px | Choosing existing org is a prerequisite, but create-org form and stats dominate screen | Prioritize **Search organization**, recently used, name/status/role; move Create to distinct opt-in flow | Search exact organization name without scanning 144 rows; switch safely with clearly displayed tenant |
+| **UX-005** | **P1** | OBSERVED My Orders 225/42, mobile image | Actionable orders hidden behind explanation and totals; no clear stage grouping | Action-needed first, In Progress/Completed tabs, compact timeline rows, single next CTA, minimal technical reference | 42 tasks grouped; newest actionable visible immediately; preserve order state and history |
+| **UX-006** | **P1** | OBSERVED Platform Organizations 336, Desktop | Hard to find target org; lifecycle approval/suspend buried in repeated cards | Name search, status filter, server pagination/virtualization, compact row + detail; explicit consequences | 300+ records: targeted org found, status recognized, confirmation scoped to correct org |
+| **UX-007** | **P1** | OBSERVED/REQUIRES TEST: Payment approve/reject dialogs | Financial operation has high cost of wrong context and accidental double submit | Common Review Dialog: clearly visible order/org/amount/status, required reason for Reject, pending/disabled/error/retry, no double submit | 320–1440, invalid, valid, 409 stale, 500, Escape, Tab trap, focus restore; persistence only disposable fixture |
+| **UX-008** | **P2** | OBSERVED mobile Staff Payments, Product, Campaign top fold | 3–5 stacked intro/stat/help panels compete with tasks | Mobile task toolbar first; collapse secondary KPIs, on-demand help; remove redundant headings | At 390×844 high-priority work visible early, no jump or clipped control; large-text 200% |
+| **UX-009** | **P2** | OBSERVED Loading screenshots | Small spinner on blank canvas communicates no progress/context | Stable PageHeader + contextual skeleton rows/panels; distinct long wait / retry | 3s delayed data shows skeleton aligned to final layout, then transitions without large CLS |
+| **UX-010** | **P2** | OBSERVED status-error screenshot | Generic red banner without recovery and without page title | Explicit network vs empty vs denied vs not found; same recovery system as UX-001 | HTTP 401/403/404/503/timeouts each have truthful copy and safe next action |
+| **UX-011** | **P2** | SOURCE REVIEW + screenshots of filters | Staff/Admin filters require raw Campaign/Order/Actor/Resource UUID; error-prone | Searchable human name/reference/date/status; advanced ID lookup only if needed; copy full ID on demand | Task can be completed without user typing UUID; ID remains accessible for audit |
+| **UX-012** | **P2** | OBSERVED modal captures and auth validation | Dialog/content hierarchy repetitive; form errors risk duplicated feedback | Shared dialogs, concise consequence, inline field errors, focus invalid input, stable submit feedback | All modal states as §4; no keyboard trap leak; validation text adjacent to field |
+| **UX-013** | **P2** | OBSERVED Org/Product/Staff management | Create/edit/list are on same long page; primary task unclear | List-first layout with distinct Create/Edit drawer/page, dirty-form discard guard | Start edit/create and cancel without losing list context; mobile no nested scrolling |
+| **UX-014** | **P2** | OBSERVED Campaign flow | Lifecycle explanations occupy prime space while action is below fold | State-specific header/action and compact status stepper; explanatory details collapsible | For each campaign state only valid actions; confirmation explains irreversible result |
+| **UX-015** | **P2** | OBSERVED role shell/mobile drawer | Current role/active org not visually dominant enough before decisions | Persistent role/tenant label and role-specific navigation grouping | Staff never approve payment for wrong tenant; mobile drawer Escape/overlay/focus remain correct |
+| **UX-016** | **P2** | OBSERVED UI repetitive neutral cards | Dense information despite large vertical whitespace; low visual hierarchy and excessive surface treatments | Design system with quieter cards, compact operational table, text hierarchy, semantic badges; real imagery only where useful | A designer/user can find page purpose, next task, status and feedback within seconds |
+| **UX-017** | **P2** | NOT TESTED – responsive & a11y gaps | Browser snapshot alone cannot validate focus and screen-reader interaction | Axe + keyboard + zoom + touch-target audit on all critical states and dialogs | 320/360/390/768/1024/1440/1920; no horizontal overflow, focus visible, reduced motion |
+| **UX-018** | **P3** | SOURCE REVIEW + image survey, provenance unverified | Placeholder/real media hierarchy inconsistent; arbitrary decorative imagery would worsen it | Inventory actual uploaded/static assets + license; only replace confirmed incorrect/low-quality assets with provenance | Asset manifest with source/license; no blind AI-asset deletion or broken image URLs |
+
+### 3.1 How P1 will be measured
+
+- **Payment reviewer task:** find a pending payment by human reference → review slip, amount, customer, order → Approve or Reject safely → visible updated status. On mobile, action should not be buried behind numerous KPI cards.
+- **Customer task:** open My Orders → immediately recognize a task requiring payment/pickup → complete next step without having to interpret status tokens or raw UUID.
+- **Organization task:** switch into known org quickly without scrolling 144 cards or accidentally creating an organization.
+- **Platform task:** find exact organization among hundreds → inspect current status → act only with contextual confirmation; no ambiguous cross-tenant action.
+- **Failure recovery:** any data request 503 → still knows current page → press Retry → see recovered data; if still failing, can navigate elsewhere.
+
+---
+
+## 4. Controls, Modal/Popup, Forms — exact test accountability
+
+### 4.1 Distinct control families in scope
+
+`frontend/interaction-coverage-matrix.md` documents **207 source-defined route-specific interaction families** plus shared navigation. Each family must receive a traceable `PASS / FAIL / BLOCKED / NOT TESTED` outcome in the implementation follow-up; the 2,346 instances counted this round are **not** those 207 outcomes.
+
+Required interaction groups:
+- Shared: logo/sidebar/mobile drawer, breadcrumb, organization switch, logout, keyboard navigation, focus return.
+- Browsing: store/campaign/product links; search input, dropdown, empty filter, clear filter, pagination and error retry.
+- Customer: quantity/variant selection; create order; payment-slip upload; cancel; notification filter/mark read; pickup token/status.
+- Staff: order/payment/pickup queue; filter combination; detail selection; approve/reject/confirm; idempotency and stale data.
+- Org Admin: settings save, member add/role/remove, store create/edit/disable, product/variant/media, campaign lifecycle, production report, audit filters/metadata.
+- Platform Admin: organization approve/suspend, state-specific validity, organization list and users summary.
+
+### 4.2 Modal matrix (actual and pending)
+
+| Modal or interaction | Prior Browser actual observed | Must add fixture-based PASS/FAIL |
+|---|---|---|
+| Customer Order cancel | **Opened** on 390px; Escape closes | Confirm success, 403/409/500, pending, back, focus return |
+| Org Admin Order cancel | **Opened** on 390px; Escape closes | Ownership, state transition, stale record |
+| Staff Payment Approve | **Opened** on 390px and 1440px | Slip context, amount, double submit, failure feedback |
+| Staff Payment Reject | **Opened** on 390px and 1440px; reason visible; Escape closes | Empty/too long reason, API 409/500, confirm pending |
+| Org Admin Staff remove/change role | **Representative modal(s) opened** | Last-admin, no permission, success notification persistence |
+| Org Admin Store disable | **Opened** | Impact on campaigns/products, cancel, disabled/action status |
+| Org Admin Product/Variant disable | **Representative Product dialog opened** | Nested state, variant impact, keyboard + tiny viewport |
+| Platform Org suspend / approve | **Representative suspend modal opened** | Correct org ID/name, no wrong-tenant action, status conflict |
+| Campaign lifecycle confirmations | **SOURCE INVENTORIED, not all visual states certified** | DRAFT→OPEN→CLOSED→PRODUCING→READY→COMPLETED / CANCELLED |
+| Pickup confirmation | **SOURCE INVENTORIED, not all outcomes visually certified** | READY, already received, invalid code, error, duplicate request |
+| Upload picker/validation | **Prior E2E coverage; all visual outcomes not rechecked** | Invalid extension/size, slow upload, 413, 500, successful preview |
+| Create/Edit forms and dirty cancel | **Partially covered, not state-exhaustive** | Mandatory field, server field error, Escape/cancel, unsaved changes |
+
+**Every modal acceptance:** trigger, title/context, initial focus, Tab+Shift+Tab trap, Escape, X, Cancel, backdrop behavior, focus return, scroll lock, short/tall viewport (320×568, 390×844, 768×1024, 1440×900), keyboard/screen reader semantics, disabled/loading/submit result, long text and stale/permission error. **The user-facing confirm action must only mutate disposable QA records**, never seeded or real records.
+
+### 4.3 Form states
+
+Existing local captures: Login/Register empty-submit inline validation at 390/1440, reveal password; Staff Payments unmatched Order ID filter → 0 results → clear restores records. **These are limited PASS for those conditions only**.
+
+Still NOT TESTED everywhere: duplicate submit, 429, 401 expiration during form, optional/required errors, file upload error, autocomplete, composition/IME Thai text, long names, special characters, 200% zoom, server validation keeping field input, Enter/Escape behavior.
+
+---
+
+## 5. State matrices — Loaded, Loading, Empty, Error, Forbidden
+
+### 5.1 Evidence-backed measurements
+
+| State | Prior observed samples | Result & UX consequence | Gate |
+|---|---|---|---|
+| Loaded | 28 mobile + 28 desktop prior; 28 desktop current | **Route visits observed;** not all live data states exercised | Verify content-ready before screenshot and interaction |
+| Loading (delayed GET) | 56 viewport-route samples | Mobile **19/28 without H1**, **22/28 with 0 main actions** at capture; loading boxes leave empty canvas | Persistent H1 and relevant skeleton. Do not treat legitimate disabled action as failure |
+| Data GET 503 | 56 viewport-route samples | Mobile **21/28 without H1**, **11/28 without main retry/back**; clear P1 recovery gap | Retry/back, preserve context, recovered result |
+| Filter-no-match | Staff Payment 390/1440 | Empty message shown; clear restores **290** | Distinguish no matches from no records |
+| Fresh-tenant empty | Not forced across all lists | **NOT TESTED** | Org/Orders/Payments/Products/Campaigns/Notifications with zero data |
+| Unauthorized (401) | Historical RBAC tests; not comprehensive visual sweep this run | **NOT CERTIFIED VISUALLY** | Session-expired explanation and safe login return |
+| Forbidden (403) | Historical RBAC tests; not comprehensive visual sweep this run | **NOT CERTIFIED VISUALLY** | Correct boundary, no privileged details leaked |
+| Invalid/Not Found (400/404) | Code inventory; incomplete direct captures | **NOT CERTIFIED** | Useful Back/Retry and correct page title |
+| Timeout/offline/slow POST | Not all replayed | **NOT TESTED** | Cancel, recover without duplicate action, preserve inputs |
+| Success toast/alert persistence | Scattered previous flows | **NOT CERTIFIED for each action** | One unambiguous success state, remains after navigation when needed |
+
+### 5.2 Eleven no-action error routes confirmed in prior 503 captures
+
+`/org/orders/`, `/org/payments/`, `/org/pickups/`, `/org/staff/`, `/org/stores/`, `/org/products/`, `/org/campaigns/`, `/org/audit/`, `/platform/summary/`, `/platform/organizations/`, `/platform/users/`.
+
+Caveat: "no in-main action" refers to the simulated-error body, not every global shell link; test exact recovery surface rather than assuming the whole browser is unusable.
+
+---
+
+## 6. UX/UI design direction (after flow fixes; not cosmetic-only)
+
+**Principle:** Campus commerce/operations interface, not a generic KPI demo or AI-generated landing template. Clear human data labels, practical compact queues, real existing product imagery, typography hierarchy, consistent spacing and high-contrast action states.
+
+### 6.1 Information architecture
+
+- Public Home → searchable available stores/products; remove duplicative “how to” cards from the prime viewport; actionable store name, available campaign, deadline first.
+- Customer → **action-required inbox** instead of flat Order cards. Put Payment/Ready-for-pickup next action before history.
+- Staff → one **operations workspace** with Payment/Orders/Pickup task queues by urgency; stable filters and a detail context; list and detail optimized by device.
+- Org Admin → list first, secondary create/edit. Dashboard shows **tasks requiring decisions** before summary statistics.
+- Platform Admin → approval exceptions and search first; organization/user directory with scalable row layout.
+
+### 6.2 Component-level system
+
+Standardize `PageHeader` (persistent H1+role/org), `TaskQueue`, `FilterToolbar`, `CompactRow`, `StatusBadge`, `ReviewPanel`, `ConfirmDialog`, `FormField`, `Skeleton`, `EmptyState`, `ErrorState`, `FeedbackToast` and `Pagination`. Variants must include default/hover/focus/active/disabled/loading/empty/validation/server-error/success/danger/long text, not just the loaded happy path.
+
+Desktop: concise sidebar + prioritized table/list-detail; avoid three screens of card stacks. Mobile: single primary action, short intro, search/filter affordance, predictable bottom actions where suitable, no long UUID breaking layout, no nested scroll in dialogs. Full technical ID available through copy/details for audit/support. Preserve role/organization scope.
+
+### 6.3 Visual media and aesthetics
+
+- Reduce repetitive rounded white boxes, diluted background fills, explanatory paragraphs and decorative badges. Use contrast to distinguish **decision** vs **information**.
+- Keep payment status, danger, validation and success semantic colors; don't use arbitrary gradient for every information block.
+- For Store/Product photography use real tenant-provided or correctly licensed assets only. Do not fabricate product details or label an image “AI” without provenance.
+- Respect Thai text length, readable smaller copy, responsive typography, useful animation only; support reduced motion.
+- If using MotionSites as design inspiration, copy **principles**, never unlicensed assets/code or unrelated aesthetic flourishes. Design must prioritize utility over motion.
+
+---
+
+## 7. Implementation phases (Phases 0–6 scoped frontend QA complete; Final Diff Review completed)
+
+| Phase | Work and ownership | Exit acceptance |
+|---|---|---|
+| **0 — Audit harness and safe fixtures** | **COMPLETE — harness and declared fixtures only**: 207 action IDs + 50 role-shell IDs, owned-ID guard, scenario catalog, outcome ledger, 28-route read-only browser matrix | 5/5 Playwright harness checks passed; 28 routes × 2 widths captured; no writes. **Important:** 43 captures ready / 13 REVIEW_REQUIRED in final run; fixture status matrix is declared, not all state records created. See frontend/quality-audit/ux-audit-foundation.md#record-01-audit-harness |
+| **1 — Shared states and navigation** | **COMPLETE for documented HTTP 503 and loading recovery coverage:** persistent H1, Retry/Back, skeletons, Unauthorized/Forbidden exits, modal regression checks | 28 role-routes × 2 widths: **0 missing H1, 0 missing in-page actions, 0 horizontal overflow** under forced 503; 11 operational+3 public browser recovery scenarios passed. 310 unit tests passed. See `frontend/quality-audit/ux-audit-foundation.md#record-02-shared-navigation` for unresolved cross-browser/modal edge cases. |
+| **2 — Customer flow redesign** | **COMPLETE for UX/UI and safe browser QA:** task-first My Orders, status groups, direct payment/pickup links, compact mobile checkout, Product selection prominence, notification ORDER-reference actions; existing Home/Store/Campaign/Payment/Pickup flows reviewed. | 10 Customer/Guest route cases × 4 widths = **40/40 Chromium screenshots**, no document overflow or page error; 312 unit tests PASS. Actual submit/upload/cancel/receipt outcomes still **NOT TESTED** against disposable fixtures. See `frontend/quality-audit/ux-audit-foundation.md#record-03-customer-journeys`. |
+| **3 — Staff operations** | **COMPLETE for task-first UX and read-only QA:** prioritized Orders/Payments/Pickups, 30-row progressive rendering, direct queue/advanced search shortcuts, mobile selected-detail focus, compact technical references, existing decision dialogs unchanged. | 3 Staff routes × 4 widths = **12 Chromium responsive captures**, 0 horizontal overflow/JS page errors; 315 unit tests. Payment reject popup and synthetic GET-only Pickup confirm popup opened/closed safely. **Real Pickup fixture unavailable (0 records), backend mutation outcomes NOT TESTED.** See `frontend/quality-audit/ux-audit-foundation.md#record-04-staff-operations`. |
+| **4 — Organization management** | **COMPLETE for task-first UX and safe read-only QA:** searchable loaded Org Selector, Staff, Stores, Products, Campaigns, Production and Audit; 24-row directory rendering; Dashboard shortcuts; Settings form revert; mobile list-first layouts; Campaign-to-Production links. | **9 pages × 4 widths = 36 Chromium captures, 0 overflow/page errors**, 319 unit tests PASS. **3/3 Staff/Store/Product dialogs open–Escape–focus return** without writes. 145+ accessible-organization lookup covered. **Actual create/edit/delete or campaign transitions NOT TESTED in Browser; loaded Production dataset not available in route sweep.** See `frontend/quality-audit/ux-audit-foundation.md#record-05-organization-management`. |
+| **5 — Platform administration** | **COMPLETE for Platform task-first UX and safe read-only QA:** searchable/filtered loaded Organization (PENDING-first) and User directories; 24-row progressive rendering; KPI totals retained; direct Summary shortcuts; approval/suspension action gates unchanged. | **326-org / 328-user Unit regressions**, full frontend **322 tests PASS**, 3 Platform routes × 4 widths = **12 Chromium captures**, no overflow/JS errors; access boundary denies Org Admin; real Suspend Modal and **synthetic GET-only** Approve Modal open/Escape/focus PASS. **No live PENDING fixture, no real Approve/Suspend API mutations**. See `frontend/quality-audit/ux-audit-foundation.md#record-06-platform-administration`. |
+| **6 — Visual system, responsive, a11y, regression** | **COMPLETE — RISK-BASED FRONTEND QA SCOPE ONLY**: 28 authorized route samples × 4 responsive widths; representative axe, keyboard, mobile/dark/modal regression, Chromium/Firefox/WebKit checks. 257/257 source Action IDs have at least one narrowly evidenced PASS, not a full-state certification. | Final rerun: **334/334 Unit**, **30/30 static build**, TypeScript/ESLint/diff PASS and **19/19 critical browser E2E PASS**; 509 unique scoped Action/state/role tuples across retained evidence. **0/257 exhaustive matrices certified**; real backend mutations, native zoom/device/screen-reader tests, manual design approval and all combinations are **deferred, NOT passed**. See `frontend/quality-audit/frontend-qa-signoff.md`. |
+
+**Phases 0–5 were implemented on 2026-10-17. Following the user's instruction to finish the prolonged Phase 6, the automated, safe, risk-based Frontend QA scope is closed on 2026-10-18. Original exhaustive and human/device sign-off requirements below are NOT claimed fulfilled; they remain visible as deferred, separate risks rather than an endless Phase 6 loop.** Keep frontend static export, backend API/domain/tenant contracts, and financial/state-machine semantics unchanged unless separately authorized and canonical specifications updated.
+
+### 7.1 Original exhaustive sign-off requirements — deferred, not certified
+
+The list below preserves the original high-bar requirements. Unchecked items are **not completed**; Phase 6 completion is limited to the separately evidenced risk-based Frontend gate and must not be interpreted as production-release approval. The deferred owner/prerequisite register is in `frontend/quality-audit/frontend-qa-signoff.md`.
+
+- [ ] All 28 canonical routes have content-ready desktop+mobile screenshot per authorized role and **all relevant distinct states** captured.
+- [ ] All 207 source interaction families (+ shell) have exact reproducible PASS/FAIL/NOT TESTED outcome; no sampling used to claim all buttons work.
+- [ ] Every conditional modal has trigger, cancel, valid/invalid, pending, backend failure, stale state, keyboard trap and focus restore proof at 320, 390, 768, 1440.
+- [ ] All 11 no-action simulated-error routes expose meaningful Retry/Back and all 28 retain page identity.
+- [ ] Search/filter/no-match, large records, pagination, long Thai text, unauthorized/forbidden/expired session, responsive and dark/light where supported.
+- [ ] Console/pageerror/network/failed-image checks in every sampled route; isolate expected mocked errors from unexpected live failures.
+- [ ] Accessible forms and dialogs; axe + keyboard + 200% zoom + reduced-motion; no mobile clipped fields or nested modal scrolling.
+- [ ] Safe fixture cleanup journal; no real payment/file/data alteration; security and tenant-isolation regressions.
+- [ ] Unit, critical E2E, lint, typecheck, build and Git diff reviewed; user accepts design after **real browser UX** review.
+
+---
+
+## 8. Evidence and data mapping
+
+- **Fresh recheck:** `/tmp/unistore-live-recheck-20261017/sweep.cjs`, `matrix.json`, `interactions.json`, `ui-*-1440.jpg`, `modal-*.jpg`, `run.log`.
+- **Earlier mobile:** `/tmp/unistore-deep-ux-audit-20261017/` with 390px captures, auth/drawer/modals.
+- **Earlier desktop:** `/tmp/unistore-deep-ux-desktop-20261017/`.
+- **Modal subsets:** `/tmp/unistore-confirm-dialog-audit-20261017/`.
+- **Loading:** `/tmp/unistore-state-loading-20261017/`.
+- **Error:** `/tmp/unistore-state-error-20261017/`.
+- **Grounding docs:** `SPEC.md`, `AGENTS.md`, `frontend/interaction-coverage-matrix.md`, `frontend/real-user-qa-audit.md`, `frontend/e2e/support/seed-auth.ts`, `frontend/e2e/audit-remediation.spec.ts`.
+
+Evidence lives on the BDXA Mac `/tmp` and **may be temporary**; these are local paths **not user download links nor committed artifacts**. Retain/generate stable, privacy-safe screenshot/trace artifacts during Phase 0 if archival is required. Some source states require guarded test data; preserve full technical reference in tests without displaying sensitive details in UI.
+
+**Final finding:** Implementation-ready redesign backlog completed. **Do not represent this audit as testing all possible buttons, modal post-submit outcomes or tenant statuses.** Remaining implementation phases require explicit user instruction; re-run visual Browser QA after each phase.
+
+**Phase 6 continuation (2026-10-17):** Added exact-state evidence for Notifications and Audit Logs: **38/257 unique Action IDs with at least one state-scoped proof**, **42 state-scoped PASS outcomes** across the two continuation batches. All 257 exhaustive all-state entries still remain NOT_TESTED. Fixed off-screen Audit filter success/error feedback. GET-only tests passed 6/6 across Chromium, Firefox, WebKit, with no Backend mutations. See `frontend/quality-audit/accessibility-and-regression-verification.md#record-02-filter-action-report`. Phase 6 stays IN PROGRESS.
+
+**Phase 6 further continuation (2026-10-17):** Login/Register and public Storefront added 8 distinct action IDs with direct scoped proof (19 state outcomes), bringing recent Phase 6 coverage to **46/257 unique IDs**, **61 state-scoped PASS results**. This is **not** full-state certification: keep the 257 baseline exhaustive entries NOT_TESTED. Tests 6/6 Chromium/Firefox/WebKit and focused regression 4/4 passed; mock-only HTTP, no real Backend writes. See `frontend/quality-audit/navigation-and-auth-verification.md#record-01-auth-storefront-report`. Phase 6 remains IN PROGRESS.
+
+**Phase 6 Staff Queue continuation (2026-10-17):** All three Staff queue advanced GET filters had off-screen terminal feedback; corrected focus/scroll only on Apply/Clear, preserving other actions. Chromium/Firefox/WebKit **3/3 PASS**, focused Phase 3–6 regression **6/6 PASS**, full Unit **323/323**, Build **30/30**. Added **19 distinct directly evidenced Action IDs and 28 scoped PASS states**: recent Phase 6 cumulative **65/257 Action IDs with at least one scoped PASS, 89 total scoped PASS outcomes**. Still **NOT** exhaustive action-state or UX acceptance; 192 IDs lack new direct evidence in recent continuation batches. See `frontend/quality-audit/organization-operations-verification.md#record-05-staff-queue-report`. Phase 6 stays IN PROGRESS.
+
+**Phase 6 Dashboard/Settings continuation (2026-10-17):** Resolved first-click invalid Submit/focus race when editing Organization Settings (including Firefox); synthetic, browser-intercepted GET/PATCH action tests passed **3/3 engines** and Phase 4–6 focused regression **5/5**. Added **17 distinct Action IDs with 21 scoped PASS outcomes**. Recent Phase 6 cumulative **82/257 distinct Action IDs with at least one direct narrow PASS, 110 state-scoped outcomes**, with **all 257 exhaustive state matrices still NOT_TESTED**. See `frontend/quality-audit/navigation-and-auth-verification.md#record-02-dashboard-settings-report`. Phase 6 remains IN PROGRESS.
+
+**Phase 6 Staff/Members and Stores continuation (2026-10-17):** Fixed Staff offscreen error after synthetic add-member 404 and Store first-invalid-Submit validation/focus race. Cross-browser **6/6 E2E PASS**, Phase 4–6 regression **4/4 PASS**, Unit **323/323 PASS**, Production Build **30/30 PASS**. Newly evidenced **15 action IDs / 23 state-scoped PASS states**, yielding **97/257 unique Action IDs** with at least one direct state proof and **133 scoped PASS states** across recent continuations. These are not full-state certifications: **all 257 exhaustive ledger entries remain NOT_TESTED**. See `frontend/quality-audit/organization-operations-verification.md#record-06-staff-stores-report`; status remains IN PROGRESS.
+
+
+**Phase 6 Products/Variants continuation (2026-10-17):** On Product Create/Edit and Variant Create/Edit, blur-time validation could interfere with first-submit ErrorSummary focus; corrected by relying on complete Submit validation. **22 newly evidenced Action IDs / 27 scoped PASS states**, bringing recent Phase 6 cumulative to **119/257 IDs with at least one state-specific proof and 160 scoped PASS outcomes**. Cross-browser **3/3 PASS**, focused regression **4/4 PASS**, Unit **323/323 PASS**, Build **30/30 PASS**. All 257 exhaustive state-matrix certifications remain **NOT_TESTED**; product images, real mutation outcomes and 138 other Action IDs are pending. Evidence: `frontend/quality-audit/organization-operations-verification.md#record-04-products-variants-report`. Phase 6 remains IN PROGRESS.
+
+
+**Phase 6 Campaign Action-State continuation (2026-10-17):** Campaign Create/Edit blur validation could intercept first invalid Submit and lose ErrorSummary Focus. Fixed all 12 blur-time field callbacks, keeping complete Submit validation and domain rules. Direct GET-only/Modal-cancel tests now cover **26 new Action IDs with 34 state-scoped PASS results**, bringing recent cumulative to **145/257 distinct IDs with at least one direct state proof and 194 scoped PASS observations**. **All 257 exhaustive action-state matrix entries still remain NOT_TESTED.** Cross-browser **3/3**, regression **4/4**, Unit **323/323**, Build **30/30**, lint/diff/typecheck PASS. No real Backend writes; lifecycle confirmations only opened and canceled. See `frontend/quality-audit/organization-operations-verification.md#record-02-campaign-actions-report`. Phase 6 IN PROGRESS.
+
+
+**Phase 6 Production & Order Detail continuation (2026-10-17):** Resolved Admin-only cancel Order HTTP 409 feedback being hidden behind a still-open Modal; pending remains locked, terminal result closes the dialog, focuses and scrolls Error/Success into view, manual Cancel keeps trigger focus. Added **4 new distinct Action IDs / 21 state-scoped PASS results**, recent Phase 6 cumulative **149/257 distinct IDs with ≥1 narrowly verified state, 215 scoped PASS outcomes**. **All 257 exhaustive Action state-matrix entries remain NOT_TESTED.** Read-only Production GET and browser-intercepted synthetic Order cancel POST 409/200, no persisted business mutation. Cross-browser **6/6**, focused Phase 3–6 regression **5/5**, Unit **323/323**, Build **30/30**, ESLint/TypeScript/diff PASS. See `frontend/quality-audit/organization-operations-verification.md#record-03-production-order-details-report`. Phase 6 stays IN PROGRESS.
+
+
+**Phase 6 Audit + Platform Organization controls (2026-10-17):** Fixed dialog-to-dialog focus leak on WebKit when a previous Platform status transition removed its trigger: focus intent now scoped by organizationId/action and each manual Cancel restores that dialog's trigger. Added **10 distinct Action IDs and 26 state-scoped PASS observations**, cumulative recent Phase 6 **159/257 IDs with at least one direct partial proof, 241 scoped PASS outcomes**. **All 257 exhaustive Action state matrices remain NOT_TESTED**; 98 IDs have no recent direct proof. Audit GET data and Platform Approve/Suspend 409/200 POST results were intercepted in Browser, with zero real Backend business writes. Final cross-browser **6/6 PASS**, focused regression **7/7 PASS**, Unit **323/323 PASS**, Build **30/30 PASS**, TypeScript/ESLint/diff PASS. Evidence: `frontend/quality-audit/organization-operations-verification.md#record-01-audit-platform-orgs-report`. Phase 6 remains IN PROGRESS.
+
+
+**Phase 6 Payment Review Dialog continuation & corrected coverage (2026-10-17):** Fixed controlled Reject Dialog Back/Escape focus return (new optional Dialog onCloseAutoFocus) and Firefox first-invalid-reason-confirm ErrorSummary focus race (removed competing onBlur validation; complete Submit validation preserved). Direct browser evidence **8 Action IDs / 11 scoped PASS states**, across Chromium/Firefox/WebKit **3/3 PASS**; focused regression **4/4**, Unit **323/323**, Build **30/30**, TypeScript/ESLint/diff PASS. No real payment mutations and no slip URL opened. **Corrected authoritative retained-evidence totals:** **158/257 distinct Action IDs with >=1 direct PASS**, **254 unique Action/state/role PASS combinations**, **99 remaining IDs without retained PASS**. Earlier narrative **159/257 and 241 scoped PASS** totals were not correctly de-duplicated or reconciled; superseded by an actual scan of all retained `action-outcomes.json` files. **All 257 exhaustive full-state matrices remain NOT_TESTED**. See `frontend/quality-audit/payment-and-pickup-verification.md#record-02-payment-review-modal-report`; Phase 6 IN PROGRESS.
+
+
+**Phase 6 Pickup Confirmation continuation (2026-10-17):** Fixed HTTP 409 feedback concealed behind still-open READY Pickup confirmation Modal; controlled terminal close, pending lock, focused visible error/success, correct Cancel/Escape focus, and no repeat action after simulated receipt. Browser E2E **3/3** across Chromium/Firefox/WebKit, regression **4/4**, Unit **323/323**, Build **30/30**, TypeScript/lint/diff PASS. Added **2 distinct IDs / 7 narrowly scoped PASS states**, synthetic GET + Playwright-intercepted POST responses, **zero real business writes**. Recomputed across retained `action-outcomes.json`: **160/257 unique Action IDs with some state proof**, **261 distinct action/state/role PASS tuples**, **97 IDs without evidence**. **All 257 exhaustive declared-state matrices remain NOT_TESTED.** Evidence: `frontend/quality-audit/payment-and-pickup-verification.md#record-03-pickup-confirm-modal-report`. Phase 6 IN PROGRESS.
+
+
+**Phase 6 Customer Pickup Refresh/Retry continuation (2026-10-17):** Fixed lost keyboard Focus after user-initiated status recheck/Retry unmounted the action button; new state heading is focused once on completion while initial load remains unaltered. Local customer cross-browser **3/3 PASS**, focused regression **3/3 PASS**, Unit **323/323 PASS**, Build **30/30 PASS**, TypeScript/ESLint/diff PASS. Synthetic read-only Order/Pickup GET tests added **4 Action IDs / 10 direct state-scoped PASS**, no business mutation. Evidence-deduplicated cumulative **164/257 IDs with at least one direct partial PASS**, **271 unique Action/state/role tuples**, **93 unevidenced IDs**; **all 257 full-state baseline entries remain NOT_TESTED**. See `frontend/quality-audit/customer-journey-verification.md#record-06-customer-pickup-refresh-report`. Phase 6 remains IN PROGRESS.
+
+
+**Phase 6 Customer Notifications continuation (2026-10-17):** Fixed off-screen operation Error on failed Mark as Read (409) by placing feedback above the paginated list and focusing/scrolling it into view. Safe Browser test of All/Unread/Read, cursor pagination, Mark as Read pending/409/200, manual Refresh 503/success: Chromium/Firefox/WebKit **3/3 PASS**, regression **3/3**, Unit **323/323**, Build **30/30**, TypeScript/ESLint/diff PASS. No real notification writes. Six IDs and 10 state results exercised; evidence-de-duplicated net addition **1 source Action ID + 6 Action/state/role tuples**. Cumulative across retained Action Ledgers **165/257 IDs with partial PASS, 277 state/role tuples, 92 IDs lacking proof**; **all 257 exhaustive all-state entries NOT_TESTED**. See `frontend/quality-audit/customer-journey-verification.md#record-08-notifications-actions-report`. Phase 6 IN PROGRESS.
+
+
+**Phase 6 Customer Payment Slip & Resubmission (2026-10-17):** Corrected terminal upload error/success Focus (PUT 403, simulated Payment 409/200) and user-initiated Payment page load Retry focus; visible result feedback with file retained on recoverable failure. New direct state-specific browser proof for **FE-UX-10-01 through FE-UX-10-05**: first upload and rejected resubmission, file validation, pending stages, expired presign, fresh-objectKey retry and authoritative GET UI refresh. Chromium/Firefox/WebKit **6/6 E2E PASS**, focused Regression **5/5**, Unit **323/323**, Build **30/30**, TypeScript/ESLint/diff PASS; all sign/PUT/submit writes mocked, **zero real business mutations**. Retained Action Ledgers de-duplicated cumulative **170/257 distinct IDs with partial PASS, 294 Action/state/role tuples, 87 IDs without proof**. **All 257 exhaustive full-state baseline entries remain NOT_TESTED**. See `frontend/quality-audit/customer-journey-verification.md#record-05-customer-payment-upload-report`. Phase 6 IN PROGRESS.
+
+
+**Phase 6 Customer My Orders Navigation & Retry (2026-10-17):** Fixed keyboard-focus loss on initial GET 503 manual Retry and inaccessible focus destination on Load More cursor 503. Added direct E2E Browser proof for `FE-UX-08-01` through `08-04`: storefront return, scoped detail and Pickup links, cursor failure/preserved list/retry, local no-match/reset, progress/completed filters and server empty. Chromium/Firefox/WebKit **3/3 PASS**, Customer regression **4/4**, Unit **323/323**, Build **30/30**, TS/ESLint/diff PASS. Synthetic read-only GET, zero real business mutations. Deduplicated retained evidence cumulative **174/257 distinct Action IDs with >=1 direct state PASS**, **305 Action/state/role PASS combinations**, **83 IDs without direct proof**; **all 257 exhaustive state-matrix entries remain NOT_TESTED**. Report: `frontend/quality-audit/customer-journey-verification.md#record-02-customer-orders-navigation-report`. Phase 6 remains IN PROGRESS.
+
+
+**Phase 6 Customer Order Detail and Cancel Modal continuation (2026-10-17):** Fixed manual Retry on initial Order GET 503 losing keyboard focus, plus terminal customer cancel 409 dialog concealing feedback; confirmation now remains locked while Pending, closes after result, focuses/scolls Error or Success, and manual Back restores trigger focus. New proof for `FE-UX-09-01` through `FE-UX-09-06` (**6 Action IDs / 14 narrow states**), with synthetic GET and intercepted cancel 409/200 and no real business write. Chromium/Firefox/WebKit **3/3 PASS**, focused regression **5/5 PASS**, Unit **323/323**, Build **30/30**, TypeScript/ESLint/diff PASS. Retained-evidence deduplicated cumulative **180/257 Action IDs with some direct PASS, 319 action/state/role PASS tuples, 77 unevidenced IDs**; **all 257 exhaustive Action state matrices NOT_TESTED**. See `frontend/quality-audit/customer-journey-verification.md#record-04-customer-order-cancel-report`. Phase 6 **IN PROGRESS**.
+
+**Phase 6 Customer Create Order continuation (2026-10-17):** Fixed lost keyboard focus on retryable Order Create GET 503, terminal intercepted POST 409 notice and accepted synthetic Order creation; a second 503 focuses the recovery landmark. Verified eight previously unevidenced `FE-UX-07-01` through `07-08` Action IDs, 13 distinct scoped PASS tuples, Chromium/Firefox/WebKit **3/3** and focused Chromium Customer regression **5/5**; Unit **323/323**, Build **30/30**, TS/ESLint/diff PASS. All order POSTs intercepted, **0 real writes**. Retained ledger dedup: **188/257 IDs with partial PASS**, **332 unique Action/state/role PASS tuples**, **69 IDs without direct proof**. **All 257 exhaustive state matrices remain NOT_TESTED**; Phase 6 **IN PROGRESS**. Details: `frontend/quality-audit/customer-journey-verification.md#record-01-customer-create-order-report`.
+
+**Phase 6 Store/Campaign/Product detail continuation (2026-10-17):** Replaced full-page Retry reload with in-place abortable GET retry and explicit success-H1/error-landmark Keyboard Focus on three public detail pages (existing shared fallback remains unchanged elsewhere). Added direct Guest/Customer proof for **14 new Action IDs / 27 scoped action/state/role PASS tuples** including Store/Campaign/Product navigation, selectors, invalid/404/503 recovery, repeated 503 focus, Guest login returnTo and authenticated order CTA. Chromium/Firefox/WebKit **3/3 PASS**, focused regression **4/4 PASS**, Unit **323/323**, Build **30/30**, TypeScript/ESLint/diff PASS. **0 real business writes** (synthetic GET + local Customer seed login). Retained evidence dedup: **202/257 Action IDs with partial PASS**, **359 unique Action/state/role PASS tuples**, **55 unevidenced IDs**. **All 257 exhaustive action-state matrices still NOT_TESTED**; Phase 6 **IN PROGRESS**, Final Diff Review pending. Report: `frontend/quality-audit/navigation-and-auth-verification.md#record-04-public-detail-journey-report`.
+
+**Phase 6 Organization Selector action-state continuation (2026-10-18):** Improved explicit GET Retry Focus to the persistent H1 after recovered or repeated 503, plus visible Focus/Scroll for terminal intercepted Organization Create 409 feedback, without changing permissions, endpoint contracts or initial load behavior. Added direct scoped browser evidence for **5 new FE-UX-13 Action IDs and 13 distinct state/role PASS tuples**: 145-organization directory search + unowned organization exclusion, STAFF vs ORG ADMIN navigation, name/description validation, Pending lock, synthetic 409 and synthetic 200/role-refresh routing. Chromium/Firefox/WebKit **3/3 PASS**; targeted Chromium Selector + Dashboard/Settings **2/2**, Phase 4 nine-route responsive suite **1/1**, Unit **323/323**, Build **30/30**, lint/typecheck/diff PASS. **0 persisted business writes**, synthetic GETs and intercepted POST only. Retained-ledger dedup now **207/257 Action IDs with narrow direct PASS**, **372 unique Action/state/role PASS tuples**, **50 IDs lacking direct proof**; **all 257 exhaustive declared-state matrices still NOT_TESTED**. Phase 6 **IN PROGRESS**; Review Diff pending. See `frontend/quality-audit/navigation-and-auth-verification.md#record-03-org-selector-actions-report`.
+
+**Phase 6 Guest/Customer Navigation continuation (2026-10-18):** Added direct browser-action evidence for **18 previously unproven IDs**: Guest brand/Stores/Login/Register on desktop; Customer application-shell brand, Storefront, My Orders, Notifications, Skip Link and Logout on mobile; authenticated Login/Register shortcuts for My Orders, Notifications, conditional Organization membership routing and Storefront return. Real control clicks and route/focus/session assertions using safe local GET mocks and seed Customer login, **zero actual business writes**. Chromium/Firefox/WebKit **3/3 PASS**, focused Chromium regression **3/3**, Unit **323/323**, Build **30/30**, TypeScript/ESLint/diff PASS. Corrected Action ID mapping and cross-browser test navigation sequencing; no application behavior source changes this batch. Retained ledger recomputation: **225/257 Action IDs with at least one scoped PASS**, **390 unique Action/state/role PASS tuples**, **32 IDs without direct evidence**; **all 257 exhaustive state matrices remain NOT_TESTED**. Phase 6 **IN PROGRESS**, Final Review pending. Evidence/report: `frontend/quality-audit/customer-journey-verification.md#record-07-guest-customer-navigation-report`.
+
+**Phase 6 Staff / Organization Admin / Platform Admin Shell Navigation (2026-10-18):** Found and fixed mobile menu Focus occasionally remaining on the trigger during initial drawer opening. Kept immediate focus for accessibility/Unit expectations plus guarded animation-frame/timer recovery without stealing focus from users interacting in the dialog. Directly exercised **28 previously unevidenced role-specific shell Action IDs** with exact route/tenant query, active navigation, Skip Link, permitted Organization Switch, Logout and keyboard dismissal. Final Chromium/Firefox/WebKit **9/9 PASS**, focused existing shell/Org Selector regression **2/2 PASS**, Unit **323/323**, Build **30/30**, TypeScript/ESLint/diff PASS. Browser business writes **0**. Retained evidence: **253/257** source IDs with at least one scoped direct PASS, **418** unique Action/state/role PASS tuples, **4 IDs not yet directly evidenced**. **All 257 exhaustive state matrices remain NOT_TESTED**; Phase 6 **IN PROGRESS**, Final Review **PENDING**. See `frontend/quality-audit/navigation-and-auth-verification.md#record-05-role-shell-navigation-report`.
+
+**Phase 6 Final Four Source-Action coverage continuation (2026-10-18):** Added scoped direct browser evidence for last **4 previously unevidenced IDs**: `FE-UX-15-01` Settings GET Retry after repeat synthetic 503 and focus restored on failure/success; `FE-UX-18-14` Product Image file validation/selection; `FE-UX-18-15` intercepted image-signing POST/Pending, signed PUT 403, new signing+PUT 200, Image Key PATCH and refresh; `FE-UX-20-06` actual Orders list-to-detail navigation for both Staff and Organization Admin. Only application fix: user-initiated Settings Retry Focus. Chromium/Firefox/WebKit **6/6 PASS**, focused Chromium Regression **4/4 PASS**, Unit **323/323**, Build **30/30**, TS/ESLint/diff PASS. **0 actual business writes; all product upload writes were intercepted**. Retained ledger dedup is now **257/257 IDs with at least one narrow scoped direct PASS**, **428 unique Action/state/role PASS tuples**, **0 IDs with no direct PASS**. **All 257 exhaustive declared-state baselines still NOT_TESTED**; Phase 6 **IN PROGRESS**, Final Diff Review **PENDING**. See `frontend/quality-audit/accessibility-and-regression-verification.md#record-03-final-four-actions-report`.
+
+**Phase 6 Payment Review terminal State Matrix continuation (2026-10-18):** Reproduced real accessibility defect: an intercepted approval **409** left the confirmation Modal open while its error alert was rendered behind the active Radix focus trap. Fixed frontend Payment Review controlled approval/rejection terminal close and one-shot keyboard focus/scroll to visible error/success feedback, preserving pending Escape lock and ordinary Cancel/Back restoration. Added direct Staff Browser evidence for approve Pending/409/200 and reject trimmed payload/409/200, **6 unique new Action/state/role PASS tuples**. Chromium/Firefox/WebKit **3/3 PASS**, focused payment/modals regression **3/3 PASS**, Unit **323/323**, Build **30/30**, TypeScript/ESLint/diff PASS. **0 actual Payment writes** (all POSTs intercepted). Retained ledger dedup **257/257 IDs with some narrow scoped PASS**, **434 distinct Action/state/role PASS tuples**, **0/257 exhaustive state matrices certified**, so Phase 6 remains **IN PROGRESS**, Review Diff pending. Report/evidence: `frontend/quality-audit/payment-and-pickup-verification.md#record-01-payment-decision-state-matrix-report`.
+
+**Phase 6 Product Image Upload negative-state matrix (2026-10-18):** Browser-reproduced upload failure accessibility gap (terminal signing 503 Error appeared but keyboard focus stayed away from result); implemented one-shot focus and scroll to terminal Error/Success wrapper after user-initiated upload without stealing focus on initial load or file change. Added direct scoped proof for `FE-UX-18-14` oversized 5MiB+1 validation/valid reselection and `FE-UX-18-15` synthetic signing 503, signed PUT 500, ImageKey PATCH 409, retry/success, and 320 CSS px no-overflow/visible feedback. All POST/PUT/PATCH writes fully intercepted, **0 real business writes**. Chromium/Firefox/WebKit **3/3 PASS**, focused Chromium regression **5/5**, Unit **323/323**, Build **30/30**, TypeScript/ESLint/diff PASS. Retained ledger dedup **257/257 IDs with at least one narrow scoped PASS**, **441 distinct Action/state/role PASS tuples** (**+7**), **0/257 exhaustive matrices certified**. Constrained 320px viewport does **not** prove native 200% zoom. Phase 6 **IN PROGRESS**, Review Diff pending. See `frontend/quality-audit/product-image-reliability-verification.md#record-06-product-upload-negative-matrix-report`.
+
+**Phase 6 Product Image Readback-Only Recovery (2026-10-18):** Reproduced risk where the Image Key PATCH succeeded but GET Product 503 was displayed as generic upload failure and allowed users to re-upload. Separated **committed Image Key awaiting verification** from pre-commit upload errors: clear original file, disable full upload, show accurate saved-but-unverified feedback, retry **GET only**, and require refreshed Image Key match before success. Added one Unit Test. Chromium/Firefox/WebKit **3/3 PASS** for GET 503 twice, stale GET 200, then matching GET 200, asserting precisely one intercepted signing POST/PUT/PATCH total. Focused Chromium regression **3/3**, Unit **324/324**, Build **30/30**, TypeScript/ESLint/diff PASS, **0 real business writes**. Retained ledger **257/257 IDs with >=1 narrow PASS**, **445 distinct Action/state/role PASS tuples** (+4), **0/257 exhaustive state matrices certified**. Phase 6 **IN PROGRESS**, Final Review **PENDING**. Evidence/report: `frontend/quality-audit/product-image-reliability-verification.md#record-03-product-image-readback-recovery-report`.
+
+**Phase 6 Product Image Session/Reload and In-flight Product Switch continuation (2026-10-18):** Retained acknowledged imageKey PATCH readback-only recovery across same-tab Product switches, route departure/return and full reload by storing a session-scoped marker keyed to authenticated user + organization + product. Keyed uploader subtree per selected Product and ignored stale GET completion after component unmount; the pending marker is cleared only when Product GET verifies matching imageKey. Added 2 focused cross-browser E2E specs (Chromium/Firefox/WebKit **6/6 PASS**) and 2 scoped marker isolation Unit Tests; Chromium upload regression **5/5**, Unit **326/326** (84 files; async act diagnostic warnings were emitted), Build **30/30**, TypeScript/ESLint/diff PASS, **0 actual business writes** (all signing/PUT/PATCH intercepted). Retained-ledger dedup: **257/257 IDs** with at least one narrow PASS; **456 unique Action/state/role PASS tuples** (+11); **0/257 exhaustive state matrices certified**. Per-tab storage is best effort, not guaranteed across tab closure/disabled storage or pre-PATCH interruptions. Phase 6 **IN PROGRESS**, Final Review **PENDING**. See `frontend/quality-audit/product-image-reliability-verification.md#record-04-product-image-session-reload-report`.
+
+**Phase 6 Storage-Denied Product Image Verification (2026-10-18):** When a Browser rejects `sessionStorage` writes for an acknowledged imageKey PATCH marker, Product upload now **truthfully warns that its pending verification state may not survive leaving/reloading**, retains in-memory GET-only recovery and blocks re-upload until matching imageKey GET confirms the save. Marker saving explicitly signals SecurityError/QuotaExceededError failure; upload-view result focus tolerates missing `scrollIntoView`. Also fixed previous async `act(...)` Unit Test warnings, added 2 marker-failure Unit Tests. Chromium/Firefox/WebKit **3/3 PASS**, focused Chromium regression **4/4 PASS**, Unit **328/328** (84 files, no unhandled errors), Build **30/30**, TypeScript/ESLint/diff PASS. All simulated signing POST / signed PUT / imageKey PATCH intercepted, **0 real writes**. Retained-ledger dedup **257/257 IDs with >=1 narrow scoped PASS**, **459 unique action/state/role PASS tuples** (+3), **0/257 exhaustive matrices certified**. The per-user/org/product unit isolation was verified, but a real cross-account login transition and post-reload recovery with storage disabled were **not** certified. Phase 6 **IN PROGRESS**, Final Diff Review **PENDING**. Report: `frontend/quality-audit/product-image-reliability-verification.md#record-05-product-image-storage-denied-report`.
+
+**Phase 6 Cross-Account and Storage-Denied Reload continuation (2026-10-18):** Browser-tested real local Seed Organization Admin → Logout → Staff → Logout → original Admin; Staff forbidden on Org Products and only original Admin recovers the previous acknowledged imageKey GET-only verification, without duplicate image writes. Pinned in-flight upload/readback UI updates to the initiating user ID; prevented work from continuing under a different account. For marker Session Storage denied after browser reload, disclosed loss of reliable pending state and added **read-only “โหลดข้อมูลสินค้าล่าสุด” GET** before potential repeat upload (no promise to reconstruct lost marker). Cross-browser Chromium/Firefox/WebKit **6/6 PASS**, Chromium focused regression **5/5**, Unit **330/330**, Build **30/30**, TypeScript/ESLint/diff PASS. All Product POST/PUT/PATCH Browser requests intercepted; **0 real business writes**. Retained-ledger dedup **257/257 IDs with >=1 narrow direct PASS**, **464 distinct Action/state/role PASS tuples** (+5), **0/257 exhaustive matrices certified**. Storage-denied+stale-read duplicate risk cannot be eliminated without server-side transaction/idempotency status. Phase 6 **IN PROGRESS**, Final Review **PENDING**. See `frontend/quality-audit/product-image-reliability-verification.md#record-01-cross-account-storage-reload-report`.
+
+**Phase 6 Upload Race + Ambiguous PATCH Recovery (2026-10-18):** Verified old Product GET `401 TOKEN_EXPIRED` after Product switch does **not** log out the active user; unit tests also simulate a genuine change of authenticated user while the former user's GET is in flight, and prove both late 401 and successful GET cannot mutate the new user's UI/marker. A signed PUT followed by **ambiguous PATCH network/5xx** now persists a conservative scoped marker before sending PATCH, reports **“ยังยืนยันผลการบันทึกไม่ได้”** without falsely claiming success, and permits **GET-only verification** instead of duplicate signing/PUT/PATCH; definite 409 rejection clears marker. Vitest earlier `ERR_REQUIRE_ESM` did not recur on separate runs, no dependencies changed. Chromium/Firefox/WebKit **6/6 PASS**, 7-scenario Chromium regression **7/7 PASS**, Unit **334/334**, Build **30/30**, TypeScript/ESLint/diff PASS; **0 real writes**, all mutation requests intercepted. Retained-ledger dedup now **257/257 Action IDs with >=1 narrow direct PASS** and **469 unique Action/state/role PASS tuples** (+5); **0/257 exhaustive declared-state matrices certified**. Phase 6 **IN PROGRESS**, Final Diff Review **PENDING**. Evidence/report: `frontend/quality-audit/product-image-reliability-verification.md#record-07-upload-race-ambiguous-patch-report`.
+
+
+**Customer Order Detail & Cancel Modal follow-up (2026-10-18):** Verified 503 → manual Retry keyboard focus, cancellation dialog standard Cancel and pending lock, terminal synthetic 409/200 feedback focus and status guard. Added explicit Browser proof of **404 recovery** and **Escape → focus-return without POST**. Cross-browser Chromium/Firefox/WebKit **3/3 PASS**, focused Customer regression **5/5 PASS**, unit **334/334** across 84 files, Build **30/30**, TypeScript/ESLint/diff PASS. **0 real business writes**, Cancel POST responses intercepted. Recomputed retained Ledger totals **257/257 source IDs with at least one narrow PASS, 471 unique Action/state/role PASS combinations (+2 new), 0/257 full state matrices certified**. Historical 180/257 counts in 2026-10-17 reports are superseded. See \`frontend/quality-audit/customer-journey-verification.md#record-03-customer-order-cancel-followup-report\`. Phase 6 stays IN PROGRESS; Review Diff pending.
+
+**Phase 6 In-flight PATCH, prolonged stale GET and closed-tab recovery (2026-10-18):** New direct Browser checks prove same-tab navigation while imageKey PATCH ACK is withheld preserves pre-dispatch provisional marker and GET-only recovery; three consecutive stale GETs, a conflicting imageKey and GET 503 do not falsely confirm save, with support/no-reupload guidance after >=3 manual retries; closing original tab loses its marker, but new tab can use an always-available Product **“โหลดข้อมูลสินค้าล่าสุด”** read-only GET before reupload. Next.js development-only `POST /__nextjs_original-stack-frames` generated by the intentionally aborted PATCH was distinguished from business writes in WebKit Test Harness and intercepted by exact path. All other unexpected Browser mutations are denied. Final Chromium/Firefox/WebKit E2E **9/9 PASS**, Chromium focused regression **13/13 PASS** (6+7 batches), Unit **334/334**, Build **30/30**, TypeScript/ESLint/diff PASS, **0 actual business writes**. Archived 42 screenshots and nine ledgers; cumulative **257/257 source Action IDs with >=1 narrow direct PASS**, **483 distinct Action/state/role PASS tuples** (+14), **0/257 exhaustive matrices certified**. Phase 6 **IN PROGRESS**, Review Diff **PENDING**. Closing a tab with stale backend reads is not guaranteed recoverable without backend transaction reconciliation/idempotency. See `frontend/quality-audit/product-image-reliability-verification.md#record-02-inflight-stale-closed-tab-report`.
+
+**Phase 6 regression readiness recheck (2026-10-18):** Fresh non-mutating gates: 334/334 Unit PASS, TypeScript/ESLint/git diff --check PASS, Next.js build 30/30 pages, and 32/32 targeted Playwright cases PASS (30 Chromium + 2 Firefox/WebKit). Retained latest Phase 6 reconciliation: **257/257 IDs each have >=1 narrow direct PASS**, **483 unique Action/State/Role PASS tuples**. **0/257 exhaustive declared-state matrices certified**, so mandatory sign-off is NOT met; real owned-fixture mutations, full modal/role permutations, native 200% zoom, assistive tech and user visual acceptance remain pending. Evidence: `frontend/quality-audit/accessibility-and-regression-verification.md#record-05-regression-readiness-20261018` and `frontend/quality-audit/product-image-reliability-verification.md#record-02-inflight-stale-closed-tab-report`. Phase 6 remains IN PROGRESS; Final Review pending. No real business writes or commit/push.
+
+**Phase 6 multi-role modal accessibility continuation (2026-10-18):** Reproduced and fixed missing explicit `aria-modal="true"` on shared Radix Dialog/ConfirmDialog content for Customer Cancel, Staff Payment Reject and Staff Pickup Confirm. Added stable-Evidence Playwright suite covering **3 Roles × 2 themes × 4 widths × 3 engines = 72 real Browser observations**, with modal focus trapping, Escape/focus return, bounded geometry and scoped axe checks. Chromium **3/3**, Firefox **3/3**, WebKit **3/3 PASS**; existing modal/payment/customer targeted regression **3/3 PASS**, Unit **334/334**, Build **30/30**, TypeScript/ESLint/diff PASS. **0 real business mutations**; scoped Action PASSs recorded without converting exhaustive baselines. Latest retained-ledger scan: **257/257 IDs with some direct evidence, 509 distinct action/state/role PASS tuples** (this new suite accounts for 24; other additions not attributed), **0/257 fully certified matrices**. See `frontend/quality-audit/accessibility-and-regression-verification.md#record-04-multi-role-modal-accessibility-report`. Phase 6 remains IN PROGRESS; Final Review pending.
+
+**Phase 6 final scoped sign-off (2026-10-18):** After the user explicitly requested closure rather than continued expansion, frontend-only nonmutating QA is **COMPLETE under revised scoped exit criteria** (not exhaustive UX certification). New final gates: Unit 334/334, Build 30/30, TypeScript/ESLint/diff PASS, critical cross-browser E2E 19/19 PASS. Retained scoped browser proof covers 257/257 Action IDs with >=1 narrow PASS, 509 deduplicated Action/state/role tuples; **0/257 full all-state matrices certified**. Real mutation and idempotency evidence, native zoom/screen readers/physical devices, user visual sign-off and complete state permutations remain **deferred/not tested** in the linked high-priority follow-up register. **Review Diff still pending.** Canonical scoped exit record: `frontend/quality-audit/frontend-qa-signoff.md`. No Commit, Push or Deploy.
+
+
+**Final Review Diff completion (2026-10-18):** BDXA task `task_7963973d-3f6b-4b26-98b0-a1f00999b0a0` finalized at revision **10** with `reviewPassed=true` for the authorized scoped UX/UI remediation. Final reviewer scanned **205 changed/new worktree paths**, all confined to `frontend/**` and this audit document; no changes to backend/contracts/infrastructure were observed. Fresh Unit **334/334**, TypeScript, ESLint, production static build **30/30**, `git diff --check` and selected cross-browser E2E **13/13** PASS. No confirmed blocker within this scoped frontend diff review. **Not production approved:** actual self-owned Backend financial/pickup/order mutations, cross-tab image PATCH idempotency, 257 complete all-state Action matrices and human/device/native-zoom a11y checks remain unverified and documented as separately deferred risks. Review details: `frontend/quality-audit/FINAL_DIFF_REVIEW_20261018.md`. No Commit, Push or Deploy.

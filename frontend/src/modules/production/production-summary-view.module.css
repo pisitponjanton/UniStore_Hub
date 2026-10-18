@@ -505,3 +505,39 @@
     transform: none;
   }
 }
+
+/* Task-first operational styling: real queues, status and filters take priority. */
+.page { background: var(--canvas); }
+.header {
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-feature);
+  padding: clamp(18px, 2.8vw, 30px);
+  box-shadow: none;
+}
+.header::after { content: none; display: none; }
+.summaryStrip > div,
+.summaryStrip > div:nth-child(n),
+.summaryStrip > div:first-child,
+.summaryStrip > div:last-child {
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-card);
+  box-shadow: none;
+}
+.filterPanel {
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-card);
+  box-shadow: none;
+}
+@media (max-width: 620px) {
+  .header { padding: 18px; }
+}
+
+.campaignPanel, .productGroup {
+  background: var(--surface);
+  border-color: var(--line-soft);
+  box-shadow: none;
+  border-radius: var(--radius-card);
+}

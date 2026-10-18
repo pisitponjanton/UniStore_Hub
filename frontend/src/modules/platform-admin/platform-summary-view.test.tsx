@@ -55,15 +55,15 @@ describe("PlatformSummaryView", () => {
   it("shows Platform summary counts and priority totals from the documented response", async () => {
     render(<PlatformSummaryView />);
 
+    // Page H1 is now persistent even before async data resolves; wait for
+    // the actual summary content rather than treating the heading as a ready signal.
     expect(
-      await screen.findByRole("heading", {
-        name: "ภาพรวม Platform",
-      }),
+      await screen.findByText("หน่วยงานรออนุมัติ"),
     ).toBeInTheDocument();
-
-    expect(
-      screen.getByText("หน่วยงานรออนุมัติ"),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", {
+      name: "ภาพรวม Platform",
+      level: 1,
+    })).toBeInTheDocument();
     expect(screen.getByText("หน่วยงานทั้งหมด")).toBeInTheDocument();
     expect(screen.getByText("ผู้ใช้ทั้งหมด")).toBeInTheDocument();
     expect(

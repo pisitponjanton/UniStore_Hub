@@ -1,4 +1,5 @@
 import {
+  act,
   fireEvent,
   render,
   screen,
@@ -11,6 +12,7 @@ import type {
   ProductDTO,
 } from "@/types";
 import { PRODUCT_IMAGE_MAX_BYTES } from "@/utils";
+import { ApiClientError } from "@/services";
 
 const mocks = vi.hoisted(() => ({
   requestImageUploadUrl: vi.fn(),
@@ -18,13 +20,16 @@ const mocks = vi.hoisted(() => ({
   get: vi.fn(),
   put: vi.fn(),
   logout: vi.fn(),
+  getSnapshot: vi.fn(),
 }));
 
 vi.mock("@/modules/auth", () => ({
   authSession: {
     logout: mocks.logout,
+    getSnapshot: mocks.getSnapshot,
   },
-  isDefinitiveSessionFailure: () => false,
+  isDefinitiveSessionFailure: (error: unknown) =>
+    error instanceof Error && error.message === "OLD_SESSION_EXPIRED",
 }));
 
 vi.mock("./product-service", () => ({
@@ -82,9 +87,22 @@ function selectFile(file: File) {
   });
 }
 
+async function clickReadyUpload() {
+  const button = screen.getByRole("button", { name: "อัปโหลดรูปสินค้า" });
+  await waitFor(() => expect(button).toBeEnabled());
+  await act(async () => {
+    fireEvent.click(button);
+  });
+}
+
 describe("ProductImageUploadView", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    window.sessionStorage.clear();
+    mocks.getSnapshot.mockReturnValue({
+      status: "authenticated",
+      user: { userId: "org-admin-A" },
+    });
   });
 
   it("validates the 5 MiB limit before requesting a Pre-signed URL", () => {
@@ -133,11 +151,7 @@ describe("ProductImageUploadView", () => {
         type: "image/png",
       }),
     );
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: "อัปโหลดรูปสินค้า",
-      }),
-    );
+    await clickReadyUpload();
 
     const statuses = await screen.findAllByRole("status");
     expect(
@@ -178,11 +192,7 @@ describe("ProductImageUploadView", () => {
     });
 
     selectFile(file);
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: "อัปโหลดรูปสินค้า",
-      }),
-    );
+    await clickReadyUpload();
 
     expect(
       await screen.findByText(
@@ -249,11 +259,7 @@ describe("ProductImageUploadView", () => {
       }),
     );
 
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: "อัปโหลดรูปสินค้า",
-      }),
-    );
+    await clickReadyUpload();
 
     expect(
       await screen.findByText(
@@ -261,11 +267,7 @@ describe("ProductImageUploadView", () => {
       ),
     ).toBeInTheDocument();
 
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: "อัปโหลดรูปสินค้า",
-      }),
-    );
+    await clickReadyUpload();
 
     await waitFor(() => {
       expect(mocks.requestImageUploadUrl).toHaveBeenCalledTimes(2);
@@ -282,5 +284,167 @@ describe("ProductImageUploadView", () => {
         },
       );
     });
+  });
+
+
+  it("retries only GET after acknowledged imageKey save but failed product readback", async () => {
+    const upload = signedUpload("products/org-1/product-1/readback");
+    const refreshed = { ...product, imageKey: upload.objectKey };
+    const onProductRefreshed = vi.fn();
+
+    mocks.requestImageUploadUrl.mockResolvedValue(upload);
+    mocks.put.mockResolvedValue(undefined);
+    mocks.update.mockResolvedValue(refreshed);
+    mocks.get
+      .mockRejectedValueOnce(new Error("Synthetic readback unavailable"))
+      .mockResolvedValueOnce(refreshed);
+
+    render(
+      <ProductImageUploadView
+        organizationId="org-1"
+        product={product}
+        onProductRefreshed={onProductRefreshed}
+      />,
+    );
+    selectFile(new File(["png"], "shirt.png", { type: "image/png" }));
+    await clickReadyUpload();
+
+    expect(
+      await screen.findByText(/บันทึกรูปสินค้าแล้ว แต่ยังโหลดข้อมูลล่าสุดไม่สำเร็จ/),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "อัปโหลดรูปสินค้า" })).toBeNull();
+    expect(screen.getByLabelText("เลือกรูปสินค้า")).toBeDisabled();
+    expect(mocks.requestImageUploadUrl).toHaveBeenCalledTimes(1);
+    expect(mocks.put).toHaveBeenCalledTimes(1);
+    expect(mocks.update).toHaveBeenCalledTimes(1);
+    expect(onProductRefreshed).not.toHaveBeenCalled();
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "ตรวจสอบข้อมูลล่าสุดอีกครั้ง" }));
+    });
+    expect(
+      await screen.findByText("อัปโหลดและบันทึกรูปสินค้าเรียบร้อยแล้ว"),
+    ).toBeInTheDocument();
+    expect(mocks.get).toHaveBeenCalledTimes(2);
+    expect(mocks.requestImageUploadUrl).toHaveBeenCalledTimes(1);
+    expect(mocks.put).toHaveBeenCalledTimes(1);
+    expect(mocks.update).toHaveBeenCalledTimes(1);
+    expect(onProductRefreshed).toHaveBeenCalledWith(refreshed);
+  });
+
+
+  it("ignores a former account's late 401 and does not log out the new account", async () => {
+    const upload = signedUpload("products/org-1/product-1/account-A");
+    let rejectOldRead: ((error: Error) => void) | undefined;
+    const readback = new Promise<ProductDTO>((_, reject) => {
+      rejectOldRead = reject;
+    });
+    mocks.requestImageUploadUrl.mockResolvedValue(upload);
+    mocks.put.mockResolvedValue(undefined);
+    mocks.update.mockResolvedValue({ ...product, imageKey: upload.objectKey });
+    mocks.get.mockReturnValue(readback);
+    const refreshed = vi.fn();
+    render(<ProductImageUploadView organizationId="org-1"
+      product={product} onProductRefreshed={refreshed} />);
+    selectFile(new File(["png"], "account.png", { type: "image/png" }));
+    await clickReadyUpload();
+    await waitFor(() => expect(mocks.get).toHaveBeenCalledTimes(1));
+    mocks.getSnapshot.mockReturnValue({
+      status: "authenticated", user: { userId: "staff-B" },
+    });
+    await act(async () => { rejectOldRead?.(new Error("OLD_SESSION_EXPIRED")); });
+    expect(mocks.logout).not.toHaveBeenCalled();
+    expect(refreshed).not.toHaveBeenCalled();
+    expect(mocks.requestImageUploadUrl).toHaveBeenCalledTimes(1);
+    expect(mocks.update).toHaveBeenCalledTimes(1);
+    expect(window.sessionStorage.getItem(
+      "unistoreHub.productImageVerification.v1:org-admin-A:org-1:product-1"
+    )).toBe(upload.objectKey);
+  });
+
+  it("ignores former account's late successful GET without clearing either account marker", async () => {
+    const upload = signedUpload("products/org-1/product-1/late-A");
+    let resolveOldRead: ((value: ProductDTO) => void) | undefined;
+    mocks.get.mockReturnValue(new Promise<ProductDTO>((resolve) => {
+      resolveOldRead = resolve;
+    }));
+    mocks.requestImageUploadUrl.mockResolvedValue(upload);
+    mocks.put.mockResolvedValue(undefined);
+    mocks.update.mockResolvedValue({ ...product, imageKey: upload.objectKey });
+    const refreshed = vi.fn();
+    render(<ProductImageUploadView organizationId="org-1"
+      product={product} onProductRefreshed={refreshed} />);
+    selectFile(new File(["png"], "account.png", { type: "image/png" }));
+    await clickReadyUpload();
+    await waitFor(() => expect(mocks.get).toHaveBeenCalledTimes(1));
+    mocks.getSnapshot.mockReturnValue({
+      status: "authenticated", user: { userId: "staff-B" },
+    });
+    await act(async () => {
+      resolveOldRead?.({ ...product, imageKey: upload.objectKey });
+    });
+    expect(mocks.logout).not.toHaveBeenCalled();
+    expect(refreshed).not.toHaveBeenCalled();
+    expect(window.sessionStorage.getItem(
+      "unistoreHub.productImageVerification.v1:org-admin-A:org-1:product-1"
+    )).toBe(upload.objectKey);
+  });
+
+
+  it("avoids duplicate PATCH after a lost PATCH response and verifies by GET only", async () => {
+    const upload = signedUpload("products/org-1/product-1/uncertain-patch");
+    const refreshed = { ...product, imageKey: upload.objectKey };
+    const onProductRefreshed = vi.fn();
+    mocks.requestImageUploadUrl.mockResolvedValue(upload);
+    mocks.put.mockResolvedValue(undefined);
+    mocks.update.mockRejectedValueOnce(new Error("Network response lost"));
+    mocks.get.mockResolvedValue(refreshed);
+
+    render(<ProductImageUploadView organizationId="org-1"
+      product={product} onProductRefreshed={onProductRefreshed} />);
+    selectFile(new File(["png"], "uncertain.png", { type: "image/png" }));
+    await clickReadyUpload();
+    expect(await screen.findByText(/ส่งคำขอบันทึกรูปไปแล้ว แต่ยังยืนยันผลไม่ได้/)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "อัปโหลดรูปสินค้า" })).toBeNull();
+    expect(screen.getByLabelText("เลือกรูปสินค้า")).toBeDisabled();
+    expect(mocks.requestImageUploadUrl).toHaveBeenCalledTimes(1);
+    expect(mocks.put).toHaveBeenCalledTimes(1);
+    expect(mocks.update).toHaveBeenCalledTimes(1);
+    expect(window.sessionStorage.getItem(
+      "unistoreHub.productImageVerification.v1:org-admin-A:org-1:product-1"
+    )).toBe(upload.objectKey);
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "ตรวจสอบข้อมูลล่าสุดอีกครั้ง" }));
+    });
+    expect(await screen.findByText("อัปโหลดและบันทึกรูปสินค้าเรียบร้อยแล้ว")).toBeInTheDocument();
+    expect(mocks.get).toHaveBeenCalledTimes(1);
+    expect(mocks.requestImageUploadUrl).toHaveBeenCalledTimes(1);
+    expect(mocks.put).toHaveBeenCalledTimes(1);
+    expect(mocks.update).toHaveBeenCalledTimes(1);
+    expect(onProductRefreshed).toHaveBeenCalledWith(refreshed);
+  });
+
+
+  it("clears provisional verification marker on definitive PATCH 409 rejection", async () => {
+    const upload = signedUpload("products/org-1/product-1/rejected-patch");
+    mocks.requestImageUploadUrl.mockResolvedValue(upload);
+    mocks.put.mockResolvedValue(undefined);
+    mocks.update.mockRejectedValueOnce(new ApiClientError({
+      status: 409, code: "INVALID_STATUS_TRANSITION", kind: "conflict", message: "UXQA rejected PATCH",
+    }));
+    render(<ProductImageUploadView organizationId="org-1"
+      product={product} onProductRefreshed={vi.fn()} />);
+    selectFile(new File(["png"], "rejected.png", { type: "image/png" }));
+    await clickReadyUpload();
+    await waitFor(() => expect(mocks.update).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(screen.getByRole("button", {
+      name: "อัปโหลดรูปสินค้า",
+    })).toBeEnabled());
+    expect(screen.getByText("rejected.png")).toBeInTheDocument();
+    expect(window.sessionStorage.getItem(
+      "unistoreHub.productImageVerification.v1:org-admin-A:org-1:product-1"
+    )).toBeNull();
+    expect(mocks.get).not.toHaveBeenCalled();
   });
 });

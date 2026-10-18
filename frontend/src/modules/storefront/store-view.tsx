@@ -1,7 +1,9 @@
 "use client";
 
+import { PageLoadingRows, PageStateHeading, RecoveryActions } from "@/components/ui/async-page";
+
 import Link from "next/link";
-import { useEffect, useState, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 
 import { ErrorState, LoadingState } from "@/components";
 import { ApiClientError } from "@/services";
@@ -44,6 +46,27 @@ type StoreViewState =
 
 export function StoreView() {
   const [state, setState] = useState<StoreViewState>({ status: "loading" });
+
+  const [retryAttempt, setRetryAttempt] = useState(0);
+  const retryFocusRequested = useRef(false);
+
+  function retryDetail() {
+    retryFocusRequested.current = true;
+    setState({ status: "loading" });
+    setRetryAttempt(attempt => attempt + 1);
+  }
+
+  useEffect(() => {
+    if (!retryFocusRequested.current || state.status === "loading") return;
+    retryFocusRequested.current = false;
+    const frame = window.requestAnimationFrame(() => {
+      const target = document.querySelector<HTMLElement>("main h1[tabindex]")
+        ?? document.querySelector<HTMLElement>("main");
+      target?.focus();
+      target?.scrollIntoView({ behavior: "instant", block: "start" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [state.status]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -92,13 +115,15 @@ export function StoreView() {
     void loadStore();
 
     return () => controller.abort();
-  }, []);
+  }, [retryAttempt]);
 
   if (state.status !== "success") {
     return (
       <div className={styles.page}>
         <StorefrontHeader />
-        <main className={styles.stateWrap}>
+        <main className={styles.stateWrap} tabIndex={-1}>
+          <PageStateHeading title="รายละเอียดร้านค้า" description="เลือกร้านค้าและตรวจสอบรายการที่เปิดให้เข้าชม" />
+          {state.status === "loading" ? <PageLoadingRows /> : null}
           {state.status === "loading" ? (
             <LoadingState title="กำลังโหลดร้านค้า" />
           ) : null}
@@ -119,8 +144,8 @@ export function StoreView() {
           {state.status === "error" ? (
             <ErrorState
               title="ไม่สามารถโหลดร้านค้าได้"
-              description="กรุณาลองโหลดหน้านี้ใหม่อีกครั้ง"
-              actions={<Link href="/">กลับไปเลือกร้านค้า</Link>}
+              description="ไม่สามารถดึงข้อมูลล่าสุดได้ ลองใหม่หรือกลับไปเลือกร้านค้า"
+              actions={<RecoveryActions backHref="/" backLabel="กลับไปเลือกร้านค้า" onRetry={retryDetail} />}
             />
           ) : null}
         </main>
@@ -141,7 +166,7 @@ export function StoreView() {
 
         <section className={`${styles.hero} ${styles.storeHero}`}>
           <div className={styles.heroCopy}>
-            <h1 className={styles.title}>{store.name}</h1>
+            <h1 tabIndex={-1} className={styles.title}>{store.name}</h1>
             {store.description ? (
               <p className={styles.description}>{store.description}</p>
             ) : (
@@ -160,14 +185,6 @@ export function StoreView() {
           </div>
 
           <div className={styles.storeHeroAside}>
-            <div className={styles.storeHeroVisual} aria-hidden="true">
-              <span className={styles.storeHeroOrb} />
-              <span className={styles.storeHeroBag}>
-                <span />
-              </span>
-              <span className={styles.storeHeroTicket}>SHOP</span>
-            </div>
-
             <dl className={styles.heroMeta} aria-label="สรุปร้านค้า">
             <div>
               <dt className={styles.metaLabel}>แคมเปญ</dt>

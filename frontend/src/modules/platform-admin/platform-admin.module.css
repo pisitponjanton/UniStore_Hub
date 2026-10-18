@@ -760,3 +760,51 @@
     transform: none;
   }
 }
+
+/* Phase 5: Platform governance uses restrained design and readable status. */
+.page { background: var(--canvas); }
+.header {
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-feature);
+  padding: clamp(18px, 2.8vw, 30px);
+  box-shadow: none;
+}
+.header::after { content: none; display: none; }
+.headerCount, .scopeContext, .priorityItem, .priorityItem:last-child {
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-card);
+  box-shadow: none;
+}
+@media (max-width: 620px) {
+  .header { padding: 18px; }
+}
+
+/* Phase 5: give governance actions and search prominence without adding unauthorized actions. */
+.platformShortcuts {
+  display: flex; flex-wrap: wrap; gap: var(--space-2); min-width: 0;
+}
+.platformShortcuts a {
+  min-height: 44px; display: inline-flex; align-items: center; justify-content: center;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--line-soft); border-radius: var(--radius-control);
+  background: var(--surface); color: var(--brand-strong);
+  text-decoration: none; font-weight: 650;
+}
+.platformShortcuts .platformPrimaryLink { background: var(--brand-soft); }
+.platformShortcuts a:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.organizationRow { padding: var(--space-4); }
+.organizationList { gap: var(--space-2); }
+.organizationName { overflow-wrap: anywhere; }
+.userIdentity { min-width: 0; overflow-wrap: anywhere; }
+@media(max-width:620px) {
+  .platformShortcuts { display: grid; grid-template-columns: 1fr; }
+  .platformShortcuts a { text-align: center; }
+  .priorityStrip { gap: var(--space-2); }
+  .priorityItem { min-height: 0; padding: var(--space-3); }
+}
+
+/* Phase 6: anchor feedback after async modal actions, including small viewports. */
+.actionFeedback { scroll-margin-top: 96px; outline: none; }
+.actionFeedback:focus-visible { outline: 3px solid var(--focus); outline-offset: 4px; }

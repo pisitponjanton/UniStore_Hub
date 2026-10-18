@@ -84,7 +84,7 @@ describe("StorefrontLanding", () => {
       }),
     ).toBeInTheDocument();
 
-    expect(screen.getAllByText("ชมรมตัวอย่าง")).toHaveLength(2);
+    expect(screen.getAllByText("ชมรมตัวอย่าง")).toHaveLength(3);
     expect(
       screen.getByRole("heading", {
         level: 2,
@@ -92,8 +92,14 @@ describe("StorefrontLanding", () => {
       }),
     ).toBeInTheDocument();
     const storeLinks = screen.getAllByRole("link", { name: /ร้านชมรม/ });
-    expect(storeLinks).toHaveLength(2);
+    expect(storeLinks).toHaveLength(3);
     expect(storeLinks[0]).toHaveAttribute(
+      "href",
+      "/stores/view?organizationId=org-1&storeId=store-1",
+    );
+    const spotlight = document.querySelector('a[class*="heroSpotlight"]');
+    expect(spotlight).toHaveTextContent("ร้านชมรม");
+    expect(spotlight).toHaveAttribute(
       "href",
       "/stores/view?organizationId=org-1&storeId=store-1",
     );
@@ -218,8 +224,8 @@ describe("StorefrontLanding", () => {
 
     render(<StorefrontLanding />);
     expect(await screen.findByText("หน้า 1 จาก 3")).toBeInTheDocument();
-    // Twelve paged directory rows plus four unchanged featured store links.
-    expect(screen.getAllByRole("link", { name: /ร้าน-\d+/ })).toHaveLength(16);
+    // Twelve paged directory rows, four featured cards, and the real-store hero spotlight.
+    expect(screen.getAllByRole("link", { name: /ร้าน-\d+/ })).toHaveLength(17);
     fireEvent.click(screen.getByRole("button", { name: "ถัดไป" }));
     expect(screen.getByText("หน้า 2 จาก 3")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "ร้าน-12" })).toBeInTheDocument();

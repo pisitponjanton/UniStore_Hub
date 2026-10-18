@@ -1,7 +1,9 @@
 "use client";
 
+import { PageLoadingRows, PageStateHeading, RecoveryActions } from "@/components/ui/async-page";
+
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   Button,
@@ -55,6 +57,19 @@ export function OrganizationOrderDetailView({
   const [cancelPending, setCancelPending] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
+
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const actionFeedbackRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if ((!actionError && !actionSuccess) || cancelDialogOpen || cancelPending) return;
+    // The error was previously hidden behind an open confirmation dialog.
+    // Once Radix releases its focus trap, announce the terminal result.
+    const timeout = window.setTimeout(() => {
+      actionFeedbackRef.current?.focus({ preventScroll: true });
+      actionFeedbackRef.current?.scrollIntoView?.({ block: "start", behavior: "instant" });
+    }, 120);
+    return () => window.clearTimeout(timeout);
+  }, [actionError, actionSuccess, cancelDialogOpen, cancelPending]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -183,6 +198,7 @@ export function OrganizationOrderDetailView({
       }
     } finally {
       setCancelPending(false);
+      setCancelDialogOpen(false);
     }
   }
 
@@ -190,6 +206,8 @@ export function OrganizationOrderDetailView({
     return (
       <div className={styles.page}>
         <main className={styles.stateWrap}>
+          <PageStateHeading title="รายละเอียดคำสั่งซื้อของหน่วยงาน" description="ตรวจสอบรายการสินค้าและสถานะล่าสุด" />
+          {state.status === "loading" ? <PageLoadingRows /> : null}
           {state.status === "loading" ? (
             <LoadingState
               title="กำลังโหลดรายละเอียดคำสั่งซื้อ"
@@ -216,12 +234,8 @@ export function OrganizationOrderDetailView({
           {state.status === "error" ? (
             <ErrorState
               title="ไม่สามารถโหลดคำสั่งซื้อได้"
-              description="กรุณาลองโหลดหน้านี้ใหม่อีกครั้ง"
-              actions={
-                <Link href={organizationOrdersHref(organizationId)}>
-                  กลับรายการคำสั่งซื้อ
-                </Link>
-              }
+              description="ไม่สามารถดึงรายละเอียดล่าสุดได้ ลองใหม่หรือกลับไปยังรายการ"
+              actions={<RecoveryActions backHref={organizationOrdersHref(organizationId)} backLabel="กลับรายการคำสั่งซื้อ" />}
             />
           ) : null}
         </main>
@@ -294,16 +308,24 @@ export function OrganizationOrderDetailView({
           </div>
         </section>
 
-        {actionSuccess ? (
-          <Notice tone="success" role="status" title="อัปเดตคำสั่งซื้อแล้ว">
-            {actionSuccess}
-          </Notice>
-        ) : null}
-
-        {actionError ? (
-          <Notice tone="danger" role="alert" title="ดำเนินการไม่สำเร็จ">
-            {actionError}
-          </Notice>
+        {actionSuccess || actionError ? (
+          <div
+            ref={actionFeedbackRef}
+            tabIndex={-1}
+            data-order-action-feedback
+            className={styles.actionFeedback}
+          >
+            {actionSuccess ? (
+              <Notice tone="success" role="status" title="อัปเดตคำสั่งซื้อแล้ว">
+                {actionSuccess}
+              </Notice>
+            ) : null}
+            {actionError ? (
+              <Notice tone="danger" role="alert" title="ดำเนินการไม่สำเร็จ">
+                {actionError}
+              </Notice>
+            ) : null}
+          </div>
         ) : null}
 
         <section
@@ -384,6 +406,15 @@ export function OrganizationOrderDetailView({
         <div className={styles.actionBar}>
           {canCancel ? (
             <ConfirmDialog
+              open={cancelDialogOpen}
+              onOpenChange={(open) => {
+                if (!cancelPending) setCancelDialogOpen(open);
+              }}
+              onCloseAutoFocus={(event) => {
+                // Radix normally returns focus to the trigger after a manual
+                // Cancel; when an operation completed, the result must win.
+                if (actionError || actionSuccess) event.preventDefault();
+              }}
               trigger={
                 <Button variant="danger">
                   ยกเลิกคำสั่งซื้อ

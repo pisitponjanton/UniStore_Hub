@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
   Button,
@@ -18,13 +18,18 @@ import {
 } from "@/modules/auth";
 import { ApiClientError } from "@/services";
 import type { Cursor, OrderDTO } from "@/types";
+import { myPaymentHref } from "@/modules/payments/payment-helpers";
+import { myPickupHref } from "@/modules/pickups/pickup-helpers";
 import { formatIsoDateTime, formatSatang } from "@/utils";
 
 import styles from "./order-tracking.module.css";
 import { orderService } from "./order-service";
 import {
+  customerOrderBucket,
   getCustomerOrderGuidance,
   myOrderHref,
+  prioritizeLoadedOrders,
+  type CustomerOrderViewFilter,
 } from "./order-tracking-helpers";
 import { OrderStatusBadge } from "./order-status";
 
@@ -45,6 +50,38 @@ export function MyOrdersView() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [loadAttempt, setLoadAttempt] = useState(0);
   const [loadMoreError, setLoadMoreError] = useState<string | null>(null);
+  const [viewFilter, setViewFilter] = useState<CustomerOrderViewFilter>("action");
+
+  const focusAfterRetry = useRef(false);
+  const cursorErrorRef = useRef<HTMLDivElement>(null);
+
+  function retryInitialLoad() {
+    focusAfterRetry.current = true;
+    setState({ status: "loading" });
+    setLoadAttempt((attempt) => attempt + 1);
+  }
+
+  useEffect(() => {
+    if (!focusAfterRetry.current || state.status === "loading") return;
+    focusAfterRetry.current = false;
+    const frame = window.requestAnimationFrame(() => {
+      const heading = document.querySelector<HTMLElement>("main h1");
+      if (!heading) return;
+      heading.tabIndex = -1;
+      heading.focus({ preventScroll: true });
+      heading.scrollIntoView?.({ block: "start", behavior: "instant" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [state.status]);
+
+  useEffect(() => {
+    if (!loadMoreError) return;
+    const frame = window.requestAnimationFrame(() => {
+      cursorErrorRef.current?.focus({ preventScroll: true });
+      cursorErrorRef.current?.scrollIntoView?.({ block: "center", behavior: "instant" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [loadMoreError]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -148,6 +185,26 @@ export function MyOrdersView() {
     ).length;
   }, [state]);
 
+  const loadedOrders = useMemo(
+    () => state.status === "success" ? prioritizeLoadedOrders(state.items) : [],
+    [state],
+  );
+  const filteredOrders = loadedOrders.filter(order =>
+    viewFilter === "all" || customerOrderBucket(order.status) === viewFilter,
+  );
+  const filterCounts = {
+    action: loadedOrders.filter(order => customerOrderBucket(order.status) === "action").length,
+    progress: loadedOrders.filter(order => customerOrderBucket(order.status) === "progress").length,
+    finished: loadedOrders.filter(order => customerOrderBucket(order.status) === "finished").length,
+    all: loadedOrders.length,
+  };
+  const orderFilters: Array<{ value: CustomerOrderViewFilter; label: string }> = [
+    { value: "action", label: "ต้องทำต่อ" },
+    { value: "progress", label: "กำลังดำเนินการ" },
+    { value: "finished", label: "เสร็จสิ้น" },
+    { value: "all", label: "ทั้งหมด" },
+  ];
+
   if (state.status !== "success") {
     return (
       <div className={styles.page}>
@@ -177,10 +234,7 @@ export function MyOrdersView() {
               actions={
                 <>
                   <Button
-                    onClick={() => {
-                      setState({ status: "loading" });
-                      setLoadAttempt((attempt) => attempt + 1);
-                    }}
+                    onClick={retryInitialLoad}
                   >
                     ลองโหลดอีกครั้ง
                   </Button>
@@ -223,7 +277,7 @@ export function MyOrdersView() {
           <p className={styles.overviewDescription}>
             {attentionCount > 0
               ? "รายการที่มีขั้นตอนให้คุณดำเนินการจะถูกทำให้เห็นเด่นขึ้นด้านล่าง"
-              : "ยังไม่มีคำสั่งซื้อที่ต้องดำเนินการจากคุณในรายการที่โหลดอยู่"}
+              : "ยังไม่มีงานที่ต้องทำต่อในรายการที่โหลดอยู่ เลือกแท็บอื่นเพื่อดูรายการที่เหลือ"}
           </p>
           <div
             className={styles.overviewLoaded}
@@ -237,6 +291,20 @@ export function MyOrdersView() {
         </section>
 
         <section className={styles.orderLedger} aria-label="รายการคำสั่งซื้อ">
+          <div className={styles.customerOrderFilters} role="group" aria-label="กรองคำสั่งซื้อที่โหลดแล้ว">
+            {orderFilters.map(option => (
+              <button
+                key={option.value}
+                type="button"
+                aria-pressed={viewFilter === option.value}
+                className={styles.customerOrderFilter}
+                data-active={viewFilter === option.value || undefined}
+                onClick={() => setViewFilter(option.value)}
+              >
+                {option.label} <span data-numeric>{filterCounts[option.value]}</span>
+              </button>
+            ))}
+          </div>
           <div className={styles.ledgerHeading}>
             <div>
               <h2>ติดตามสถานะและขั้นตอนถัดไป</h2>
@@ -247,7 +315,7 @@ export function MyOrdersView() {
           </div>
 
           <div className={styles.orderRows}>
-            {state.items.map((order) => {
+            {filteredOrders.map((order) => {
               const guidance = getCustomerOrderGuidance(order.status);
               const needsAction = guidance.action !== null;
 
@@ -267,10 +335,10 @@ export function MyOrdersView() {
                     </div>
 
                     <div className={styles.orderIdentity}>
-                      <span className={styles.orderId} data-technical>
-                        {order.orderId}
-                      </span>
                       <p className={styles.orderNextStep}>{guidance.title}</p>
+                      <span className={styles.orderId} data-technical title={order.orderId}>
+                        อ้างอิง {order.orderId.slice(0, 8)}
+                      </span>
                       <p className={styles.orderGuidance}>
                         {guidance.description}
                       </p>
@@ -290,27 +358,42 @@ export function MyOrdersView() {
                     </time>
                   </div>
 
-                  <Link
-                    href={myOrderHref(order.orderId)}
-                    className={
-                      needsAction
-                        ? styles.detailLinkPrimary
-                        : styles.detailLink
-                    }
-                    aria-label={`${needsAction ? "ดำเนินการต่อ" : "ดูรายละเอียด"} คำสั่งซื้อ ${order.orderId}`}
-                  >
-                    {needsAction ? "ดำเนินการต่อ" : "ดูรายละเอียด"}
-                  </Link>
+                  <div className={styles.orderRowActions}>
+                    {needsAction ? (
+                      <Link
+                        href={guidance.action === "PAYMENT" ? myPaymentHref(order.orderId) : myPickupHref(order.orderId)}
+                        className={styles.detailLinkPrimary}
+                        aria-label={guidance.action === "PAYMENT" ? "ชำระเงิน คำสั่งซื้อ " + order.orderId : "เปิดข้อมูลรับสินค้า คำสั่งซื้อ " + order.orderId}
+                      >
+                        {guidance.action === "PAYMENT"
+                          ? order.status === "PAYMENT_REJECTED" ? "ส่งหลักฐานใหม่" : "ไปชำระเงิน"
+                          : "ข้อมูลรับสินค้า"}
+                      </Link>
+                    ) : null}
+                    <Link
+                      href={myOrderHref(order.orderId)}
+                      className={styles.detailLink}
+                      aria-label={"ดูรายละเอียด คำสั่งซื้อ " + order.orderId}
+                    >ดูรายละเอียด</Link>
+                  </div>
                 </article>
               );
             })}
           </div>
+          {filteredOrders.length === 0 ? (
+            <div className={styles.filteredEmpty} role="status">
+              ยังไม่มีคำสั่งซื้อในกลุ่มนี้จากรายการที่โหลดแล้ว
+              <button type="button" onClick={() => setViewFilter("all")}>ดูคำสั่งซื้อทั้งหมด</button>
+            </div>
+          ) : null}
         </section>
 
         {loadMoreError ? (
-          <Notice tone="danger" role="alert" title="โหลดรายการเพิ่มเติมไม่สำเร็จ">
-            {loadMoreError}
-          </Notice>
+          <div ref={cursorErrorRef} tabIndex={-1} data-customer-orders-page-error className={styles.focusableQueueFeedback}>
+            <Notice tone="danger" role="alert" title="โหลดรายการเพิ่มเติมไม่สำเร็จ">
+              {loadMoreError}
+            </Notice>
+          </div>
         ) : null}
 
         {state.nextCursor ? (

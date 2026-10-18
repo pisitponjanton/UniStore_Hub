@@ -1,15 +1,17 @@
 "use client";
 
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { AsyncPageFallback } from "@/components/ui/async-page";
+import { LoadedDirectoryControls } from "@/modules/organization-directory/loaded-directory-controls";
+import { searchLoadedItems, visibleLoadedItems } from "@/modules/organization-directory/loaded-directory-helpers";
+
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 
 import {
   Badge,
   Button,
   ConfirmDialog,
   EmptyState,
-  ErrorState,
   ErrorSummary,
-  LoadingState,
   Notice,
   SelectField,
   TextField,
@@ -94,6 +96,8 @@ export function StaffView({
   organizationId: string;
 }) {
   const focusErrorSummary = useErrorSummaryFocus();
+  const [directoryQuery, setDirectoryQuery] = useState("");
+  const [directoryLimit, setDirectoryLimit] = useState(24);
   const [state, setState] = useState<StaffState>({
     status: "loading",
   });
@@ -108,6 +112,18 @@ export function StaffView({
   >({});
   const [inlineError, setInlineError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+
+  const operationFeedbackRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!inlineError) return;
+    // Mutating actions are below the member list; after failure bring the
+    // newly rendered error back into the keyboard and mobile viewport.
+    const frame = window.requestAnimationFrame(() => {
+      operationFeedbackRef.current?.focus({ preventScroll: true });
+      operationFeedbackRef.current?.scrollIntoView?.({ block: "start", behavior: "instant" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [inlineError]);
 
   const refreshMembers = useCallback(
     async (signal?: AbortSignal) => {
@@ -171,6 +187,9 @@ export function StaffView({
 
   const members =
     state.status === "success" ? state.members : [];
+
+  const directoryMatches = searchLoadedItems(members, directoryQuery, member => [member.user.name, member.user.email, member.userId, member.role, member.status]);
+  const directoryVisible = visibleLoadedItems(directoryMatches, directoryLimit);
 
   const adminCount = activeAdminCount(members);
   const activeMembers = members.filter(
@@ -305,17 +324,15 @@ export function StaffView({
     return (
       <div className={styles.page}>
         <main className={styles.stateWrap}>
-          {state.status === "loading" ? (
-            <LoadingState
-              title="กำลังโหลดรายชื่อบุคลากร"
-              description="กำลังดึงสมาชิกและบทบาทล่าสุดของหน่วยงาน"
-            />
-          ) : (
-            <ErrorState
-              title="ไม่สามารถโหลดรายชื่อบุคลากรได้"
-              description="กรุณาลองโหลดหน้านี้ใหม่อีกครั้ง"
-            />
-          )}
+          <AsyncPageFallback
+            status={state.status}
+            pageTitle="บุคลากรและสิทธิ์"
+            pageDescription="จัดการผู้ร่วมงานและบทบาทในหน่วยงาน"
+            loadingTitle="กำลังโหลดรายชื่อบุคลากร"
+            errorTitle="ไม่สามารถโหลดรายชื่อบุคลากรได้"
+            backHref="/org/select/"
+            backLabel="กลับไปพื้นที่ทำงาน"
+          />
         </main>
       </div>
     );
@@ -353,9 +370,16 @@ export function StaffView({
         </section>
 
         {inlineError ? (
-          <Notice tone="danger" role="alert" title="ดำเนินการไม่สำเร็จ">
-            {inlineError}
-          </Notice>
+          <div
+            data-staff-operation-error
+            ref={operationFeedbackRef}
+            tabIndex={-1}
+            className={styles.operationFeedback}
+          >
+            <Notice tone="danger" role="alert" title="ดำเนินการไม่สำเร็จ">
+              {inlineError}
+            </Notice>
+          </div>
         ) : null}
 
         {notice ? (
@@ -380,6 +404,17 @@ export function StaffView({
               </span>
             </div>
 
+          <LoadedDirectoryControls
+            id="staff-directory-search"
+            label="ค้นหาสมาชิก"
+            query={directoryQuery}
+            onQueryChange={value => { setDirectoryQuery(value); setDirectoryLimit(24); }}
+            loadedCount={members.length}
+            matchingCount={directoryMatches.length}
+            visibleCount={directoryVisible.length}
+            onShowMore={() => setDirectoryLimit(limit => limit + 24)}
+          />
+
             {members.length === 0 ? (
               <EmptyState
                 title="ยังไม่มีสมาชิก"
@@ -387,7 +422,7 @@ export function StaffView({
               />
             ) : (
               <div className={styles.memberList}>
-                {members.map((member) => {
+                {directoryVisible.map((member) => {
                   const finalAdmin = isFinalActiveAdmin(member, members);
                   const draftRole =
                     roleDrafts[member.userId] ?? member.role;

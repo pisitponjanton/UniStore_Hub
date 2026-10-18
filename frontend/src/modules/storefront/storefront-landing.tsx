@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 import {
-  BrandIllustration,
   Button,
   EmptyState,
   ErrorState,
@@ -149,7 +148,7 @@ export function StorefrontLanding() {
       <StorefrontHeader />
 
       <main>
-        <section className={styles.hero} data-filtering={hasActiveFilters ? "true" : "false"} aria-labelledby="storefront-intro-heading">
+        <section className={styles.hero} data-has-preview={discoveryStores[0] ? "true" : "false"} data-filtering={hasActiveFilters ? "true" : "false"} aria-labelledby="storefront-intro-heading">
           <div className={styles.heroMain}>
             <h1 className={styles.heroTitle} id="storefront-intro-heading">
               เลือกซื้อจากร้านในมหาวิทยาลัย
@@ -241,37 +240,25 @@ export function StorefrontLanding() {
             ) : null}
           </div>
 
-          <div className={styles.heroScene} aria-hidden="true">
-            <BrandIllustration
-              variant="market"
-              className={styles.heroSceneIllustration}
-              decorative
-            />
-          </div>
-
+          {discoveryStores[0] ? (
+            <Link
+              href={storeHref(discoveryStores[0].organization.organizationId, discoveryStores[0].store.storeId)}
+              className={styles.heroSpotlight}
+            >
+              <span className={styles.heroSpotlightEyebrow}>ร้านที่เปิดให้เข้าชม</span>
+              <div className={styles.heroSpotlightBody}>
+                <span className={styles.heroSpotlightOrganization}>
+                  {discoveryStores[0].organization.name}
+                </span>
+                <strong className={styles.heroSpotlightName}>{discoveryStores[0].store.name}</strong>
+                <p className={styles.heroSpotlightDescription}>
+                  {discoveryStores[0].store.description || "ดูสินค้าและแคมเปญล่าสุดของร้าน"}
+                </p>
+              </div>
+              <span className={styles.heroSpotlightAction}>เปิดหน้าร้าน <span aria-hidden="true">↗</span></span>
+            </Link>
+          ) : null}
         </section>
-
-        {!hasActiveFilters ? (
-        <aside className={styles.heroGuide} aria-labelledby="storefront-guide-heading">
-          <h2 className={styles.heroGuideTitle} id="storefront-guide-heading">
-            ซื้อและติดตามในที่เดียว
-          </h2>
-          <ol className={styles.heroGuideList}>
-            <li>
-              <strong>เลือกร้าน</strong>
-              <span>เริ่มจากหน่วยงานและร้านที่เปิดให้เข้าชม</span>
-            </li>
-            <li>
-              <strong>ดูสินค้าและรอบขาย</strong>
-              <span>ตรวจสอบตัวเลือก ราคา และช่วงเวลาของแคมเปญก่อนสั่ง</span>
-            </li>
-            <li>
-              <strong>ติดตามหลังสั่งซื้อ</strong>
-              <span>ดูสถานะคำสั่งซื้อ การชำระเงิน และการรับสินค้าในบัญชีของคุณ</span>
-            </li>
-          </ol>
-        </aside>
-        ) : null}
 
         {state.status === "success" && !hasActiveFilters && discoveryStores.length > 0 ? (
           <section
@@ -451,6 +438,28 @@ export function StorefrontLanding() {
           ) : null}
         </section>
 
+        {!hasActiveFilters ? (
+        <aside className={styles.heroGuide} aria-labelledby="storefront-guide-heading">
+          <h2 className={styles.heroGuideTitle} id="storefront-guide-heading">
+            ซื้อและติดตามในที่เดียว
+          </h2>
+          <ol className={styles.heroGuideList}>
+            <li>
+              <strong>เลือกร้าน</strong>
+              <span>เริ่มจากหน่วยงานและร้านที่เปิดให้เข้าชม</span>
+            </li>
+            <li>
+              <strong>ดูสินค้าและรอบขาย</strong>
+              <span>ตรวจสอบตัวเลือก ราคา และช่วงเวลาของแคมเปญก่อนสั่ง</span>
+            </li>
+            <li>
+              <strong>ติดตามหลังสั่งซื้อ</strong>
+              <span>ดูสถานะคำสั่งซื้อ การชำระเงิน และการรับสินค้าในบัญชีของคุณ</span>
+            </li>
+          </ol>
+        </aside>
+        ) : null}
+
         {state.status === "loading" ? (
           <div className={styles.loadingArea}>
             <div className={styles.loadingPreview} aria-hidden="true">
@@ -473,7 +482,6 @@ export function StorefrontLanding() {
           <div className={styles.stateWrap}>
             <EmptyState
               title="ยังไม่มีร้านค้าที่เปิดให้เข้าชม"
-              media={<BrandIllustration variant="market" decorative />}
               description="เมื่อมีร้านค้าที่พร้อมให้ลูกค้าเข้าชม รายการจะปรากฏที่หน้านี้"
             />
           </div>

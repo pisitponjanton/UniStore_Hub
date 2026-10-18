@@ -135,4 +135,34 @@ describe("OrganizationSelectView", () => {
     await waitFor(() => expect(summary).toHaveFocus());
     expect(mocks.create).not.toHaveBeenCalled();
   });
+  it("searches accessible organization #145 without rendering 145 cards or leaking unowned organizations", async () => {
+    const orgs = Array.from({ length: 145 }, (_, index) =>
+      organization("org-" + index, index === 144 ? "Final KMITL Club" : "Campus Club " + index));
+    mocks.listAccessible.mockResolvedValue([...orgs, organization("private-1", "Private Organization")]);
+    mocks.useAuthSession.mockReturnValue({
+      status: "authenticated",
+      user: {
+        userId: "user-1", email: "admin@example.com", name: "Admin",
+        status: "ACTIVE", platformRole: null,
+      },
+      memberships: orgs.map(org => ({
+        organizationId: org.organizationId,
+        role: "ORGANIZATION_ADMIN",
+        status: "ACTIVE",
+      })),
+    });
+    render(<OrganizationSelectView />);
+    await screen.findByText("Campus Club 0");
+    expect(screen.getByText("เข้าถึงได้").parentElement).toHaveTextContent("145");
+    expect(screen.queryByText("Final KMITL Club")).not.toBeInTheDocument();
+    expect(screen.queryByText("Private Organization")).not.toBeInTheDocument();
+    const input = screen.getByRole("searchbox", { name: "ค้นหาหน่วยงานที่เข้าถึงได้" });
+    fireEvent.change(input, { target: { value: "final kmitl" } });
+    expect(screen.getByText("Final KMITL Club")).toBeInTheDocument();
+    expect(screen.queryByText("Campus Club 0")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "เข้าใช้งาน Final KMITL Club" }));
+    expect(mocks.push).toHaveBeenCalledWith("/org/dashboard/?organizationId=org-144");
+    expect(mocks.remember).not.toHaveBeenCalledWith("private-1", expect.any(Array));
+  });
+
 });

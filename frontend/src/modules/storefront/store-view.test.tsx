@@ -85,7 +85,8 @@ describe("StoreView mobile shopping hierarchy", () => {
       "id", "product-heading",
     );
     expect(screen.getAllByText("1", { selector: "dd" })).toHaveLength(2);
-    expect(container.querySelector('[class*="storeHeroVisual"]')).toHaveAttribute("aria-hidden", "true");
+    // Product imagery is never invented when the store has no media.
+    expect(container.querySelector('[class*="storeHeroVisual"]')).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Local Demo Product/ })).toHaveAttribute(
       "href", `/products/view?organizationId=${organizationId}&productId=product-1`,
     );

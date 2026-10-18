@@ -1,19 +1,21 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { AsyncPageFallback } from "@/components/ui/async-page";
+import { useQueueFilterFeedback } from "@/modules/operations/use-queue-filter-feedback";
+import { QueuePriorityControls, QueueFilterEmpty } from "@/modules/operations/queue-priority-controls";
+import { useRevealSelectedQueueDetail } from "@/modules/operations/use-reveal-selected-queue-detail";
+import { prioritizeLoadedQueue, visibleLoadedQueue } from "@/modules/operations/queue-priority";
+
+import { useEffect, useRef, useState, type FormEvent } from "react";
 
 import {
   Badge,
   Button,
   ConfirmDialog,
   EmptyState,
-  ErrorState,
-  ForbiddenState,
-  LoadingState,
   Notice,
   SelectField,
   TextField,
-  UnauthorizedState,
 } from "@/components";
 import {
   authSession,
@@ -114,17 +116,35 @@ export function OrganizationPickupsView({
 
   const [filtering, setFiltering] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [queueView, setQueueView] = useState<"all" | "action">("all");
+  const [visibleLimit, setVisibleLimit] = useState(30);
   const [detailLoadingId, setDetailLoadingId] =
     useState<string | null>(null);
   const [selected, setSelected] =
     useState<SelectedPickupState | null>(null);
   const [confirmPending, setConfirmPending] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const actionFeedbackRef = useRef<HTMLDivElement>(null);
 
   const [inlineError, setInlineError] = useState<string | null>(
     null,
   );
   const [notice, setNotice] = useState<string | null>(null);
   const [listFeedback, setListFeedback] = useState<string | null>(null);
+  const { successRef, errorRef, announceCompletion } = useQueueFilterFeedback(filtering, inlineError);
+
+  useRevealSelectedQueueDetail(selected?.pickup.pickupId ?? null, "staff-pickup-detail");
+  useEffect(() => {
+    if ((!inlineError && !notice) || confirmOpen || confirmPending) return;
+    // Wait for the Radix focus trap to release before focusing the
+    // status/error that explains the outcome of the confirmation.
+    const timeout = window.setTimeout(() => {
+      actionFeedbackRef.current?.focus({ preventScroll: true });
+      actionFeedbackRef.current?.scrollIntoView?.({ block: "start", behavior: "instant" });
+    }, 120);
+    return () => window.clearTimeout(timeout);
+  }, [inlineError, notice, confirmOpen, confirmPending]);
+
 
   useEffect(() => {
     const controller = new AbortController();
@@ -256,6 +276,7 @@ export function OrganizationPickupsView({
       setListFeedback(
         `แสดง ${result.items.length.toLocaleString("th-TH")} รายการรับสินค้า${nextFilters.status ? ` · ${getPickupStatusLabel(nextFilters.status)}` : ""}`,
       );
+      announceCompletion();
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();
@@ -263,6 +284,7 @@ export function OrganizationPickupsView({
       }
 
       setInlineError(operationErrorMessage(error));
+      announceCompletion();
     } finally {
       setFiltering(false);
     }
@@ -297,6 +319,7 @@ export function OrganizationPickupsView({
       setListFeedback(
         `แสดงรายการรับสินค้าทั้งหมดที่โหลด ${result.items.length.toLocaleString("th-TH")} รายการ`,
       );
+      announceCompletion();
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();
@@ -304,6 +327,7 @@ export function OrganizationPickupsView({
       }
 
       setInlineError(operationErrorMessage(error));
+      announceCompletion();
     } finally {
       setFiltering(false);
     }
@@ -463,6 +487,7 @@ export function OrganizationPickupsView({
       }
     } finally {
       setConfirmPending(false);
+      setConfirmOpen(false);
     }
   }
 
@@ -470,21 +495,15 @@ export function OrganizationPickupsView({
     return (
       <div className={styles.page}>
         <main className={styles.stateWrap}>
-          {state.status === "loading" ? (
-            <LoadingState title="กำลังโหลดรายการรับสินค้า" />
-          ) : null}
-          {state.status === "unauthorized" ? (
-            <UnauthorizedState />
-          ) : null}
-          {state.status === "forbidden" ? (
-            <ForbiddenState />
-          ) : null}
-          {state.status === "error" ? (
-            <ErrorState
-              title="ไม่สามารถโหลดรายการรับสินค้าได้"
-              description="กรุณาลองโหลดหน้านี้ใหม่อีกครั้ง"
-            />
-          ) : null}
+          <AsyncPageFallback
+            status={state.status}
+            pageTitle="จุดรับสินค้า"
+            pageDescription="ค้นหาและยืนยันการรับสินค้า"
+            loadingTitle="กำลังโหลดรายการรับสินค้า"
+            errorTitle="ไม่สามารถโหลดรายการรับสินค้าได้"
+            backHref="/org/select/"
+            backLabel="กลับไปพื้นที่ทำงาน"
+          />
         </main>
       </div>
     );
@@ -507,6 +526,11 @@ export function OrganizationPickupsView({
     (pickup) => pickup.status === "RECEIVED",
   ).length;
 
+  const isActionable = (pickup: PickupDTO) => pickup.status === "READY";
+  const sortedRows = prioritizeLoadedQueue(state.pickups, isActionable, item => item.updatedAt);
+  const queueRows = visibleLoadedQueue(sortedRows, queueView, isActionable);
+  const visibleRows = queueRows.slice(0, visibleLimit);
+
   return (
     <div className={styles.page}>
       <main className={styles.main}>
@@ -518,153 +542,29 @@ export function OrganizationPickupsView({
             </p>
           </div>
         </header>
+        <QueuePriorityControls
+          heading="คิวรับสินค้า"
+          actionLabel="รับสินค้า"
+          countLabel="พร้อมรับสินค้า"
+          actionCount={readyCount}
+          loadedCount={state.pickups.length}
+          mode={queueView}
+          onChange={(next) => { setQueueView(next); setVisibleLimit(30); }}
+          listId="pickup-list"
+          filterId="pickup-filter-title"
+        />
 
-        <section
-          className={styles.summaryStrip}
-          aria-label="สรุปรายการรับสินค้าที่โหลด"
-        >
-          <div>
-            <span className={styles.summaryLabel}>รายการที่โหลด</span>
-            <strong>{state.pickups.length}</strong>
-          </div>
-          <div>
-            <span className={styles.summaryLabel}>พร้อมรับสินค้า</span>
-            <strong>{readyCount}</strong>
-          </div>
-          <div>
-            <span className={styles.summaryLabel}>รับสินค้าแล้ว</span>
-            <strong>{receivedCount}</strong>
-          </div>
-        </section>
 
-        <section
-          className={styles.filterPanel}
-          aria-labelledby="pickup-filter-title"
-        >
-          <div className={styles.filterHeading}>
-            <div>
-              <h2 className={styles.sectionTitle} id="pickup-filter-title">
-                ค้นหารายการรับสินค้า
-              </h2>
-              <p className={styles.sectionDescription}>
-                Token และ Order ID เหมาะสำหรับค้นหารายการเฉพาะ ส่วนแคมเปญและสถานะใช้จำกัดคิว
-              </p>
-            </div>
 
-            <div
-              className={styles.appliedFilters}
-              role="group"
-              aria-label="ตัวกรองที่ใช้อยู่"
-            >
-              {hasFilters ? (
-                <>
-                  {appliedFilters.token ? (
-                    <span>Token: {appliedFilters.token}</span>
-                  ) : null}
-                  {appliedFilters.orderId ? (
-                    <span>Order: {appliedFilters.orderId}</span>
-                  ) : null}
-                  {appliedFilters.campaignId ? (
-                    <span>Campaign: {appliedFilters.campaignId}</span>
-                  ) : null}
-                  {appliedFilters.status ? (
-                    <span>
-                      สถานะ: {getPickupStatusLabel(appliedFilters.status)}
-                    </span>
-                  ) : null}
-                </>
-              ) : (
-                <span>แสดงทุกรายการ</span>
-              )}
-            </div>
-          </div>
 
-          <form
-            className={styles.filterForm}
-            onSubmit={applyFilters}
-            aria-busy={filtering}
-          >
-            <div className={styles.filters}>
-              <TextField
-                id="pickup-token-filter"
-                label="Pickup token"
-                value={draftToken}
-                onChange={(event) =>
-                  setDraftToken(event.target.value)
-                }
-                placeholder="Token ที่ลูกค้าแสดง"
-                disabled={filtering}
-              />
 
-              <TextField
-                id="pickup-order-filter"
-                label="Order ID"
-                value={draftOrderId}
-                onChange={(event) =>
-                  setDraftOrderId(event.target.value)
-                }
-                placeholder="เช่น order-..."
-                disabled={filtering}
-              />
-
-              <TextField
-                id="pickup-campaign-filter"
-                label="Campaign ID"
-                value={draftCampaignId}
-                onChange={(event) =>
-                  setDraftCampaignId(event.target.value)
-                }
-                placeholder="เช่น campaign-..."
-                disabled={filtering}
-              />
-
-              <SelectField
-                id="pickup-status-filter"
-                label="สถานะ Pickup"
-                value={draftStatus}
-                onChange={(event) =>
-                  setDraftStatus(
-                    event.target.value as PickupStatus | "",
-                  )
-                }
-                disabled={filtering}
-              >
-                <option value="">ทุกสถานะ</option>
-                {PICKUP_STATUSES.map((status) => (
-                  <option key={status} value={status}>
-                    {getPickupStatusLabel(status)}
-                  </option>
-                ))}
-              </SelectField>
-            </div>
-
-            <div className={styles.filterActions}>
-              <Button
-                type="submit"
-                pending={filtering}
-                pendingLabel="กำลังค้นหา"
-              >
-                ใช้ตัวกรอง
-              </Button>
-              <Button
-                type="button"
-                variant="quiet"
-                disabled={
-                  filtering || (!hasFilters && !hasDraftFilters)
-                }
-                onClick={() => {
-                  void clearFilters();
-                }}
-              >
-                แสดงทั้งหมด
-              </Button>
-            </div>
-          </form>
-        </section>
 
         {listFeedback ? (
           <p
-            className={styles.listFeedback}
+            ref={successRef}
+            tabIndex={-1}
+            data-queue-filter-feedback="success"
+            className={`${styles.listFeedback} ${styles.focusableFeedback}`}
             role="status"
             aria-live="polite"
             aria-atomic="true"
@@ -673,16 +573,21 @@ export function OrganizationPickupsView({
           </p>
         ) : null}
 
-        {inlineError ? (
-          <Notice tone="danger" role="alert" title="ดำเนินการไม่สำเร็จ">
-            {inlineError}
-          </Notice>
-        ) : null}
-
-        {notice ? (
-          <Notice tone="success" role="status" title="อัปเดตแล้ว">
-            {notice}
-          </Notice>
+        {inlineError || notice ? (
+          <div ref={actionFeedbackRef} tabIndex={-1} data-pickup-action-feedback className={styles.focusableFeedback}>
+            {inlineError ? (
+              <div ref={errorRef} tabIndex={-1} data-queue-filter-feedback="error">
+                <Notice tone="danger" role="alert" title="ดำเนินการไม่สำเร็จ">
+                  {inlineError}
+                </Notice>
+              </div>
+            ) : null}
+            {notice ? (
+              <Notice tone="success" role="status" title="อัปเดตแล้ว">
+                {notice}
+              </Notice>
+            ) : null}
+          </div>
         ) : null}
 
         <div className={styles.layout}>
@@ -715,7 +620,8 @@ export function OrganizationPickupsView({
               />
             ) : (
               <div className={styles.list}>
-                {state.pickups.map((pickup) => {
+                {visibleRows.length === 0 ? <QueueFilterEmpty onShowAll={() => setQueueView("all")} /> : null}
+                {visibleRows.map((pickup) => {
                   const isSelected =
                     selected?.pickup.pickupId === pickup.pickupId;
 
@@ -734,8 +640,8 @@ export function OrganizationPickupsView({
                     >
                       <div className={styles.rowMain}>
                         <div className={styles.rowHeading}>
-                          <h3 className={styles.cardTitle}>
-                            Pickup {pickup.pickupId}
+                          <h3 className={styles.cardTitle} title={`Pickup ${pickup.pickupId}`}>
+                            Pickup {pickup.pickupId.slice(0, 12)}
                           </h3>
                           <Badge tone={pickupTone(pickup.status)}>
                             {getPickupStatusLabel(pickup.status)}
@@ -747,7 +653,7 @@ export function OrganizationPickupsView({
                             {pickup.token}
                           </span>
                           <span className={styles.meta}>
-                            Order: {pickup.orderId}
+                            Order: {pickup.orderId.slice(0, 12)}
                           </span>
                           <time className={styles.meta} dateTime={pickup.updatedAt}>
                             อัปเดต {formatIsoDateTime(pickup.updatedAt)}
@@ -786,7 +692,15 @@ export function OrganizationPickupsView({
               </div>
             )}
 
-            {state.nextCursor ? (
+            {queueRows.length > visibleLimit ? (
+              <div className={styles.loadMore}>
+                <Button type="button" variant="secondary" onClick={() => setVisibleLimit(limit => limit + 30)}>
+                  แสดงอีก {Math.min(30, queueRows.length - visibleLimit)} รายการจากชุดที่โหลด
+                </Button>
+              </div>
+            ) : null}
+
+            {state.nextCursor && queueRows.length <= visibleLimit ? (
               <div className={styles.loadMore}>
                 <Button
                   variant="secondary"
@@ -802,7 +716,7 @@ export function OrganizationPickupsView({
             ) : null}
           </section>
 
-          <aside aria-label="รายละเอียด Pickup">
+          <aside id="staff-pickup-detail" tabIndex={-1} aria-label="รายละเอียด Pickup">
             {selected ? (
               <div className={styles.detailPanel}>
                 <div className={styles.detailHeader}>
@@ -960,6 +874,18 @@ export function OrganizationPickupsView({
                     selected.pickup.status,
                   ) ? (
                     <ConfirmDialog
+                      open={confirmOpen}
+                      onOpenChange={(open) => {
+                        if (confirmPending) return;
+                        if (open) {
+                          setInlineError(null);
+                          setNotice(null);
+                        }
+                        setConfirmOpen(open);
+                      }}
+                      onCloseAutoFocus={(event) => {
+                        if (inlineError || notice) event.preventDefault();
+                      }}
                       trigger={
                         <Button disabled={confirmPending}>
                           ยืนยันรับสินค้า
@@ -986,6 +912,148 @@ export function OrganizationPickupsView({
             )}
           </aside>
         </div>
+        <section
+          className={styles.summaryStrip}
+          aria-label="สรุปรายการรับสินค้าที่โหลด"
+        >
+          <div>
+            <span className={styles.summaryLabel}>รายการที่โหลด</span>
+            <strong>{state.pickups.length}</strong>
+          </div>
+          <div>
+            <span className={styles.summaryLabel}>พร้อมรับสินค้า</span>
+            <strong>{readyCount}</strong>
+          </div>
+          <div>
+            <span className={styles.summaryLabel}>รับสินค้าแล้ว</span>
+            <strong>{receivedCount}</strong>
+          </div>
+        </section>
+
+        <section
+          className={styles.filterPanel}
+          aria-labelledby="pickup-filter-title"
+        >
+          <div className={styles.filterHeading}>
+            <div>
+              <h2 className={styles.sectionTitle} id="pickup-filter-title">
+                ค้นหารายการรับสินค้า
+              </h2>
+              <p className={styles.sectionDescription}>
+                Token และ Order ID เหมาะสำหรับค้นหารายการเฉพาะ ส่วนแคมเปญและสถานะใช้จำกัดคิว
+              </p>
+            </div>
+
+            <div
+              className={styles.appliedFilters}
+              role="group"
+              aria-label="ตัวกรองที่ใช้อยู่"
+            >
+              {hasFilters ? (
+                <>
+                  {appliedFilters.token ? (
+                    <span>Token: {appliedFilters.token}</span>
+                  ) : null}
+                  {appliedFilters.orderId ? (
+                    <span>Order: {appliedFilters.orderId}</span>
+                  ) : null}
+                  {appliedFilters.campaignId ? (
+                    <span>Campaign: {appliedFilters.campaignId}</span>
+                  ) : null}
+                  {appliedFilters.status ? (
+                    <span>
+                      สถานะ: {getPickupStatusLabel(appliedFilters.status)}
+                    </span>
+                  ) : null}
+                </>
+              ) : (
+                <span>แสดงทุกรายการ</span>
+              )}
+            </div>
+          </div>
+
+          <form
+            className={styles.filterForm}
+            onSubmit={applyFilters}
+            aria-busy={filtering}
+          >
+            <div className={styles.filters}>
+              <TextField
+                id="pickup-token-filter"
+                label="Pickup token"
+                value={draftToken}
+                onChange={(event) =>
+                  setDraftToken(event.target.value)
+                }
+                placeholder="Token ที่ลูกค้าแสดง"
+                disabled={filtering}
+              />
+
+              <TextField
+                id="pickup-order-filter"
+                label="Order ID"
+                value={draftOrderId}
+                onChange={(event) =>
+                  setDraftOrderId(event.target.value)
+                }
+                placeholder="เช่น order-..."
+                disabled={filtering}
+              />
+
+              <TextField
+                id="pickup-campaign-filter"
+                label="Campaign ID"
+                value={draftCampaignId}
+                onChange={(event) =>
+                  setDraftCampaignId(event.target.value)
+                }
+                placeholder="เช่น campaign-..."
+                disabled={filtering}
+              />
+
+              <SelectField
+                id="pickup-status-filter"
+                label="สถานะ Pickup"
+                value={draftStatus}
+                onChange={(event) =>
+                  setDraftStatus(
+                    event.target.value as PickupStatus | "",
+                  )
+                }
+                disabled={filtering}
+              >
+                <option value="">ทุกสถานะ</option>
+                {PICKUP_STATUSES.map((status) => (
+                  <option key={status} value={status}>
+                    {getPickupStatusLabel(status)}
+                  </option>
+                ))}
+              </SelectField>
+            </div>
+
+            <div className={styles.filterActions}>
+              <Button
+                type="submit"
+                pending={filtering}
+                pendingLabel="กำลังค้นหา"
+              >
+                ใช้ตัวกรอง
+              </Button>
+              <Button
+                type="button"
+                variant="quiet"
+                disabled={
+                  filtering || (!hasFilters && !hasDraftFilters)
+                }
+                onClick={() => {
+                  void clearFilters();
+                }}
+              >
+                แสดงทั้งหมด
+              </Button>
+            </div>
+          </form>
+        </section>
       </main>
     </div>
   );

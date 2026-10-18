@@ -6,6 +6,8 @@ import {
   useState,
   type FormEvent,
 } from "react";
+import { LoadedDirectoryControls } from "@/modules/organization-directory/loaded-directory-controls";
+import { searchLoadedItems, visibleLoadedItems } from "@/modules/organization-directory/loaded-directory-helpers";
 
 import {
   Button,
@@ -63,6 +65,8 @@ export function ProductionSummaryView({
   organizationId: string;
   initialCampaignId: string | null;
 }) {
+  const [directoryQuery, setDirectoryQuery] = useState("");
+  const [directoryLimit, setDirectoryLimit] = useState(24);
   const [campaignId, setCampaignId] = useState(
     initialCampaignId ?? "",
   );
@@ -292,6 +296,14 @@ export function ProductionSummaryView({
         )
       : 0;
 
+  const productionMatches = state.status === "success"
+    ? searchLoadedItems(state.summary.products, directoryQuery, product => [
+        product.productName, product.productId,
+        ...product.variants.map(variant => variant.variantName),
+      ])
+    : [];
+  const productionVisible = visibleLoadedItems(productionMatches, directoryLimit);
+
   return (
     <div className={styles.page}>
       <main className={styles.main}>
@@ -467,6 +479,19 @@ export function ProductionSummaryView({
                 </div>
               </div>
 
+              {state.summary.products.length > 0 ? (
+                <LoadedDirectoryControls
+                  id="production-product-search"
+                  label="ค้นหารายการสินค้าที่ต้องผลิต"
+                  query={directoryQuery}
+                  onQueryChange={value => { setDirectoryQuery(value); setDirectoryLimit(24); }}
+                  loadedCount={state.summary.products.length}
+                  matchingCount={productionMatches.length}
+                  visibleCount={productionVisible.length}
+                  onShowMore={() => setDirectoryLimit(limit => limit + 24)}
+                  placeholder="ชื่อสินค้า ตัวเลือก หรือรหัสสินค้า"
+                />
+              ) : null}
               {state.summary.products.length === 0 ? (
                 <EmptyState
                   title="ยังไม่มีรายการที่ต้องผลิต"
@@ -474,7 +499,7 @@ export function ProductionSummaryView({
                 />
               ) : (
                 <div className={styles.productList}>
-                  {state.summary.products.map((product) => {
+                  {productionVisible.map((product) => {
                     const productQuantity = product.variants.reduce(
                       (total, variant) => total + variant.quantity,
                       0,

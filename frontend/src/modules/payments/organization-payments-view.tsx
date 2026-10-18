@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { AsyncPageFallback } from "@/components/ui/async-page";
+import { useQueueFilterFeedback } from "@/modules/operations/use-queue-filter-feedback";
+import { QueuePriorityControls, QueueFilterEmpty } from "@/modules/operations/queue-priority-controls";
+import { useRevealSelectedQueueDetail } from "@/modules/operations/use-reveal-selected-queue-detail";
+import { prioritizeLoadedQueue, visibleLoadedQueue } from "@/modules/operations/queue-priority";
+
+import { useEffect, useRef, useState, type FormEvent } from "react";
 
 import {
   Badge,
@@ -8,15 +14,11 @@ import {
   ConfirmDialog,
   Dialog,
   EmptyState,
-  ErrorState,
   ErrorSummary,
-  ForbiddenState,
-  LoadingState,
   Notice,
   SelectField,
   TextareaField,
   TextField,
-  UnauthorizedState,
   useErrorSummaryFocus,
 } from "@/components";
 import {
@@ -129,6 +131,8 @@ export function OrganizationPaymentsView({
     useState<AppliedFilters>(EMPTY_FILTERS);
   const [filtering, setFiltering] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [queueView, setQueueView] = useState<"all" | "action">("all");
+  const [visibleLimit, setVisibleLimit] = useState(30);
 
   const [selected, setSelected] =
     useState<SelectedPaymentState | null>(null);
@@ -142,6 +146,8 @@ export function OrganizationPaymentsView({
   const [reviewPending, setReviewPending] = useState<
     "approve" | "reject" | null
   >(null);
+  const [approveOpen, setApproveOpen] = useState(false);
+  const reviewResultFocusRequested = useRef(false);
   const [rejectOpen, setRejectOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
   const [rejectReasonError, setRejectReasonError] = useState<
@@ -151,6 +157,23 @@ export function OrganizationPaymentsView({
   const [inlineError, setInlineError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [listFeedback, setListFeedback] = useState<string | null>(null);
+  const { successRef, errorRef, announceCompletion } = useQueueFilterFeedback(filtering, inlineError);
+
+  // Terminal review feedback lives outside Radix. Close its focus trap first.
+  useEffect(() => {
+    if (!reviewResultFocusRequested.current || reviewPending || approveOpen || rejectOpen || (!inlineError && !notice)) return;
+    const timeout = window.setTimeout(() => {
+      const target = document.querySelector<HTMLElement>("[data-payment-review-result]");
+      if (target && reviewResultFocusRequested.current) {
+        reviewResultFocusRequested.current = false;
+        target.focus({ preventScroll: true });
+        target.scrollIntoView({ block: "nearest", behavior: "instant" });
+      }
+    }, 150);
+    return () => window.clearTimeout(timeout);
+  }, [reviewPending, approveOpen, rejectOpen, inlineError, notice]);
+
+  useRevealSelectedQueueDetail(selected?.payment.paymentId ?? null, "staff-payment-detail");
 
   useEffect(() => {
     const controller = new AbortController();
@@ -261,6 +284,7 @@ export function OrganizationPaymentsView({
       setListFeedback(
         `แสดง ${result.items.length.toLocaleString("th-TH")} การชำระเงิน${nextFilters.status ? ` · ${paymentStatusLabel(nextFilters.status)}` : ""}`,
       );
+      announceCompletion();
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();
@@ -268,6 +292,7 @@ export function OrganizationPaymentsView({
       }
 
       setInlineError(operationErrorMessage(error));
+      announceCompletion();
     } finally {
       setFiltering(false);
     }
@@ -302,6 +327,7 @@ export function OrganizationPaymentsView({
       setListFeedback(
         `แสดงการชำระเงินทั้งหมดที่โหลด ${result.items.length.toLocaleString("th-TH")} รายการ`,
       );
+      announceCompletion();
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();
@@ -309,6 +335,7 @@ export function OrganizationPaymentsView({
       }
 
       setInlineError(operationErrorMessage(error));
+      announceCompletion();
     } finally {
       setFiltering(false);
     }
@@ -460,6 +487,7 @@ export function OrganizationPaymentsView({
       return;
     }
 
+    reviewResultFocusRequested.current = true;
     setReviewPending("approve");
     setInlineError(null);
     setNotice(null);
@@ -481,6 +509,7 @@ export function OrganizationPaymentsView({
       updatePaymentInList(approved);
 
       setDownload(null);
+      setApproveOpen(false);
       setNotice("อนุมัติการชำระเงินเรียบร้อยแล้ว");
 
       // The mutation is already committed. A slow/failed readback must
@@ -506,6 +535,7 @@ export function OrganizationPaymentsView({
         return;
       }
 
+      setApproveOpen(false);
       setInlineError(operationErrorMessage(error));
 
       try {
@@ -540,6 +570,7 @@ export function OrganizationPaymentsView({
       return;
     }
 
+    reviewResultFocusRequested.current = true;
     setReviewPending("reject");
     setInlineError(null);
     setNotice(null);
@@ -588,6 +619,7 @@ export function OrganizationPaymentsView({
         return;
       }
 
+      setRejectOpen(false);
       setInlineError(operationErrorMessage(error));
 
       try {
@@ -607,21 +639,15 @@ export function OrganizationPaymentsView({
     return (
       <div className={styles.page}>
         <main className={styles.stateWrap}>
-          {state.status === "loading" ? (
-            <LoadingState title="กำลังโหลดคิวตรวจสอบการชำระเงิน" />
-          ) : null}
-          {state.status === "unauthorized" ? (
-            <UnauthorizedState />
-          ) : null}
-          {state.status === "forbidden" ? (
-            <ForbiddenState />
-          ) : null}
-          {state.status === "error" ? (
-            <ErrorState
-              title="ไม่สามารถโหลดรายการชำระเงินได้"
-              description="กรุณาลองโหลดหน้านี้ใหม่อีกครั้ง"
-            />
-          ) : null}
+          <AsyncPageFallback
+            status={state.status}
+            pageTitle="ตรวจสอบการชำระเงิน"
+            pageDescription="ตรวจหลักฐานและตัดสินใจรายการของหน่วยงาน"
+            loadingTitle="กำลังโหลดคิวตรวจสอบการชำระเงิน"
+            errorTitle="ไม่สามารถโหลดรายการชำระเงินได้"
+            backHref="/org/select/"
+            backLabel="กลับไปพื้นที่ทำงาน"
+          />
         </main>
       </div>
     );
@@ -641,6 +667,11 @@ export function OrganizationPaymentsView({
     (payment) => payment.status === "REJECTED",
   ).length;
 
+  const isActionable = (payment: PaymentDTO) => payment.status === "PENDING_REVIEW";
+  const sortedRows = prioritizeLoadedQueue(state.payments, isActionable, item => item.updatedAt);
+  const queueRows = visibleLoadedQueue(sortedRows, queueView, isActionable);
+  const visibleRows = queueRows.slice(0, visibleLimit);
+
   return (
     <div className={styles.page}>
       <main className={styles.main}>
@@ -652,146 +683,31 @@ export function OrganizationPaymentsView({
             </p>
           </div>
         </header>
+        <QueuePriorityControls
+          heading="คิวตรวจสอบการชำระเงิน"
+          actionLabel="ตรวจสลิป"
+          countLabel="รอตรวจสอบ"
+          actionCount={pendingReviewCount}
+          loadedCount={state.payments.length}
+          mode={queueView}
+          onChange={(next) => { setQueueView(next); setVisibleLimit(30); }}
+          listId="payment-review-list"
+          filterId="payment-filter-title"
+        />
 
-        <nav className={styles.queueShortcuts} aria-label="ทางลัดคิวตรวจสอบการชำระเงิน">
-          <a href="#payment-review-list" className={styles.queueShortcutPrimary}>
-            <span>ดูคิวตรวจสลิป</span>
-            <strong>{pendingReviewCount} รอตรวจสอบ</strong>
-          </a>
-          <a href="#payment-filter-title" className={styles.queueShortcutSecondary}>
-            ตัวกรองรายการ
-          </a>
-        </nav>
 
-        <section className={styles.summaryStrip} aria-label="สรุปคิวชำระเงินที่โหลด">
-          <div>
-            <span className={styles.summaryLabel}>รายการที่โหลด</span>
-            <strong>{state.payments.length}</strong>
-          </div>
-          <div>
-            <span className={styles.summaryLabel}>รอตรวจสอบ</span>
-            <strong>{pendingReviewCount}</strong>
-          </div>
-          <div>
-            <span className={styles.summaryLabel}>อนุมัติแล้ว</span>
-            <strong>{approvedCount}</strong>
-          </div>
-          <div>
-            <span className={styles.summaryLabel}>ปฏิเสธแล้ว</span>
-            <strong>{rejectedCount}</strong>
-          </div>
-        </section>
 
-        <section className={styles.filterPanel} aria-labelledby="payment-filter-title">
-          <div className={styles.filterHeading}>
-            <div>
-              <h2 className={styles.sectionTitle} id="payment-filter-title">
-                ค้นหาคิวตรวจสอบ
-              </h2>
-              <p className={styles.sectionDescription}>
-                กรองด้วยสถานะ รหัสแคมเปญ หรือรหัสคำสั่งซื้อ
-              </p>
-            </div>
-            <div className={styles.appliedFilters} role="group" aria-label="ตัวกรองที่ใช้อยู่">
-              {hasFilters ? (
-                <>
-                  {appliedFilters.status ? (
-                    <span>
-                      สถานะ: {paymentStatusLabel(appliedFilters.status)}
-                    </span>
-                  ) : null}
-                  {appliedFilters.campaignId ? (
-                    <span>Campaign: {appliedFilters.campaignId}</span>
-                  ) : null}
-                  {appliedFilters.orderId ? (
-                    <span>Order: {appliedFilters.orderId}</span>
-                  ) : null}
-                </>
-              ) : (
-                <span>แสดงทุกการชำระเงิน</span>
-              )}
-            </div>
-          </div>
 
-          <form
-            className={styles.filterForm}
-            onSubmit={applyFilters}
-            aria-busy={filtering}
-          >
-            <div className={styles.filters}>
-              <SelectField
-                id="payment-review-status"
-                label="สถานะ Payment"
-                value={draftStatus}
-                onChange={(event) =>
-                  setDraftStatus(
-                    event.target.value as PaymentStatus | "",
-                  )
-                }
-                disabled={filtering}
-              >
-                <option value="">ทุกสถานะ</option>
-                {PAYMENT_STATUSES.map((status) => (
-                  <option key={status} value={status}>
-                    {paymentStatusLabel(status)}
-                  </option>
-                ))}
-              </SelectField>
 
-              <TextField
-                id="payment-review-campaign"
-                label="Campaign ID"
-                value={draftCampaignId}
-                onChange={(event) =>
-                  setDraftCampaignId(event.target.value)
-                }
-                placeholder="เช่น campaign-..."
-                disabled={filtering}
-              />
 
-              <TextField
-                id="payment-review-order"
-                label="Order ID"
-                value={draftOrderId}
-                onChange={(event) =>
-                  setDraftOrderId(event.target.value)
-                }
-                placeholder="เช่น order-..."
-                disabled={filtering}
-              />
-            </div>
 
-            <div className={styles.filterActions}>
-              <Button
-                type="submit"
-                pending={filtering}
-                pendingLabel="กำลังค้นหา"
-              >
-                ใช้ตัวกรอง
-              </Button>
-              <Button
-                type="button"
-                variant="quiet"
-                disabled={
-                  filtering ||
-                  (!hasFilters &&
-                    !draftCampaignId.trim() &&
-                    !draftOrderId.trim() &&
-                    !draftStatus)
-                }
-                onClick={() => {
-                  void clearFilters();
-                }}
-              >
-                แสดงทั้งหมด
-              </Button>
-            </div>
-          </form>
-        </section>
 
         {listFeedback ? (
           <p
-            className={styles.listFeedback}
+            ref={successRef}
+            tabIndex={-1}
+            data-queue-filter-feedback="success"
+            className={`${styles.listFeedback} ${styles.focusableFeedback}`}
             role="status"
             aria-live="polite"
             aria-atomic="true"
@@ -801,15 +717,19 @@ export function OrganizationPaymentsView({
         ) : null}
 
         {inlineError ? (
-          <Notice tone="danger" role="alert" title="ดำเนินการไม่สำเร็จ">
-            {inlineError}
-          </Notice>
+          <div ref={errorRef} tabIndex={-1} data-payment-review-result data-queue-filter-feedback="error" className={styles.focusableFeedback}>
+            <Notice tone="danger" role="alert" title="ดำเนินการไม่สำเร็จ">
+              {inlineError}
+            </Notice>
+          </div>
         ) : null}
 
         {notice ? (
-          <Notice tone="success" role="status" title="อัปเดตแล้ว">
-            {notice}
-          </Notice>
+          <div tabIndex={-1} data-payment-review-result className={styles.focusableFeedback}>
+            <Notice tone="success" role="status" title="อัปเดตแล้ว">
+              {notice}
+            </Notice>
+          </div>
         ) : null}
 
         <div className={styles.layout}>
@@ -845,7 +765,8 @@ export function OrganizationPaymentsView({
               />
             ) : (
               <div className={styles.list}>
-                {state.payments.map((payment) => {
+                {visibleRows.length === 0 ? <QueueFilterEmpty onShowAll={() => setQueueView("all")} /> : null}
+                {visibleRows.map((payment) => {
                   const isSelected =
                     selected?.payment.paymentId === payment.paymentId;
 
@@ -864,8 +785,8 @@ export function OrganizationPaymentsView({
                     >
                       <div className={styles.rowMain}>
                         <div className={styles.rowHeading}>
-                          <h3 className={styles.cardTitle}>
-                            Payment {payment.paymentId}
+                          <h3 className={styles.cardTitle} title={`Payment ${payment.paymentId}`}>
+                            Payment {payment.paymentId.slice(0, 12)}
                           </h3>
                           <Badge
                             tone={paymentStatusTone(payment.status)}
@@ -875,10 +796,10 @@ export function OrganizationPaymentsView({
                         </div>
                         <div className={styles.metaRow}>
                           <span className={styles.meta}>
-                            Order: {payment.orderId}
+                            Order: {payment.orderId.slice(0, 12)}
                           </span>
                           <span className={styles.meta}>
-                            Customer: {payment.customerId}
+                            Customer: {payment.customerId.slice(0, 12)}
                           </span>
                           <time className={styles.meta} dateTime={payment.createdAt}>
                             ส่งเมื่อ {formatIsoDateTime(payment.createdAt)}
@@ -917,7 +838,15 @@ export function OrganizationPaymentsView({
               </div>
             )}
 
-            {state.nextCursor ? (
+            {queueRows.length > visibleLimit ? (
+              <div className={styles.loadMore}>
+                <Button type="button" variant="secondary" onClick={() => setVisibleLimit(limit => limit + 30)}>
+                  แสดงอีก {Math.min(30, queueRows.length - visibleLimit)} รายการจากชุดที่โหลด
+                </Button>
+              </div>
+            ) : null}
+
+            {state.nextCursor && queueRows.length <= visibleLimit ? (
               <div className={styles.loadMore}>
                 <Button
                   variant="secondary"
@@ -933,7 +862,7 @@ export function OrganizationPaymentsView({
             ) : null}
           </section>
 
-          <aside aria-label="รายละเอียดการชำระเงิน">
+          <aside id="staff-payment-detail" tabIndex={-1} aria-label="รายละเอียดการชำระเงิน">
             {selected ? (
               <div className={styles.detailPanel}>
                 <div className={styles.detailHeader}>
@@ -1144,6 +1073,13 @@ export function OrganizationPaymentsView({
 
                     <div className={styles.reviewActions}>
                       <ConfirmDialog
+                        open={approveOpen}
+                        onOpenChange={(open) => {
+                          if (!reviewPending) setApproveOpen(open);
+                        }}
+                        onCloseAutoFocus={(event) => {
+                          if (reviewResultFocusRequested.current) event.preventDefault();
+                        }}
                         trigger={
                           <Button
                             disabled={reviewPending !== null}
@@ -1162,6 +1098,7 @@ export function OrganizationPaymentsView({
 
                       <Button
                         variant="danger"
+                        data-payment-reject-trigger
                         disabled={reviewPending !== null}
                         onClick={() => {
                           setRejectReason("");
@@ -1177,6 +1114,15 @@ export function OrganizationPaymentsView({
 
                 <Dialog
                   open={rejectOpen}
+                  onCloseAutoFocus={(event) => {
+                    // This controlled dialog is opened by a button outside Radix
+                    // Trigger. Restore focus explicitly on Back / Escape.
+                    const trigger = document.querySelector<HTMLButtonElement>("[data-payment-reject-trigger]");
+                    event.preventDefault();
+                    if (reviewResultFocusRequested.current) return;
+                    if (trigger) trigger.focus({ preventScroll: true });
+                    else document.getElementById("staff-payment-detail")?.focus({ preventScroll: true });
+                  }}
                   onOpenChange={(open) => {
                     if (!reviewPending) {
                       setRejectOpen(open);
@@ -1241,13 +1187,6 @@ export function OrganizationPaymentsView({
                       }}
                       error={rejectReasonError}
                       announceError={false}
-                      onBlur={() => {
-                        window.setTimeout(() => {
-                          const validation =
-                            validateRejectReason(rejectReason);
-                          setRejectReasonError(validation.error);
-                        }, 0);
-                      }}
                       required
                       disabled={reviewPending === "reject"}
                       placeholder="เช่น ยอดเงินในสลิปไม่ตรงกับยอดคำสั่งซื้อ"
@@ -1265,6 +1204,131 @@ export function OrganizationPaymentsView({
             )}
           </aside>
         </div>
+        <section className={styles.summaryStrip} aria-label="สรุปคิวชำระเงินที่โหลด">
+          <div>
+            <span className={styles.summaryLabel}>รายการที่โหลด</span>
+            <strong>{state.payments.length}</strong>
+          </div>
+          <div>
+            <span className={styles.summaryLabel}>รอตรวจสอบ</span>
+            <strong>{pendingReviewCount}</strong>
+          </div>
+          <div>
+            <span className={styles.summaryLabel}>อนุมัติแล้ว</span>
+            <strong>{approvedCount}</strong>
+          </div>
+          <div>
+            <span className={styles.summaryLabel}>ปฏิเสธแล้ว</span>
+            <strong>{rejectedCount}</strong>
+          </div>
+        </section>
+
+        <section className={styles.filterPanel} aria-labelledby="payment-filter-title">
+          <div className={styles.filterHeading}>
+            <div>
+              <h2 className={styles.sectionTitle} id="payment-filter-title">
+                ค้นหาคิวตรวจสอบ
+              </h2>
+              <p className={styles.sectionDescription}>
+                กรองด้วยสถานะ รหัสแคมเปญ หรือรหัสคำสั่งซื้อ
+              </p>
+            </div>
+            <div className={styles.appliedFilters} role="group" aria-label="ตัวกรองที่ใช้อยู่">
+              {hasFilters ? (
+                <>
+                  {appliedFilters.status ? (
+                    <span>
+                      สถานะ: {paymentStatusLabel(appliedFilters.status)}
+                    </span>
+                  ) : null}
+                  {appliedFilters.campaignId ? (
+                    <span>Campaign: {appliedFilters.campaignId}</span>
+                  ) : null}
+                  {appliedFilters.orderId ? (
+                    <span>Order: {appliedFilters.orderId}</span>
+                  ) : null}
+                </>
+              ) : (
+                <span>แสดงทุกการชำระเงิน</span>
+              )}
+            </div>
+          </div>
+
+          <form
+            className={styles.filterForm}
+            onSubmit={applyFilters}
+            aria-busy={filtering}
+          >
+            <div className={styles.filters}>
+              <SelectField
+                id="payment-review-status"
+                label="สถานะ Payment"
+                value={draftStatus}
+                onChange={(event) =>
+                  setDraftStatus(
+                    event.target.value as PaymentStatus | "",
+                  )
+                }
+                disabled={filtering}
+              >
+                <option value="">ทุกสถานะ</option>
+                {PAYMENT_STATUSES.map((status) => (
+                  <option key={status} value={status}>
+                    {paymentStatusLabel(status)}
+                  </option>
+                ))}
+              </SelectField>
+
+              <TextField
+                id="payment-review-campaign"
+                label="Campaign ID"
+                value={draftCampaignId}
+                onChange={(event) =>
+                  setDraftCampaignId(event.target.value)
+                }
+                placeholder="เช่น campaign-..."
+                disabled={filtering}
+              />
+
+              <TextField
+                id="payment-review-order"
+                label="Order ID"
+                value={draftOrderId}
+                onChange={(event) =>
+                  setDraftOrderId(event.target.value)
+                }
+                placeholder="เช่น order-..."
+                disabled={filtering}
+              />
+            </div>
+
+            <div className={styles.filterActions}>
+              <Button
+                type="submit"
+                pending={filtering}
+                pendingLabel="กำลังค้นหา"
+              >
+                ใช้ตัวกรอง
+              </Button>
+              <Button
+                type="button"
+                variant="quiet"
+                disabled={
+                  filtering ||
+                  (!hasFilters &&
+                    !draftCampaignId.trim() &&
+                    !draftOrderId.trim() &&
+                    !draftStatus)
+                }
+                onClick={() => {
+                  void clearFilters();
+                }}
+              >
+                แสดงทั้งหมด
+              </Button>
+            </div>
+          </form>
+        </section>
       </main>
     </div>
   );

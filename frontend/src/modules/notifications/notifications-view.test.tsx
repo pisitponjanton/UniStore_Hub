@@ -196,4 +196,21 @@ describe("NotificationsView", () => {
       ),
     ).toBeInTheDocument();
   });
+  it("links only ORDER resources to the authoritative next customer step", async () => {
+    mocks.listNotifications.mockResolvedValue({
+      items: [
+        makeNotification({ notificationId: "n-rejected", resourceType: "ORDER", resourceId: "o-1" }),
+        makeNotification({ notificationId: "n-pickup", title: "สินค้าพร้อมรับ", type: "READY_FOR_PICKUP", resourceType: "ORDER", resourceId: "o-2" }),
+        makeNotification({ notificationId: "n-approved", title: "จ่ายเงินผ่าน", type: "PAYMENT_APPROVED", resourceType: "ORDER", resourceId: "o-3" }),
+        makeNotification({ notificationId: "n-no-id", title: "ไม่ได้ผูกคำสั่งซื้อ", type: "PAYMENT_REJECTED", resourceType: "PAYMENT", resourceId: "payment-4" }),
+      ], nextCursor: null,
+    });
+    render(<NotificationsView />);
+    await screen.findByText("สินค้าพร้อมรับ");
+    expect(screen.getByRole("link", { name: "ตรวจสอบและส่งหลักฐานใหม่" })).toHaveAttribute("href", "/my/payment?orderId=o-1");
+    expect(screen.getByRole("link", { name: "เปิดข้อมูลรับสินค้า" })).toHaveAttribute("href", "/my/pickup?orderId=o-2");
+    expect(screen.getByRole("link", { name: "ดูสถานะคำสั่งซื้อ" })).toHaveAttribute("href", "/my/order?orderId=o-3");
+    expect(screen.getAllByRole("link")).toHaveLength(3);
+  });
+
 });
