@@ -541,3 +541,43 @@
   box-shadow: none;
   border-radius: var(--radius-card);
 }
+
+/* Production is a read-only quantity report, not a mutable order status. */
+.main { gap: clamp(14px, 2vw, 23px); padding-top: clamp(13px, 2vw, 27px); }
+.header { border: 1px solid var(--line); border-radius: 15px; padding: clamp(18px, 2.6vw, 30px); background: var(--surface); box-shadow: none; }
+.header::before,.header::after { content: none; display: none; }
+.title { font-size: clamp(1.8rem, 3vw, 2.6rem); font-weight: 810; line-height: 1.15; letter-spacing: -.035em; }
+.header .description { font-size: .9rem; line-height: 1.55; max-width: 70ch; }
+.campaignPanel { border: 1px solid var(--line); border-radius: 13px; padding: clamp(16px, 2vw, 24px); gap: 20px; box-shadow: none; background: var(--surface); }
+.campaignForm { gap: 12px; }
+.campaignDirectoryLink { display: inline-flex; align-items: center; width: fit-content; gap: 9px; min-height: 42px; padding: 8px 11px; border: 1px solid var(--brand-line); border-radius: 9px; color: var(--brand-strong); background: var(--brand-soft); font-size: .79rem; line-height: 1.4; font-weight: 750; text-decoration: none; }
+.campaignDirectoryLink:hover { color: var(--brand-strong); text-decoration: underline; text-underline-offset: 3px; }
+.campaignDirectoryLink:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.contextCode { padding: 7px 10px; border-radius: 8px; }
+.summaryStrip { gap: 10px; }
+.summaryStrip > div,.summaryStrip > div:nth-child(n),.summaryStrip > div:first-child,.summaryStrip > div:last-child { background: var(--surface); border: 1px solid var(--line); border-radius: 11px; padding: 13px; box-shadow: none; min-height: 90px; }
+.summaryStrip > div:last-child { border-color: var(--brand-line); box-shadow: inset 3px 0 0 var(--brand); }
+.summaryStrip strong { color: var(--ink); font-weight: 830; font-size: clamp(1.4rem,2.8vw,2rem); }
+.sectionHeader { gap: 9px; }
+.sectionTitle { font-size: clamp(1.2rem,2vw,1.6rem); font-weight: 780; }
+.productList { gap: 10px; }
+.productGroup { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); box-shadow: none; }
+.productHeader { padding: 15px; border-bottom: 1px solid var(--line); background: var(--surface); }
+.productName { color: var(--ink); font-size: 1.01rem; font-weight: 780; }
+.productTotal { border: 1px solid var(--brand-line); border-radius: 10px; background: var(--brand-soft); }
+.productTotal strong { color: var(--brand-strong); }
+.variantRow { padding: 13px 15px; gap: 10px; }
+.quantity { background: var(--surface-muted); border-radius: 9px; min-width: 88px; }
+.quantity strong { color: var(--ink); }
+@media(max-width:760px) {
+ .campaignPanel { grid-template-columns: minmax(0,1fr); }
+ .panelHeading { padding-right: 0; border-right: 0; border-bottom: 1px solid var(--line); padding-bottom: 11px; }
+ .campaignDirectoryLink { width: 100%; justify-content: center; }
+ .summaryStrip { grid-template-columns: repeat(3,minmax(0,1fr)); gap: 6px; }
+ .summaryStrip > div,.summaryStrip > div:nth-child(n),.summaryStrip > div:first-child,.summaryStrip > div:last-child { min-height: 80px; padding: 10px; }
+ .summaryStrip strong { font-size: 1.35rem; }
+}
+@media(max-width:620px) {
+ .header,.campaignPanel { padding: 15px; }
+ .productHeader,.variantRow { padding: 12px; }
+}

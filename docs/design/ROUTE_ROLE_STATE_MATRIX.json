@@ -1,0 +1,2105 @@
+{
+  "schemaVersion": 1,
+  "baselineCommit": "9007ec3",
+  "source": "frontend/quality-audit/coverage-baseline.json",
+  "sourceSha256": "3baafe3868f3056bb45aec0aae0267f72dc78d7a7881f759276ed37f393c939f",
+  "routeCount": 28,
+  "routeActions": 207,
+  "shellActions": 50,
+  "newRedesignStatus": "NOT_STARTED",
+  "browserObserved": [
+    "/ desktop 1440x900 loading",
+    "/ mobile 390x844 loading",
+    "/login/ account loading"
+  ],
+  "notYetObserved": [
+    "Populated homepage",
+    "Role-protected views",
+    "All new modal and responsive states"
+  ],
+  "notes": "Every NEW redesign state must be verified after implementing it. Source roles are not proof of all allowed/denied contexts; verify alternate roles without changing RBAC.",
+  "routes": [
+    {
+      "route": "/",
+      "sourceRoles": [
+        "guest",
+        "customer"
+      ],
+      "sourceActionCount": 6,
+      "actionIds": [
+        "FE-UX-01-01",
+        "FE-UX-01-02",
+        "FE-UX-01-03",
+        "FE-UX-01-04",
+        "FE-UX-01-05",
+        "FE-UX-01-06"
+      ],
+      "primaryTask": "ค้นหาร้านและสินค้าที่เปิดขาย",
+      "redesignStatus": "IMPLEMENTED_WITH_UNTESTED_ROLE_AND_STATE_VARIANTS",
+      "roleEvidence": {
+        "guest": "SCOPED_BROWSER_PASS_MOCKED_DIRECTORY",
+        "customer": "NOT_TESTED",
+        "staff": "NOT_TESTED",
+        "organizationAdmin": "NOT_TESTED",
+        "platformAdmin": "NOT_TESTED"
+      },
+      "viewportEvidence": {
+        "320": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW",
+        "390": "PASS_BROWSER_CAPTURE_MOCKED_DIRECTORY",
+        "768": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW",
+        "1024": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW",
+        "1440": "PASS_BROWSER_CAPTURE_MOCKED_DIRECTORY"
+      },
+      "stateEvidence": {
+        "loading": "OBSERVED_LOCAL_RENDER_NOT_SEPARATE_E2E",
+        "loaded": "PASS_BROWSER_MOCKED_DIRECTORY",
+        "empty": "PASS_BROWSER_MOCKED_DIRECTORY",
+        "error": "PASS_BROWSER_MOCKED_DIRECTORY",
+        "unauthorized": "NOT_TESTED",
+        "forbidden": "NOT_TESTED",
+        "validation": "NOT_TESTED",
+        "conflict": "NOT_TESTED",
+        "pending": "NOT_TESTED",
+        "success": "NOT_TESTED",
+        "retry": "PASS_BROWSER_MOCKED_DIRECTORY",
+        "modal-and-focus": "NOT_TESTED",
+        "keyboard": "NOT_TESTED",
+        "reduced-motion": "NOT_TESTED"
+      },
+      "actionEvidence": {
+        "FE-UX-01-01": "PASS_BROWSER_CLICK_ANCHOR",
+        "FE-UX-01-02": "PASS_BROWSER_HREF_TARGET_ONLY",
+        "FE-UX-01-03": "PASS_BROWSER_HREF_TARGET_ONLY",
+        "FE-UX-01-04": "PASS_BROWSER_HREF_TARGET_ONLY",
+        "FE-UX-01-05": "PASS_BROWSER_HREF_TARGET_ONLY",
+        "FE-UX-01-06": "PASS_BROWSER_ERROR_RETRY"
+      },
+      "evidenceNotes": "Only page /: guest mocked read-only directory, browser captures at 390/1440, no backend mutations. Customer and denied states NOT_TESTED. Source link IDs verified but not all clicked.",
+      "evidenceSources": [
+        "frontend/e2e/quality-audit/storefront-discovery.spec.ts",
+        "frontend/quality-audit/.evidence/redesign-storefront/populated-directory-390.png",
+        "frontend/quality-audit/.evidence/redesign-storefront/populated-directory-1440.png"
+      ]
+    },
+    {
+      "route": "/login/",
+      "sourceRoles": [
+        "guest",
+        "customer"
+      ],
+      "sourceActionCount": 10,
+      "actionIds": [
+        "FE-UX-02-01",
+        "FE-UX-02-02",
+        "FE-UX-02-03",
+        "FE-UX-02-04",
+        "FE-UX-02-05",
+        "FE-UX-02-06",
+        "FE-UX-02-07",
+        "FE-UX-02-08",
+        "FE-UX-02-09",
+        "FE-UX-02-10"
+      ],
+      "primaryTask": "เข้าสู่ระบบ",
+      "redesignStatus": "IMPLEMENTED_WITH_UNTESTED_ROLE_AND_STATE_VARIANTS",
+      "roleEvidence": {
+        "guest": "PASS_BROWSER_GUEST_RETURNTO_AND_VALIDATION",
+        "customer": "PASS_BROWSER_READ_ONLY_ME_FIXTURE_ROLE_ENTRY",
+        "staff": "PASS_BROWSER_READ_ONLY_ME_FIXTURE_ROLE_ENTRY",
+        "organizationAdmin": "PASS_BROWSER_READ_ONLY_ME_FIXTURE_ROLE_ENTRY",
+        "platformAdmin": "PASS_BROWSER_READ_ONLY_ME_FIXTURE_ROLE_ENTRY"
+      },
+      "viewportEvidence": {
+        "320": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW",
+        "390": "PASS_BROWSER_CAPTURE_READ_ONLY_FIXTURE",
+        "768": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW",
+        "1024": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW",
+        "1440": "PASS_BROWSER_CAPTURE_READ_ONLY_FIXTURE"
+      },
+      "stateEvidence": {
+        "loading": "OBSERVED_ISOLATED_LOCAL_PENDING_NOT_DEEP_BROWSER_GATE",
+        "loaded": "PASS_BROWSER_FIXTURE_ROLE_OR_GUEST",
+        "empty": "NOT_TESTED",
+        "error": "PASS_BROWSER_AUTH_ERROR_RESPONSE",
+        "unauthorized": "NOT_TESTED",
+        "forbidden": "NOT_TESTED",
+        "validation": "PASS_BROWSER_EMPTY_MALFORMED_FIELDS",
+        "conflict": "NOT_TESTED",
+        "pending": "PASS_BROWSER_INTERCEPTED_AUTH_REQUEST",
+        "success": "NOT_TESTED",
+        "retry": "PARTIAL_BROWSER_EDIT_CLEARS_FORM_ERROR",
+        "modal-and-focus": "NOT_TESTED",
+        "keyboard": "NOT_TESTED",
+        "reduced-motion": "NOT_TESTED"
+      },
+      "actionEvidence": {
+        "FE-UX-02-01": "PARTIAL_BROWSER_AND_UNIT_VALIDATION_OR_HREF_NOT_SUCCESSFUL_BACKEND_AUTH",
+        "FE-UX-02-02": "PARTIAL_BROWSER_AND_UNIT_VALIDATION_OR_HREF_NOT_SUCCESSFUL_BACKEND_AUTH",
+        "FE-UX-02-03": "PARTIAL_BROWSER_AND_UNIT_VALIDATION_OR_HREF_NOT_SUCCESSFUL_BACKEND_AUTH",
+        "FE-UX-02-04": "PARTIAL_BROWSER_AND_UNIT_VALIDATION_OR_HREF_NOT_SUCCESSFUL_BACKEND_AUTH",
+        "FE-UX-02-05": "PARTIAL_BROWSER_AND_UNIT_VALIDATION_OR_HREF_NOT_SUCCESSFUL_BACKEND_AUTH",
+        "FE-UX-02-06": "PARTIAL_BROWSER_AND_UNIT_VALIDATION_OR_HREF_NOT_SUCCESSFUL_BACKEND_AUTH",
+        "FE-UX-02-07": "PARTIAL_BROWSER_AND_UNIT_VALIDATION_OR_HREF_NOT_SUCCESSFUL_BACKEND_AUTH",
+        "FE-UX-02-08": "PARTIAL_BROWSER_AND_UNIT_VALIDATION_OR_HREF_NOT_SUCCESSFUL_BACKEND_AUTH",
+        "FE-UX-02-09": "PARTIAL_BROWSER_AND_UNIT_VALIDATION_OR_HREF_NOT_SUCCESSFUL_BACKEND_AUTH",
+        "FE-UX-02-10": "PARTIAL_BROWSER_AND_UNIT_VALIDATION_OR_HREF_NOT_SUCCESSFUL_BACKEND_AUTH"
+      },
+      "evidenceSources": [
+        "frontend/e2e/quality-audit/account-role-entry.spec.ts",
+        "frontend/e2e/quality-audit/auth-form-states.spec.ts",
+        "frontend/src/modules/auth/auth-entry-state.test.tsx",
+        "docs/design/ACCOUNT_ENTRY_IMPLEMENTATION.md"
+      ],
+      "evidenceNotes": "Read-only GET /me and /organizations API-shaped browser fixtures; successful auth/register, session persistence across actual backend, organization CREATE, all permission boundaries, native assistive technology and actual business data not certified."
+    },
+    {
+      "route": "/register/",
+      "sourceRoles": [
+        "guest",
+        "customer"
+      ],
+      "sourceActionCount": 11,
+      "actionIds": [
+        "FE-UX-03-01",
+        "FE-UX-03-02",
+        "FE-UX-03-03",
+        "FE-UX-03-04",
+        "FE-UX-03-05",
+        "FE-UX-03-06",
+        "FE-UX-03-07",
+        "FE-UX-03-08",
+        "FE-UX-03-09",
+        "FE-UX-03-10",
+        "FE-UX-03-11"
+      ],
+      "primaryTask": "สมัครบัญชี",
+      "redesignStatus": "IMPLEMENTED_WITH_UNTESTED_ROLE_AND_STATE_VARIANTS",
+      "roleEvidence": {
+        "guest": "PASS_BROWSER_GUEST_RETURNTO_AND_VALIDATION",
+        "customer": "NOT_TESTED",
+        "staff": "NOT_TESTED",
+        "organizationAdmin": "NOT_TESTED",
+        "platformAdmin": "NOT_TESTED"
+      },
+      "viewportEvidence": {
+        "320": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW",
+        "390": "PASS_BROWSER_CAPTURE_READ_ONLY_FIXTURE",
+        "768": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW",
+        "1024": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW",
+        "1440": "PASS_BROWSER_CAPTURE_READ_ONLY_FIXTURE"
+      },
+      "stateEvidence": {
+        "loading": "OBSERVED_ISOLATED_LOCAL_PENDING_NOT_DEEP_BROWSER_GATE",
+        "loaded": "PASS_BROWSER_FIXTURE_ROLE_OR_GUEST",
+        "empty": "NOT_TESTED",
+        "error": "PASS_BROWSER_AUTH_ERROR_RESPONSE",
+        "unauthorized": "NOT_TESTED",
+        "forbidden": "NOT_TESTED",
+        "validation": "PASS_BROWSER_EMPTY_MALFORMED_FIELDS",
+        "conflict": "NOT_TESTED",
+        "pending": "PASS_BROWSER_INTERCEPTED_AUTH_REQUEST",
+        "success": "NOT_TESTED",
+        "retry": "PARTIAL_BROWSER_EDIT_CLEARS_FORM_ERROR",
+        "modal-and-focus": "NOT_TESTED",
+        "keyboard": "NOT_TESTED",
+        "reduced-motion": "NOT_TESTED"
+      },
+      "actionEvidence": {
+        "FE-UX-03-01": "PARTIAL_BROWSER_AND_UNIT_VALIDATION_OR_HREF_NOT_SUCCESSFUL_BACKEND_AUTH",
+        "FE-UX-03-02": "PARTIAL_BROWSER_AND_UNIT_VALIDATION_OR_HREF_NOT_SUCCESSFUL_BACKEND_AUTH",
+        "FE-UX-03-03": "PARTIAL_BROWSER_AND_UNIT_VALIDATION_OR_HREF_NOT_SUCCESSFUL_BACKEND_AUTH",
+        "FE-UX-03-04": "PARTIAL_BROWSER_AND_UNIT_VALIDATION_OR_HREF_NOT_SUCCESSFUL_BACKEND_AUTH",
+        "FE-UX-03-05": "PARTIAL_BROWSER_AND_UNIT_VALIDATION_OR_HREF_NOT_SUCCESSFUL_BACKEND_AUTH",
+        "FE-UX-03-06": "PARTIAL_BROWSER_AND_UNIT_VALIDATION_OR_HREF_NOT_SUCCESSFUL_BACKEND_AUTH",
+        "FE-UX-03-07": "PARTIAL_BROWSER_AND_UNIT_VALIDATION_OR_HREF_NOT_SUCCESSFUL_BACKEND_AUTH",
+        "FE-UX-03-08": "PARTIAL_BROWSER_AND_UNIT_VALIDATION_OR_HREF_NOT_SUCCESSFUL_BACKEND_AUTH",
+        "FE-UX-03-09": "PARTIAL_BROWSER_AND_UNIT_VALIDATION_OR_HREF_NOT_SUCCESSFUL_BACKEND_AUTH",
+        "FE-UX-03-10": "PARTIAL_BROWSER_AND_UNIT_VALIDATION_OR_HREF_NOT_SUCCESSFUL_BACKEND_AUTH",
+        "FE-UX-03-11": "PARTIAL_BROWSER_AND_UNIT_VALIDATION_OR_HREF_NOT_SUCCESSFUL_BACKEND_AUTH"
+      },
+      "evidenceSources": [
+        "frontend/e2e/quality-audit/account-role-entry.spec.ts",
+        "frontend/e2e/quality-audit/auth-form-states.spec.ts",
+        "frontend/src/modules/auth/auth-entry-state.test.tsx",
+        "docs/design/ACCOUNT_ENTRY_IMPLEMENTATION.md"
+      ],
+      "evidenceNotes": "Read-only GET /me and /organizations API-shaped browser fixtures; successful auth/register, session persistence across actual backend, organization CREATE, all permission boundaries, native assistive technology and actual business data not certified."
+    },
+    {
+      "route": "/stores/view/",
+      "sourceRoles": [
+        "guest",
+        "customer"
+      ],
+      "sourceActionCount": 4,
+      "actionIds": [
+        "FE-UX-04-01",
+        "FE-UX-04-02",
+        "FE-UX-04-03",
+        "FE-UX-04-04"
+      ],
+      "primaryTask": "ดูสินค้าในร้าน",
+      "redesignStatus": "IMPLEMENTED_WITH_UNTESTED_ROLE_AND_STATE_VARIANTS",
+      "roleEvidence": {
+        "guest": "SCOPED_BROWSER_PASS_WITH_API_MOCKS",
+        "customer": "NOT_TESTED",
+        "staff": "NOT_TESTED",
+        "organizationAdmin": "NOT_TESTED",
+        "platformAdmin": "NOT_TESTED"
+      },
+      "viewportEvidence": {
+        "320": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW",
+        "390": "PASS_BROWSER_CAPTURE_API_MOCK",
+        "768": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW",
+        "1024": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW",
+        "1440": "PASS_BROWSER_CAPTURE_API_MOCK"
+      },
+      "stateEvidence": {
+        "loading": "OBSERVED_LOCAL_API_PENDING_NOT_FULL_E2E",
+        "loaded": "PASS_BROWSER_API_MOCK",
+        "empty": "NOT_TESTED",
+        "error": "PARTIAL_BROWSER_503_RETRY",
+        "unauthorized": "NOT_TESTED",
+        "forbidden": "NOT_TESTED",
+        "validation": "NOT_TESTED",
+        "conflict": "NOT_TESTED",
+        "pending": "NOT_TESTED",
+        "success": "NOT_TESTED",
+        "retry": "PARTIAL_BROWSER_503_RETRY",
+        "modal-and-focus": "NOT_TESTED",
+        "keyboard": "NOT_TESTED",
+        "reduced-motion": "NOT_TESTED"
+      },
+      "actionEvidence": {
+        "FE-UX-04-01": "PASS_BROWSER_HREF_ONLY",
+        "FE-UX-04-02": "PASS_BROWSER_HREF_ONLY",
+        "FE-UX-04-03": "PASS_BROWSER_HREF_ONLY",
+        "FE-UX-04-04": "PARTIAL_BROWSER_503_RETRY_ONLY"
+      },
+      "evidenceSources": [
+        "frontend/e2e/quality-audit/commerce-detail-journeys.spec.ts",
+        "frontend/e2e/quality-audit/public-route-recovery.spec.ts",
+        "frontend/quality-audit/.evidence/redesign-details/store-390.png",
+        "frontend/quality-audit/.evidence/redesign-details/store-1440.png"
+      ],
+      "evidenceNotes": "Browser fixture uses read-only API-shaped mocks; real local API pending. Evidence includes actual UI rendering, 5 viewport overflow checks and guarded status interactions, not production data writes or full role/action matrices."
+    },
+    {
+      "route": "/products/view/",
+      "sourceRoles": [
+        "guest",
+        "customer"
+      ],
+      "sourceActionCount": 7,
+      "actionIds": [
+        "FE-UX-05-01",
+        "FE-UX-05-02",
+        "FE-UX-05-03",
+        "FE-UX-05-04",
+        "FE-UX-05-05",
+        "FE-UX-05-06",
+        "FE-UX-05-07"
+      ],
+      "primaryTask": "เลือกสินค้าและตัวเลือก",
+      "redesignStatus": "IMPLEMENTED_WITH_UNTESTED_ROLE_AND_STATE_VARIANTS",
+      "roleEvidence": {
+        "guest": "SCOPED_BROWSER_PASS_WITH_API_MOCKS",
+        "customer": "NOT_TESTED",
+        "staff": "NOT_TESTED",
+        "organizationAdmin": "NOT_TESTED",
+        "platformAdmin": "NOT_TESTED"
+      },
+      "viewportEvidence": {
+        "320": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW",
+        "390": "PASS_BROWSER_CAPTURE_API_MOCK",
+        "768": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW",
+        "1024": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW",
+        "1440": "PASS_BROWSER_CAPTURE_API_MOCK"
+      },
+      "stateEvidence": {
+        "loading": "OBSERVED_LOCAL_API_PENDING_NOT_FULL_E2E",
+        "loaded": "PASS_BROWSER_API_MOCK",
+        "empty": "NOT_TESTED",
+        "error": "PARTIAL_BROWSER_503_RETRY",
+        "unauthorized": "PARTIAL_BROWSER_LOGIN_REDIRECT_HREF",
+        "forbidden": "NOT_TESTED",
+        "validation": "PASS_BROWSER_QUANTITY",
+        "conflict": "NOT_TESTED",
+        "pending": "NOT_TESTED",
+        "success": "NOT_TESTED",
+        "retry": "PARTIAL_BROWSER_503_RETRY",
+        "modal-and-focus": "NOT_TESTED",
+        "keyboard": "NOT_TESTED",
+        "reduced-motion": "NOT_TESTED"
+      },
+      "actionEvidence": {
+        "FE-UX-05-01": "PASS_BROWSER_HREF_ONLY",
+        "FE-UX-05-02": "PARTIAL_BROWSER_DEFAULT_VARIANT_AND_PRICE",
+        "FE-UX-05-03": "PASS_BROWSER_CAMPAIGN_OPTION_CHANGE",
+        "FE-UX-05-04": "PASS_BROWSER_QUANTITY_VALIDATION_AND_TOTAL_ONLY",
+        "FE-UX-05-05": "PASS_BROWSER_HREF_ONLY",
+        "FE-UX-05-06": "NOT_TESTED",
+        "FE-UX-05-07": "PASS_BROWSER_LOGIN_RETURNTO_HREF"
+      },
+      "evidenceSources": [
+        "frontend/e2e/quality-audit/commerce-detail-journeys.spec.ts",
+        "frontend/e2e/quality-audit/public-route-recovery.spec.ts",
+        "frontend/quality-audit/.evidence/redesign-details/product-390.png",
+        "frontend/quality-audit/.evidence/redesign-details/product-1440.png"
+      ],
+      "evidenceNotes": "Browser fixture uses read-only API-shaped mocks; real local API pending. Evidence includes actual UI rendering, 5 viewport overflow checks and guarded status interactions, not production data writes or full role/action matrices."
+    },
+    {
+      "route": "/campaigns/view/",
+      "sourceRoles": [
+        "guest",
+        "customer"
+      ],
+      "sourceActionCount": 3,
+      "actionIds": [
+        "FE-UX-06-01",
+        "FE-UX-06-02",
+        "FE-UX-06-03"
+      ],
+      "primaryTask": "ดูรอบขายพรีออเดอร์",
+      "redesignStatus": "IMPLEMENTED_WITH_UNTESTED_ROLE_AND_STATE_VARIANTS",
+      "roleEvidence": {
+        "guest": "SCOPED_BROWSER_PASS_WITH_API_MOCKS",
+        "customer": "NOT_TESTED",
+        "staff": "NOT_TESTED",
+        "organizationAdmin": "NOT_TESTED",
+        "platformAdmin": "NOT_TESTED"
+      },
+      "viewportEvidence": {
+        "320": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW",
+        "390": "PASS_BROWSER_CAPTURE_API_MOCK",
+        "768": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW",
+        "1024": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW",
+        "1440": "PASS_BROWSER_CAPTURE_API_MOCK"
+      },
+      "stateEvidence": {
+        "loading": "OBSERVED_LOCAL_API_PENDING_NOT_FULL_E2E",
+        "loaded": "PASS_BROWSER_API_MOCK",
+        "empty": "NOT_TESTED",
+        "error": "PARTIAL_BROWSER_503_RETRY",
+        "unauthorized": "NOT_TESTED",
+        "forbidden": "NOT_TESTED",
+        "validation": "NOT_TESTED",
+        "conflict": "NOT_TESTED",
+        "pending": "NOT_TESTED",
+        "success": "PASS_BROWSER_STATUS_OPEN_AND_CLOSED_DISPLAY_ONLY",
+        "retry": "PARTIAL_BROWSER_503_RETRY",
+        "modal-and-focus": "NOT_TESTED",
+        "keyboard": "NOT_TESTED",
+        "reduced-motion": "NOT_TESTED"
+      },
+      "actionEvidence": {
+        "FE-UX-06-01": "PASS_BROWSER_HREF_ONLY",
+        "FE-UX-06-02": "PASS_BROWSER_HREF_ONLY",
+        "FE-UX-06-03": "PARTIAL_BROWSER_503_RETRY_ONLY"
+      },
+      "evidenceSources": [
+        "frontend/e2e/quality-audit/commerce-detail-journeys.spec.ts",
+        "frontend/e2e/quality-audit/public-route-recovery.spec.ts",
+        "frontend/quality-audit/.evidence/redesign-details/campaign-open-390.png",
+        "frontend/quality-audit/.evidence/redesign-details/campaign-open-1440.png"
+      ],
+      "evidenceNotes": "Browser fixture uses read-only API-shaped mocks; real local API pending. Evidence includes actual UI rendering, 5 viewport overflow checks and guarded status interactions, not production data writes or full role/action matrices."
+    },
+    {
+      "route": "/orders/new/",
+      "sourceRoles": [
+        "customer"
+      ],
+      "sourceActionCount": 8,
+      "actionIds": [
+        "FE-UX-07-01",
+        "FE-UX-07-02",
+        "FE-UX-07-03",
+        "FE-UX-07-04",
+        "FE-UX-07-05",
+        "FE-UX-07-06",
+        "FE-UX-07-07",
+        "FE-UX-07-08"
+      ],
+      "primaryTask": "ตรวจและยืนยันคำสั่งซื้อ",
+      "redesignStatus": "IMPLEMENTED_WITH_UNTESTED_ROLE_AND_STATE_VARIANTS",
+      "roleEvidence": {
+        "guest": "NOT_TESTED",
+        "customer": "SCOPED_BROWSER_LOCAL_SEED_READ_AND_INTERCEPTED_MUTATIONS",
+        "staff": "NOT_TESTED",
+        "organizationAdmin": "NOT_TESTED",
+        "platformAdmin": "NOT_TESTED"
+      },
+      "viewportEvidence": {
+        "320": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW",
+        "390": "PASS_BROWSER_CAPTURE_LOCAL_SEED",
+        "768": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW",
+        "1024": "NOT_TESTED",
+        "1440": "PASS_BROWSER_CAPTURE_LOCAL_SEED"
+      },
+      "stateEvidence": {
+        "loading": "NOT_TESTED",
+        "loaded": "PARTIAL_BROWSER_PASS_SCOPED_MOCKED_OR_LOCAL",
+        "empty": "NOT_TESTED",
+        "error": "NOT_TESTED",
+        "unauthorized": "NOT_TESTED",
+        "forbidden": "NOT_TESTED",
+        "validation": "PARTIAL_BROWSER_PASS_SCOPED_MOCKED_OR_LOCAL",
+        "conflict": "PARTIAL_BROWSER_PASS_SCOPED_MOCKED_OR_LOCAL",
+        "pending": "PARTIAL_BROWSER_PASS_SCOPED_MOCKED_OR_LOCAL",
+        "success": "PARTIAL_BROWSER_PASS_SCOPED_MOCKED_OR_LOCAL",
+        "retry": "PARTIAL_BROWSER_PASS_SCOPED_MOCKED_OR_LOCAL",
+        "modal-and-focus": "NOT_TESTED",
+        "keyboard": "NOT_TESTED",
+        "reduced-motion": "SCOPED_BROWSER_REDUCED_MOTION_RENDERED_ONLY"
+      },
+      "actionEvidence": {
+        "FE-UX-07-01": "PARTIAL_SCOPED_BROWSER_OR_COMPONENT_COVERAGE_NOT_ALL_STATES",
+        "FE-UX-07-02": "PARTIAL_SCOPED_BROWSER_OR_COMPONENT_COVERAGE_NOT_ALL_STATES",
+        "FE-UX-07-03": "PARTIAL_SCOPED_BROWSER_OR_COMPONENT_COVERAGE_NOT_ALL_STATES",
+        "FE-UX-07-04": "PARTIAL_SCOPED_BROWSER_OR_COMPONENT_COVERAGE_NOT_ALL_STATES",
+        "FE-UX-07-05": "PARTIAL_SCOPED_BROWSER_OR_COMPONENT_COVERAGE_NOT_ALL_STATES",
+        "FE-UX-07-06": "PARTIAL_SCOPED_BROWSER_OR_COMPONENT_COVERAGE_NOT_ALL_STATES",
+        "FE-UX-07-07": "PARTIAL_SCOPED_BROWSER_OR_COMPONENT_COVERAGE_NOT_ALL_STATES",
+        "FE-UX-07-08": "PARTIAL_SCOPED_BROWSER_OR_COMPONENT_COVERAGE_NOT_ALL_STATES"
+      },
+      "evidenceSources": [
+        "frontend/e2e/quality-audit/customer-responsive-journey.spec.ts",
+        "frontend/e2e/quality-audit/customer-orders-actions.spec.ts",
+        "frontend/e2e/quality-audit/customer-create-order-actions.spec.ts",
+        "frontend/e2e/quality-audit/customer-payment-initial-actions.spec.ts",
+        "frontend/e2e/quality-audit/customer-pickup-actions.spec.ts",
+        "frontend/e2e/quality-audit/notification-actions.spec.ts",
+        "docs/design/CUSTOMER_JOURNEY_IMPLEMENTATION.md",
+        "frontend/quality-audit/.evidence/redesign-customer/checkout-390.png",
+        "frontend/quality-audit/.evidence/redesign-customer/checkout-1440.png",
+        "frontend/e2e/quality-audit/customer-order-cancel-actions.spec.ts",
+        "frontend/e2e/quality-audit/customer-payment-upload-actions.spec.ts",
+        "frontend/e2e/quality-audit/filter-recovery.spec.ts"
+      ],
+      "evidenceNotes": "LOCAL seed GET navigation; non-read browser requests blocked unless explicitly intercepted with synthetic responses in action tests; no actual new orders/payments/notification reads persisted. Not exhaustive all state/role/accessibility permutations."
+    },
+    {
+      "route": "/my/orders/",
+      "sourceRoles": [
+        "customer"
+      ],
+      "sourceActionCount": 4,
+      "actionIds": [
+        "FE-UX-08-01",
+        "FE-UX-08-02",
+        "FE-UX-08-03",
+        "FE-UX-08-04"
+      ],
+      "primaryTask": "ดูสถานะรายการของฉัน",
+      "redesignStatus": "IMPLEMENTED_WITH_UNTESTED_ROLE_AND_STATE_VARIANTS",
+      "roleEvidence": {
+        "guest": "NOT_TESTED",
+        "customer": "SCOPED_BROWSER_LOCAL_SEED_READ_AND_INTERCEPTED_MUTATIONS",
+        "staff": "NOT_TESTED",
+        "organizationAdmin": "NOT_TESTED",
+        "platformAdmin": "NOT_TESTED"
+      },
+      "viewportEvidence": {
+        "320": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW",
+        "390": "PASS_BROWSER_CAPTURE_LOCAL_SEED",
+        "768": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW",
+        "1024": "NOT_TESTED",
+        "1440": "PASS_BROWSER_CAPTURE_LOCAL_SEED"
+      },
+      "stateEvidence": {
+        "loading": "NOT_TESTED",
+        "loaded": "PARTIAL_BROWSER_PASS_SCOPED_MOCKED_OR_LOCAL",
+        "empty": "PARTIAL_BROWSER_PASS_SCOPED_MOCKED_OR_LOCAL",
+        "error": "PARTIAL_BROWSER_PASS_SCOPED_MOCKED_OR_LOCAL",
+        "unauthorized": "NOT_TESTED",
+        "forbidden": "NOT_TESTED",
+        "validation": "NOT_TESTED",
+        "conflict": "NOT_TESTED",
+        "pending": "NOT_TESTED",
+        "success": "NOT_TESTED",
+        "retry": "PARTIAL_BROWSER_PASS_SCOPED_MOCKED_OR_LOCAL",
+        "modal-and-focus": "NOT_TESTED",
+        "keyboard": "NOT_TESTED",
+        "reduced-motion": "SCOPED_BROWSER_REDUCED_MOTION_RENDERED_ONLY"
+      },
+      "actionEvidence": {
+        "FE-UX-08-01": "PARTIAL_SCOPED_BROWSER_OR_COMPONENT_COVERAGE_NOT_ALL_STATES",
+        "FE-UX-08-02": "PARTIAL_SCOPED_BROWSER_OR_COMPONENT_COVERAGE_NOT_ALL_STATES",
+        "FE-UX-08-03": "PARTIAL_SCOPED_BROWSER_OR_COMPONENT_COVERAGE_NOT_ALL_STATES",
+        "FE-UX-08-04": "PARTIAL_SCOPED_BROWSER_OR_COMPONENT_COVERAGE_NOT_ALL_STATES"
+      },
+      "evidenceSources": [
+        "frontend/e2e/quality-audit/customer-responsive-journey.spec.ts",
+        "frontend/e2e/quality-audit/customer-orders-actions.spec.ts",
+        "frontend/e2e/quality-audit/customer-create-order-actions.spec.ts",
+        "frontend/e2e/quality-audit/customer-payment-initial-actions.spec.ts",
+        "frontend/e2e/quality-audit/customer-pickup-actions.spec.ts",
+        "frontend/e2e/quality-audit/notification-actions.spec.ts",
+        "docs/design/CUSTOMER_JOURNEY_IMPLEMENTATION.md",
+        "frontend/quality-audit/.evidence/redesign-customer/my-orders-390.png",
+        "frontend/quality-audit/.evidence/redesign-customer/my-orders-1440.png",
+        "frontend/e2e/quality-audit/customer-order-cancel-actions.spec.ts",
+        "frontend/e2e/quality-audit/customer-payment-upload-actions.spec.ts",
+        "frontend/e2e/quality-audit/filter-recovery.spec.ts"
+      ],
+      "evidenceNotes": "LOCAL seed GET navigation; non-read browser requests blocked unless explicitly intercepted with synthetic responses in action tests; no actual new orders/payments/notification reads persisted. Not exhaustive all state/role/accessibility permutations."
+    },
+    {
+      "route": "/my/order/",
+      "sourceRoles": [
+        "customer"
+      ],
+      "sourceActionCount": 6,
+      "actionIds": [
+        "FE-UX-09-01",
+        "FE-UX-09-02",
+        "FE-UX-09-03",
+        "FE-UX-09-04",
+        "FE-UX-09-05",
+        "FE-UX-09-06"
+      ],
+      "primaryTask": "เปิดรายละเอียดคำสั่งซื้อ",
+      "redesignStatus": "IMPLEMENTED_WITH_UNTESTED_ROLE_AND_STATE_VARIANTS",
+      "roleEvidence": {
+        "guest": "NOT_TESTED",
+        "customer": "SCOPED_BROWSER_LOCAL_SEED_READ_AND_INTERCEPTED_MUTATIONS",
+        "staff": "NOT_TESTED",
+        "organizationAdmin": "NOT_TESTED",
+        "platformAdmin": "NOT_TESTED"
+      },
+      "viewportEvidence": {
+        "320": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW",
+        "390": "PASS_BROWSER_CAPTURE_LOCAL_SEED",
+        "768": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW",
+        "1024": "NOT_TESTED",
+        "1440": "PASS_BROWSER_CAPTURE_LOCAL_SEED"
+      },
+      "stateEvidence": {
+        "loading": "NOT_TESTED",
+        "loaded": "PARTIAL_BROWSER_PASS_SCOPED_MOCKED_OR_LOCAL",
+        "empty": "NOT_TESTED",
+        "error": "PARTIAL_BROWSER_PASS_SCOPED_MOCKED_OR_LOCAL",
+        "unauthorized": "NOT_TESTED",
+        "forbidden": "NOT_TESTED",
+        "validation": "NOT_TESTED",
+        "conflict": "NOT_TESTED",
+        "pending": "NOT_TESTED",
+        "success": "NOT_TESTED",
+        "retry": "PARTIAL_BROWSER_PASS_SCOPED_MOCKED_OR_LOCAL",
+        "modal-and-focus": "PARTIAL_BROWSER_PASS_SCOPED_MOCKED_OR_LOCAL",
+        "keyboard": "NOT_TESTED",
+        "reduced-motion": "SCOPED_BROWSER_REDUCED_MOTION_RENDERED_ONLY"
+      },
+      "actionEvidence": {
+        "FE-UX-09-01": "PARTIAL_SCOPED_BROWSER_OR_COMPONENT_COVERAGE_NOT_ALL_STATES",
+        "FE-UX-09-02": "PARTIAL_SCOPED_BROWSER_OR_COMPONENT_COVERAGE_NOT_ALL_STATES",
+        "FE-UX-09-03": "PARTIAL_SCOPED_BROWSER_OR_COMPONENT_COVERAGE_NOT_ALL_STATES",
+        "FE-UX-09-04": "PARTIAL_SCOPED_BROWSER_OR_COMPONENT_COVERAGE_NOT_ALL_STATES",
+        "FE-UX-09-05": "PARTIAL_SCOPED_BROWSER_OR_COMPONENT_COVERAGE_NOT_ALL_STATES",
+        "FE-UX-09-06": "PARTIAL_SCOPED_BROWSER_OR_COMPONENT_COVERAGE_NOT_ALL_STATES"
+      },
+      "evidenceSources": [
+        "frontend/e2e/quality-audit/customer-responsive-journey.spec.ts",
+        "frontend/e2e/quality-audit/customer-orders-actions.spec.ts",
+        "frontend/e2e/quality-audit/customer-create-order-actions.spec.ts",
+        "frontend/e2e/quality-audit/customer-payment-initial-actions.spec.ts",
+        "frontend/e2e/quality-audit/customer-pickup-actions.spec.ts",
+        "frontend/e2e/quality-audit/notification-actions.spec.ts",
+        "docs/design/CUSTOMER_JOURNEY_IMPLEMENTATION.md",
+        "frontend/quality-audit/.evidence/redesign-customer/order-detail-390.png",
+        "frontend/quality-audit/.evidence/redesign-customer/order-detail-1440.png",
+        "frontend/e2e/quality-audit/customer-order-cancel-actions.spec.ts",
+        "frontend/e2e/quality-audit/customer-payment-upload-actions.spec.ts",
+        "frontend/e2e/quality-audit/filter-recovery.spec.ts"
+      ],
+      "evidenceNotes": "LOCAL seed GET navigation; non-read browser requests blocked unless explicitly intercepted with synthetic responses in action tests; no actual new orders/payments/notification reads persisted. Not exhaustive all state/role/accessibility permutations."
+    },
+    {
+      "route": "/my/payment/",
+      "sourceRoles": [
+        "customer"
+      ],
+      "sourceActionCount": 5,
+      "actionIds": [
+        "FE-UX-10-01",
+        "FE-UX-10-02",
+        "FE-UX-10-03",
+        "FE-UX-10-04",
+        "FE-UX-10-05"
+      ],
+      "primaryTask": "ส่งหลักฐานชำระเงิน",
+      "redesignStatus": "IMPLEMENTED_WITH_UNTESTED_ROLE_AND_STATE_VARIANTS",
+      "roleEvidence": {
+        "guest": "NOT_TESTED",
+        "customer": "SCOPED_BROWSER_LOCAL_SEED_READ_AND_INTERCEPTED_MUTATIONS",
+        "staff": "NOT_TESTED",
+        "organizationAdmin": "NOT_TESTED",
+        "platformAdmin": "NOT_TESTED"
+      },
+      "viewportEvidence": {
+        "320": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW",
+        "390": "PASS_BROWSER_CAPTURE_LOCAL_SEED",
+        "768": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW",
+        "1024": "NOT_TESTED",
+        "1440": "PASS_BROWSER_CAPTURE_LOCAL_SEED"
+      },
+      "stateEvidence": {
+        "loading": "NOT_TESTED",
+        "loaded": "PARTIAL_BROWSER_PASS_SCOPED_MOCKED_OR_LOCAL",
+        "empty": "NOT_TESTED",
+        "error": "PARTIAL_BROWSER_PASS_SCOPED_MOCKED_OR_LOCAL",
+        "unauthorized": "NOT_TESTED",
+        "forbidden": "NOT_TESTED",
+        "validation": "PARTIAL_BROWSER_PASS_SCOPED_MOCKED_OR_LOCAL",
+        "conflict": "NOT_TESTED",
+        "pending": "PARTIAL_BROWSER_PASS_SCOPED_MOCKED_OR_LOCAL",
+        "success": "PARTIAL_BROWSER_PASS_SCOPED_MOCKED_OR_LOCAL",
+        "retry": "PARTIAL_BROWSER_PASS_SCOPED_MOCKED_OR_LOCAL",
+        "modal-and-focus": "NOT_TESTED",
+        "keyboard": "NOT_TESTED",
+        "reduced-motion": "SCOPED_BROWSER_REDUCED_MOTION_RENDERED_ONLY"
+      },
+      "actionEvidence": {
+        "FE-UX-10-01": "PARTIAL_SCOPED_BROWSER_OR_COMPONENT_COVERAGE_NOT_ALL_STATES",
+        "FE-UX-10-02": "PARTIAL_SCOPED_BROWSER_OR_COMPONENT_COVERAGE_NOT_ALL_STATES",
+        "FE-UX-10-03": "PARTIAL_SCOPED_BROWSER_OR_COMPONENT_COVERAGE_NOT_ALL_STATES",
+        "FE-UX-10-04": "PARTIAL_SCOPED_BROWSER_OR_COMPONENT_COVERAGE_NOT_ALL_STATES",
+        "FE-UX-10-05": "PARTIAL_SCOPED_BROWSER_OR_COMPONENT_COVERAGE_NOT_ALL_STATES"
+      },
+      "evidenceSources": [
+        "frontend/e2e/quality-audit/customer-responsive-journey.spec.ts",
+        "frontend/e2e/quality-audit/customer-orders-actions.spec.ts",
+        "frontend/e2e/quality-audit/customer-create-order-actions.spec.ts",
+        "frontend/e2e/quality-audit/customer-payment-initial-actions.spec.ts",
+        "frontend/e2e/quality-audit/customer-pickup-actions.spec.ts",
+        "frontend/e2e/quality-audit/notification-actions.spec.ts",
+        "docs/design/CUSTOMER_JOURNEY_IMPLEMENTATION.md",
+        "frontend/quality-audit/.evidence/redesign-customer/payment-390.png",
+        "frontend/quality-audit/.evidence/redesign-customer/payment-1440.png",
+        "frontend/e2e/quality-audit/customer-order-cancel-actions.spec.ts",
+        "frontend/e2e/quality-audit/customer-payment-upload-actions.spec.ts",
+        "frontend/e2e/quality-audit/filter-recovery.spec.ts"
+      ],
+      "evidenceNotes": "LOCAL seed GET navigation; non-read browser requests blocked unless explicitly intercepted with synthetic responses in action tests; no actual new orders/payments/notification reads persisted. Not exhaustive all state/role/accessibility permutations."
+    },
+    {
+      "route": "/my/pickup/",
+      "sourceRoles": [
+        "customer"
+      ],
+      "sourceActionCount": 4,
+      "actionIds": [
+        "FE-UX-11-01",
+        "FE-UX-11-02",
+        "FE-UX-11-03",
+        "FE-UX-11-04"
+      ],
+      "primaryTask": "ดูข้อมูลรับสินค้า",
+      "redesignStatus": "IMPLEMENTED_WITH_UNTESTED_ROLE_AND_STATE_VARIANTS",
+      "roleEvidence": {
+        "guest": "NOT_TESTED",
+        "customer": "SCOPED_BROWSER_LOCAL_SEED_READ_AND_INTERCEPTED_MUTATIONS",
+        "staff": "NOT_TESTED",
+        "organizationAdmin": "NOT_TESTED",
+        "platformAdmin": "NOT_TESTED"
+      },
+      "viewportEvidence": {
+        "320": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW",
+        "390": "PASS_BROWSER_CAPTURE_LOCAL_SEED",
+        "768": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW",
+        "1024": "NOT_TESTED",
+        "1440": "PASS_BROWSER_CAPTURE_LOCAL_SEED"
+      },
+      "stateEvidence": {
+        "loading": "NOT_TESTED",
+        "loaded": "PARTIAL_BROWSER_PASS_SCOPED_MOCKED_OR_LOCAL",
+        "empty": "NOT_TESTED",
+        "error": "PARTIAL_BROWSER_PASS_SCOPED_MOCKED_OR_LOCAL",
+        "unauthorized": "NOT_TESTED",
+        "forbidden": "NOT_TESTED",
+        "validation": "NOT_TESTED",
+        "conflict": "NOT_TESTED",
+        "pending": "NOT_TESTED",
+        "success": "NOT_TESTED",
+        "retry": "PARTIAL_BROWSER_PASS_SCOPED_MOCKED_OR_LOCAL",
+        "modal-and-focus": "NOT_TESTED",
+        "keyboard": "NOT_TESTED",
+        "reduced-motion": "SCOPED_BROWSER_REDUCED_MOTION_RENDERED_ONLY"
+      },
+      "actionEvidence": {
+        "FE-UX-11-01": "PARTIAL_SCOPED_BROWSER_OR_COMPONENT_COVERAGE_NOT_ALL_STATES",
+        "FE-UX-11-02": "PARTIAL_SCOPED_BROWSER_OR_COMPONENT_COVERAGE_NOT_ALL_STATES",
+        "FE-UX-11-03": "PARTIAL_SCOPED_BROWSER_OR_COMPONENT_COVERAGE_NOT_ALL_STATES",
+        "FE-UX-11-04": "PARTIAL_SCOPED_BROWSER_OR_COMPONENT_COVERAGE_NOT_ALL_STATES"
+      },
+      "evidenceSources": [
+        "frontend/e2e/quality-audit/customer-responsive-journey.spec.ts",
+        "frontend/e2e/quality-audit/customer-orders-actions.spec.ts",
+        "frontend/e2e/quality-audit/customer-create-order-actions.spec.ts",
+        "frontend/e2e/quality-audit/customer-payment-initial-actions.spec.ts",
+        "frontend/e2e/quality-audit/customer-pickup-actions.spec.ts",
+        "frontend/e2e/quality-audit/notification-actions.spec.ts",
+        "docs/design/CUSTOMER_JOURNEY_IMPLEMENTATION.md",
+        "frontend/quality-audit/.evidence/redesign-customer/pickup-390.png",
+        "frontend/quality-audit/.evidence/redesign-customer/pickup-1440.png",
+        "frontend/e2e/quality-audit/customer-order-cancel-actions.spec.ts",
+        "frontend/e2e/quality-audit/customer-payment-upload-actions.spec.ts",
+        "frontend/e2e/quality-audit/filter-recovery.spec.ts"
+      ],
+      "evidenceNotes": "LOCAL seed GET navigation; non-read browser requests blocked unless explicitly intercepted with synthetic responses in action tests; no actual new orders/payments/notification reads persisted. Not exhaustive all state/role/accessibility permutations."
+    },
+    {
+      "route": "/notifications/",
+      "sourceRoles": [
+        "customer"
+      ],
+      "sourceActionCount": 7,
+      "actionIds": [
+        "FE-UX-12-01",
+        "FE-UX-12-02",
+        "FE-UX-12-03",
+        "FE-UX-12-04",
+        "FE-UX-12-05",
+        "FE-UX-12-06",
+        "FE-UX-12-07"
+      ],
+      "primaryTask": "เปิดรายการจากการแจ้งเตือน",
+      "redesignStatus": "IMPLEMENTED_WITH_UNTESTED_ROLE_AND_STATE_VARIANTS",
+      "roleEvidence": {
+        "guest": "NOT_TESTED",
+        "customer": "SCOPED_BROWSER_LOCAL_SEED_READ_AND_INTERCEPTED_MUTATIONS",
+        "staff": "NOT_TESTED",
+        "organizationAdmin": "NOT_TESTED",
+        "platformAdmin": "NOT_TESTED"
+      },
+      "viewportEvidence": {
+        "320": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW",
+        "390": "PASS_BROWSER_CAPTURE_LOCAL_SEED",
+        "768": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW",
+        "1024": "NOT_TESTED",
+        "1440": "PASS_BROWSER_CAPTURE_LOCAL_SEED"
+      },
+      "stateEvidence": {
+        "loading": "NOT_TESTED",
+        "loaded": "PARTIAL_BROWSER_PASS_SCOPED_MOCKED_OR_LOCAL",
+        "empty": "PARTIAL_BROWSER_PASS_SCOPED_MOCKED_OR_LOCAL",
+        "error": "PARTIAL_BROWSER_PASS_SCOPED_MOCKED_OR_LOCAL",
+        "unauthorized": "NOT_TESTED",
+        "forbidden": "NOT_TESTED",
+        "validation": "NOT_TESTED",
+        "conflict": "NOT_TESTED",
+        "pending": "PARTIAL_BROWSER_PASS_SCOPED_MOCKED_OR_LOCAL",
+        "success": "PARTIAL_BROWSER_PASS_SCOPED_MOCKED_OR_LOCAL",
+        "retry": "PARTIAL_BROWSER_PASS_SCOPED_MOCKED_OR_LOCAL",
+        "modal-and-focus": "NOT_TESTED",
+        "keyboard": "NOT_TESTED",
+        "reduced-motion": "SCOPED_BROWSER_REDUCED_MOTION_RENDERED_ONLY"
+      },
+      "actionEvidence": {
+        "FE-UX-12-01": "PARTIAL_SCOPED_BROWSER_OR_COMPONENT_COVERAGE_NOT_ALL_STATES",
+        "FE-UX-12-02": "PARTIAL_SCOPED_BROWSER_OR_COMPONENT_COVERAGE_NOT_ALL_STATES",
+        "FE-UX-12-03": "PARTIAL_SCOPED_BROWSER_OR_COMPONENT_COVERAGE_NOT_ALL_STATES",
+        "FE-UX-12-04": "PARTIAL_SCOPED_BROWSER_OR_COMPONENT_COVERAGE_NOT_ALL_STATES",
+        "FE-UX-12-05": "PARTIAL_SCOPED_BROWSER_OR_COMPONENT_COVERAGE_NOT_ALL_STATES",
+        "FE-UX-12-06": "PARTIAL_SCOPED_BROWSER_OR_COMPONENT_COVERAGE_NOT_ALL_STATES",
+        "FE-UX-12-07": "PARTIAL_SCOPED_BROWSER_OR_COMPONENT_COVERAGE_NOT_ALL_STATES"
+      },
+      "evidenceSources": [
+        "frontend/e2e/quality-audit/customer-responsive-journey.spec.ts",
+        "frontend/e2e/quality-audit/customer-orders-actions.spec.ts",
+        "frontend/e2e/quality-audit/customer-create-order-actions.spec.ts",
+        "frontend/e2e/quality-audit/customer-payment-initial-actions.spec.ts",
+        "frontend/e2e/quality-audit/customer-pickup-actions.spec.ts",
+        "frontend/e2e/quality-audit/notification-actions.spec.ts",
+        "docs/design/CUSTOMER_JOURNEY_IMPLEMENTATION.md",
+        "frontend/quality-audit/.evidence/redesign-customer/notifications-390.png",
+        "frontend/quality-audit/.evidence/redesign-customer/notifications-1440.png",
+        "frontend/e2e/quality-audit/customer-order-cancel-actions.spec.ts",
+        "frontend/e2e/quality-audit/customer-payment-upload-actions.spec.ts",
+        "frontend/e2e/quality-audit/filter-recovery.spec.ts"
+      ],
+      "evidenceNotes": "LOCAL seed GET navigation; non-read browser requests blocked unless explicitly intercepted with synthetic responses in action tests; no actual new orders/payments/notification reads persisted. Not exhaustive all state/role/accessibility permutations."
+    },
+    {
+      "route": "/org/select/",
+      "sourceRoles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "sourceActionCount": 5,
+      "actionIds": [
+        "FE-UX-13-01",
+        "FE-UX-13-02",
+        "FE-UX-13-03",
+        "FE-UX-13-04",
+        "FE-UX-13-05"
+      ],
+      "primaryTask": "เลือกหน่วยงาน",
+      "redesignStatus": "IMPLEMENTED_WITH_UNTESTED_ROLE_AND_STATE_VARIANTS",
+      "roleEvidence": {
+        "guest": "NOT_TESTED",
+        "customer": "NOT_TESTED",
+        "staff": "PASS_BROWSER_READ_ONLY_ORGANIZATIONS_FIXTURE",
+        "organizationAdmin": "SCOPED_BROWSER_READ_ONLY_LOCAL_SEED_AND_INTERCEPTED_WRITES",
+        "platformAdmin": "NOT_TESTED"
+      },
+      "viewportEvidence": {
+        "320": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW_LOCAL",
+        "390": "PASS_BROWSER_CAPTURE_READ_ONLY_LOCAL",
+        "768": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW_LOCAL",
+        "1024": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW",
+        "1440": "PASS_BROWSER_CAPTURE_READ_ONLY_LOCAL"
+      },
+      "stateEvidence": {
+        "loading": "OBSERVED_ISOLATED_LOCAL_PENDING_NOT_DEEP_BROWSER_GATE",
+        "loaded": "PASS_BROWSER_SCOPED_LOCAL_SEED_OR_SYNTHETIC",
+        "empty": "NOT_TESTED",
+        "error": "PARTIAL_BROWSER_INTERCEPTED_NETWORK_ERROR",
+        "unauthorized": "NOT_TESTED",
+        "forbidden": "NOT_TESTED",
+        "validation": "PARTIAL_BROWSER_SYNTHETIC_FORM_VALIDATION",
+        "conflict": "PARTIAL_BROWSER_SYNTHETIC_NETWORK",
+        "pending": "PARTIAL_BROWSER_INTERCEPTED_WRITES_ONLY",
+        "success": "PARTIAL_BROWSER_INTERCEPTED_WRITES_ONLY",
+        "retry": "PARTIAL_BROWSER_INTERCEPTED_RETRY",
+        "modal-and-focus": "NOT_TESTED",
+        "keyboard": "NOT_TESTED",
+        "reduced-motion": "PARTIAL_BROWSER_RENDERED_REDUCED_MOTION"
+      },
+      "actionEvidence": {
+        "FE-UX-13-01": "PARTIAL_BROWSER_OR_UNIT_SCOPED_NOT_EXHAUSTIVE",
+        "FE-UX-13-02": "PARTIAL_BROWSER_OR_UNIT_SCOPED_NOT_EXHAUSTIVE",
+        "FE-UX-13-03": "PARTIAL_BROWSER_OR_UNIT_SCOPED_NOT_EXHAUSTIVE",
+        "FE-UX-13-04": "PARTIAL_BROWSER_OR_UNIT_SCOPED_NOT_EXHAUSTIVE",
+        "FE-UX-13-05": "PARTIAL_BROWSER_OR_UNIT_SCOPED_NOT_EXHAUSTIVE"
+      },
+      "evidenceSources": [
+        "frontend/e2e/quality-audit/organization-management-responsive.spec.ts",
+        "frontend/e2e/quality-audit/org-selector-actions.spec.ts",
+        "frontend/e2e/quality-audit/dashboard-settings.spec.ts",
+        "frontend/e2e/quality-audit/staff-member-actions.spec.ts",
+        "frontend/e2e/quality-audit/organization-management-dialogs.spec.ts",
+        "frontend/src/modules/organizations/organization-admin-nav.test.tsx",
+        "docs/design/ORGANIZATION_MANAGEMENT_IMPLEMENTATION.md",
+        "frontend/quality-audit/.evidence/redesign-organization/selector-390.png",
+        "frontend/quality-audit/.evidence/redesign-organization/selector-1440.png"
+      ],
+      "evidenceNotes": "GET-only local Org Admin and Staff-denied real browser routes, synthetic write intercepts for settings/membership/create; no actual PATCH/POST/DELETE. Not exhaustive all roles, UI states, physical devices or screen readers."
+    },
+    {
+      "route": "/org/dashboard/",
+      "sourceRoles": [
+        "organizationAdmin"
+      ],
+      "sourceActionCount": 12,
+      "actionIds": [
+        "FE-UX-14-01",
+        "FE-UX-14-02",
+        "FE-UX-14-03",
+        "FE-UX-14-04",
+        "FE-UX-14-05",
+        "FE-UX-14-06",
+        "FE-UX-14-07",
+        "FE-UX-14-08",
+        "FE-UX-14-09",
+        "FE-UX-14-10",
+        "FE-UX-14-11",
+        "FE-UX-14-12"
+      ],
+      "primaryTask": "เปิดงานที่รอดำเนินการ",
+      "redesignStatus": "IMPLEMENTED_WITH_UNTESTED_ROLE_AND_STATE_VARIANTS",
+      "roleEvidence": {
+        "guest": "NOT_TESTED",
+        "customer": "NOT_TESTED",
+        "staff": "PASS_BROWSER_DIRECT_ROUTE_FORBIDDEN",
+        "organizationAdmin": "SCOPED_BROWSER_READ_ONLY_LOCAL_SEED_AND_INTERCEPTED_WRITES",
+        "platformAdmin": "NOT_TESTED"
+      },
+      "viewportEvidence": {
+        "320": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW_LOCAL",
+        "390": "PASS_BROWSER_CAPTURE_READ_ONLY_LOCAL",
+        "768": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW_LOCAL",
+        "1024": "NOT_TESTED",
+        "1440": "PASS_BROWSER_CAPTURE_READ_ONLY_LOCAL"
+      },
+      "stateEvidence": {
+        "loading": "NOT_TESTED",
+        "loaded": "PASS_BROWSER_SCOPED_LOCAL_SEED_OR_SYNTHETIC",
+        "empty": "NOT_TESTED",
+        "error": "PARTIAL_BROWSER_INTERCEPTED_NETWORK_ERROR",
+        "unauthorized": "NOT_TESTED",
+        "forbidden": "PASS_BROWSER_STAFF_DENIED_DIRECT_URL",
+        "validation": "PARTIAL_BROWSER_SYNTHETIC_FORM_VALIDATION",
+        "conflict": "NOT_TESTED",
+        "pending": "PARTIAL_BROWSER_INTERCEPTED_WRITES_ONLY",
+        "success": "PARTIAL_BROWSER_INTERCEPTED_WRITES_ONLY",
+        "retry": "PARTIAL_BROWSER_INTERCEPTED_RETRY",
+        "modal-and-focus": "NOT_TESTED",
+        "keyboard": "NOT_TESTED",
+        "reduced-motion": "PARTIAL_BROWSER_RENDERED_REDUCED_MOTION"
+      },
+      "actionEvidence": {
+        "FE-UX-14-01": "PARTIAL_BROWSER_OR_UNIT_SCOPED_NOT_EXHAUSTIVE",
+        "FE-UX-14-02": "PARTIAL_BROWSER_OR_UNIT_SCOPED_NOT_EXHAUSTIVE",
+        "FE-UX-14-03": "PARTIAL_BROWSER_OR_UNIT_SCOPED_NOT_EXHAUSTIVE",
+        "FE-UX-14-04": "PARTIAL_BROWSER_OR_UNIT_SCOPED_NOT_EXHAUSTIVE",
+        "FE-UX-14-05": "PARTIAL_BROWSER_OR_UNIT_SCOPED_NOT_EXHAUSTIVE",
+        "FE-UX-14-06": "PARTIAL_BROWSER_OR_UNIT_SCOPED_NOT_EXHAUSTIVE",
+        "FE-UX-14-07": "PARTIAL_BROWSER_OR_UNIT_SCOPED_NOT_EXHAUSTIVE",
+        "FE-UX-14-08": "PARTIAL_BROWSER_OR_UNIT_SCOPED_NOT_EXHAUSTIVE",
+        "FE-UX-14-09": "PARTIAL_BROWSER_OR_UNIT_SCOPED_NOT_EXHAUSTIVE",
+        "FE-UX-14-10": "PARTIAL_BROWSER_OR_UNIT_SCOPED_NOT_EXHAUSTIVE",
+        "FE-UX-14-11": "PARTIAL_BROWSER_OR_UNIT_SCOPED_NOT_EXHAUSTIVE",
+        "FE-UX-14-12": "PARTIAL_BROWSER_OR_UNIT_SCOPED_NOT_EXHAUSTIVE"
+      },
+      "evidenceSources": [
+        "frontend/e2e/quality-audit/organization-management-responsive.spec.ts",
+        "frontend/e2e/quality-audit/org-selector-actions.spec.ts",
+        "frontend/e2e/quality-audit/dashboard-settings.spec.ts",
+        "frontend/e2e/quality-audit/staff-member-actions.spec.ts",
+        "frontend/e2e/quality-audit/organization-management-dialogs.spec.ts",
+        "frontend/src/modules/organizations/organization-admin-nav.test.tsx",
+        "docs/design/ORGANIZATION_MANAGEMENT_IMPLEMENTATION.md",
+        "frontend/quality-audit/.evidence/redesign-organization/dashboard-390.png",
+        "frontend/quality-audit/.evidence/redesign-organization/dashboard-1440.png"
+      ],
+      "evidenceNotes": "GET-only local Org Admin and Staff-denied real browser routes, synthetic write intercepts for settings/membership/create; no actual PATCH/POST/DELETE. Not exhaustive all roles, UI states, physical devices or screen readers."
+    },
+    {
+      "route": "/org/settings/",
+      "sourceRoles": [
+        "organizationAdmin"
+      ],
+      "sourceActionCount": 6,
+      "actionIds": [
+        "FE-UX-15-01",
+        "FE-UX-15-02",
+        "FE-UX-15-03",
+        "FE-UX-15-04",
+        "FE-UX-15-05",
+        "FE-UX-15-06"
+      ],
+      "primaryTask": "แก้ไขข้อมูลหน่วยงาน",
+      "redesignStatus": "IMPLEMENTED_WITH_UNTESTED_ROLE_AND_STATE_VARIANTS",
+      "roleEvidence": {
+        "guest": "NOT_TESTED",
+        "customer": "NOT_TESTED",
+        "staff": "PASS_BROWSER_DIRECT_ROUTE_FORBIDDEN",
+        "organizationAdmin": "SCOPED_BROWSER_READ_ONLY_LOCAL_SEED_AND_INTERCEPTED_WRITES",
+        "platformAdmin": "NOT_TESTED"
+      },
+      "viewportEvidence": {
+        "320": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW_LOCAL",
+        "390": "PASS_BROWSER_CAPTURE_READ_ONLY_LOCAL",
+        "768": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW_LOCAL",
+        "1024": "NOT_TESTED",
+        "1440": "PASS_BROWSER_CAPTURE_READ_ONLY_LOCAL"
+      },
+      "stateEvidence": {
+        "loading": "NOT_TESTED",
+        "loaded": "PASS_BROWSER_SCOPED_LOCAL_SEED_OR_SYNTHETIC",
+        "empty": "NOT_TESTED",
+        "error": "PARTIAL_BROWSER_INTERCEPTED_NETWORK_ERROR",
+        "unauthorized": "NOT_TESTED",
+        "forbidden": "PASS_BROWSER_STAFF_DENIED_DIRECT_URL",
+        "validation": "PARTIAL_BROWSER_SYNTHETIC_FORM_VALIDATION",
+        "conflict": "NOT_TESTED",
+        "pending": "PARTIAL_BROWSER_INTERCEPTED_WRITES_ONLY",
+        "success": "PARTIAL_BROWSER_INTERCEPTED_WRITES_ONLY",
+        "retry": "PARTIAL_BROWSER_INTERCEPTED_RETRY",
+        "modal-and-focus": "NOT_TESTED",
+        "keyboard": "NOT_TESTED",
+        "reduced-motion": "PARTIAL_BROWSER_RENDERED_REDUCED_MOTION"
+      },
+      "actionEvidence": {
+        "FE-UX-15-01": "PARTIAL_BROWSER_OR_UNIT_SCOPED_NOT_EXHAUSTIVE",
+        "FE-UX-15-02": "PARTIAL_BROWSER_OR_UNIT_SCOPED_NOT_EXHAUSTIVE",
+        "FE-UX-15-03": "PARTIAL_BROWSER_OR_UNIT_SCOPED_NOT_EXHAUSTIVE",
+        "FE-UX-15-04": "PARTIAL_BROWSER_OR_UNIT_SCOPED_NOT_EXHAUSTIVE",
+        "FE-UX-15-05": "PARTIAL_BROWSER_OR_UNIT_SCOPED_NOT_EXHAUSTIVE",
+        "FE-UX-15-06": "PARTIAL_BROWSER_OR_UNIT_SCOPED_NOT_EXHAUSTIVE"
+      },
+      "evidenceSources": [
+        "frontend/e2e/quality-audit/organization-management-responsive.spec.ts",
+        "frontend/e2e/quality-audit/org-selector-actions.spec.ts",
+        "frontend/e2e/quality-audit/dashboard-settings.spec.ts",
+        "frontend/e2e/quality-audit/staff-member-actions.spec.ts",
+        "frontend/e2e/quality-audit/organization-management-dialogs.spec.ts",
+        "frontend/src/modules/organizations/organization-admin-nav.test.tsx",
+        "docs/design/ORGANIZATION_MANAGEMENT_IMPLEMENTATION.md",
+        "frontend/quality-audit/.evidence/redesign-organization/settings-390.png",
+        "frontend/quality-audit/.evidence/redesign-organization/settings-1440.png"
+      ],
+      "evidenceNotes": "GET-only local Org Admin and Staff-denied real browser routes, synthetic write intercepts for settings/membership/create; no actual PATCH/POST/DELETE. Not exhaustive all roles, UI states, physical devices or screen readers."
+    },
+    {
+      "route": "/org/staff/",
+      "sourceRoles": [
+        "organizationAdmin"
+      ],
+      "sourceActionCount": 6,
+      "actionIds": [
+        "FE-UX-16-01",
+        "FE-UX-16-02",
+        "FE-UX-16-03",
+        "FE-UX-16-04",
+        "FE-UX-16-05",
+        "FE-UX-16-06"
+      ],
+      "primaryTask": "จัดการทีมงาน",
+      "redesignStatus": "IMPLEMENTED_WITH_UNTESTED_ROLE_AND_STATE_VARIANTS",
+      "roleEvidence": {
+        "guest": "NOT_TESTED",
+        "customer": "NOT_TESTED",
+        "staff": "PASS_BROWSER_DIRECT_ROUTE_FORBIDDEN",
+        "organizationAdmin": "SCOPED_BROWSER_READ_ONLY_LOCAL_SEED_AND_INTERCEPTED_WRITES",
+        "platformAdmin": "NOT_TESTED"
+      },
+      "viewportEvidence": {
+        "320": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW_LOCAL",
+        "390": "PASS_BROWSER_CAPTURE_READ_ONLY_LOCAL",
+        "768": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW_LOCAL",
+        "1024": "NOT_TESTED",
+        "1440": "PASS_BROWSER_CAPTURE_READ_ONLY_LOCAL"
+      },
+      "stateEvidence": {
+        "loading": "NOT_TESTED",
+        "loaded": "PASS_BROWSER_SCOPED_LOCAL_SEED_OR_SYNTHETIC",
+        "empty": "NOT_TESTED",
+        "error": "PARTIAL_BROWSER_INTERCEPTED_NETWORK_ERROR",
+        "unauthorized": "NOT_TESTED",
+        "forbidden": "PASS_BROWSER_STAFF_DENIED_DIRECT_URL",
+        "validation": "PARTIAL_BROWSER_SYNTHETIC_FORM_VALIDATION",
+        "conflict": "PARTIAL_BROWSER_SYNTHETIC_NETWORK",
+        "pending": "PARTIAL_BROWSER_INTERCEPTED_WRITES_ONLY",
+        "success": "PARTIAL_BROWSER_INTERCEPTED_WRITES_ONLY",
+        "retry": "PARTIAL_BROWSER_INTERCEPTED_RETRY",
+        "modal-and-focus": "PARTIAL_BROWSER_SAFE_MODAL_CANCEL",
+        "keyboard": "NOT_TESTED",
+        "reduced-motion": "PARTIAL_BROWSER_RENDERED_REDUCED_MOTION"
+      },
+      "actionEvidence": {
+        "FE-UX-16-01": "PARTIAL_BROWSER_OR_UNIT_SCOPED_NOT_EXHAUSTIVE",
+        "FE-UX-16-02": "PARTIAL_BROWSER_OR_UNIT_SCOPED_NOT_EXHAUSTIVE",
+        "FE-UX-16-03": "PARTIAL_BROWSER_OR_UNIT_SCOPED_NOT_EXHAUSTIVE",
+        "FE-UX-16-04": "PARTIAL_BROWSER_OR_UNIT_SCOPED_NOT_EXHAUSTIVE",
+        "FE-UX-16-05": "PARTIAL_BROWSER_OR_UNIT_SCOPED_NOT_EXHAUSTIVE",
+        "FE-UX-16-06": "PARTIAL_BROWSER_OR_UNIT_SCOPED_NOT_EXHAUSTIVE"
+      },
+      "evidenceSources": [
+        "frontend/e2e/quality-audit/organization-management-responsive.spec.ts",
+        "frontend/e2e/quality-audit/org-selector-actions.spec.ts",
+        "frontend/e2e/quality-audit/dashboard-settings.spec.ts",
+        "frontend/e2e/quality-audit/staff-member-actions.spec.ts",
+        "frontend/e2e/quality-audit/organization-management-dialogs.spec.ts",
+        "frontend/src/modules/organizations/organization-admin-nav.test.tsx",
+        "docs/design/ORGANIZATION_MANAGEMENT_IMPLEMENTATION.md",
+        "frontend/quality-audit/.evidence/redesign-organization/staff-390.png",
+        "frontend/quality-audit/.evidence/redesign-organization/staff-1440.png"
+      ],
+      "evidenceNotes": "GET-only local Org Admin and Staff-denied real browser routes, synthetic write intercepts for settings/membership/create; no actual PATCH/POST/DELETE. Not exhaustive all roles, UI states, physical devices or screen readers."
+    },
+    {
+      "route": "/org/stores/",
+      "sourceRoles": [
+        "organizationAdmin"
+      ],
+      "sourceActionCount": 9,
+      "actionIds": [
+        "FE-UX-17-01",
+        "FE-UX-17-02",
+        "FE-UX-17-03",
+        "FE-UX-17-04",
+        "FE-UX-17-05",
+        "FE-UX-17-06",
+        "FE-UX-17-07",
+        "FE-UX-17-08",
+        "FE-UX-17-09"
+      ],
+      "primaryTask": "จัดการร้านค้า",
+      "redesignStatus": "IMPLEMENTED_WITH_UNTESTED_ROLE_AND_STATE_VARIANTS",
+      "roleEvidence": {
+        "guest": "NOT_TESTED",
+        "customer": "NOT_TESTED",
+        "staff": "PASS_BROWSER_DIRECT_ROUTE_FORBIDDEN",
+        "organizationAdmin": "PASS_BROWSER_LOCAL_SEED_GET_AND_INTERCEPTED_MUTATION_TESTS",
+        "platformAdmin": "NOT_TESTED"
+      },
+      "viewportEvidence": {
+        "320": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW_LOCAL",
+        "390": "PASS_BROWSER_CAPTURE_READ_ONLY_LOCAL",
+        "768": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW_LOCAL",
+        "1024": "NOT_TESTED",
+        "1440": "PASS_BROWSER_CAPTURE_READ_ONLY_LOCAL"
+      },
+      "stateEvidence": {
+        "loading": "NOT_TESTED",
+        "loaded": "PASS_BROWSER_READ_ONLY_LOCAL_SEED_OR_INTERCEPTED_GET",
+        "empty": "NOT_TESTED",
+        "error": "PARTIAL_BROWSER_SYNTHETIC_FAILURES",
+        "unauthorized": "NOT_TESTED",
+        "forbidden": "PASS_BROWSER_STAFF_DENIED_DIRECT_URL",
+        "validation": "PARTIAL_BROWSER_VALIDATION_CASES",
+        "conflict": "NOT_TESTED",
+        "pending": "PARTIAL_BROWSER_INTERCEPTED_PENDING",
+        "success": "PARTIAL_BROWSER_INTERCEPTED_SUCCESS_NOT_PERSISTED",
+        "retry": "PARTIAL_BROWSER_INTERCEPTED_RETRY",
+        "modal-and-focus": "NOT_TESTED",
+        "keyboard": "NOT_TESTED",
+        "reduced-motion": "PASS_BROWSER_RENDER_REDUCED_MOTION"
+      },
+      "actionEvidence": {
+        "FE-UX-17-01": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-17-02": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-17-03": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-17-04": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-17-05": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-17-06": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-17-07": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-17-08": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-17-09": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES"
+      },
+      "evidenceSources": [
+        "frontend/e2e/quality-audit/organization-management-responsive.spec.ts",
+        "frontend/e2e/quality-audit/store-management-actions.spec.ts",
+        "frontend/e2e/quality-audit/products-variants-actions.spec.ts",
+        "frontend/e2e/quality-audit/campaign-actions.spec.ts",
+        "frontend/e2e/quality-audit/product-image-ambiguous-patch.spec.ts",
+        "frontend/e2e/quality-audit/product-image-stale-readback.spec.ts",
+        "frontend/e2e/quality-audit/product-image-session-reload.spec.ts",
+        "frontend/e2e/quality-audit/product-image-upload-negative-cases.spec.ts",
+        "frontend/e2e/quality-audit/product-image-storage-denied.spec.ts",
+        "frontend/src/modules/operations/commerce-management-nav.test.tsx",
+        "docs/design/COMMERCE_MANAGEMENT_IMPLEMENTATION.md",
+        "frontend/quality-audit/.evidence/redesign-commerce-management/stores-390.png",
+        "frontend/quality-audit/.evidence/redesign-commerce-management/stores-1440.png"
+      ],
+      "evidenceNotes": "Real local Org Admin readonly GETs, 4 responsive widths, 3-route contextual navigation, staff URL denial; mutations and image upload edge cases were intercepted. No production or persistent create/edit/status/image mutation verified; exhaustive all-state matrices remain NOT_TESTED."
+    },
+    {
+      "route": "/org/products/",
+      "sourceRoles": [
+        "organizationAdmin"
+      ],
+      "sourceActionCount": 24,
+      "actionIds": [
+        "FE-UX-18-01",
+        "FE-UX-18-02",
+        "FE-UX-18-03",
+        "FE-UX-18-04",
+        "FE-UX-18-05",
+        "FE-UX-18-06",
+        "FE-UX-18-07",
+        "FE-UX-18-08",
+        "FE-UX-18-09",
+        "FE-UX-18-10",
+        "FE-UX-18-11",
+        "FE-UX-18-12",
+        "FE-UX-18-13",
+        "FE-UX-18-14",
+        "FE-UX-18-15",
+        "FE-UX-18-16",
+        "FE-UX-18-17",
+        "FE-UX-18-18",
+        "FE-UX-18-19",
+        "FE-UX-18-20",
+        "FE-UX-18-21",
+        "FE-UX-18-22",
+        "FE-UX-18-23",
+        "FE-UX-18-24"
+      ],
+      "primaryTask": "จัดการสินค้า/ตัวเลือก/รูปภาพ",
+      "redesignStatus": "IMPLEMENTED_WITH_UNTESTED_ROLE_AND_STATE_VARIANTS",
+      "roleEvidence": {
+        "guest": "NOT_TESTED",
+        "customer": "NOT_TESTED",
+        "staff": "PASS_BROWSER_DIRECT_ROUTE_FORBIDDEN",
+        "organizationAdmin": "PASS_BROWSER_LOCAL_SEED_GET_AND_INTERCEPTED_MUTATION_TESTS",
+        "platformAdmin": "NOT_TESTED"
+      },
+      "viewportEvidence": {
+        "320": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW_LOCAL",
+        "390": "PASS_BROWSER_CAPTURE_READ_ONLY_LOCAL",
+        "768": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW_LOCAL",
+        "1024": "NOT_TESTED",
+        "1440": "PASS_BROWSER_CAPTURE_READ_ONLY_LOCAL"
+      },
+      "stateEvidence": {
+        "loading": "NOT_TESTED",
+        "loaded": "PASS_BROWSER_READ_ONLY_LOCAL_SEED_OR_INTERCEPTED_GET",
+        "empty": "NOT_TESTED",
+        "error": "PARTIAL_BROWSER_SYNTHETIC_FAILURES",
+        "unauthorized": "NOT_TESTED",
+        "forbidden": "PASS_BROWSER_STAFF_DENIED_DIRECT_URL",
+        "validation": "PARTIAL_BROWSER_VALIDATION_CASES",
+        "conflict": "PARTIAL_BROWSER_IMAGE_PATCH_AMBIGUITY_GET_ONLY_RECOVERY",
+        "pending": "PARTIAL_BROWSER_INTERCEPTED_PENDING",
+        "success": "PARTIAL_BROWSER_INTERCEPTED_SUCCESS_NOT_PERSISTED",
+        "retry": "PARTIAL_BROWSER_INTERCEPTED_RETRY",
+        "modal-and-focus": "NOT_TESTED",
+        "keyboard": "NOT_TESTED",
+        "reduced-motion": "PASS_BROWSER_RENDER_REDUCED_MOTION"
+      },
+      "actionEvidence": {
+        "FE-UX-18-01": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-18-02": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-18-03": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-18-04": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-18-05": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-18-06": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-18-07": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-18-08": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-18-09": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-18-10": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-18-11": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-18-12": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-18-13": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-18-14": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-18-15": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-18-16": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-18-17": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-18-18": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-18-19": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-18-20": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-18-21": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-18-22": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-18-23": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-18-24": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES"
+      },
+      "evidenceSources": [
+        "frontend/e2e/quality-audit/organization-management-responsive.spec.ts",
+        "frontend/e2e/quality-audit/store-management-actions.spec.ts",
+        "frontend/e2e/quality-audit/products-variants-actions.spec.ts",
+        "frontend/e2e/quality-audit/campaign-actions.spec.ts",
+        "frontend/e2e/quality-audit/product-image-ambiguous-patch.spec.ts",
+        "frontend/e2e/quality-audit/product-image-stale-readback.spec.ts",
+        "frontend/e2e/quality-audit/product-image-session-reload.spec.ts",
+        "frontend/e2e/quality-audit/product-image-upload-negative-cases.spec.ts",
+        "frontend/e2e/quality-audit/product-image-storage-denied.spec.ts",
+        "frontend/src/modules/operations/commerce-management-nav.test.tsx",
+        "docs/design/COMMERCE_MANAGEMENT_IMPLEMENTATION.md",
+        "frontend/quality-audit/.evidence/redesign-commerce-management/products-390.png",
+        "frontend/quality-audit/.evidence/redesign-commerce-management/products-1440.png"
+      ],
+      "evidenceNotes": "Real local Org Admin readonly GETs, 4 responsive widths, 3-route contextual navigation, staff URL denial; mutations and image upload edge cases were intercepted. No production or persistent create/edit/status/image mutation verified; exhaustive all-state matrices remain NOT_TESTED."
+    },
+    {
+      "route": "/org/campaigns/",
+      "sourceRoles": [
+        "organizationAdmin"
+      ],
+      "sourceActionCount": 26,
+      "actionIds": [
+        "FE-UX-19-01",
+        "FE-UX-19-02",
+        "FE-UX-19-03",
+        "FE-UX-19-04",
+        "FE-UX-19-05",
+        "FE-UX-19-06",
+        "FE-UX-19-07",
+        "FE-UX-19-08",
+        "FE-UX-19-09",
+        "FE-UX-19-10",
+        "FE-UX-19-11",
+        "FE-UX-19-12",
+        "FE-UX-19-13",
+        "FE-UX-19-14",
+        "FE-UX-19-15",
+        "FE-UX-19-16",
+        "FE-UX-19-17",
+        "FE-UX-19-18",
+        "FE-UX-19-19",
+        "FE-UX-19-20",
+        "FE-UX-19-21",
+        "FE-UX-19-22",
+        "FE-UX-19-23",
+        "FE-UX-19-24",
+        "FE-UX-19-25",
+        "FE-UX-19-26"
+      ],
+      "primaryTask": "จัดการรอบพรีออเดอร์",
+      "redesignStatus": "IMPLEMENTED_WITH_UNTESTED_ROLE_AND_STATE_VARIANTS",
+      "roleEvidence": {
+        "guest": "NOT_TESTED",
+        "customer": "NOT_TESTED",
+        "staff": "PASS_BROWSER_DIRECT_ROUTE_FORBIDDEN",
+        "organizationAdmin": "PASS_BROWSER_LOCAL_SEED_GET_AND_INTERCEPTED_MUTATION_TESTS",
+        "platformAdmin": "NOT_TESTED"
+      },
+      "viewportEvidence": {
+        "320": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW_LOCAL",
+        "390": "PASS_BROWSER_CAPTURE_READ_ONLY_LOCAL",
+        "768": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW_LOCAL",
+        "1024": "NOT_TESTED",
+        "1440": "PASS_BROWSER_CAPTURE_READ_ONLY_LOCAL"
+      },
+      "stateEvidence": {
+        "loading": "NOT_TESTED",
+        "loaded": "PASS_BROWSER_READ_ONLY_LOCAL_SEED_OR_INTERCEPTED_GET",
+        "empty": "NOT_TESTED",
+        "error": "PARTIAL_BROWSER_SYNTHETIC_FAILURES",
+        "unauthorized": "NOT_TESTED",
+        "forbidden": "PASS_BROWSER_STAFF_DENIED_DIRECT_URL",
+        "validation": "PARTIAL_BROWSER_VALIDATION_CASES",
+        "conflict": "NOT_TESTED",
+        "pending": "PARTIAL_BROWSER_INTERCEPTED_PENDING",
+        "success": "PARTIAL_BROWSER_INTERCEPTED_SUCCESS_NOT_PERSISTED",
+        "retry": "PARTIAL_BROWSER_INTERCEPTED_RETRY",
+        "modal-and-focus": "NOT_TESTED",
+        "keyboard": "NOT_TESTED",
+        "reduced-motion": "PASS_BROWSER_RENDER_REDUCED_MOTION"
+      },
+      "actionEvidence": {
+        "FE-UX-19-01": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-19-02": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-19-03": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-19-04": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-19-05": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-19-06": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-19-07": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-19-08": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-19-09": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-19-10": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-19-11": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-19-12": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-19-13": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-19-14": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-19-15": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-19-16": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-19-17": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-19-18": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-19-19": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-19-20": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-19-21": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-19-22": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-19-23": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-19-24": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-19-25": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES",
+        "FE-UX-19-26": "PARTIAL_BROWSER_SCOPED_ACTION_NOT_ALL_STATES"
+      },
+      "evidenceSources": [
+        "frontend/e2e/quality-audit/organization-management-responsive.spec.ts",
+        "frontend/e2e/quality-audit/store-management-actions.spec.ts",
+        "frontend/e2e/quality-audit/products-variants-actions.spec.ts",
+        "frontend/e2e/quality-audit/campaign-actions.spec.ts",
+        "frontend/e2e/quality-audit/product-image-ambiguous-patch.spec.ts",
+        "frontend/e2e/quality-audit/product-image-stale-readback.spec.ts",
+        "frontend/e2e/quality-audit/product-image-session-reload.spec.ts",
+        "frontend/e2e/quality-audit/product-image-upload-negative-cases.spec.ts",
+        "frontend/e2e/quality-audit/product-image-storage-denied.spec.ts",
+        "frontend/src/modules/operations/commerce-management-nav.test.tsx",
+        "docs/design/COMMERCE_MANAGEMENT_IMPLEMENTATION.md",
+        "frontend/quality-audit/.evidence/redesign-commerce-management/campaigns-390.png",
+        "frontend/quality-audit/.evidence/redesign-commerce-management/campaigns-1440.png"
+      ],
+      "evidenceNotes": "Real local Org Admin readonly GETs, 4 responsive widths, 3-route contextual navigation, staff URL denial; mutations and image upload edge cases were intercepted. No production or persistent create/edit/status/image mutation verified; exhaustive all-state matrices remain NOT_TESTED."
+    },
+    {
+      "route": "/org/orders/",
+      "sourceRoles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "sourceActionCount": 7,
+      "actionIds": [
+        "FE-UX-20-01",
+        "FE-UX-20-02",
+        "FE-UX-20-03",
+        "FE-UX-20-04",
+        "FE-UX-20-05",
+        "FE-UX-20-06",
+        "FE-UX-20-07"
+      ],
+      "primaryTask": "เปิดงานในคิวคำสั่งซื้อ",
+      "redesignStatus": "IMPLEMENTED_WITH_UNTESTED_ROLE_AND_STATE_VARIANTS",
+      "roleEvidence": {
+        "guest": "NOT_TESTED",
+        "customer": "NOT_TESTED",
+        "staff": "SCOPED_BROWSER_READ_ONLY_SEEDED_STAFF_AND_NETWORK_MOCKS",
+        "organizationAdmin": "NOT_TESTED",
+        "platformAdmin": "NOT_TESTED"
+      },
+      "viewportEvidence": {
+        "320": "PASS_BROWSER_READ_ONLY_NO_HORIZONTAL_OVERFLOW",
+        "390": "PASS_BROWSER_CAPTURE_READ_ONLY_SEED",
+        "768": "PASS_BROWSER_READ_ONLY_NO_HORIZONTAL_OVERFLOW",
+        "1024": "NOT_TESTED",
+        "1440": "PASS_BROWSER_CAPTURE_READ_ONLY_SEED"
+      },
+      "stateEvidence": {
+        "loading": "NOT_TESTED",
+        "loaded": "PASS_BROWSER_SCOPED_LOCAL_SEED",
+        "empty": "NOT_TESTED",
+        "error": "PARTIAL_BROWSER_NETWORK_503_AND_RECOVERY",
+        "unauthorized": "NOT_TESTED",
+        "forbidden": "NOT_TESTED",
+        "validation": "NOT_TESTED",
+        "conflict": "NOT_TESTED",
+        "pending": "NOT_TESTED",
+        "success": "NOT_TESTED",
+        "retry": "PARTIAL_BROWSER_NETWORK_503_AND_RECOVERY",
+        "modal-and-focus": "NOT_TESTED",
+        "keyboard": "NOT_TESTED",
+        "reduced-motion": "PASS_BROWSER_RENDER_WITH_REDUCED_MOTION"
+      },
+      "actionEvidence": {
+        "FE-UX-20-01": "PARTIAL_SCOPED_BROWSER_TEST_NOT_EXHAUSTIVE",
+        "FE-UX-20-02": "PARTIAL_SCOPED_BROWSER_TEST_NOT_EXHAUSTIVE",
+        "FE-UX-20-03": "PARTIAL_SCOPED_BROWSER_TEST_NOT_EXHAUSTIVE",
+        "FE-UX-20-04": "PARTIAL_SCOPED_BROWSER_TEST_NOT_EXHAUSTIVE",
+        "FE-UX-20-05": "PARTIAL_SCOPED_BROWSER_TEST_NOT_EXHAUSTIVE",
+        "FE-UX-20-06": "PARTIAL_SCOPED_BROWSER_TEST_NOT_EXHAUSTIVE",
+        "FE-UX-20-07": "PARTIAL_SCOPED_BROWSER_TEST_NOT_EXHAUSTIVE"
+      },
+      "evidenceSources": [
+        "frontend/e2e/quality-audit/staff-operations-responsive.spec.ts",
+        "frontend/e2e/quality-audit/staff-queue-filters.spec.ts",
+        "frontend/e2e/quality-audit/payment-review-decision-matrix.spec.ts",
+        "frontend/e2e/quality-audit/payment-review-safe-actions.spec.ts",
+        "frontend/e2e/quality-audit/pickup-confirm-safe-actions.spec.ts",
+        "frontend/e2e/quality-audit/order-detail-safe-actions.spec.ts",
+        "docs/design/STAFF_OPERATIONS_IMPLEMENTATION.md",
+        "frontend/quality-audit/.evidence/redesign-staff/orders-390.png",
+        "frontend/quality-audit/.evidence/redesign-staff/orders-1440.png",
+        "frontend/quality-audit/.evidence/redesign-staff/payments-390.png",
+        "frontend/quality-audit/.evidence/redesign-staff/payments-1440.png",
+        "frontend/quality-audit/.evidence/redesign-staff/pickups-390.png",
+        "frontend/quality-audit/.evidence/redesign-staff/pickups-1440.png",
+        "frontend/quality-audit/.evidence/redesign-staff/order-detail-390.png",
+        "frontend/quality-audit/.evidence/redesign-staff/order-detail-1440.png",
+        "frontend/quality-audit/.evidence/redesign-staff/payment-reject-dialog-390.png"
+      ],
+      "evidenceNotes": "Bounded local STAFF role browser run, valid organization context, 4 breakpoints, mocked pending/reject/approve/confirm and conflict; actual production mutations, all role/state matrices and native assistive technology not verified. Local pickup queue was empty."
+    },
+    {
+      "route": "/org/orders/view/",
+      "sourceRoles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "sourceActionCount": 2,
+      "actionIds": [
+        "FE-UX-21-01",
+        "FE-UX-21-02"
+      ],
+      "primaryTask": "ดูและดำเนินการตามสิทธิ์",
+      "redesignStatus": "IMPLEMENTED_WITH_UNTESTED_ROLE_AND_STATE_VARIANTS",
+      "roleEvidence": {
+        "guest": "NOT_TESTED",
+        "customer": "NOT_TESTED",
+        "staff": "SCOPED_BROWSER_READ_ONLY_SEEDED_STAFF_AND_NETWORK_MOCKS",
+        "organizationAdmin": "NOT_TESTED",
+        "platformAdmin": "NOT_TESTED"
+      },
+      "viewportEvidence": {
+        "320": "PASS_BROWSER_READ_ONLY_NO_HORIZONTAL_OVERFLOW",
+        "390": "PASS_BROWSER_CAPTURE_READ_ONLY_SEED",
+        "768": "PASS_BROWSER_READ_ONLY_NO_HORIZONTAL_OVERFLOW",
+        "1024": "NOT_TESTED",
+        "1440": "PASS_BROWSER_CAPTURE_READ_ONLY_SEED"
+      },
+      "stateEvidence": {
+        "loading": "NOT_TESTED",
+        "loaded": "PASS_BROWSER_SCOPED_LOCAL_SEED",
+        "empty": "NOT_TESTED",
+        "error": "PARTIAL_BROWSER_NETWORK_503_AND_RECOVERY",
+        "unauthorized": "NOT_TESTED",
+        "forbidden": "NOT_TESTED",
+        "validation": "NOT_TESTED",
+        "conflict": "PARTIAL_BROWSER_SAFE_DIALOG_REGRESSION",
+        "pending": "NOT_TESTED",
+        "success": "NOT_TESTED",
+        "retry": "PARTIAL_BROWSER_NETWORK_503_AND_RECOVERY",
+        "modal-and-focus": "PARTIAL_BROWSER_SAFE_DIALOG_REGRESSION",
+        "keyboard": "NOT_TESTED",
+        "reduced-motion": "PASS_BROWSER_RENDER_WITH_REDUCED_MOTION"
+      },
+      "actionEvidence": {
+        "FE-UX-21-01": "PARTIAL_SCOPED_BROWSER_TEST_NOT_EXHAUSTIVE",
+        "FE-UX-21-02": "PARTIAL_SCOPED_BROWSER_TEST_NOT_EXHAUSTIVE"
+      },
+      "evidenceSources": [
+        "frontend/e2e/quality-audit/staff-operations-responsive.spec.ts",
+        "frontend/e2e/quality-audit/staff-queue-filters.spec.ts",
+        "frontend/e2e/quality-audit/payment-review-decision-matrix.spec.ts",
+        "frontend/e2e/quality-audit/payment-review-safe-actions.spec.ts",
+        "frontend/e2e/quality-audit/pickup-confirm-safe-actions.spec.ts",
+        "frontend/e2e/quality-audit/order-detail-safe-actions.spec.ts",
+        "docs/design/STAFF_OPERATIONS_IMPLEMENTATION.md",
+        "frontend/quality-audit/.evidence/redesign-staff/orders-390.png",
+        "frontend/quality-audit/.evidence/redesign-staff/orders-1440.png",
+        "frontend/quality-audit/.evidence/redesign-staff/payments-390.png",
+        "frontend/quality-audit/.evidence/redesign-staff/payments-1440.png",
+        "frontend/quality-audit/.evidence/redesign-staff/pickups-390.png",
+        "frontend/quality-audit/.evidence/redesign-staff/pickups-1440.png",
+        "frontend/quality-audit/.evidence/redesign-staff/order-detail-390.png",
+        "frontend/quality-audit/.evidence/redesign-staff/order-detail-1440.png",
+        "frontend/quality-audit/.evidence/redesign-staff/payment-reject-dialog-390.png"
+      ],
+      "evidenceNotes": "Bounded local STAFF role browser run, valid organization context, 4 breakpoints, mocked pending/reject/approve/confirm and conflict; actual production mutations, all role/state matrices and native assistive technology not verified. Local pickup queue was empty."
+    },
+    {
+      "route": "/org/payments/",
+      "sourceRoles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "sourceActionCount": 14,
+      "actionIds": [
+        "FE-UX-22-01",
+        "FE-UX-22-02",
+        "FE-UX-22-03",
+        "FE-UX-22-04",
+        "FE-UX-22-05",
+        "FE-UX-22-06",
+        "FE-UX-22-07",
+        "FE-UX-22-08",
+        "FE-UX-22-09",
+        "FE-UX-22-10",
+        "FE-UX-22-11",
+        "FE-UX-22-12",
+        "FE-UX-22-13",
+        "FE-UX-22-14"
+      ],
+      "primaryTask": "ตรวจการชำระเงิน",
+      "redesignStatus": "IMPLEMENTED_WITH_UNTESTED_ROLE_AND_STATE_VARIANTS",
+      "roleEvidence": {
+        "guest": "NOT_TESTED",
+        "customer": "NOT_TESTED",
+        "staff": "SCOPED_BROWSER_READ_ONLY_SEEDED_STAFF_AND_NETWORK_MOCKS",
+        "organizationAdmin": "NOT_TESTED",
+        "platformAdmin": "NOT_TESTED"
+      },
+      "viewportEvidence": {
+        "320": "PASS_BROWSER_READ_ONLY_NO_HORIZONTAL_OVERFLOW",
+        "390": "PASS_BROWSER_CAPTURE_READ_ONLY_SEED",
+        "768": "PASS_BROWSER_READ_ONLY_NO_HORIZONTAL_OVERFLOW",
+        "1024": "NOT_TESTED",
+        "1440": "PASS_BROWSER_CAPTURE_READ_ONLY_SEED"
+      },
+      "stateEvidence": {
+        "loading": "NOT_TESTED",
+        "loaded": "PASS_BROWSER_SCOPED_LOCAL_SEED",
+        "empty": "NOT_TESTED",
+        "error": "PARTIAL_BROWSER_NETWORK_503_AND_RECOVERY",
+        "unauthorized": "NOT_TESTED",
+        "forbidden": "NOT_TESTED",
+        "validation": "PARTIAL_BROWSER_INTERCEPTED_WRITE_NO_BACKEND_MUTATION",
+        "conflict": "PARTIAL_BROWSER_INTERCEPTED_WRITE_NO_BACKEND_MUTATION",
+        "pending": "PARTIAL_BROWSER_INTERCEPTED_WRITE_NO_BACKEND_MUTATION",
+        "success": "PARTIAL_BROWSER_INTERCEPTED_WRITE_NO_BACKEND_MUTATION",
+        "retry": "PARTIAL_BROWSER_NETWORK_503_AND_RECOVERY",
+        "modal-and-focus": "PARTIAL_BROWSER_INTERCEPTED_WRITE_NO_BACKEND_MUTATION",
+        "keyboard": "NOT_TESTED",
+        "reduced-motion": "PASS_BROWSER_RENDER_WITH_REDUCED_MOTION"
+      },
+      "actionEvidence": {
+        "FE-UX-22-01": "PARTIAL_SCOPED_BROWSER_TEST_NOT_EXHAUSTIVE",
+        "FE-UX-22-02": "PARTIAL_SCOPED_BROWSER_TEST_NOT_EXHAUSTIVE",
+        "FE-UX-22-03": "PARTIAL_SCOPED_BROWSER_TEST_NOT_EXHAUSTIVE",
+        "FE-UX-22-04": "PARTIAL_SCOPED_BROWSER_TEST_NOT_EXHAUSTIVE",
+        "FE-UX-22-05": "PARTIAL_SCOPED_BROWSER_TEST_NOT_EXHAUSTIVE",
+        "FE-UX-22-06": "PARTIAL_SCOPED_BROWSER_TEST_NOT_EXHAUSTIVE",
+        "FE-UX-22-07": "PARTIAL_SCOPED_BROWSER_TEST_NOT_EXHAUSTIVE",
+        "FE-UX-22-08": "PARTIAL_SCOPED_BROWSER_TEST_NOT_EXHAUSTIVE",
+        "FE-UX-22-09": "PARTIAL_SCOPED_BROWSER_TEST_NOT_EXHAUSTIVE",
+        "FE-UX-22-10": "PARTIAL_SCOPED_BROWSER_TEST_NOT_EXHAUSTIVE",
+        "FE-UX-22-11": "PARTIAL_SCOPED_BROWSER_TEST_NOT_EXHAUSTIVE",
+        "FE-UX-22-12": "PARTIAL_SCOPED_BROWSER_TEST_NOT_EXHAUSTIVE",
+        "FE-UX-22-13": "PARTIAL_SCOPED_BROWSER_TEST_NOT_EXHAUSTIVE",
+        "FE-UX-22-14": "PARTIAL_SCOPED_BROWSER_TEST_NOT_EXHAUSTIVE"
+      },
+      "evidenceSources": [
+        "frontend/e2e/quality-audit/staff-operations-responsive.spec.ts",
+        "frontend/e2e/quality-audit/staff-queue-filters.spec.ts",
+        "frontend/e2e/quality-audit/payment-review-decision-matrix.spec.ts",
+        "frontend/e2e/quality-audit/payment-review-safe-actions.spec.ts",
+        "frontend/e2e/quality-audit/pickup-confirm-safe-actions.spec.ts",
+        "frontend/e2e/quality-audit/order-detail-safe-actions.spec.ts",
+        "docs/design/STAFF_OPERATIONS_IMPLEMENTATION.md",
+        "frontend/quality-audit/.evidence/redesign-staff/orders-390.png",
+        "frontend/quality-audit/.evidence/redesign-staff/orders-1440.png",
+        "frontend/quality-audit/.evidence/redesign-staff/payments-390.png",
+        "frontend/quality-audit/.evidence/redesign-staff/payments-1440.png",
+        "frontend/quality-audit/.evidence/redesign-staff/pickups-390.png",
+        "frontend/quality-audit/.evidence/redesign-staff/pickups-1440.png",
+        "frontend/quality-audit/.evidence/redesign-staff/order-detail-390.png",
+        "frontend/quality-audit/.evidence/redesign-staff/order-detail-1440.png",
+        "frontend/quality-audit/.evidence/redesign-staff/payment-reject-dialog-390.png"
+      ],
+      "evidenceNotes": "Bounded local STAFF role browser run, valid organization context, 4 breakpoints, mocked pending/reject/approve/confirm and conflict; actual production mutations, all role/state matrices and native assistive technology not verified. Local pickup queue was empty."
+    },
+    {
+      "route": "/org/production/",
+      "sourceRoles": [
+        "organizationAdmin"
+      ],
+      "sourceActionCount": 2,
+      "actionIds": [
+        "FE-UX-23-01",
+        "FE-UX-23-02"
+      ],
+      "primaryTask": "ตรวจยอดผลิต",
+      "redesignStatus": "IMPLEMENTED_WITH_UNTESTED_ROLE_AND_STATE_VARIANTS",
+      "roleEvidence": {
+        "guest": "NOT_TESTED",
+        "customer": "NOT_TESTED",
+        "staff": "PASS_BROWSER_DIRECT_ROUTE_FORBIDDEN",
+        "organizationAdmin": "SCOPED_BROWSER_LOCAL_READ_ONLY_GET_AND_SYNTHETIC_GET_STATES",
+        "platformAdmin": "NOT_TESTED"
+      },
+      "viewportEvidence": {
+        "320": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW",
+        "390": "PASS_BROWSER_READ_ONLY_CAPTURE",
+        "768": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW",
+        "1024": "NOT_TESTED",
+        "1440": "PASS_BROWSER_READ_ONLY_CAPTURE"
+      },
+      "stateEvidence": {
+        "loading": "PARTIAL_BROWSER_SYNTHETIC_GET_PENDING",
+        "loaded": "SCOPED_BROWSER_LOCAL_OR_INTERCEPTED_READ_ONLY_GET",
+        "empty": "SCOPED_BROWSER_READ_ONLY_EMPTY_RESULT",
+        "error": "SCOPED_BROWSER_SYNTHETIC_HTTP_503",
+        "unauthorized": "NOT_TESTED",
+        "forbidden": "PASS_BROWSER_STAFF_DENIED_DIRECT_URL",
+        "validation": "SCOPED_BROWSER_INPUT_VALIDATION_OR_FILTER",
+        "conflict": "NOT_TESTED",
+        "pending": "NOT_TESTED",
+        "success": "NOT_TESTED",
+        "retry": "SCOPED_BROWSER_HTTP_503_RECOVERY",
+        "modal-and-focus": "NOT_TESTED",
+        "keyboard": "NOT_TESTED",
+        "reduced-motion": "SCOPED_BROWSER_RENDER_REDUCED_MOTION"
+      },
+      "actionEvidence": {
+        "FE-UX-23-01": "PARTIAL_SCOPED_BROWSER_ACTION_NOT_ALL_STATES",
+        "FE-UX-23-02": "PARTIAL_SCOPED_BROWSER_ACTION_NOT_ALL_STATES"
+      },
+      "evidenceSources": [
+        "frontend/e2e/quality-audit/organization-management-responsive.spec.ts",
+        "frontend/e2e/quality-audit/production-safe-actions.spec.ts",
+        "frontend/e2e/quality-audit/audit-filters-actions.spec.ts",
+        "frontend/src/modules/operations/organization-operations-nav.test.tsx",
+        "docs/design/OPERATIONS_REPORTING_IMPLEMENTATION.md",
+        "frontend/quality-audit/.evidence/redesign-operations/production-1440.png",
+        "frontend/quality-audit/.evidence/redesign-operations/production-390.png",
+        "frontend/quality-audit/.evidence/redesign-operations/production-loaded-mobile.png"
+      ],
+      "evidenceNotes": "GET-only local seeded admin and synthetic read-only endpoint fixtures; Staff route denied. No production transactions, exhaustive all-state signoff, audit storage certification or native screen-reader testing."
+    },
+    {
+      "route": "/org/pickups/",
+      "sourceRoles": [
+        "staff",
+        "organizationAdmin"
+      ],
+      "sourceActionCount": 9,
+      "actionIds": [
+        "FE-UX-24-01",
+        "FE-UX-24-02",
+        "FE-UX-24-03",
+        "FE-UX-24-04",
+        "FE-UX-24-05",
+        "FE-UX-24-06",
+        "FE-UX-24-07",
+        "FE-UX-24-08",
+        "FE-UX-24-09"
+      ],
+      "primaryTask": "ยืนยันการรับสินค้า",
+      "redesignStatus": "IMPLEMENTED_WITH_UNTESTED_ROLE_AND_STATE_VARIANTS",
+      "roleEvidence": {
+        "guest": "NOT_TESTED",
+        "customer": "NOT_TESTED",
+        "staff": "SCOPED_BROWSER_READ_ONLY_SEEDED_STAFF_AND_NETWORK_MOCKS",
+        "organizationAdmin": "NOT_TESTED",
+        "platformAdmin": "NOT_TESTED"
+      },
+      "viewportEvidence": {
+        "320": "PASS_BROWSER_READ_ONLY_NO_HORIZONTAL_OVERFLOW",
+        "390": "PASS_BROWSER_CAPTURE_READ_ONLY_SEED",
+        "768": "PASS_BROWSER_READ_ONLY_NO_HORIZONTAL_OVERFLOW",
+        "1024": "NOT_TESTED",
+        "1440": "PASS_BROWSER_CAPTURE_READ_ONLY_SEED"
+      },
+      "stateEvidence": {
+        "loading": "NOT_TESTED",
+        "loaded": "PASS_BROWSER_SCOPED_LOCAL_SEED",
+        "empty": "NOT_TESTED",
+        "error": "PARTIAL_BROWSER_NETWORK_503_AND_RECOVERY",
+        "unauthorized": "NOT_TESTED",
+        "forbidden": "NOT_TESTED",
+        "validation": "NOT_TESTED",
+        "conflict": "PARTIAL_BROWSER_INTERCEPTED_WRITE_NO_BACKEND_MUTATION",
+        "pending": "PARTIAL_BROWSER_INTERCEPTED_WRITE_NO_BACKEND_MUTATION",
+        "success": "PARTIAL_BROWSER_INTERCEPTED_WRITE_NO_BACKEND_MUTATION",
+        "retry": "PARTIAL_BROWSER_NETWORK_503_AND_RECOVERY",
+        "modal-and-focus": "PARTIAL_BROWSER_INTERCEPTED_WRITE_NO_BACKEND_MUTATION",
+        "keyboard": "NOT_TESTED",
+        "reduced-motion": "PASS_BROWSER_RENDER_WITH_REDUCED_MOTION"
+      },
+      "actionEvidence": {
+        "FE-UX-24-01": "PARTIAL_SCOPED_BROWSER_TEST_NOT_EXHAUSTIVE",
+        "FE-UX-24-02": "PARTIAL_SCOPED_BROWSER_TEST_NOT_EXHAUSTIVE",
+        "FE-UX-24-03": "PARTIAL_SCOPED_BROWSER_TEST_NOT_EXHAUSTIVE",
+        "FE-UX-24-04": "PARTIAL_SCOPED_BROWSER_TEST_NOT_EXHAUSTIVE",
+        "FE-UX-24-05": "PARTIAL_SCOPED_BROWSER_TEST_NOT_EXHAUSTIVE",
+        "FE-UX-24-06": "PARTIAL_SCOPED_BROWSER_TEST_NOT_EXHAUSTIVE",
+        "FE-UX-24-07": "PARTIAL_SCOPED_BROWSER_TEST_NOT_EXHAUSTIVE",
+        "FE-UX-24-08": "PARTIAL_SCOPED_BROWSER_TEST_NOT_EXHAUSTIVE",
+        "FE-UX-24-09": "PARTIAL_SCOPED_BROWSER_TEST_NOT_EXHAUSTIVE"
+      },
+      "evidenceSources": [
+        "frontend/e2e/quality-audit/staff-operations-responsive.spec.ts",
+        "frontend/e2e/quality-audit/staff-queue-filters.spec.ts",
+        "frontend/e2e/quality-audit/payment-review-decision-matrix.spec.ts",
+        "frontend/e2e/quality-audit/payment-review-safe-actions.spec.ts",
+        "frontend/e2e/quality-audit/pickup-confirm-safe-actions.spec.ts",
+        "frontend/e2e/quality-audit/order-detail-safe-actions.spec.ts",
+        "docs/design/STAFF_OPERATIONS_IMPLEMENTATION.md",
+        "frontend/quality-audit/.evidence/redesign-staff/orders-390.png",
+        "frontend/quality-audit/.evidence/redesign-staff/orders-1440.png",
+        "frontend/quality-audit/.evidence/redesign-staff/payments-390.png",
+        "frontend/quality-audit/.evidence/redesign-staff/payments-1440.png",
+        "frontend/quality-audit/.evidence/redesign-staff/pickups-390.png",
+        "frontend/quality-audit/.evidence/redesign-staff/pickups-1440.png",
+        "frontend/quality-audit/.evidence/redesign-staff/order-detail-390.png",
+        "frontend/quality-audit/.evidence/redesign-staff/order-detail-1440.png",
+        "frontend/quality-audit/.evidence/redesign-staff/payment-reject-dialog-390.png"
+      ],
+      "evidenceNotes": "Bounded local STAFF role browser run, valid organization context, 4 breakpoints, mocked pending/reject/approve/confirm and conflict; actual production mutations, all role/state matrices and native assistive technology not verified. Local pickup queue was empty."
+    },
+    {
+      "route": "/org/audit/",
+      "sourceRoles": [
+        "organizationAdmin"
+      ],
+      "sourceActionCount": 8,
+      "actionIds": [
+        "FE-UX-25-01",
+        "FE-UX-25-02",
+        "FE-UX-25-03",
+        "FE-UX-25-04",
+        "FE-UX-25-05",
+        "FE-UX-25-06",
+        "FE-UX-25-07",
+        "FE-UX-25-08"
+      ],
+      "primaryTask": "ค้นประวัติการทำรายการ",
+      "redesignStatus": "IMPLEMENTED_WITH_UNTESTED_ROLE_AND_STATE_VARIANTS",
+      "roleEvidence": {
+        "guest": "NOT_TESTED",
+        "customer": "NOT_TESTED",
+        "staff": "PASS_BROWSER_DIRECT_ROUTE_FORBIDDEN",
+        "organizationAdmin": "SCOPED_BROWSER_LOCAL_READ_ONLY_GET_AND_SYNTHETIC_GET_STATES",
+        "platformAdmin": "NOT_TESTED"
+      },
+      "viewportEvidence": {
+        "320": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW",
+        "390": "PASS_BROWSER_READ_ONLY_CAPTURE",
+        "768": "PASS_BROWSER_NO_HORIZONTAL_OVERFLOW",
+        "1024": "NOT_TESTED",
+        "1440": "PASS_BROWSER_READ_ONLY_CAPTURE"
+      },
+      "stateEvidence": {
+        "loading": "NOT_TESTED",
+        "loaded": "SCOPED_BROWSER_LOCAL_OR_INTERCEPTED_READ_ONLY_GET",
+        "empty": "SCOPED_BROWSER_READ_ONLY_EMPTY_RESULT",
+        "error": "SCOPED_BROWSER_SYNTHETIC_HTTP_503",
+        "unauthorized": "NOT_TESTED",
+        "forbidden": "PASS_BROWSER_STAFF_DENIED_DIRECT_URL",
+        "validation": "SCOPED_BROWSER_INPUT_VALIDATION_OR_FILTER",
+        "conflict": "NOT_TESTED",
+        "pending": "NOT_TESTED",
+        "success": "NOT_TESTED",
+        "retry": "SCOPED_BROWSER_HTTP_503_RECOVERY",
+        "modal-and-focus": "NOT_TESTED",
+        "keyboard": "PARTIAL_BROWSER_NATIVE_METADATA_DETAILS_ONLY",
+        "reduced-motion": "SCOPED_BROWSER_RENDER_REDUCED_MOTION"
+      },
+      "actionEvidence": {
+        "FE-UX-25-01": "PARTIAL_SCOPED_BROWSER_ACTION_NOT_ALL_STATES",
+        "FE-UX-25-02": "PARTIAL_SCOPED_BROWSER_ACTION_NOT_ALL_STATES",
+        "FE-UX-25-03": "PARTIAL_SCOPED_BROWSER_ACTION_NOT_ALL_STATES",
+        "FE-UX-25-04": "PARTIAL_SCOPED_BROWSER_ACTION_NOT_ALL_STATES",
+        "FE-UX-25-05": "PARTIAL_SCOPED_BROWSER_ACTION_NOT_ALL_STATES",
+        "FE-UX-25-06": "PARTIAL_SCOPED_BROWSER_ACTION_NOT_ALL_STATES",
+        "FE-UX-25-07": "PARTIAL_SCOPED_BROWSER_ACTION_NOT_ALL_STATES",
+        "FE-UX-25-08": "PARTIAL_SCOPED_BROWSER_ACTION_NOT_ALL_STATES"
+      },
+      "evidenceSources": [
+        "frontend/e2e/quality-audit/organization-management-responsive.spec.ts",
+        "frontend/e2e/quality-audit/production-safe-actions.spec.ts",
+        "frontend/e2e/quality-audit/audit-filters-actions.spec.ts",
+        "frontend/src/modules/operations/organization-operations-nav.test.tsx",
+        "docs/design/OPERATIONS_REPORTING_IMPLEMENTATION.md",
+        "frontend/quality-audit/.evidence/redesign-operations/audit-1440.png",
+        "frontend/quality-audit/.evidence/redesign-operations/audit-390.png",
+        "frontend/quality-audit/.evidence/redesign-operations/audit-metadata-mobile.png"
+      ],
+      "evidenceNotes": "GET-only local seeded admin and synthetic read-only endpoint fixtures; Staff route denied. No production transactions, exhaustive all-state signoff, audit storage certification or native screen-reader testing."
+    },
+    {
+      "route": "/platform/summary/",
+      "sourceRoles": [
+        "platformAdmin"
+      ],
+      "sourceActionCount": 0,
+      "actionIds": [],
+      "primaryTask": "ดูภาพรวมแพลตฟอร์ม",
+      "redesignStatus": "IMPLEMENTED_WITH_UNTESTED_ROLE_AND_STATE_VARIANTS",
+      "roleEvidence": {
+        "guest": "NOT_TESTED",
+        "customer": "NOT_TESTED",
+        "staff": "NOT_TESTED",
+        "organizationAdmin": "PASS_BROWSER_DIRECT_URL_DENIED",
+        "platformAdmin": "SCOPED_BROWSER_LOCAL_SEED_GET_AND_NETWORK_INTERCEPTED_MUTATIONS"
+      },
+      "viewportEvidence": {
+        "320": "PASS_BROWSER_LOCAL_READ_ONLY_NO_OVERFLOW",
+        "390": "PASS_BROWSER_LOCAL_READ_ONLY_NO_OVERFLOW",
+        "768": "PASS_BROWSER_LOCAL_READ_ONLY_NO_OVERFLOW",
+        "1024": "NOT_TESTED",
+        "1440": "PASS_BROWSER_LOCAL_READ_ONLY_NO_OVERFLOW"
+      },
+      "stateEvidence": {
+        "loading": "NOT_TESTED",
+        "loaded": "PASS_BROWSER_LOCAL_SEEDED_GET",
+        "empty": "PARTIAL_BROWSER_CLIENT_SEARCH_NO_MATCH",
+        "error": "PARTIAL_BROWSER_SYNTHETIC_ENDPOINT_ERROR",
+        "unauthorized": "NOT_TESTED",
+        "forbidden": "PASS_BROWSER_ORGANIZATION_ADMIN_DENIED",
+        "validation": "NOT_TESTED",
+        "conflict": "NOT_TESTED",
+        "pending": "NOT_TESTED",
+        "success": "NOT_TESTED",
+        "retry": "PARTIAL_BROWSER_SYNTHETIC_HTTP_RECOVERY",
+        "modal-and-focus": "NOT_TESTED",
+        "keyboard": "NOT_TESTED",
+        "reduced-motion": "PASS_BROWSER_RENDER_REDUCED_MOTION"
+      },
+      "actionEvidence": {},
+      "evidenceSources": [
+        "docs/design/PLATFORM_GOVERNANCE_IMPLEMENTATION.md",
+        "frontend/e2e/quality-audit/platform-administration-responsive.spec.ts",
+        "frontend/e2e/quality-audit/platform-organization-actions.spec.ts",
+        "frontend/e2e/quality-audit/platform-transition-states.spec.ts",
+        "frontend/e2e/quality-audit/platform-approval-fixture.spec.ts",
+        "frontend/src/modules/platform-admin/platform-workspace-nav.test.tsx",
+        "frontend/quality-audit/.evidence/redesign-platform-governance/organization-approval-dialog-390.png",
+        "frontend/quality-audit/.evidence/redesign-platform-governance/organization-suspension-dialog-390.png",
+        "frontend/quality-audit/.evidence/redesign-platform-governance/organizations-1440.png",
+        "frontend/quality-audit/.evidence/redesign-platform-governance/organizations-320.png",
+        "frontend/quality-audit/.evidence/redesign-platform-governance/organizations-390.png",
+        "frontend/quality-audit/.evidence/redesign-platform-governance/summary-1440.png",
+        "frontend/quality-audit/.evidence/redesign-platform-governance/summary-390.png",
+        "frontend/quality-audit/.evidence/redesign-platform-governance/users-1440.png",
+        "frontend/quality-audit/.evidence/redesign-platform-governance/users-390.png",
+        "frontend/quality-audit/.evidence/redesign-platform-governance/users-directory-390.png"
+      ],
+      "evidenceNotes": "Platform Admin local seeded GET and Organization Admin direct-route denial confirmed across responsive widths. Real loaded organization PENDING count was zero; approval and all POST outcomes are browser intercepts. User directory read-only; exhaustive action/role/state and backend mutation semantics not certified."
+    },
+    {
+      "route": "/platform/organizations/",
+      "sourceRoles": [
+        "platformAdmin"
+      ],
+      "sourceActionCount": 2,
+      "actionIds": [
+        "FE-UX-27-01",
+        "FE-UX-27-02"
+      ],
+      "primaryTask": "ตรวจหน่วยงานที่รออนุมัติ",
+      "redesignStatus": "IMPLEMENTED_WITH_UNTESTED_ROLE_AND_STATE_VARIANTS",
+      "roleEvidence": {
+        "guest": "NOT_TESTED",
+        "customer": "NOT_TESTED",
+        "staff": "NOT_TESTED",
+        "organizationAdmin": "PASS_BROWSER_DIRECT_URL_DENIED",
+        "platformAdmin": "SCOPED_BROWSER_LOCAL_SEED_GET_AND_NETWORK_INTERCEPTED_MUTATIONS"
+      },
+      "viewportEvidence": {
+        "320": "PASS_BROWSER_LOCAL_READ_ONLY_NO_OVERFLOW",
+        "390": "PASS_BROWSER_LOCAL_READ_ONLY_NO_OVERFLOW",
+        "768": "PASS_BROWSER_LOCAL_READ_ONLY_NO_OVERFLOW",
+        "1024": "NOT_TESTED",
+        "1440": "PASS_BROWSER_LOCAL_READ_ONLY_NO_OVERFLOW"
+      },
+      "stateEvidence": {
+        "loading": "NOT_TESTED",
+        "loaded": "PASS_BROWSER_LOCAL_SEEDED_GET",
+        "empty": "PARTIAL_BROWSER_CLIENT_SEARCH_NO_MATCH",
+        "error": "PARTIAL_BROWSER_SYNTHETIC_ENDPOINT_ERROR",
+        "unauthorized": "NOT_TESTED",
+        "forbidden": "PASS_BROWSER_ORGANIZATION_ADMIN_DENIED",
+        "validation": "NOT_TESTED",
+        "conflict": "PARTIAL_BROWSER_SYNTHETIC_POST_ONLY",
+        "pending": "PARTIAL_BROWSER_SYNTHETIC_POST_ONLY",
+        "success": "PARTIAL_BROWSER_SYNTHETIC_POST_ONLY",
+        "retry": "PARTIAL_BROWSER_SYNTHETIC_HTTP_RECOVERY",
+        "modal-and-focus": "PARTIAL_BROWSER_SYNTHETIC_POST_ONLY",
+        "keyboard": "PARTIAL_BROWSER_SYNTHETIC_POST_ONLY",
+        "reduced-motion": "PASS_BROWSER_RENDER_REDUCED_MOTION"
+      },
+      "actionEvidence": {
+        "FE-UX-27-01": "PARTIAL_BROWSER_SYNTHETIC_ACTION_NOT_ALL_STATES",
+        "FE-UX-27-02": "PARTIAL_BROWSER_SYNTHETIC_ACTION_NOT_ALL_STATES"
+      },
+      "evidenceSources": [
+        "docs/design/PLATFORM_GOVERNANCE_IMPLEMENTATION.md",
+        "frontend/e2e/quality-audit/platform-administration-responsive.spec.ts",
+        "frontend/e2e/quality-audit/platform-organization-actions.spec.ts",
+        "frontend/e2e/quality-audit/platform-transition-states.spec.ts",
+        "frontend/e2e/quality-audit/platform-approval-fixture.spec.ts",
+        "frontend/src/modules/platform-admin/platform-workspace-nav.test.tsx",
+        "frontend/quality-audit/.evidence/redesign-platform-governance/organization-approval-dialog-390.png",
+        "frontend/quality-audit/.evidence/redesign-platform-governance/organization-suspension-dialog-390.png",
+        "frontend/quality-audit/.evidence/redesign-platform-governance/organizations-1440.png",
+        "frontend/quality-audit/.evidence/redesign-platform-governance/organizations-320.png",
+        "frontend/quality-audit/.evidence/redesign-platform-governance/organizations-390.png",
+        "frontend/quality-audit/.evidence/redesign-platform-governance/summary-1440.png",
+        "frontend/quality-audit/.evidence/redesign-platform-governance/summary-390.png",
+        "frontend/quality-audit/.evidence/redesign-platform-governance/users-1440.png",
+        "frontend/quality-audit/.evidence/redesign-platform-governance/users-390.png",
+        "frontend/quality-audit/.evidence/redesign-platform-governance/users-directory-390.png"
+      ],
+      "evidenceNotes": "Platform Admin local seeded GET and Organization Admin direct-route denial confirmed across responsive widths. Real loaded organization PENDING count was zero; approval and all POST outcomes are browser intercepts. User directory read-only; exhaustive action/role/state and backend mutation semantics not certified."
+    },
+    {
+      "route": "/platform/users/",
+      "sourceRoles": [
+        "platformAdmin"
+      ],
+      "sourceActionCount": 0,
+      "actionIds": [],
+      "primaryTask": "ค้นผู้ใช้",
+      "redesignStatus": "IMPLEMENTED_WITH_UNTESTED_ROLE_AND_STATE_VARIANTS",
+      "roleEvidence": {
+        "guest": "NOT_TESTED",
+        "customer": "NOT_TESTED",
+        "staff": "NOT_TESTED",
+        "organizationAdmin": "PASS_BROWSER_DIRECT_URL_DENIED",
+        "platformAdmin": "SCOPED_BROWSER_LOCAL_SEED_GET_AND_NETWORK_INTERCEPTED_MUTATIONS"
+      },
+      "viewportEvidence": {
+        "320": "PASS_BROWSER_LOCAL_READ_ONLY_NO_OVERFLOW",
+        "390": "PASS_BROWSER_LOCAL_READ_ONLY_NO_OVERFLOW",
+        "768": "PASS_BROWSER_LOCAL_READ_ONLY_NO_OVERFLOW",
+        "1024": "NOT_TESTED",
+        "1440": "PASS_BROWSER_LOCAL_READ_ONLY_NO_OVERFLOW"
+      },
+      "stateEvidence": {
+        "loading": "NOT_TESTED",
+        "loaded": "PASS_BROWSER_LOCAL_SEEDED_GET",
+        "empty": "PARTIAL_BROWSER_CLIENT_SEARCH_NO_MATCH",
+        "error": "PARTIAL_BROWSER_SYNTHETIC_ENDPOINT_ERROR",
+        "unauthorized": "NOT_TESTED",
+        "forbidden": "PASS_BROWSER_ORGANIZATION_ADMIN_DENIED",
+        "validation": "NOT_TESTED",
+        "conflict": "NOT_TESTED",
+        "pending": "NOT_TESTED",
+        "success": "NOT_TESTED",
+        "retry": "PARTIAL_BROWSER_SYNTHETIC_HTTP_RECOVERY",
+        "modal-and-focus": "NOT_TESTED",
+        "keyboard": "NOT_TESTED",
+        "reduced-motion": "PASS_BROWSER_RENDER_REDUCED_MOTION"
+      },
+      "actionEvidence": {},
+      "evidenceSources": [
+        "docs/design/PLATFORM_GOVERNANCE_IMPLEMENTATION.md",
+        "frontend/e2e/quality-audit/platform-administration-responsive.spec.ts",
+        "frontend/e2e/quality-audit/platform-organization-actions.spec.ts",
+        "frontend/e2e/quality-audit/platform-transition-states.spec.ts",
+        "frontend/e2e/quality-audit/platform-approval-fixture.spec.ts",
+        "frontend/src/modules/platform-admin/platform-workspace-nav.test.tsx",
+        "frontend/quality-audit/.evidence/redesign-platform-governance/organization-approval-dialog-390.png",
+        "frontend/quality-audit/.evidence/redesign-platform-governance/organization-suspension-dialog-390.png",
+        "frontend/quality-audit/.evidence/redesign-platform-governance/organizations-1440.png",
+        "frontend/quality-audit/.evidence/redesign-platform-governance/organizations-320.png",
+        "frontend/quality-audit/.evidence/redesign-platform-governance/organizations-390.png",
+        "frontend/quality-audit/.evidence/redesign-platform-governance/summary-1440.png",
+        "frontend/quality-audit/.evidence/redesign-platform-governance/summary-390.png",
+        "frontend/quality-audit/.evidence/redesign-platform-governance/users-1440.png",
+        "frontend/quality-audit/.evidence/redesign-platform-governance/users-390.png",
+        "frontend/quality-audit/.evidence/redesign-platform-governance/users-directory-390.png"
+      ],
+      "evidenceNotes": "Platform Admin local seeded GET and Organization Admin direct-route denial confirmed across responsive widths. Real loaded organization PENDING count was zero; approval and all POST outcomes are browser intercepts. User directory read-only; exhaustive action/role/state and backend mutation semantics not certified."
+    }
+  ],
+  "shellActionIds": [
+    "FE-UX-SHELL-GUEST-01",
+    "FE-UX-SHELL-GUEST-02",
+    "FE-UX-SHELL-GUEST-03",
+    "FE-UX-SHELL-GUEST-04",
+    "FE-UX-SHELL-CUSTOMER-01",
+    "FE-UX-SHELL-CUSTOMER-02",
+    "FE-UX-SHELL-CUSTOMER-03",
+    "FE-UX-SHELL-CUSTOMER-04",
+    "FE-UX-SHELL-CUSTOMER-05",
+    "FE-UX-SHELL-CUSTOMER-06",
+    "FE-UX-SHELL-CUSTOMER-07",
+    "FE-UX-SHELL-CUSTOMER-08",
+    "FE-UX-SHELL-CUSTOMER-09",
+    "FE-UX-SHELL-STAFF-01",
+    "FE-UX-SHELL-STAFF-02",
+    "FE-UX-SHELL-STAFF-03",
+    "FE-UX-SHELL-STAFF-04",
+    "FE-UX-SHELL-STAFF-05",
+    "FE-UX-SHELL-STAFF-06",
+    "FE-UX-SHELL-STAFF-07",
+    "FE-UX-SHELL-STAFF-08",
+    "FE-UX-SHELL-STAFF-09",
+    "FE-UX-SHELL-STAFF-10",
+    "FE-UX-SHELL-ORGANIZATIONADMIN-01",
+    "FE-UX-SHELL-ORGANIZATIONADMIN-02",
+    "FE-UX-SHELL-ORGANIZATIONADMIN-03",
+    "FE-UX-SHELL-ORGANIZATIONADMIN-04",
+    "FE-UX-SHELL-ORGANIZATIONADMIN-05",
+    "FE-UX-SHELL-ORGANIZATIONADMIN-06",
+    "FE-UX-SHELL-ORGANIZATIONADMIN-07",
+    "FE-UX-SHELL-ORGANIZATIONADMIN-08",
+    "FE-UX-SHELL-ORGANIZATIONADMIN-09",
+    "FE-UX-SHELL-ORGANIZATIONADMIN-10",
+    "FE-UX-SHELL-ORGANIZATIONADMIN-11",
+    "FE-UX-SHELL-ORGANIZATIONADMIN-12",
+    "FE-UX-SHELL-ORGANIZATIONADMIN-13",
+    "FE-UX-SHELL-ORGANIZATIONADMIN-14",
+    "FE-UX-SHELL-ORGANIZATIONADMIN-15",
+    "FE-UX-SHELL-ORGANIZATIONADMIN-16",
+    "FE-UX-SHELL-ORGANIZATIONADMIN-17",
+    "FE-UX-SHELL-ORGANIZATIONADMIN-18",
+    "FE-UX-SHELL-PLATFORMADMIN-01",
+    "FE-UX-SHELL-PLATFORMADMIN-02",
+    "FE-UX-SHELL-PLATFORMADMIN-03",
+    "FE-UX-SHELL-PLATFORMADMIN-04",
+    "FE-UX-SHELL-PLATFORMADMIN-05",
+    "FE-UX-SHELL-PLATFORMADMIN-06",
+    "FE-UX-SHELL-PLATFORMADMIN-07",
+    "FE-UX-SHELL-PLATFORMADMIN-08",
+    "FE-UX-SHELL-PLATFORMADMIN-09"
+  ],
+  "foundationEvidence": {
+    "status": "SCOPED_BROWSER_PASS_NOT_FULL_ROUTE_SIGNOFF",
+    "testedWorkspaces": [
+      "customer",
+      "staff",
+      "organizationAdmin",
+      "platformAdmin"
+    ],
+    "viewportsTested": [
+      320,
+      390,
+      768,
+      1440
+    ],
+    "browsers": [
+      "chromium",
+      "firefox",
+      "webkit"
+    ],
+    "testSpec": "frontend/e2e/quality-audit/workspace-navigation.spec.ts",
+    "review": "docs/design/FOUNDATION_IMPLEMENTATION.md",
+    "scope": "Work area selector, mobile drawer, Escape/return focus and viewport overflow, NOT full route or mutation state certification"
+  }
+}

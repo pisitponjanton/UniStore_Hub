@@ -1,0 +1,253 @@
+{
+  "date": "2026-10-18",
+  "browsers": [
+    {
+      "engine": "chromium",
+      "passed": 19,
+      "exitCode": 0,
+      "durationSeconds": 73.8
+    },
+    {
+      "engine": "firefox",
+      "passed": 19,
+      "exitCode": 0,
+      "durationSeconds": 98.0
+    },
+    {
+      "engine": "webkit",
+      "passed": 19,
+      "exitCode": 0,
+      "durationSeconds": 87.1
+    }
+  ],
+  "totalSelectedE2ETestsPassed": 57,
+  "additionalHighRiskInterceptedE2EPassed": 7,
+  "sourceScope": {
+    "modifiedTracked": 87,
+    "untracked": 46,
+    "scannedChangedSource": 114,
+    "backendOrInfraChanges": 0
+  },
+  "suspiciousSourceTextHeuristics": {
+    "dangerouslySetInnerHTML": [],
+    "document.write(": [],
+    "eval(": [],
+    "new Function(": [],
+    "-----BEGIN PRIVATE KEY-----": [],
+    "sk_live_": [],
+    "ghp_": []
+  },
+  "embeddedRemoteUrlSourceLines": [],
+  "locallyBundledThirdPartyMediaFiles": 0,
+  "assetManifestEntries": 0,
+  "sellerProductImageLicensing": "Not independently verified; images are sourced from existing product API imageUrl",
+  "icons": "Current inline code vectors; no downloaded third-party icon/media files",
+  "performance": {
+    "nextStaticExport": true,
+    "imagesUnoptimized": true,
+    "files": 210,
+    "totalExportBytes": 2974531,
+    "staticChunkFiles": 63,
+    "staticChunkBytes": 2114785,
+    "webVitals": "NOT_TESTED"
+  },
+  "npmAuditProductionCounts": {
+    "info": 0,
+    "low": 0,
+    "moderate": 0,
+    "high": 2,
+    "critical": 0,
+    "total": 2
+  },
+  "npmAuditAllCounts": {
+    "info": 0,
+    "low": 0,
+    "moderate": 1,
+    "high": 7,
+    "critical": 2,
+    "total": 10
+  },
+  "productionVulnerablePackages": [
+    {
+      "name": "next",
+      "severity": "high",
+      "range": "16.0.0 - 16.3.7",
+      "fixAvailable": {
+        "name": "next",
+        "version": "16.4.2",
+        "isSemVerMajor": false
+      },
+      "advisories": [
+        "https://github.com/advisories/GHSA-3w37-wq28-93x7",
+        "https://github.com/advisories/GHSA-4jqv-mc3x-m676",
+        "https://github.com/advisories/GHSA-39w2-rjm5-chcv",
+        "https://github.com/advisories/GHSA-f87g-xv8r-7p7x",
+        "https://github.com/advisories/GHSA-mcj8-r9mp-w47p",
+        "https://github.com/advisories/GHSA-cjq9-62q9-8jv4"
+      ]
+    },
+    {
+      "name": "source-map-js",
+      "severity": "high",
+      "range": "1.0.0 - 1.2.1",
+      "fixAvailable": true,
+      "advisories": [
+        "https://github.com/advisories/GHSA-68fv-2mgg-jv7q"
+      ]
+    }
+  ],
+  "securityReleaseGate": "BLOCKED_BY_UNPATCHED_DEPENDENCY_ADVISORIES",
+  "actualBusinessWrites": 0,
+  "realBackendTransactionCertification": "NOT_TESTED",
+  "notes": [
+    "npm advisory is package-version evidence; not proof of runtime exploitability.",
+    "Static export and unoptimized images reduce exposure to some Next server/image optimizer advisories but do not eliminate the obligation to patch.",
+    "No dependencies changed within the scoped QA-only phase.",
+    "No pentest, asset license ownership verification or production Core Web Vitals conducted."
+  ],
+  "postReviewRemediation": {
+    "document": "docs/design/DEPENDENCY_SECURITY_REMEDIATION.md",
+    "productionAuditAfter": {
+      "critical": 0,
+      "high": 0,
+      "moderate": 0,
+      "total": 0
+    },
+    "fullAuditAfter": {
+      "critical": 0,
+      "high": 5,
+      "moderate": 0,
+      "total": 5
+    },
+    "codeGates": {
+      "unit": "360/360 PASS",
+      "typescript": "PASS",
+      "eslint": "PASS",
+      "staticBuild": "30/30 PASS",
+      "crossBrowser": "57/57 PASS",
+      "highRiskE2E": "7/7 PASS",
+      "npmCiDryRun": "PASS"
+    },
+    "remainingFinding": "Upstream-unpatched braces@3.0.3 nested glob stack exhaustion in development ESLint dependency chain; five npm affected nodes.",
+    "productionDependencyAudit": "PASS",
+    "fullDevelopmentAudit": "OPEN",
+    "fullTaskReview": "NOT_PASSED; awaiting explicit accepted risk or reviewed safe patch"
+  },
+  "localBracesGuard": {
+    "advisory": "GHSA-vfj7-8cjw-p6xm",
+    "date": "2026-10-19",
+    "source": "frontend/vendor/braces",
+    "archive": "frontend/vendor/braces-3.0.3.tgz",
+    "archive_sha256": "cf9d1ceef10badc2a90da5550fd235bcbb33b1f96cafcd22cd42afac84e485e4",
+    "sourceVersion": "3.0.3",
+    "upstreamPatchedRelease": false,
+    "mitigation": "MAX_AST_NESTING=128 in parse and recursive walkers; original MIT source",
+    "packaging": "direct devDependency file tarball, micromatch deduped; fresh npm ci verified",
+    "checks": {
+      "patch": "PASS",
+      "unit": "360/360 PASS",
+      "tsc": "PASS",
+      "lint": "PASS",
+      "build": "30/30 PASS",
+      "crossBrowserE2E": "57/57 PASS",
+      "highRiskE2E": "7/7 PASS"
+    },
+    "productionAudit": {
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "fullAudit": {
+      "high": 5,
+      "critical": 0,
+      "moderate": 0
+    },
+    "scannerFlagStillVisible": true,
+    "formalSecurityReview": "SOURCE_REVIEW_COMPLETED; INDEPENDENT_SECURITY_APPROVAL_PENDING",
+    "riskWaiver": "NOT_GRANTED",
+    "productionReleaseApproval": "NOT_GRANTED",
+    "compatibility": "672/672 identical normal-pattern method/option comparisons against npm upstream after correcting stringify escapeInvalid",
+    "reviewDocument": "docs/design/BRACES_PATCH_TECHNICAL_REVIEW.md",
+    "postCompatibilityReview": {
+      "differentialCases": 672,
+      "upstreamDifferencesAfterCorrection": 0,
+      "previousDifferencesFoundAndCorrected": 20,
+      "freshNpmCi": "PASS",
+      "sourceArchiveLockIntegrity": "PASS",
+      "normalAndDeepInputSecurityTests": "PASS",
+      "unitTests": "360/360 PASS",
+      "typescript": "PASS",
+      "eslint": "PASS",
+      "productionBuild": "30/30 PASS",
+      "crossBrowser": "57/57 PASS",
+      "highRiskScenarios": "7/7 PASS",
+      "independentSecuritySignoff": "PENDING",
+      "formalRiskWaiver": "NOT_GRANTED",
+      "fullAudit": "5 HIGH remains open (version-based)"
+    },
+    "latestSecurityGateReview": {
+      "date": "2026-10-19",
+      "finding": "Joint vendor archive and recomputed lockfile SRI could previously inherit the known advisory classification.",
+      "fix": "Pinned reviewed archive SHA256 in gate; pinned all 10 reviewed vendor+installed file hashes and require installed-code verifier on live audits.",
+      "auditReviewUnitTests": "9/9 PASS",
+      "installedPatchVerification": "PASS",
+      "frontendUnitTests": "360/360 PASS",
+      "typescript": "PASS",
+      "eslint": "PASS",
+      "nextStaticBuild": "30/30 PASS",
+      "npmCiDryRun": "PASS",
+      "productionNpmAudit": "ZERO findings",
+      "fullNpmAudit": "5 High nodes on same upstream dev-only braces advisory",
+      "liveGate": "MANUAL_SECURITY_REVIEW_REQUIRED, exit 2",
+      "externalCodeOwnerApproval": "NOT_GRANTED",
+      "releaseApproval": "NOT_GRANTED",
+      "handoff": "docs/design/SECURITY_PATCH_ACCEPTANCE_PACKET.md"
+    },
+    "runtimeIsolationReview": {
+      "date": "2026-10-19",
+      "document": "docs/design/RUNTIME_DEPENDENCY_ISOLATION.md",
+      "command": "npm run test:security:runtime",
+      "syntheticTests": "6/6 PASS",
+      "currentStaticExportAssetsScanned": 75,
+      "characteristicVendorGuardTokensFound": 0,
+      "developmentDependencyLockClassification": "PASS",
+      "guardStressDepths": [
+        160,
+        512,
+        4000
+      ],
+      "guardStressTest": "PASS",
+      "liveProductionAudit": {
+        "total": 0
+      },
+      "liveFullAudit": {
+        "high": 5,
+        "critical": 0,
+        "moderate": 0
+      },
+      "liveAuditGate": "MANUAL_SECURITY_REVIEW_REQUIRED (exit 2)",
+      "externalSecurityApproval": "NOT_GRANTED"
+    },
+    "expansionBudgetReview": {
+      "date": "2026-10-19",
+      "document": "docs/design/BRACES_EXPANSION_BUDGET_IMPLEMENTATION.md",
+      "maxExpansionResults": 65536,
+      "boundary65536": "PASS",
+      "overBoundary131072": "CONTROLLED_RANGE_ERROR",
+      "rangeLimitFalseExceedingCap": "CONTROLLED_RANGE_ERROR",
+      "recursionDepthGuard": 128,
+      "upstreamOrdinaryPatternCompatibility": "672/672 PASS",
+      "freshNpmCi": "PASS",
+      "sourceArchivePinUpdated": true,
+      "unitTests": "360/360 PASS",
+      "typescript": "PASS",
+      "eslint": "PASS",
+      "staticBuild": "30/30 PASS",
+      "crossBrowserRegression": "57/57 PASS (19/19 Chromium, Firefox, WebKit)",
+      "fullAudit": "FIVE HIGH upstream-version advisory nodes remain",
+      "independentSecuritySignoff": "PENDING",
+      "highRiskE2E": "7/7 PASS",
+      "formalRiskWaiver": "NOT_GRANTED"
+    }
+  }
+}

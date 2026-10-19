@@ -598,3 +598,18 @@
 /* Action errors must be reachable above long paginated notification lists. */
 .actionError { scroll-margin-top: 108px; outline: none; }
 .actionError:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+
+/* Notifications are contextual links, never the final source of an order state. */
+.header { border-radius: 16px; border: 1px solid var(--line); }
+.controlPanel { gap: 10px; }
+.controlBar { border-radius: 12px; background: var(--surface); }
+.list { gap: 9px; }
+.row { border: 1px solid var(--line); border-radius: 11px; background: var(--surface); }
+.rowUnread { border-color: var(--brand-line); box-shadow: inset 3px 0 0 var(--brand); }
+.rowTitle { color: var(--ink); font-weight: 770; }
+.notificationNextAction { border-radius: 9px; }
+@media (max-width: 760px) {
+  .header { padding: 17px; }
+  .listSummary p { font-size: .75rem; line-height: 1.5; }
+  .row { padding: 14px; }
+}

@@ -30,13 +30,13 @@ function roleFor(route: Route): Role {
 }
 test.use({ trace: "off", video: "off", screenshot: "off" });
 
-test("28 canonical routes × 4 widths, accessibility, visuals and read-only security gate", async ({ browser, request }) => {
+test("28 canonical routes × 5 widths, accessibility, visuals and read-only security gate", async ({ browser, request }) => {
   test.setTimeout(480_000);
   const { frontend, api } = localAuditTargets();
   const manifest = JSON.parse(await readFile("quality-audit/coverage-baseline.json", "utf8")) as { routes: Route[]; sourceSha256: string };
   expect(manifest.routes).toHaveLength(28);
   const runId = "uxqa-" + randomUUID();
-  const dir = join("test-results", "quality-audit", runId, "phase6");
+  const dir = join("test-results", "quality-audit", runId, "design-quality");
   await mkdir(dir, { recursive: true });
   const contexts = new Map<Role, BrowserContext>();
   const outcomes: Array<Record<string, unknown>> = [];
@@ -87,7 +87,7 @@ test("28 canonical routes × 4 widths, accessibility, visuals and read-only secu
       } catch (error) { navigation = error instanceof Error ? error.message.slice(0, 250) : String(error); }
 
       let axeResult: { violations: Array<{ id: string; impact: string | null; selectors: string[][]; description: string }> } | null = null;
-      for (const [width, height] of [[320, 700], [390, 844], [768, 1024], [1440, 900]] as const) {
+      for (const [width, height] of [[320, 700], [390, 844], [768, 1024], [1024, 768], [1440, 900]] as const) {
         await page.setViewportSize({ width, height });
         await page.waitForTimeout(85);
         const metrics = await page.evaluate(() => {
@@ -125,7 +125,7 @@ test("28 canonical routes × 4 widths, accessibility, visuals and read-only secu
             await page.addScriptTag({ content: axe.source });
             axeResult = await page.evaluate(async () => {
               const a = (window as unknown as { axe: typeof axe }).axe;
-              const result = await a.run(document, { runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"] } });
+              const result = await a.run(document, { runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"] } });
               return { violations: result.violations.map(v => ({
                 id: v.id, impact: v.impact ?? null,
                 description: v.help, selectors: v.nodes.slice(0, 6).map(n => n.target.map(String)),
@@ -160,7 +160,7 @@ test("28 canonical routes × 4 widths, accessibility, visuals and read-only secu
     outcomes, caveat: "Screenshots and automated axe checks do not establish all 257 interactions. No mutation requests were sent.",
   };
   await writeFile(join(dir, "responsive-a11y-matrix.json"), JSON.stringify(aggregate, null, 2) + "\n");
-  expect(outcomes).toHaveLength(112);
+  expect(outcomes).toHaveLength(140);
   expect(aggregate.uniqueRoutes).toBe(28);
   expect(blockedWrites).toBe(0);
 });

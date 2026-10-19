@@ -227,6 +227,10 @@ export function ProductView() {
   const requestedCampaignMissing =
     state.requestedCampaignId !== null &&
     !findCampaign(campaigns, state.requestedCampaignId);
+  const otherOpenCampaignExists = campaigns.some((campaign) => campaign.status === "OPEN");
+  const selectedCampaignIsClosed = selection?.campaign !== undefined
+    && selection?.campaign !== null
+    && selection.campaign.status !== "OPEN";
   const startingPrice =
     variants.length > 0
       ? Math.min(...variants.map((variant) => variant.price))
@@ -249,12 +253,13 @@ export function ProductView() {
       <StorefrontHeader />
 
       <main className={styles.main}>
-        <Link
-          href={storeHref(store.organizationId, store.storeId)}
-          className={styles.backLink}
-        >
-          {store.name}
-        </Link>
+        <nav className={styles.breadcrumbs} aria-label="เส้นทางสินค้า">
+          <Link href="/">ร้านค้าทั้งหมด</Link>
+          <span aria-hidden="true">/</span>
+          <Link href={storeHref(store.organizationId, store.storeId)}>{store.name}</Link>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">{product.name}</span>
+        </nav>
 
         <section className={styles.productDetail} data-has-image={product.imageUrl ? "true" : "false"}>
           <div className={styles.productDetailMedia} data-has-image={product.imageUrl ? "true" : "false"}>
@@ -278,7 +283,7 @@ export function ProductView() {
 
           <div className={styles.productDetailBody}>
             <div className={styles.heroCopy}>
-              <span className={styles.contextLine}>สินค้าในร้าน {store.name}</span>
+              <span className={styles.contextLine}>PRODUCT / {store.name}</span>
               <h1 tabIndex={-1} className={styles.title}>{product.name}</h1>
               {product.description ? (
                 <p className={styles.description}>
@@ -291,18 +296,31 @@ export function ProductView() {
               )}
             </div>
 
+            <div className={styles.productOpeningSummary}>
+              <div>
+                <span>ราคาเริ่มต้น</span>
+                <strong data-numeric>
+                  {startingPrice === null ? "ยังไม่มีราคาที่ใช้งาน" : formatSatang(startingPrice)}
+                </strong>
+              </div>
+              {variants.length > 0 ? (
+                <a className={styles.productJump} href="#product-selection">
+                  เลือกตัวเลือกและคำนวณยอด <span aria-hidden="true">↗</span>
+                </a>
+              ) : null}
+            </div>
+            <p className={styles.productReadiness} role="status">
+              <span aria-hidden="true" className={!selectedCampaignIsClosed && otherOpenCampaignExists ? styles.readinessDotActive : styles.readinessDot} />
+              {selectedCampaignIsClosed
+                ? "รอบที่เลือกยังไม่เปิดรับคำสั่งซื้อ กรุณาเลือกรอบที่เปิดรับ"
+                : otherOpenCampaignExists
+                  ? "มีรอบพรีออเดอร์ที่เปิดรับคำสั่งซื้อ"
+                  : "ยังไม่มีรอบพรีออเดอร์ที่เปิดรับคำสั่งซื้อ"}
+            </p>
             <dl className={styles.productFacts} aria-label="ข้อมูลสินค้าสำหรับการสั่งซื้อ">
               <div>
                 <dt>ตัวเลือกสินค้า</dt>
                 <dd data-numeric>{variants.length}</dd>
-              </div>
-              <div>
-                <dt>ราคาเริ่มต้น</dt>
-                <dd data-numeric>
-                  {startingPrice === null
-                    ? "ยังไม่มีราคา"
-                    : formatSatang(startingPrice)}
-                </dd>
               </div>
               <div>
                 <dt>แคมเปญที่พบ</dt>
@@ -311,17 +329,17 @@ export function ProductView() {
             </dl>
 
             {variants.length > 0 ? (
-              <div className={styles.selectionPanel}>
+              <div id="product-selection" className={styles.selectionPanel}>
                 <div className={styles.selectionHeading}>
                   <div>
                     <h2 className={styles.selectionTitle}>
                       เลือกรายละเอียดที่ต้องการ
                     </h2>
                     <p className={styles.selectionDescription}>
-                      เลือกตัวเลือก แคมเปญ และจำนวนก่อนดำเนินการสั่งซื้อ
+                      เลือกตัวเลือกสินค้า รอบพรีออเดอร์ แล้วระบุจำนวนที่ต้องการ
                     </p>
                   </div>
-                  <span className={styles.selectionStep}>1 รายการสินค้า</span>
+                  <span className={styles.selectionStep}>ตรวจสอบก่อนสั่ง</span>
                 </div>
 
                 <div className={styles.selectionFields}>
@@ -346,12 +364,12 @@ export function ProductView() {
 
                   <SelectField
                     id="product-campaign"
-                    label="แคมเปญ"
+                    label="รอบพรีออเดอร์"
                     value={selectedCampaignId}
                     onChange={(event) =>
                       setSelectedCampaignId(event.target.value)
                     }
-                    hint="เริ่มสั่งซื้อได้เมื่อแคมเปญอยู่ในสถานะเปิดรับคำสั่งซื้อ"
+                    hint="สั่งซื้อได้เฉพาะรอบที่เปิดรับคำสั่งซื้อเท่านั้น"
                   >
                     <option value="">เลือกแคมเปญ</option>
                     {campaigns.map((campaign) => (
@@ -385,7 +403,7 @@ export function ProductView() {
                 </div>
 
                 <div className={styles.estimatePanel}>
-                  <span className={styles.metaLabel}>ยอดประมาณการ</span>
+                  <span className={styles.metaLabel}>ยอดรวมโดยประมาณ</span>
                   <output
                     className={styles.estimateValue}
                     htmlFor="product-variant product-campaign product-quantity"
@@ -443,7 +461,7 @@ export function ProductView() {
                         href={orderHref}
                         className={styles.primaryAction}
                       >
-                        ดำเนินการสั่งซื้อ
+                        ตรวจสอบคำสั่งซื้อ
                       </Link>
                     ) : auth.status === "anonymous" ? (
                       <Link
@@ -471,8 +489,8 @@ export function ProductView() {
                     >
                       {selection?.campaign &&
                       selection.campaign.status !== "OPEN"
-                        ? "แคมเปญที่เลือกยังไม่เปิดรับคำสั่งซื้อ"
-                        : "เลือกตัวเลือกสินค้า แคมเปญที่เปิดรับ และจำนวนที่ถูกต้องเพื่อดำเนินการต่อ"}
+                        ? "รอบพรีออเดอร์ที่เลือกยังไม่เปิดรับคำสั่งซื้อ"
+                        : "เลือกตัวเลือกสินค้า รอบพรีออเดอร์ที่เปิดรับ และจำนวนที่ถูกต้องเพื่อดำเนินการต่อ"}
                     </Notice>
                   )}
                 </div>

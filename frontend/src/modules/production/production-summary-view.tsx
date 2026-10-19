@@ -1,5 +1,8 @@
 "use client";
 
+import Link from "next/link";
+import { OrganizationOperationsNav } from "@/modules/operations/organization-operations-nav";
+
 import {
   useEffect,
   useRef,
@@ -307,6 +310,7 @@ export function ProductionSummaryView({
   return (
     <div className={styles.page}>
       <main className={styles.main}>
+        <OrganizationOperationsNav organizationId={organizationId} current="production" />
         <header className={styles.header}>
           <div className={styles.headerCopy}>
             <h1 className={styles.title}>สรุปงานผลิต</h1>
@@ -329,8 +333,11 @@ export function ProductionSummaryView({
                 เลือกแคมเปญ
               </h2>
               <p className={styles.sectionDescription}>
-                Production Summary ต้องระบุ Campaign ID ก่อนโหลดข้อมูล
+                ระบุรหัสรอบขายที่ต้องการดูยอดผลิต หรือไปที่หน้ารอบขายเพื่อเลือกรายการก่อน
               </p>
+              <Link className={styles.campaignDirectoryLink} href={"/org/campaigns/?" + new URLSearchParams({ organizationId }).toString()}>
+                เปิดรายการรอบขายเพื่อดูรหัสที่ต้องการ <span aria-hidden="true">↗</span>
+              </Link>
             </div>
             {loadedCampaignId ? (
               <span className={styles.contextCode}>
@@ -361,7 +368,7 @@ export function ProductionSummaryView({
             />
             <TextField
               id="production-campaign-id"
-              label="Campaign ID"
+              label="รหัสรอบขาย (Campaign ID)"
               value={campaignId}
               onChange={(event) => {
                 setCampaignId(event.target.value);
@@ -377,7 +384,7 @@ export function ProductionSummaryView({
                     : "กรุณาระบุ Campaign ID",
                 );
               }}
-              hint="ระบุแคมเปญที่ต้องการดูยอดผลิต"
+              hint="รหัสรอบขายจากหน้ารอบขาย — เมื่อเปิดจากแคมเปญโดยตรงจะใช้รหัสนั้นให้อัตโนมัติ"
               placeholder="เช่น campaign-123"
               disabled={state.status === "loading"}
               required
@@ -414,7 +421,7 @@ export function ProductionSummaryView({
 
         {state.status === "idle" ? (
           <Notice tone="neutral" title="ยังไม่ได้เลือกแคมเปญ">
-            ระบุ Campaign ID ด้านบนเพื่อดูจำนวนสินค้าที่ต้องผลิต
+            กรอกรหัสรอบขาย หรือไปยังหน้ารอบขายด้านบนเพื่อค้นหารอบที่ต้องการ ก่อนโหลดจำนวนสินค้าที่ต้องเตรียม
           </Notice>
         ) : null}
 
@@ -516,7 +523,7 @@ export function ProductionSummaryView({
                               {product.productName}
                             </h3>
                             <span className={styles.productId}>
-                              Product ID: {product.productId}
+                              รหัสสินค้า: {product.productId}
                             </span>
                           </div>
                           <div className={styles.productTotal}>
@@ -538,7 +545,7 @@ export function ProductionSummaryView({
                                   {variant.variantName}
                                 </span>
                                 <span className={styles.variantId}>
-                                  Variant ID: {variant.variantId}
+                                  รหัสตัวเลือก: {variant.variantId}
                                 </span>
                               </div>
 

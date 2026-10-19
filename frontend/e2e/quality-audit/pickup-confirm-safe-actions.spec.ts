@@ -67,7 +67,7 @@ test("Pickup selection and confirm modal pending/409/retry/200, intercepted only
   await expect(item).toBeVisible({timeout:17000});
   await item.getByRole("button",{name:/ดูรายละเอียด Pickup uxqa-pickup-modal/}).click();
   const detail=page.getByRole("complementary",{name:"รายละเอียด Pickup"});
-  await expect(detail.getByRole("heading",{name:"Pickup "+pickupId})).toBeVisible();
+  await expect(detail.getByRole("heading",{name:"รายการรับสินค้า "+pickupId.slice(0, 12)})).toBeVisible();
   await expect(detail).toContainText("ABCDEFGHIJKLMNOPQRSTUV");
   await expect(detail).toContainText(orderId);
   await proof(page,"FE-UX-24-07","fresh-detail","Separate Pickup and Order GETs populate selected panel");

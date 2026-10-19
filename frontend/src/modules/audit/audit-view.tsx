@@ -1,5 +1,7 @@
 "use client";
 
+import { OrganizationOperationsNav } from "@/modules/operations/organization-operations-nav";
+
 import { AsyncPageFallback } from "@/components/ui/async-page";
 import { LoadedDirectoryControls } from "@/modules/organization-directory/loaded-directory-controls";
 import { searchLoadedItems, visibleLoadedItems } from "@/modules/organization-directory/loaded-directory-helpers";
@@ -325,12 +327,13 @@ export function AuditView({
   return (
     <div className={styles.page}>
       <main className={styles.main}>
+        <OrganizationOperationsNav organizationId={organizationId} current="audit" />
         <header className={styles.header}>
           <div className={styles.headerCopy}>
             <span className={styles.readOnlyBadge}>อ่านอย่างเดียว</span>
             <h1 className={styles.title}>ประวัติการทำรายการ</h1>
             <p className={styles.description}>
-              ตรวจสอบว่าใครทำอะไรกับข้อมูลใดและเมื่อไร โดยรายการนี้เป็นประวัติแบบอ่านอย่างเดียว
+              ตรวจสอบว่าใครทำอะไรกับรายการใด เมื่อไร พร้อมดูรายละเอียดเพิ่มเติมได้ โดยไม่มีการแก้ข้อมูลบันทึก
             </p>
           </div>
           <div className={styles.headerCount}>
@@ -386,7 +389,7 @@ export function AuditView({
                 เหตุการณ์ที่บันทึกไว้
               </h2>
               <p className={styles.sectionDescription}>
-                รายการเรียงตามผลลัพธ์ที่ API ส่งกลับและใช้ cursor สำหรับโหลดต่อ
+                ค้นหาจากเหตุการณ์ที่โหลดแล้ว หรือใช้ตัวกรองจากเซิร์ฟเวอร์ด้านล่างเพื่อเจาะจงข้อมูล
               </p>
             </div>
             <span className={styles.sectionMeta}>
@@ -415,7 +418,9 @@ export function AuditView({
               }
             />
           ) : (
-            <Table
+            <>
+              <p className={styles.mobileTableHint}>แต่ละเหตุการณ์แสดงผู้ดำเนินการและข้อมูลที่เกี่ยวข้อง แตะ “ดู metadata” เพื่ออ่านข้อมูลเพิ่มเติม</p>
+              <Table
               caption="รายการ Audit Log ของหน่วยงาน"
               density="compact"
               className={styles.auditTable}
@@ -424,9 +429,9 @@ export function AuditView({
                 <TableRow>
                   <TableHeaderCell>เวลา</TableHeaderCell>
                   <TableHeaderCell>การทำรายการ</TableHeaderCell>
-                  <TableHeaderCell>Actor</TableHeaderCell>
-                  <TableHeaderCell>Resource</TableHeaderCell>
-                  <TableHeaderCell>Metadata</TableHeaderCell>
+                  <TableHeaderCell>ผู้ดำเนินการ</TableHeaderCell>
+                  <TableHeaderCell>ข้อมูลที่เกี่ยวข้อง</TableHeaderCell>
+                  <TableHeaderCell>รายละเอียด</TableHeaderCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -468,7 +473,8 @@ export function AuditView({
                   </TableRow>
                 ))}
               </TableBody>
-            </Table>
+              </Table>
+            </>
           )}
         </section>
 
@@ -482,7 +488,7 @@ export function AuditView({
                 ค้นหาเหตุการณ์
               </h2>
               <p className={styles.sectionDescription}>
-                กรองด้วยผู้ดำเนินการ Action หรือ Resource เพื่อเจาะจงเหตุการณ์ที่ต้องตรวจสอบ
+                ค้นหาจากผู้ดำเนินการ ประเภทเหตุการณ์ หรือรหัสรายการ โดยระบบจะโหลดผลลัพธ์ใหม่ตามเงื่อนไข
               </p>
             </div>
 
@@ -520,7 +526,7 @@ export function AuditView({
             <div className={styles.filters}>
               <TextField
                 id="audit-actor-id"
-                label="Actor ID"
+                label="ผู้ดำเนินการ (Actor ID)"
                 value={draftActorId}
                 onChange={(event) =>
                   setDraftActorId(event.target.value)
@@ -531,7 +537,7 @@ export function AuditView({
 
               <TextField
                 id="audit-action"
-                label="Action"
+                label="การทำรายการ (Action)"
                 value={draftAction}
                 onChange={(event) =>
                   setDraftAction(event.target.value)
@@ -542,7 +548,7 @@ export function AuditView({
 
               <TextField
                 id="audit-resource-type"
-                label="Resource Type"
+                label="ประเภทข้อมูล (Resource Type)"
                 value={draftResourceType}
                 onChange={(event) =>
                   setDraftResourceType(event.target.value)
@@ -553,7 +559,7 @@ export function AuditView({
 
               <TextField
                 id="audit-resource-id"
-                label="Resource ID"
+                label="รหัสรายการ (Resource ID)"
                 value={draftResourceId}
                 onChange={(event) =>
                   setDraftResourceId(event.target.value)

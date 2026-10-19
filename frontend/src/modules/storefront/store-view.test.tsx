@@ -72,13 +72,13 @@ describe("StoreView mobile shopping hierarchy", () => {
     expect(await screen.findByRole("heading", { name: "Local Demo Store" })).toBeInTheDocument();
     expect(screen.getByText("ร้านค้าที่เปิดรับพรีออเดอร์")).toBeInTheDocument();
     expect(screen.getByRole("navigation", { name: "ทางลัดไปรายการในร้าน" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "ดูแคมเปญ" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "ดูรอบพรีออเดอร์" })).toHaveAttribute(
       "href", "#campaign-heading",
     );
-    expect(screen.getByRole("link", { name: "ดูสินค้า" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "เลือกดูสินค้า" })).toHaveAttribute(
       "href", "#product-heading",
     );
-    expect(screen.getByRole("heading", { name: "แคมเปญของร้าน" })).toHaveAttribute(
+    expect(screen.getByRole("heading", { name: "รอบพรีออเดอร์ของร้าน" })).toHaveAttribute(
       "id", "campaign-heading",
     );
     expect(screen.getByRole("heading", { name: "สินค้าของร้าน" })).toHaveAttribute(
@@ -105,10 +105,10 @@ describe("StoreView mobile shopping hierarchy", () => {
     render(<StoreView />);
     expect(await screen.findByRole("heading", { name: "Local Demo Store" })).toBeInTheDocument();
     expect(screen.getAllByText("0", { selector: "dd" })).toHaveLength(2);
-    expect(screen.getByRole("link", { name: "ดูแคมเปญ" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "ดูรอบพรีออเดอร์" })).toHaveAttribute(
       "href", "#campaign-heading",
     );
-    expect(screen.getByRole("link", { name: "ดูสินค้า" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "เลือกดูสินค้า" })).toHaveAttribute(
       "href", "#product-heading",
     );
     expect(screen.getByText("ร้านนี้ยังไม่มีแคมเปญที่เปิดให้ลูกค้าเข้าชม")).toBeInTheDocument();
@@ -128,13 +128,13 @@ describe("StoreView mobile shopping hierarchy", () => {
 
     try {
       const originalUrl = window.location.href;
-      fireEvent.click(screen.getByRole("link", { name: /^ดูสินค้า$/ }));
+      fireEvent.click(screen.getByRole("link", { name: /^เลือกดูสินค้า$/ }));
       expect(screen.getByRole("heading", { name: "สินค้าของร้าน" })).toHaveFocus();
       expect(scrollIntoView).toHaveBeenCalledWith({ behavior: "auto", block: "start" });
       expect(window.location.href).toBe(originalUrl);
 
-      fireEvent.click(screen.getByRole("link", { name: /^ดูแคมเปญ$/ }));
-      expect(screen.getByRole("heading", { name: "แคมเปญของร้าน" })).toHaveFocus();
+      fireEvent.click(screen.getByRole("link", { name: /^ดูรอบพรีออเดอร์$/ }));
+      expect(screen.getByRole("heading", { name: "รอบพรีออเดอร์ของร้าน" })).toHaveFocus();
       expect(window.location.href).toBe(originalUrl);
     } finally {
       if (original) {

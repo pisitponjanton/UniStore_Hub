@@ -1,5 +1,7 @@
 "use client";
 
+import { CommerceManagementNav } from "@/modules/operations/commerce-management-nav";
+
 import { AsyncPageFallback } from "@/components/ui/async-page";
 import { LoadedDirectoryControls } from "@/modules/organization-directory/loaded-directory-controls";
 import { searchLoadedItems, visibleLoadedItems } from "@/modules/organization-directory/loaded-directory-helpers";
@@ -333,6 +335,7 @@ export function StoreManagementView({
   return (
     <div className={styles.page}>
       <main className={styles.main}>
+        <CommerceManagementNav current="stores" organizationId={organizationId} />
         <header className={styles.header}>
           <div className={styles.headerCopy}>
             <h1 className={styles.title}>ร้านค้า</h1>

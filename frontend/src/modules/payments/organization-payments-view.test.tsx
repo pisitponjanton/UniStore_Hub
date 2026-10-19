@@ -112,7 +112,7 @@ describe("OrganizationPaymentsView", () => {
   it("provides task-first shortcuts without changing review and filter actions", async () => {
     render(<OrganizationPaymentsView organizationId="org-1" />);
 
-    expect(await screen.findByText("Payment payment-1")).toBeInTheDocument();
+    expect(await screen.findByText("หลักฐาน payment-1")).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: /ดูคิวตรวจสลิป/ }),
     ).toHaveAttribute("href", "#payment-review-list");
@@ -142,7 +142,7 @@ describe("OrganizationPaymentsView", () => {
       <OrganizationPaymentsView organizationId="org-1" />,
     );
 
-    await screen.findByText("Payment payment-1");
+    await screen.findByText("หลักฐาน payment-1");
 
     fireEvent.change(screen.getByLabelText("สถานะ Payment"), {
       target: { value: "PENDING_REVIEW" },
@@ -175,7 +175,7 @@ describe("OrganizationPaymentsView", () => {
       <OrganizationPaymentsView organizationId="org-1" />,
     );
 
-    await screen.findByText("Payment payment-1");
+    await screen.findByText("หลักฐาน payment-1");
 
     fireEvent.click(
       screen.getByRole("button", {
@@ -184,7 +184,7 @@ describe("OrganizationPaymentsView", () => {
     );
 
     expect(
-      await screen.findByText("Order order-1"),
+      await screen.findByText("คำสั่งซื้อ order-1"),
     ).toBeInTheDocument();
 
     fireEvent.click(
@@ -234,13 +234,13 @@ describe("OrganizationPaymentsView", () => {
       <OrganizationPaymentsView organizationId="org-1" />,
     );
 
-    await screen.findByText("Payment payment-1");
+    await screen.findByText("หลักฐาน payment-1");
     fireEvent.click(
       screen.getByRole("button", {
         name: "ตรวจสอบ การชำระเงิน payment-1",
       }),
     );
-    await screen.findByText("Order order-1");
+    await screen.findByText("คำสั่งซื้อ order-1");
 
     fireEvent.click(
       screen.getByRole("button", { name: "อนุมัติการชำระเงิน" }),
@@ -286,11 +286,11 @@ describe("OrganizationPaymentsView", () => {
     mocks.approvePayment.mockResolvedValue(approved);
 
     render(<OrganizationPaymentsView organizationId="org-1" />);
-    await screen.findByText("Payment payment-1");
+    await screen.findByText("หลักฐาน payment-1");
     fireEvent.click(screen.getByRole("button", {
       name: "ตรวจสอบ การชำระเงิน payment-1",
     }));
-    await screen.findByText("Order order-1");
+    await screen.findByText("คำสั่งซื้อ order-1");
 
     fireEvent.click(screen.getByRole("button", {
       name: "อนุมัติการชำระเงิน",
@@ -317,11 +317,11 @@ describe("OrganizationPaymentsView", () => {
     mocks.approvePayment.mockResolvedValue(approved);
 
     render(<OrganizationPaymentsView organizationId="org-1" />);
-    await screen.findByText("Payment payment-1");
+    await screen.findByText("หลักฐาน payment-1");
     fireEvent.click(screen.getByRole("button", {
       name: "ตรวจสอบ การชำระเงิน payment-1",
     }));
-    await screen.findByText("Order order-1");
+    await screen.findByText("คำสั่งซื้อ order-1");
     fireEvent.click(screen.getByRole("button", {
       name: "อนุมัติการชำระเงิน",
     }));
@@ -345,11 +345,11 @@ describe("OrganizationPaymentsView", () => {
     mocks.rejectPayment.mockResolvedValue(rejected);
 
     render(<OrganizationPaymentsView organizationId="org-1" />);
-    await screen.findByText("Payment payment-1");
+    await screen.findByText("หลักฐาน payment-1");
     fireEvent.click(screen.getByRole("button", {
       name: "ตรวจสอบ การชำระเงิน payment-1",
     }));
-    await screen.findByText("Order order-1");
+    await screen.findByText("คำสั่งซื้อ order-1");
     fireEvent.click(screen.getByRole("button", {
       name: "ปฏิเสธการชำระเงิน",
     }));
@@ -387,11 +387,11 @@ describe("OrganizationPaymentsView", () => {
       }
 
       render(<OrganizationPaymentsView organizationId="org-1" />);
-      await screen.findByText("Payment payment-1");
+      await screen.findByText("หลักฐาน payment-1");
       fireEvent.click(screen.getByRole("button", {
         name: "ตรวจสอบ การชำระเงิน payment-1",
       }));
-      await screen.findByText("Order order-1");
+      await screen.findByText("คำสั่งซื้อ order-1");
 
       if (action === "approve") {
         fireEvent.click(screen.getByRole("button", { name: "อนุมัติการชำระเงิน" }));
@@ -441,13 +441,13 @@ describe("OrganizationPaymentsView", () => {
       <OrganizationPaymentsView organizationId="org-1" />,
     );
 
-    await screen.findByText("Payment payment-1");
+    await screen.findByText("หลักฐาน payment-1");
     fireEvent.click(
       screen.getByRole("button", {
         name: "ตรวจสอบ การชำระเงิน payment-1",
       }),
     );
-    await screen.findByText("Order order-1");
+    await screen.findByText("คำสั่งซื้อ order-1");
 
     fireEvent.click(
       screen.getByRole("button", { name: "ปฏิเสธการชำระเงิน" }),

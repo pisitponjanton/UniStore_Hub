@@ -513,3 +513,63 @@
 /* Phase 6: async server-filter feedback is reachable even when its form follows the list. */
 .focusableFeedback { scroll-margin-top: 108px; outline: none; }
 .focusableFeedback:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+
+/* Audit events: read-only, filterable and legible on narrow screens. */
+.main { gap: clamp(14px,2vw,22px); padding-top: clamp(13px,2vw,27px); }
+.header { padding: clamp(18px,2.6vw,30px); border: 1px solid var(--line); border-radius: 15px; background: var(--surface); box-shadow:none; }
+.header::before,.header::after { content:none; display:none; }
+.title { font-size:clamp(1.8rem,3vw,2.6rem); font-weight:810; line-height:1.15; letter-spacing:-.035em; }
+.header .description { max-width:70ch; font-size:.87rem; line-height:1.55; }
+.readOnlyBadge { min-height:27px; border:0; background:var(--brand-soft); border-radius:7px; font-size:.7rem; }
+.headerCount { min-height:78px; min-width:110px; padding:13px; border:1px solid var(--line); border-radius:11px; background:var(--surface-muted); box-shadow:none; }
+.headerCount strong { font-size:clamp(1.5rem,2.8vw,2.1rem); font-weight:820; }
+.auditShortcuts { gap:8px; }
+.auditShortcuts a { min-height:43px; border:1px solid var(--line); border-radius:9px; background:var(--surface); font-size:.78rem; }
+.auditShortcuts a:last-child { background:var(--brand-soft); border-color:var(--brand-line); }
+.section,.filterPanel { border:1px solid var(--line); border-radius:13px; box-shadow:none; background:var(--surface); padding:17px; }
+.sectionTitle { font-size:clamp(1.2rem,2vw,1.55rem); font-weight:790; }
+.sectionDescription { font-size:.81rem; line-height:1.5; }
+.auditTable { min-width:0; width:100%; }
+.auditTable tbody tr:hover { box-shadow:none; background:var(--surface-muted); }
+.auditTable .action,.auditTable .code { overflow-wrap:anywhere; }
+.auditTable .action { border-radius:7px; font-size:.74rem; }
+.metadataDetails summary { padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:var(--surface-muted); font-size:.72rem; line-height:1.45; }
+.metadata { max-width:100%; padding:12px; background:var(--surface-muted); border-radius:8px; }
+.appliedFilters span { border-radius:7px; }
+.mobileTableHint { display:none; margin:0; font-size:.74rem; color:var(--ink-secondary); line-height:1.5; }
+@media(max-width:760px) {
+ .section,.filterPanel { padding:12px; }
+ .mobileTableHint { display:block; margin:6px 0 12px; }
+ .auditTable,.auditTable tbody,.auditTable tbody tr,.auditTable tbody td { display:block; width:100%; min-width:0; max-width:100%; }
+ .auditTable thead { position:absolute; height:1px; width:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+ .auditTable tbody { display:grid; gap:10px; }
+ .auditTable tbody tr { padding:11px; border:1px solid var(--line); border-radius:11px; background:var(--surface); }
+ .auditTable tbody tr:hover { border-color:var(--brand-line); background:var(--surface); }
+ .auditTable tbody td { display:grid; grid-template-columns:76px minmax(0,1fr); gap:8px; align-items:start; padding:8px 2px; border:0; white-space:normal; overflow-wrap:anywhere; }
+ .auditTable tbody td + td { border-top:1px solid var(--line-soft); }
+ .auditTable tbody td::before { color:var(--ink-secondary); font-size:.7rem; font-weight:720; line-height:1.6; }
+ .auditTable tbody td:nth-child(1)::before { content:"เวลา"; }
+ .auditTable tbody td:nth-child(2)::before { content:"การทำรายการ"; }
+ .auditTable tbody td:nth-child(3)::before { content:"ผู้ดำเนินการ"; }
+ .auditTable tbody td:nth-child(4)::before { content:"ข้อมูล"; }
+ .auditTable tbody td:nth-child(5)::before { content:"รายละเอียด"; }
+ .auditTable tbody td .metadata { max-width:100%; font-size:.7rem; }
+ .auditShortcuts { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:5px; }
+ .auditShortcuts a { min-height:45px; padding:7px 5px; font-size:.72rem; }
+ .headerCount { min-height:0; }
+}
+@media(max-width:380px) {
+ .auditTable tbody td { grid-template-columns:65px minmax(0,1fr); gap:7px; }
+ .auditShortcuts a { font-size:.68rem; }
+}
+@media(prefers-reduced-motion:reduce) { .auditTable tbody tr { transition:none; } }
+
+/* The visible h2 already titles this section; preserve caption for assistive tech
+   without squeezing it vertically when table cells become small-screen cards. */
+@media(max-width:760px) {
+ .auditTable caption {
+  position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+  overflow:hidden; clip:rect(0,0,0,0); clip-path:inset(50%);
+  white-space:nowrap; border:0;
+ }
+}

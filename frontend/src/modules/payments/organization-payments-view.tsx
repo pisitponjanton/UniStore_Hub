@@ -1,5 +1,7 @@
 "use client";
 
+import { StaffOperationNav } from "@/modules/operations/staff-operation-nav";
+
 import { AsyncPageFallback } from "@/components/ui/async-page";
 import { useQueueFilterFeedback } from "@/modules/operations/use-queue-filter-feedback";
 import { QueuePriorityControls, QueueFilterEmpty } from "@/modules/operations/queue-priority-controls";
@@ -675,6 +677,7 @@ export function OrganizationPaymentsView({
   return (
     <div className={styles.page}>
       <main className={styles.main}>
+        <StaffOperationNav organizationId={organizationId} current="payments" />
         <header className={styles.header}>
           <div className={styles.headerCopy}>
             <h1 className={styles.title}>ตรวจสอบการชำระเงิน</h1>
@@ -786,7 +789,7 @@ export function OrganizationPaymentsView({
                       <div className={styles.rowMain}>
                         <div className={styles.rowHeading}>
                           <h3 className={styles.cardTitle} title={`Payment ${payment.paymentId}`}>
-                            Payment {payment.paymentId.slice(0, 12)}
+                            หลักฐาน {payment.paymentId.slice(0, 12)}
                           </h3>
                           <Badge
                             tone={paymentStatusTone(payment.status)}
@@ -796,10 +799,10 @@ export function OrganizationPaymentsView({
                         </div>
                         <div className={styles.metaRow}>
                           <span className={styles.meta}>
-                            Order: {payment.orderId.slice(0, 12)}
+                            คำสั่งซื้อ {payment.orderId.slice(0, 12)}
                           </span>
                           <span className={styles.meta}>
-                            Customer: {payment.customerId.slice(0, 12)}
+                            ลูกค้า {payment.customerId.slice(0, 12)}
                           </span>
                           <time className={styles.meta} dateTime={payment.createdAt}>
                             ส่งเมื่อ {formatIsoDateTime(payment.createdAt)}
@@ -869,10 +872,10 @@ export function OrganizationPaymentsView({
                   <div className={styles.detailCopy}>
                     <span className={styles.detailLabel}>รายการที่กำลังตรวจสอบ</span>
                     <h2 className={styles.detailTitle}>
-                      Payment {selected.payment.paymentId}
+                      หลักฐานชำระเงิน {selected.payment.paymentId.slice(0, 12)}
                     </h2>
                     <span className={styles.detailCode}>
-                      Order {selected.payment.orderId}
+                      คำสั่งซื้อ {selected.payment.orderId}
                     </span>
                   </div>
 
@@ -1088,7 +1091,7 @@ export function OrganizationPaymentsView({
                           </Button>
                         }
                         title="ยืนยันการอนุมัติการชำระเงิน"
-                        description="ระบบจะตรวจสถานะแคมเปญและการชำระเงินอีกครั้งก่อนอัปเดตผล"
+                        description="เมื่อยืนยัน ระบบจะตรวจสอบสถานะอีกครั้งก่อนบันทึกผลอนุมัติ และอัปเดตคำสั่งซื้อที่เกี่ยวข้องตามกฎเดิม"
                         confirmLabel="ยืนยันอนุมัติ"
                         pending={reviewPending === "approve"}
                         onConfirm={() => {
@@ -1196,9 +1199,9 @@ export function OrganizationPaymentsView({
               </div>
             ) : (
               <div className={styles.emptyDetail}>
-                <strong>เลือก Payment เพื่อเริ่มตรวจสอบ</strong>
+                <strong>เลือกหลักฐานเพื่อเริ่มตรวจสอบ</strong>
                 <span>
-                  ระบบจะโหลด Payment และ Order ล่าสุดก่อนแสดงสลิปและ action ตัดสินผล
+                  ระบบจะโหลดข้อมูลชำระเงินและคำสั่งซื้อล่าสุดก่อนให้อนุมัติหรือปฏิเสธ
                 </span>
               </div>
             )}

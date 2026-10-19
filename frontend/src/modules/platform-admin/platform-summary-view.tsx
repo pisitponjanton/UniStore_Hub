@@ -1,5 +1,7 @@
 "use client";
 
+import { PlatformWorkspaceNav } from "./platform-workspace-nav";
+
 import { AsyncPageFallback } from "@/components/ui/async-page";
 
 import Link from "next/link";
@@ -127,6 +129,7 @@ export function PlatformSummaryView() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
+        <PlatformWorkspaceNav current="summary" />
         <header className={styles.header}>
           <div className={styles.headerCopy}>
             <h1 className={styles.title}>ภาพรวม Platform</h1>
@@ -170,7 +173,9 @@ export function PlatformSummaryView() {
               {count(pendingOrganizations)}
             </strong>
             <span className={styles.metricHint}>
-              รายการที่ต้องตรวจสอบก่อนอนุมัติหรือระงับ
+              {pendingOrganizations > 0
+                ? "รายการรอให้ Platform Admin ตรวจและตัดสินใจ"
+                : "ไม่มีหน่วยงานรออนุมัติตามภาพรวมล่าสุด"}
             </span>
           </article>
 

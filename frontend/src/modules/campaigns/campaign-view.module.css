@@ -684,3 +684,41 @@
   .grid > .section { order: -1; }
   .grid > .panel { order: 0; }
 }
+
+/* Campaigns are time-bound workflows, not unrelated decorative cards. */
+.page { background: var(--canvas); }
+.main { gap: clamp(14px, 2vw, 24px); padding-top: clamp(13px, 2vw, 27px); }
+.header { padding: clamp(18px, 2.8vw, 32px); background: var(--surface); border: 1px solid var(--line); border-radius: 16px; box-shadow: none; }
+.header::before,.header::after { content: none; display: none; }
+.title { font-size: clamp(1.82rem, 3.1vw, 2.7rem); line-height: 1.15; letter-spacing: -.03em; color: var(--ink); }
+.header .description { font-size: .9rem; line-height: 1.55; max-width: 70ch; color: var(--ink-secondary); }
+.summaryStrip { gap: 9px; }
+.summaryStrip > div,.summaryStrip > div:nth-child(n) { min-height: 86px; padding: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 11px; box-shadow: none; }
+.summaryStrip strong { font-size: clamp(1.42rem, 2.5vw, 1.92rem); color: var(--ink); font-weight: 800; }
+.flowContext { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 14px; }
+.flowStrip { gap: 7px; }
+.flowStrip > li,.flowStrip > li:nth-child(n) { border: 1px solid var(--line); border-radius: 9px; background: var(--surface-muted); padding: 11px; }
+.grid { align-items: start; gap: 16px; }
+.section { gap: 12px; }
+.sectionTitle { font-size: clamp(1.16rem, 2vw, 1.56rem); letter-spacing: -.02em; }
+.sectionDescription { font-size: .83rem; line-height: 1.55; }
+.toolbar { border: 1px solid var(--line); border-radius: 11px; background: var(--surface); padding: 12px; }
+.list { gap: 9px; }
+.row,.rowSelected { padding: 15px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); box-shadow: none; }
+.row::before,.rowSelected::before { content: none; display: none; }
+.row:hover { transform: none; border-color: var(--brand-line); box-shadow: none; }
+.rowSelected { border-color: var(--brand-line); background: var(--brand-soft); box-shadow: inset 3px 0 0 var(--brand); }
+.cardTitle { color: var(--ink); font-size: 1rem; font-weight: 790; }
+.nextAction { border: 1px solid var(--brand-line); border-radius: 9px; background: var(--brand-soft); box-shadow: none; }
+.panel,.detailPanel { border: 1px solid var(--line); border-radius: 13px; background: var(--surface); padding: 18px; box-shadow: none; }
+.detailPanel::before { content: none; display: none; }
+.detailSection { border: 1px solid var(--line); border-radius: 11px; background: var(--surface); padding: 14px; }
+.detailSection + .detailSection { border: 1px solid var(--line); }
+.scheduleItem,.scheduleItem:nth-child(n) { border: 1px solid var(--line); border-radius: 9px; background: var(--surface-muted); padding: 12px; }
+@media(max-width:760px) {
+ .summaryStrip { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 7px; }
+ .summaryStrip > div,.summaryStrip > div:nth-child(n) { min-height: 73px; padding: 10px; }
+ .summaryStrip strong { font-size: 1.48rem; }
+ .flowContext,.toolbar,.panel,.detailPanel { padding: 13px; }
+ .detailSection { padding: 12px; }
+}

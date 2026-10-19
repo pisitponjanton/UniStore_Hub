@@ -157,20 +157,28 @@ export function CampaignView() {
       <StorefrontHeader />
 
       <main className={styles.main}>
-        <Link
-          href={storeHref(store.organizationId, store.storeId)}
-          className={styles.backLink}
-        >
-          {store.name}
-        </Link>
+        <nav className={styles.breadcrumbs} aria-label="เส้นทางรอบพรีออเดอร์">
+          <Link href="/">ร้านค้าทั้งหมด</Link>
+          <span aria-hidden="true">/</span>
+          <Link href={storeHref(store.organizationId, store.storeId)}>{store.name}</Link>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">{campaign.name}</span>
+        </nav>
 
         <section className={`${styles.hero} ${styles.campaignHero}`}>
           <div className={styles.heroCopy}>
-            <span className={styles.contextLine}>รอบขายจาก {store.name}</span>
+            <span className={styles.contextLine}>PRE-ORDER / {store.name}</span>
             <h1 tabIndex={-1} className={styles.title}>{campaign.name}</h1>
-            <p className={styles.description}>
-              ตรวจสอบสถานะและช่วงเวลาสำคัญของรอบนี้ก่อนเลือกสินค้าที่ต้องการ
-            </p>
+            <p className={styles.description}>{campaignGuidance[campaign.status]}</p>
+            {campaign.status === "OPEN" ? (
+              <a className={styles.campaignShopAction} href="#campaign-products">
+                เลือกสินค้าที่สั่งได้ <span aria-hidden="true">↗</span>
+              </a>
+            ) : (
+              <p className={styles.campaignClosedHint}>
+                รอบนี้ยังสั่งซื้อเพิ่มไม่ได้ แต่ยังดูรายละเอียดและสินค้าได้
+              </p>
+            )}
           </div>
 
           <aside
@@ -182,8 +190,14 @@ export function CampaignView() {
               <CampaignStatusBadge status={campaign.status} />
             </div>
             <p className={styles.campaignStatusDescription}>
-              {campaignGuidance[campaign.status]}
+              {campaign.status === "OPEN"
+                ? "เปิดให้เลือกสินค้าจากรอบนี้ได้ในตอนนี้"
+                : "โปรดตรวจสอบสถานะรอบขายก่อนดำเนินการ"}
             </p>
+            <div className={styles.deadlineSpotlight}>
+              <span>ปิดรับคำสั่งซื้อ</span>
+              <strong>{formatIsoDateTime(campaign.closeAt)}</strong>
+            </div>
             <dl className={styles.campaignFacts}>
               <div>
                 <dt className={styles.metaLabel}>สินค้า</dt>
@@ -200,6 +214,7 @@ export function CampaignView() {
         <section className={styles.section} aria-labelledby="schedule-heading">
           <div className={styles.sectionHeader}>
             <div>
+              <span className={styles.sectionKicker}>YOUR TIMELINE / วันสำคัญ</span>
               <h2 className={styles.sectionTitle} id="schedule-heading">
                 ช่วงเวลาสำคัญ
               </h2>
@@ -240,7 +255,8 @@ export function CampaignView() {
         <section className={styles.section} aria-labelledby="campaign-products">
           <div className={styles.sectionHeader}>
             <div>
-              <h2 className={styles.sectionTitle} id="campaign-products">
+              <span className={styles.sectionKicker}>AVAILABLE ITEMS / สินค้าในรอบนี้</span>
+              <h2 className={styles.sectionTitle} id="campaign-products" tabIndex={-1}>
                 เลือกสินค้าที่ต้องการ
               </h2>
             </div>

@@ -451,3 +451,17 @@
   border: 1px solid var(--line-soft);
   box-shadow: none;
 }
+
+/* Pickup proof is shown only when existing backend state says it is usable. */
+.header { border-radius: 16px; border: 1px solid var(--line); }
+.pickupCredential { border-radius: 14px; border-color: var(--brand-line); }
+.credentialHeading { gap: 12px; }
+.qrColumn, .tokenColumn { border-radius: 11px; box-shadow: none; }
+.qrTokenGrid { align-items: stretch; }
+.token { overflow-wrap: anywhere; user-select: all; }
+.securityNote { line-height: 1.6; }
+@media (max-width: 760px) {
+  .header { padding: 17px; }
+  .pickupCredential { padding: 14px; }
+  .qrTokenGrid { gap: 10px; }
+}

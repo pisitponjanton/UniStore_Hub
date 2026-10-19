@@ -61,11 +61,11 @@ describe("StorefrontLanding", () => {
     expect(
       screen.getByRole("heading", {
         level: 1,
-        name: "เลือกซื้อจากร้านในมหาวิทยาลัย",
+        name: /ร้านค้าและพรีออเดอร์\s*ในมหาวิทยาลัย/,
       }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: "ดูร้านที่เปิดอยู่" }),
+      screen.getByRole("link", { name: "เลือกดูร้านค้า" }),
     ).toHaveAttribute("href", "#storefront-heading");
     const trackingHref = screen
       .getByRole("link", { name: "ติดตามคำสั่งซื้อ" })
@@ -84,15 +84,11 @@ describe("StorefrontLanding", () => {
       }),
     ).toBeInTheDocument();
 
-    expect(screen.getAllByText("ชมรมตัวอย่าง")).toHaveLength(3);
-    expect(
-      screen.getByRole("heading", {
-        level: 2,
-        name: "เลือกร้านจากพื้นที่ที่เปิดอยู่",
-      }),
-    ).toBeInTheDocument();
+    expect(screen.getAllByText("ชมรมตัวอย่าง")).toHaveLength(2);
+    expect(screen.queryByRole("heading", { name: "ร้านค้าอื่นที่น่าสนใจ" }))
+      .not.toBeInTheDocument();
     const storeLinks = screen.getAllByRole("link", { name: /ร้านชมรม/ });
-    expect(storeLinks).toHaveLength(3);
+    expect(storeLinks).toHaveLength(2);
     expect(storeLinks[0]).toHaveAttribute(
       "href",
       "/stores/view?organizationId=org-1&storeId=store-1",
@@ -103,8 +99,8 @@ describe("StorefrontLanding", () => {
       "href",
       "/stores/view?organizationId=org-1&storeId=store-1",
     );
+    expect(screen.getByText("มีร้านค้า", { exact: false })).toBeInTheDocument();
     expect(screen.getByText("1 ร้าน")).toBeInTheDocument();
-    expect(screen.getAllByText("1", { selector: "dd" })).toHaveLength(2);
   });
 
   it("keeps explicit QA fixtures opt-in only in Dev and restores them on request", async () => {
@@ -224,8 +220,8 @@ describe("StorefrontLanding", () => {
 
     render(<StorefrontLanding />);
     expect(await screen.findByText("หน้า 1 จาก 3")).toBeInTheDocument();
-    // Twelve paged directory rows, four featured cards, and the real-store hero spotlight.
-    expect(screen.getAllByRole("link", { name: /ร้าน-\d+/ })).toHaveLength(17);
+    // Twelve paged directory rows plus a real-store hero and three distinct discovery cards.
+    expect(screen.getAllByRole("link", { name: /ร้าน-\d+/ })).toHaveLength(16);
     fireEvent.click(screen.getByRole("button", { name: "ถัดไป" }));
     expect(screen.getByText("หน้า 2 จาก 3")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "ร้าน-12" })).toBeInTheDocument();

@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 export default function LoginPage() {
   return (
     <AuthPageFrame
-      introTitle="กลับมาดูรายการที่กำลังดำเนินการ"
+      introTitle="กลับมาจัดการคำสั่งซื้อของคุณ"
       introDescription="เข้าสู่ระบบเพื่อดูคำสั่งซื้อ การชำระเงิน การรับสินค้า และพื้นที่หน่วยงานตามสิทธิ์ของบัญชี"
     >
       <AuthEntryState>

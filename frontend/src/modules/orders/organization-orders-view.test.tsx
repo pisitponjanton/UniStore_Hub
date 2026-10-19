@@ -56,7 +56,7 @@ describe("OrganizationOrdersView", () => {
     );
 
     expect(
-      await screen.findByText("Order order-1"),
+      await screen.findByText("คำสั่งซื้อ order-1"),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("link", {
@@ -79,7 +79,7 @@ describe("OrganizationOrdersView", () => {
       <OrganizationOrdersView organizationId="org-1" />,
     );
 
-    await screen.findByText("Order order-1");
+    await screen.findByText("คำสั่งซื้อ order-1");
 
     fireEvent.change(screen.getByLabelText("Campaign ID"), {
       target: { value: "  campaign-2  " },
@@ -126,14 +126,14 @@ describe("OrganizationOrdersView", () => {
       <OrganizationOrdersView organizationId="org-1" />,
     );
 
-    await screen.findByText("Order order-1");
+    await screen.findByText("คำสั่งซื้อ order-1");
 
     fireEvent.click(
       screen.getByRole("button", { name: "โหลดเพิ่มเติม" }),
     );
 
     expect(
-      await screen.findByText("Order order-2"),
+      await screen.findByText("คำสั่งซื้อ order-2"),
     ).toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent(
       "โหลดเพิ่มเติมแล้ว ตอนนี้แสดง 2 คำสั่งซื้อ",
@@ -156,10 +156,10 @@ describe("OrganizationOrdersView", () => {
       nextCursor: null,
     });
     render(<OrganizationOrdersView organizationId="org-1" />);
-    expect(await screen.findByText("Order order-00")).toBeInTheDocument();
-    expect(screen.queryByText("Order order-34")).not.toBeInTheDocument();
+    expect(await screen.findByText("คำสั่งซื้อ order-00")).toBeInTheDocument();
+    expect(screen.queryByText("คำสั่งซื้อ order-34")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "แสดงอีก 5 รายการจากชุดที่โหลด" }));
-    expect(screen.getByText("Order order-34")).toBeInTheDocument();
+    expect(screen.getByText("คำสั่งซื้อ order-34")).toBeInTheDocument();
     expect(mocks.listOrganizationOrders).toHaveBeenCalledTimes(1);
   });
 

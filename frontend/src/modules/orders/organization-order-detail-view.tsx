@@ -1,5 +1,8 @@
 "use client";
 
+import { StaffOperationNav } from "@/modules/operations/staff-operation-nav";
+import { StaffOrderNextTask } from "@/modules/operations/staff-order-next-task";
+
 import { PageLoadingRows, PageStateHeading, RecoveryActions } from "@/components/ui/async-page";
 
 import Link from "next/link";
@@ -250,6 +253,7 @@ export function OrganizationOrderDetailView({
   return (
     <div className={styles.page}>
       <main className={styles.main}>
+        <StaffOperationNav organizationId={organizationId} current="orders" isDetail />
         <Link
           href={organizationOrdersHref(organizationId)}
           className={styles.backLink}
@@ -262,7 +266,7 @@ export function OrganizationOrderDetailView({
             <div className={styles.detailTitleGroup}>
               <h1 className={styles.title}>รายละเอียดคำสั่งซื้อ</h1>
               <span className={styles.orderCode}>
-                Order {order.orderId}
+                คำสั่งซื้อ {order.orderId}
               </span>
             </div>
 
@@ -300,13 +304,15 @@ export function OrganizationOrderDetailView({
 
           <div className={styles.metaRow}>
             <span className={styles.meta}>
-              Customer: {order.customerId}
+              ลูกค้า {order.customerId}
             </span>
             <span className={styles.meta}>
-              Campaign: {order.campaignId}
+              รอบขาย {order.campaignId}
             </span>
           </div>
         </section>
+
+        <StaffOrderNextTask organizationId={organizationId} status={order.status} />
 
         {actionSuccess || actionError ? (
           <div

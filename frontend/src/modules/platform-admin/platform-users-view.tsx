@@ -1,5 +1,7 @@
 "use client";
 
+import { PlatformWorkspaceNav } from "./platform-workspace-nav";
+
 import { AsyncPageFallback } from "@/components/ui/async-page";
 import { LoadedDirectoryControls } from "@/modules/organization-directory/loaded-directory-controls";
 import { searchLoadedItems, visibleLoadedItems } from "@/modules/organization-directory/loaded-directory-helpers";
@@ -139,12 +141,13 @@ export function PlatformUsersView() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
+        <PlatformWorkspaceNav current="users" />
         <header className={styles.header}>
           <div className={styles.headerCopy}>
             <h1 className={styles.title}>ผู้ใช้ระดับ Platform</h1>
             <p className={styles.description}>
               ตรวจสอบสถานะผู้ใช้และ Platform role ที่บันทึกอยู่ในระบบ
-              โดยรายการนี้เป็นข้อมูลอ่านอย่างเดียวตาม contract ปัจจุบัน
+              โดยสามารถค้นหาและกรองจากรายชื่อที่โหลดแล้วได้ (อ่านอย่างเดียว)
             </p>
           </div>
 
@@ -173,6 +176,41 @@ export function PlatformUsersView() {
         </Notice>
 
         <section
+          className={styles.priorityStrip}
+          aria-label="สรุปผู้ใช้ระดับ Platform"
+        >
+          <article className={styles.priorityItem}>
+            <span className={styles.metricLabel}>Platform Admin</span>
+            <strong className={styles.priorityValue} data-numeric>
+              {platformAdminCount.toLocaleString("th-TH")}
+            </strong>
+            <span className={styles.metricHint}>
+              ผู้ใช้ที่มี platformRole = PLATFORM_ADMIN
+            </span>
+          </article>
+
+          <article className={styles.priorityItem}>
+            <span className={styles.metricLabel}>ใช้งานอยู่</span>
+            <strong className={styles.priorityValue} data-numeric>
+              {activeCount.toLocaleString("th-TH")}
+            </strong>
+            <span className={styles.metricHint}>
+              ผู้ใช้ที่มีสถานะ ACTIVE ในรายการที่โหลด
+            </span>
+          </article>
+
+          <article className={styles.priorityItem}>
+            <span className={styles.metricLabel}>ปิดใช้งาน</span>
+            <strong className={styles.priorityValue} data-numeric>
+              {disabledCount.toLocaleString("th-TH")}
+            </strong>
+            <span className={styles.metricHint}>
+              ผู้ใช้ที่มีสถานะ DISABLED ในรายการที่โหลด
+            </span>
+          </article>
+        </section>
+
+        <section
           className={styles.section}
           aria-labelledby="platform-users-title"
         >
@@ -185,7 +223,7 @@ export function PlatformUsersView() {
                 ผู้ใช้ทั้งหมด
               </h2>
               <p className={styles.sectionDescription}>
-                สถานะและ Platform role แสดงจาก UserDTO ที่ระบบส่งกลับ
+                ค้นหาด้วยชื่อ อีเมล หรือรหัสผู้ใช้ แล้วตรวจสถานะและสิทธิ์ที่ระบบบันทึกไว้
               </p>
             </div>
           </div>
@@ -277,40 +315,7 @@ export function PlatformUsersView() {
             </Table>
           )}
         </section>
-        <section
-          className={styles.priorityStrip}
-          aria-label="สรุปผู้ใช้ระดับ Platform"
-        >
-          <article className={styles.priorityItem}>
-            <span className={styles.metricLabel}>Platform Admin</span>
-            <strong className={styles.priorityValue} data-numeric>
-              {platformAdminCount.toLocaleString("th-TH")}
-            </strong>
-            <span className={styles.metricHint}>
-              ผู้ใช้ที่มี platformRole = PLATFORM_ADMIN
-            </span>
-          </article>
 
-          <article className={styles.priorityItem}>
-            <span className={styles.metricLabel}>ใช้งานอยู่</span>
-            <strong className={styles.priorityValue} data-numeric>
-              {activeCount.toLocaleString("th-TH")}
-            </strong>
-            <span className={styles.metricHint}>
-              ผู้ใช้ที่มีสถานะ ACTIVE ในรายการที่โหลด
-            </span>
-          </article>
-
-          <article className={styles.priorityItem}>
-            <span className={styles.metricLabel}>ปิดใช้งาน</span>
-            <strong className={styles.priorityValue} data-numeric>
-              {disabledCount.toLocaleString("th-TH")}
-            </strong>
-            <span className={styles.metricHint}>
-              ผู้ใช้ที่มีสถานะ DISABLED ในรายการที่โหลด
-            </span>
-          </article>
-        </section>
 
       </main>
     </div>

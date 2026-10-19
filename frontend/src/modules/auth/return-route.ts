@@ -58,3 +58,17 @@ export function getAuthNavigationContext(search: string): AuthNavigationContext 
     registerHref: buildAuthPagePath("/register/", returnPath),
   };
 }
+
+export function describeAuthReturnDestination(path: string): string {
+  const pathname = path.split("?")[0] ?? "/";
+  if (pathname.startsWith("/orders/new")) return "กลับไปตรวจสอบคำสั่งซื้อ";
+  if (pathname.startsWith("/my/payment")) return "กลับไปส่งหลักฐานชำระเงิน";
+  if (pathname.startsWith("/my/pickup")) return "กลับไปดูข้อมูลรับสินค้า";
+  if (pathname.startsWith("/my/order")) return "กลับไปติดตามคำสั่งซื้อ";
+  if (pathname.startsWith("/products/view")) return "กลับไปดูสินค้า";
+  if (pathname.startsWith("/campaigns/view")) return "กลับไปดูรอบพรีออเดอร์";
+  if (pathname.startsWith("/stores/view")) return "กลับไปหน้าร้านค้า";
+  if (pathname.startsWith("/org/")) return "กลับไปพื้นที่หน่วยงาน";
+  if (pathname.startsWith("/platform/")) return "กลับไปพื้นที่ผู้ดูแลระบบ";
+  return "กลับไปทำรายการต่อ";
+}

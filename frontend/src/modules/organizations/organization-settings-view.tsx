@@ -1,5 +1,7 @@
 "use client";
 
+import { OrganizationAdminNav } from "@/modules/organizations/organization-admin-nav";
+
 import { PageLoadingRows, PageStateHeading } from "@/components/ui/async-page";
 
 import Link from "next/link";
@@ -280,8 +282,10 @@ export function OrganizationSettingsView({
   return (
     <div className={styles.page}>
       <main className={styles.main}>
+        <OrganizationAdminNav organizationId={organizationId} current="settings" />
         <header className={styles.settingsHeader} data-organization-status={organization.status}>
           <div className={styles.headerCopy}>
+            <span className={styles.managementEyebrow}>กำลังดูแล: {organization.name}</span>
             <h1 className={styles.title} tabIndex={-1} data-organization-settings-result>ตั้งค่าหน่วยงาน</h1>
             <p className={styles.description}>
               แก้ไขข้อมูลที่ผู้ใช้เห็นได้ โดยไม่กระทบสถานะอนุมัติ สิทธิ์สมาชิก หรือขอบเขตอำนาจของ Platform Admin
@@ -296,7 +300,9 @@ export function OrganizationSettingsView({
           </div>
         </header>
 
-        <dl className={styles.referenceStrip} aria-label="ข้อมูลอ้างอิงหน่วยงาน">
+        <details className={styles.referenceDisclosure}>
+          <summary>ดูรหัสหน่วยงานและประวัติการอัปเดต</summary>
+          <dl className={styles.referenceStrip} aria-label="ข้อมูลอ้างอิงหน่วยงาน">
           <div>
             <dt className={styles.detailLabel}>รหัสหน่วยงาน</dt>
             <dd className={styles.detailValue} data-technical>
@@ -319,7 +325,8 @@ export function OrganizationSettingsView({
               </time>
             </dd>
           </div>
-        </dl>
+          </dl>
+        </details>
 
         <div className={styles.settingsWorkspace}>
           <section className={styles.settingsPanel} aria-labelledby="organization-edit">
@@ -422,12 +429,9 @@ export function OrganizationSettingsView({
                     คืนค่าที่ยังไม่บันทึก
                   </Button>
                 ) : null}
-                <Link href="/org/select/" className={styles.secondaryLink}>
-                  เปลี่ยนหน่วยงาน
-                </Link>
                 {!isDirty && !saved ? (
                   <span className={styles.unsavedHint}>
-                    ยังไม่มีข้อมูลที่เปลี่ยนแปลง
+                    ไม่มีการแก้ไขที่รอบันทึก
                   </span>
                 ) : null}
               </div>

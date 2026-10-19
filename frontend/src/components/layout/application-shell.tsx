@@ -11,6 +11,7 @@ import {
 } from "@/modules/auth/navigation";
 
 import styles from "./application-shell.module.css";
+import { WorkspaceIcon, navigationIcon } from "./workspace-icon";
 
 type ShellScope = "customer" | "organization" | "platform";
 
@@ -47,6 +48,7 @@ export function ApplicationShell({
   contextId,
   contextMeta,
   showOrganizationSwitcher = false,
+  workAreas = [],
   onLogout,
   children,
 }: {
@@ -58,6 +60,7 @@ export function ApplicationShell({
   contextId?: string;
   contextMeta?: string;
   showOrganizationSwitcher?: boolean;
+  workAreas?: readonly { id: ShellScope; href: string; label: string }[];
   onLogout: () => void;
   children: ReactNode;
 }) {
@@ -197,11 +200,11 @@ export function ApplicationShell({
         <div className={styles.sidebarTop}>
           <Link href="/" className={styles.brand} onClick={closeMenu}>
             <span className={styles.brandMark} aria-hidden="true">
-              <span />
+              <WorkspaceIcon name="store" size={21} />
             </span>
             <span className={styles.brandCopy}>
               <strong>UniStore Hub</strong>
-              <span>Campus Commerce</span>
+              <span>ร้านค้าและพรีออเดอร์ในมหาวิทยาลัย</span>
             </span>
           </Link>
 
@@ -348,6 +351,9 @@ export function ApplicationShell({
                               aria-current={active ? "page" : undefined}
                               onClick={closeMenu}
                             >
+                              <span className={styles.navIcon}>
+                                <WorkspaceIcon name={navigationIcon(item.href)} />
+                              </span>
                               <span className={styles.navText}>{item.label}</span>
                               <span
                                 className={styles.navState}
@@ -407,6 +413,32 @@ export function ApplicationShell({
         id="main-content"
         tabIndex={-1}
       >
+        <div className={styles.orientation} aria-label="ตำแหน่งในระบบ">
+          <div className={styles.orientationPath}>
+            <span className={styles.orientationArea}>{scopeLabel[shellScope]}</span>
+            <WorkspaceIcon name="chevron" size={13} />
+            <strong>{activeNavigation?.item.label ?? "หน้าหลัก"}</strong>
+          </div>
+          <nav className={styles.workAreaNavigation} aria-label="เปลี่ยนพื้นที่ใช้งาน">
+            {workAreas.map((area) => (
+              <Link
+                key={area.id}
+                href={area.href}
+                aria-current={area.id === shellScope ? "location" : undefined}
+                className={[
+                  styles.workAreaLink,
+                  area.id === shellScope ? styles.workAreaLinkCurrent : "",
+                ].filter(Boolean).join(" ")}
+              >
+                <WorkspaceIcon
+                  name={area.id === "customer" ? "store" : area.id === "organization" ? "organization" : "platform"}
+                  size={16}
+                />
+                <span>{area.label}</span>
+              </Link>
+            ))}
+          </nav>
+        </div>
         {children}
       </div>
     </div>

@@ -74,7 +74,7 @@ test("Organization Selector: 145-org search, role navigation, 503 retry, safe cr
   const s=await staff.newPage();
   force503=true;
   await s.goto(frontend+"/org/select/",{waitUntil:"domcontentloaded"});
-  await expect(s.getByRole("heading",{name:"เลือกหน่วยงานที่จะทำงาน",level:1})).toBeVisible();
+  await expect(s.getByRole("heading",{name:"วันนี้จะทำงานกับหน่วยงานไหน?",level:1})).toBeVisible();
   const retry=s.getByRole("button",{name:"ลองโหลดอีกครั้ง"});
   await expect(retry).toBeVisible();
   await proof(s,"FE-UX-13-01","staff","503-retry-offered","GET 503 has in-page Retry and H1");
@@ -109,7 +109,7 @@ test("Organization Selector: 145-org search, role navigation, 503 retry, safe cr
   await expect(p).toHaveURL(frontend+"/org/dashboard/?organizationId="+orgs[144]!.organizationId);
   await proof(p,"FE-UX-13-02","organizationAdmin","admin-scope","Admin selection routes to scoped Dashboard");
   await p.goto(frontend+"/org/select/",{waitUntil:"domcontentloaded"});
-  await expect(p.getByRole("heading",{name:"สร้างหน่วยงาน",level:2})).toBeVisible();
+  await expect(p.getByRole("heading",{name:"ต้องการพื้นที่ใหม่?",level:2})).toBeVisible();
   const name=p.getByRole("textbox",{name:"ชื่อหน่วยงาน"});
   const description=p.getByRole("textbox",{name:"คำอธิบาย"});
   await expect(name).toBeVisible();

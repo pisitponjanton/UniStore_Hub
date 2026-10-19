@@ -51,7 +51,7 @@ test("Payment Review selection, private slip, approve/reject cancel and invalid 
     await expect(page.getByRole("heading",{name:"ตรวจสอบการชำระเงิน",level:1})).toBeVisible({timeout:18000});
     await page.getByRole("button",{name:"ตรวจสอบ การชำระเงิน "+paymentId}).click();
     const detail=page.getByLabel("รายละเอียดการชำระเงิน");
-    await expect(detail.getByRole("heading",{name:"Payment "+paymentId})).toBeVisible();
+    await expect(detail.getByRole("heading",{name:"หลักฐานชำระเงิน "+paymentId.slice(0, 12)})).toBeVisible();
     await expect(detail).toContainText("28");
     await prove(page,"FE-UX-22-06","fresh-detail","Payment and Order details resolved through two distinct mocked GETs");
 

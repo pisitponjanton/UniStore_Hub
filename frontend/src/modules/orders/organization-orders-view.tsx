@@ -1,5 +1,7 @@
 "use client";
 
+import { StaffOperationNav } from "@/modules/operations/staff-operation-nav";
+
 import { AsyncPageFallback } from "@/components/ui/async-page";
 import { useQueueFilterFeedback } from "@/modules/operations/use-queue-filter-feedback";
 import { QueuePriorityControls, QueueFilterEmpty } from "@/modules/operations/queue-priority-controls";
@@ -319,6 +321,7 @@ export function OrganizationOrdersView({
   return (
     <div className={styles.page}>
       <main className={styles.main}>
+        <StaffOperationNav organizationId={organizationId} current="orders" />
         <header className={styles.header}>
           <div className={styles.headerCopy}>
             <h1 className={styles.title}>คำสั่งซื้อของหน่วยงาน</h1>
@@ -403,16 +406,16 @@ export function OrganizationOrdersView({
                   <div className={styles.rowMain}>
                     <div className={styles.rowHeading}>
                       <h3 className={styles.cardTitle} title={`Order ${order.orderId}`}>
-                        Order {order.orderId.slice(0, 12)}
+                        คำสั่งซื้อ {order.orderId.slice(0, 12)}
                       </h3>
                       <OrderStatusBadge status={order.status} />
                     </div>
                     <div className={styles.metaRow}>
                       <span className={styles.meta} title={`Customer: ${order.customerId}`}>
-                        Customer: {order.customerId.slice(0, 12)}
+                        ลูกค้า {order.customerId.slice(0, 12)}
                       </span>
                       <span className={styles.meta} title={`Campaign: ${order.campaignId}`}>
-                        Campaign: {order.campaignId.slice(0, 12)}
+                        รอบขาย {order.campaignId.slice(0, 12)}
                       </span>
                       <time className={styles.meta} dateTime={order.createdAt}>
                         สร้างเมื่อ {formatIsoDateTime(order.createdAt)}

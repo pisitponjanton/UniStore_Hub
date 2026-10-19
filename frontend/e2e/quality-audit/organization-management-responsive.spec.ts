@@ -21,7 +21,7 @@ test("nine Organization Admin routes and local search are responsive without wri
   });
   const org = "?organizationId=" + encodeURIComponent(ids.organizationId);
   const routes = [
-    { name: "selector", path: "/org/select/", h1: "เลือกหน่วยงานที่จะทำงาน", search: "organization-directory-search" },
+    { name: "selector", path: "/org/select/", h1: "วันนี้จะทำงานกับหน่วยงานไหน?", search: "organization-directory-search" },
     { name: "dashboard", path: "/org/dashboard/" + org, h1: "ภาพรวมหน่วยงาน" },
     { name: "settings", path: "/org/settings/" + org, h1: "ตั้งค่าหน่วยงาน" },
     { name: "staff", path: "/org/staff/" + org, h1: "บุคลากรและสิทธิ์", search: "staff-directory-search" },
@@ -31,7 +31,7 @@ test("nine Organization Admin routes and local search are responsive without wri
     { name: "production", path: "/org/production/" + org, h1: "สรุปงานผลิต" },
     { name: "audit", path: "/org/audit/" + org, h1: "ประวัติการทำรายการ", search: "audit-directory-search" },
   ] as const;
-  const dir = join("test-results", "quality-audit", "uxqa-" + randomUUID(), "phase4");
+  const dir = join("test-results", "quality-audit", "uxqa-" + randomUUID(), "organization-management");
   await mkdir(dir, { recursive: true });
   const observations: Array<Record<string, unknown>> = [];
   try {
@@ -52,6 +52,20 @@ test("nine Organization Admin routes and local search are responsive without wri
         await input.fill("");
         await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
       }
+      if (["production", "audit"].includes(route.name)) {
+        const opsNav = page.getByRole("navigation", { name: "ข้อมูลการดำเนินงานหน่วยงาน" });
+        await expect(opsNav).toBeVisible();
+        await expect(opsNav.locator('[aria-current="page"]'))
+          .toHaveText(route.name === "production" ? "สรุปงานผลิต" : "ประวัติรายการ");
+        for (const link of await opsNav.getByRole("link").all()) {
+          expect(new URL((await link.getAttribute("href"))!, frontend)
+            .searchParams.get("organizationId")).toBe(ids.organizationId);
+        }
+      }
+      if (route.name === "production") {
+        await expect(page.getByRole("link", { name: /เปิดรายการรอบขายเพื่อดูรหัส/ }))
+          .toHaveAttribute("href", /\/org\/campaigns\/\?organizationId=/);
+      }
       if (route.name === "audit") {
         await expect(page.getByRole("navigation", { name: "การสำรวจ Audit Log" }).getByRole("link", { name: /ตัวกรองขั้นสูง/ })).toHaveAttribute("href", "#audit-filter-title");
       }
@@ -60,7 +74,43 @@ test("nine Organization Admin routes and local search are responsive without wri
         await expect(shortcut).toBeVisible();
         await expect(shortcut.getByRole("link", { name: "สรุปงานผลิต" })).toHaveAttribute("href", /\/org\/production\/\?organizationId=/);
       }
+      if (["dashboard", "settings", "staff"].includes(route.name)) {
+        const managementNav = page.getByRole("navigation", { name: "พื้นที่จัดการหน่วยงาน" });
+        await expect(managementNav).toBeVisible();
+        const navLabels = { dashboard: "ภาพรวมงาน", settings: "ข้อมูลหน่วยงาน", staff: "สมาชิกและสิทธิ์" };
+        await expect(managementNav.locator('[aria-current="page"]'))
+          .toHaveText(navLabels[route.name as "dashboard" | "settings" | "staff"]);
+        const links = managementNav.locator('a[href*="organizationId"]');
+        await expect(links).toHaveCount(2);
+        for (const link of await links.all()) {
+          const href = await link.getAttribute("href");
+          expect(new URL(href!, frontend).searchParams.get("organizationId"))
+            .toBe(ids.organizationId);
+        }
+        await expect(managementNav.getByRole("link", { name: "เปลี่ยนหน่วยงาน" }))
+          .toHaveAttribute("href", /\/org\/select/);
+      }
+      if (["stores", "products", "campaigns"].includes(route.name)) {
+        const commerceNav = page.getByRole("navigation", { name: "จัดการการขายของหน่วยงาน" });
+        await expect(commerceNav).toBeVisible();
+        const expected = { stores: "ร้านค้า", products: "สินค้าและตัวเลือก", campaigns: "รอบการขาย" };
+        await expect(commerceNav.locator('[aria-current="page"]'))
+          .toHaveText(expected[route.name as "stores" | "products" | "campaigns"]);
+        const links = commerceNav.getByRole("link");
+        await expect(links).toHaveCount(2);
+        for (const link of await links.all()) {
+          const href = await link.getAttribute("href");
+          expect(new URL(href!, frontend).searchParams.get("organizationId")).toBe(ids.organizationId);
+        }
+      }
       if (route.name === "settings") {
+        const reference = page.getByText("ดูรหัสหน่วยงานและประวัติการอัปเดต", { exact: true });
+        await expect(reference).toBeVisible();
+        await expect(page.getByLabel("ข้อมูลอ้างอิงหน่วยงาน").getByText(ids.organizationId, { exact: true })).toBeHidden();
+        await reference.click();
+        await expect(page.getByLabel("ข้อมูลอ้างอิงหน่วยงาน").getByText(ids.organizationId, { exact: true })).toBeVisible();
+        await reference.click();
+        await expect(page.getByLabel("ข้อมูลอ้างอิงหน่วยงาน").getByText(ids.organizationId, { exact: true })).toBeHidden();
         const name = page.getByLabel("ชื่อหน่วยงาน");
         await expect(name).toBeVisible();
         const prior = await name.inputValue();
@@ -73,6 +123,12 @@ test("nine Organization Admin routes and local search are responsive without wri
       for (const [width, height] of [[320, 700], [390, 844], [768, 1024], [1440, 900]] as const) {
         await page.setViewportSize({ width, height });
         await page.waitForTimeout(100);
+        await page.evaluate(() => window.scrollTo(0, 0));
+        if (route.name === "staff" && width === 390) {
+          const columns = await page.locator('main section[aria-label="สรุปบุคลากร"]')
+            .evaluate(el => getComputedStyle(el).gridTemplateColumns.split(" ").filter(Boolean).length);
+          expect(columns).toBe(2);
+        }
         const result = await page.evaluate(() => ({
           heading: document.querySelector("main h1")?.textContent?.trim(),
           overflow: Math.max(0, document.documentElement.scrollWidth - innerWidth),
@@ -97,6 +153,26 @@ test("nine Organization Admin routes and local search are responsive without wri
         observations.push({ route: route.name, width, ...result, pageErrors: [...pageErrors] });
         await page.screenshot({ path: join(dir, route.name + "-" + width + ".png"), animations: "disabled" });
       }
+      if (route.name === "stores") {
+        const commerceNav = page.getByRole("navigation", { name: "จัดการการขายของหน่วยงาน" });
+        await commerceNav.getByRole("link", { name: "สินค้าและตัวเลือก" }).click();
+        await expect(page.getByRole("heading", { name: "สินค้าและตัวเลือก", level: 1 })).toBeVisible();
+        expect(new URL(page.url()).searchParams.get("organizationId")).toBe(ids.organizationId);
+        await page.getByRole("navigation", { name: "จัดการการขายของหน่วยงาน" })
+          .getByRole("link", { name: "รอบการขาย" }).click();
+        await expect(page.getByRole("heading", { name: "แคมเปญ", level: 1 })).toBeVisible();
+        expect(new URL(page.url()).searchParams.get("organizationId")).toBe(ids.organizationId);
+      }
+      if (route.name === "dashboard") {
+        const nav = page.getByRole("navigation", { name: "พื้นที่จัดการหน่วยงาน" });
+        await nav.getByRole("link", { name: "สมาชิกและสิทธิ์" }).click();
+        await expect(page.getByRole("heading", { name: "บุคลากรและสิทธิ์", level: 1 })).toBeVisible();
+        expect(new URL(page.url()).searchParams.get("organizationId")).toBe(ids.organizationId);
+        await page.getByRole("navigation", { name: "พื้นที่จัดการหน่วยงาน" })
+          .getByRole("link", { name: "ข้อมูลหน่วยงาน" }).click();
+        await expect(page.getByRole("heading", { name: "ตั้งค่าหน่วยงาน", level: 1 })).toBeVisible();
+        expect(new URL(page.url()).searchParams.get("organizationId")).toBe(ids.organizationId);
+      }
       await page.close();
     }
   } finally {
@@ -108,4 +184,36 @@ test("nine Organization Admin routes and local search are responsive without wri
   }, null, 2) + "\n");
   expect(observations).toHaveLength(36);
   expect(blockedWrites).toBe(0);
+});
+
+
+test("Staff cannot open Organization Admin management or commerce routes via direct URL", async ({ browser, request }) => {
+  test.setTimeout(100_000);
+  const { frontend } = localAuditTargets();
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: "reduce" });
+  await establishSeedRoleSession(ctx, request, "staff");
+  let attemptedWrites = 0;
+  await ctx.route("**/*", async route => {
+    if (!["GET", "HEAD", "OPTIONS"].includes(route.request().method())) {
+      attemptedWrites++;
+      await route.abort("blockedbyclient");
+      return;
+    }
+    await route.continue();
+  });
+  try {
+    for (const pageName of ["dashboard", "staff", "settings", "stores", "products", "campaigns", "production", "audit"]) {
+      const page = await ctx.newPage();
+      await page.goto(frontend + "/org/" + pageName + "/?organizationId=" + encodeURIComponent(ids.organizationId),
+        { waitUntil: "domcontentloaded" });
+      await expect(page.getByRole("heading", { name: "ไม่มีสิทธิ์เข้าถึง" })).toBeVisible({ timeout: 17000 });
+      await expect(page.getByRole("navigation", { name: "พื้นที่จัดการหน่วยงาน" })).toHaveCount(0);
+      await expect(page.getByRole("navigation", { name: "จัดการการขายของหน่วยงาน" })).toHaveCount(0);
+      await expect(page.getByRole("navigation", { name: "ข้อมูลการดำเนินงานหน่วยงาน" })).toHaveCount(0);
+      await page.close();
+    }
+    expect(attemptedWrites).toBe(0);
+  } finally {
+    await ctx.close();
+  }
 });

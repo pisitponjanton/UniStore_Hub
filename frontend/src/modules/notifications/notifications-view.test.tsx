@@ -210,7 +210,7 @@ describe("NotificationsView", () => {
     expect(screen.getByRole("link", { name: "ตรวจสอบและส่งหลักฐานใหม่" })).toHaveAttribute("href", "/my/payment?orderId=o-1");
     expect(screen.getByRole("link", { name: "เปิดข้อมูลรับสินค้า" })).toHaveAttribute("href", "/my/pickup?orderId=o-2");
     expect(screen.getByRole("link", { name: "ดูสถานะคำสั่งซื้อ" })).toHaveAttribute("href", "/my/order?orderId=o-3");
-    expect(screen.getAllByRole("link")).toHaveLength(3);
+    expect(screen.getByRole("region", { name: "รายการการแจ้งเตือน" }).querySelectorAll("a[href]")).toHaveLength(3);
   });
 
 });

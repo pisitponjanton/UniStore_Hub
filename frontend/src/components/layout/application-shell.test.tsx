@@ -297,4 +297,34 @@ describe("ApplicationShell accessibility", () => {
       screen.getByRole("link", { name: "เปลี่ยนหน่วยงาน" }),
     ).toHaveAttribute("href", "/org/select");
   });
+  it("shows only permitted workspace areas and keeps the current area identifiable", () => {
+    mocks.usePathname.mockReturnValue("/platform/summary/");
+    render(
+      <ApplicationShell
+        groups={[{
+          label: "ผู้ดูแลแพลตฟอร์ม",
+          items: [{ label: "ภาพรวมระบบ", href: "/platform/summary/" }],
+        }]}
+        workAreas={[
+          { id: "customer", href: "/", label: "ซื้อสินค้า" },
+          { id: "platform", href: "/platform/summary/", label: "ดูแลแพลตฟอร์ม" },
+        ]}
+        userName="Platform User"
+        userEmail="platform@example.com"
+        onLogout={vi.fn()}
+      >
+        <p>ข้อมูลภาพรวม</p>
+      </ApplicationShell>,
+    );
+
+    const workspaceNav = screen.getByRole("navigation", { name: "เปลี่ยนพื้นที่ใช้งาน" });
+    expect(within(workspaceNav).getAllByRole("link")).toHaveLength(2);
+    expect(within(workspaceNav).getByRole("link", { name: "ดูแลแพลตฟอร์ม" }))
+      .toHaveAttribute("aria-current", "location");
+    expect(within(workspaceNav).queryByRole("link", { name: "จัดการหน่วยงาน" }))
+      .not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "ภาพรวมระบบ" }))
+      .toHaveAttribute("aria-current", "page");
+  });
+
 });

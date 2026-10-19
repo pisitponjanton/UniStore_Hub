@@ -216,3 +216,13 @@
     padding: var(--space-4);
   }
 }
+
+/* Variants remain explicitly scoped to a selected product. */
+.root { border: 1px solid var(--line); border-radius: 11px; background: var(--surface); box-shadow: none; padding: 15px; }
+.header { gap: 10px; }
+.title { font-size: 1.07rem; font-weight: 790; }
+.layout { gap: 13px; }
+.row,.rowEditing { padding: 13px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); box-shadow: none; }
+.row:hover { transform: none; border-color: var(--brand-line); }
+.rowEditing { border-color: var(--brand-line); box-shadow: inset 3px 0 0 var(--brand); }
+@media(max-width:640px) { .root { padding: 12px; } .row,.rowEditing { padding: 12px; } }

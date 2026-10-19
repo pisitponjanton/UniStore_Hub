@@ -196,3 +196,14 @@
     width: 100%;
   }
 }
+
+/* Image proof is an explicit lifecycle. Network-ambiguous saves do not auto-repeat. */
+.root { border: 1px solid var(--line); border-radius: 11px; background: var(--surface); padding: 15px; box-shadow: none; }
+.header { gap: 10px; }
+.title { font-size: 1.07rem; font-weight: 790; }
+.currentMedia { border: 1px solid var(--line); border-radius: 10px; background: var(--surface-muted); }
+.progress { border: 1px solid var(--brand-line); border-radius: 11px; background: var(--brand-soft); padding: 13px; }
+.progressCurrent { color: var(--brand-strong); font-weight: 790; }
+.progressStep { border-radius: 9px; }
+.actions button { min-height: 44px; border-radius: 9px; }
+@media(max-width:640px) { .root { padding: 12px; } .progress { padding: 11px; } }

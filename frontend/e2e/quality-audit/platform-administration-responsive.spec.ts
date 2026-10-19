@@ -8,7 +8,7 @@ import { localAuditTargets } from "./fixture-guard";
 test("Platform Summary, organizations and users across responsive widths, search, filter and safe approval dialog", async ({ browser, request }) => {
   test.setTimeout(220_000);
   const { frontend } = localAuditTargets();
-  const evidenceDir = join("test-results", "quality-audit", "uxqa-" + randomUUID(), "phase5");
+  const evidenceDir = join("test-results", "quality-audit", "uxqa-" + randomUUID(), "platform-governance");
   await mkdir(evidenceDir, { recursive: true });
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: "reduce" });
   await establishSeedRoleSession(ctx, request, "platformAdmin");
@@ -36,6 +36,11 @@ test("Platform Summary, organizations and users across responsive widths, search
       page.on("pageerror", error => pageErrors.push(error.message));
       await page.goto(frontend + view.path, { waitUntil: "domcontentloaded" });
       await expect(page.getByRole("heading", { name: view.h1, level: 1 })).toBeVisible({ timeout: 20000 });
+      const workspaceNav = page.getByRole("navigation", { name: "ส่วนจัดการ Platform" });
+      await expect(workspaceNav).toBeVisible();
+      const activeLabels = { summary: "ภาพรวมระบบ", organizations: "หน่วยงาน", users: "ผู้ใช้" };
+      await expect(workspaceNav.locator('[aria-current="page"]')).toHaveText(activeLabels[view.name]);
+      await expect(workspaceNav.getByRole("link")).toHaveCount(2);
       if (view.name === "summary") {
         const nav = page.getByRole("navigation", { name: "งานระดับ Platform" });
         await expect(nav.getByRole("link", { name: /ตรวจสอบหน่วยงานรออนุมัติ/ })).toHaveAttribute("href", "/platform/organizations/");
@@ -80,6 +85,27 @@ test("Platform Summary, organizations and users across responsive widths, search
         await page.screenshot({ path: join(evidenceDir, view.name + "-" + width + ".png"), animations: "disabled" });
       }
 
+      if (view.name === "users") {
+        const firstUser = page.locator("main table tbody tr").first();
+        await page.setViewportSize({ width: 390, height: 844 });
+        await firstUser.scrollIntoViewIfNeeded();
+        const cardLayout = await firstUser.evaluate(row => ({
+          display: getComputedStyle(row).display,
+          cell: getComputedStyle(row.querySelector("td")!).display,
+          captionClipped: getComputedStyle(row.closest("table")!.querySelector("caption")!).clipPath,
+          overflow: Math.max(0, document.documentElement.scrollWidth - innerWidth),
+        }));
+        expect(cardLayout).toMatchObject({ display: "block", cell: "grid", captionClipped: "inset(50%)", overflow: 0 });
+        await page.screenshot({ path: join(evidenceDir, "users-directory-390.png"), animations: "disabled" });
+      }
+      if (view.name === "summary") {
+        const nav = page.getByRole("navigation", { name: "ส่วนจัดการ Platform" });
+        await nav.getByRole("link", { name: "หน่วยงาน" }).click();
+        await expect(page.getByRole("heading", { name: "จัดการหน่วยงาน", level: 1 })).toBeVisible();
+        await page.getByRole("navigation", { name: "ส่วนจัดการ Platform" })
+          .getByRole("link", { name: "ผู้ใช้" }).click();
+        await expect(page.getByRole("heading", { name: "ผู้ใช้ระดับ Platform", level: 1 })).toBeVisible();
+      }
       if (view.name === "organizations") {
         await page.setViewportSize({ width: 390, height: 844 });
         const list = page.getByLabel("รายการหน่วยงานทั้งหมด");
@@ -136,11 +162,12 @@ test("Organization Admin cannot read Platform-only directories", async ({ browse
     } else await route.continue();
   });
   try {
-    for (const route of ["/platform/organizations/", "/platform/users/"]) {
+    for (const route of ["/platform/summary/", "/platform/organizations/", "/platform/users/"]) {
       const page = await ctx.newPage();
       await page.goto(frontend + route, { waitUntil: "domcontentloaded" });
       await expect(page.getByText("ไม่มีสิทธิ์", { exact: false }).first()).toBeVisible({ timeout: 15000 });
       await expect(page.locator("#platform-organizations-search,#platform-users-search")).toHaveCount(0);
+      await expect(page.getByRole("navigation", { name: "ส่วนจัดการ Platform" })).toHaveCount(0);
       await page.close();
     }
     expect(writes).toBe(0);

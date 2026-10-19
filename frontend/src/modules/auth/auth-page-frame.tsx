@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { WorkspaceIcon } from "@/components/layout/workspace-icon";
 import type { ReactNode } from "react";
 
 import styles from "./auth-form.module.css";
@@ -17,37 +18,40 @@ export function AuthPageFrame({
       <section className={styles.intro} aria-label="UniStore Hub">
         <Link href="/" className={styles.brand} aria-label="UniStore Hub หน้าร้าน">
           <span className={styles.brandMark} aria-hidden="true">
-            <span />
+            <WorkspaceIcon name="store" size={21} />
           </span>
           <span className={styles.brandCopy}>
             <strong>UniStore Hub</strong>
-            <span>Campus marketplace</span>
+            <span>ร้านค้าและพรีออเดอร์ในมหาวิทยาลัย</span>
           </span>
         </Link>
 
         <div className={styles.introBody}>
           <div className={styles.introCopy}>
-            <span className={styles.introLabel}>บัญชีสำหรับ campus commerce</span>
+            <span className={styles.introLabel}>UNISTORE / บัญชีของคุณ</span>
             <h1 className={styles.introTitle}>{introTitle}</h1>
             <p className={styles.introDescription}>{introDescription}</p>
           </div>
 
           <section className={styles.accountJourney} aria-labelledby="account-journey-heading">
             <h2 className={styles.accountJourneyTitle} id="account-journey-heading">
-              บัญชีนี้ใช้ทำอะไรได้
+              ซื้อสินค้าแล้วทำอะไรต่อได้
             </h2>
             <ul className={styles.accountJourneyList}>
               <li className={styles.accountJourneyItem}>
-                <strong>สั่งซื้อ</strong>
-                <span>เลือกสินค้าและรอบขายที่เปิดรับ</span>
+                <span className={styles.accountJourneyNumber} aria-hidden="true">01</span>
+                <strong>เลือกร้าน</strong>
+                <span>ค้นหาสินค้าและรอบพรีออเดอร์</span>
               </li>
               <li className={styles.accountJourneyItem}>
-                <strong>ติดตาม</strong>
-                <span>ดูสถานะคำสั่งซื้อและการชำระเงิน</span>
+                <span className={styles.accountJourneyNumber} aria-hidden="true">02</span>
+                <strong>สั่งและชำระเงิน</strong>
+                <span>ตรวจยอดและติดตามสถานะ</span>
               </li>
               <li className={styles.accountJourneyItem}>
+                <span className={styles.accountJourneyNumber} aria-hidden="true">03</span>
                 <strong>รับสินค้า</strong>
-                <span>ดูข้อมูลรับสินค้าเมื่อรายการพร้อม</span>
+                <span>ดูจุดและข้อมูลรับสินค้าเมื่อพร้อม</span>
               </li>
             </ul>
           </section>

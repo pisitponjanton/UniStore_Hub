@@ -1,5 +1,7 @@
 "use client";
 
+import { OrganizationAdminNav } from "@/modules/organizations/organization-admin-nav";
+
 import { PageLoadingRows, PageStateHeading } from "@/components/ui/async-page";
 
 import Link from "next/link";
@@ -255,11 +257,14 @@ export function DashboardView({
   return (
     <div className={styles.page}>
       <main className={styles.main}>
+        <OrganizationAdminNav organizationId={organizationId} current="dashboard" />
         <header className={styles.header} data-has-attention={summary.pendingPaymentReviews > 0 || undefined}>
           <div className={styles.headerCopy}>
             <h1 className={styles.title}>ภาพรวมหน่วยงาน</h1>
             <p className={styles.description}>
-              เริ่มจากงานที่ต้องดูแลก่อน แล้วใช้รายงานด้านล่างเพื่อตรวจภาพรวมของร้านค้า แคมเปญ และคำสั่งซื้อ
+              {summary.pendingPaymentReviews > 0
+                ? "มีหลักฐานการชำระเงินที่ต้องตรวจ เริ่มจากคิวงานก่อน แล้วดูภาพรวมและรายงานของหน่วยงานด้านล่าง"
+                : "ไม่มีหลักฐานการชำระเงินค้างตรวจในรายงานนี้ ดูสถานะคำสั่งซื้อ ร้านค้า และงานอื่นของหน่วยงานได้ด้านล่าง"}
             </p>
           </div>
 

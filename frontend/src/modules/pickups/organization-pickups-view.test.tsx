@@ -84,7 +84,7 @@ function order(
 }
 
 async function openDetail() {
-  await screen.findByText("Pickup pickup-1");
+  await screen.findByText("รายการรับสินค้า pickup-1");
   fireEvent.click(
     screen.getByRole("button", {
       name: "ดูรายละเอียด Pickup pickup-1",
@@ -124,7 +124,7 @@ describe("OrganizationPickupsView", () => {
       <OrganizationPickupsView organizationId="org-1" />,
     );
 
-    await screen.findByText("Pickup pickup-1");
+    await screen.findByText("รายการรับสินค้า pickup-1");
 
     fireEvent.change(screen.getByLabelText("Pickup token"), {
       target: { value: "  token-search  " },

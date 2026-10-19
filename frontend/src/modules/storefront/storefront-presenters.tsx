@@ -102,9 +102,9 @@ export function CampaignCard({
     >
       <div className={styles.campaignVisual} aria-hidden="true">
         <span className={styles.campaignVisualLabel}>รอบพรีออเดอร์</span>
-        <span className={styles.campaignVisualName}>{campaign.name}</span>
+        <span className={styles.campaignVisualName}>กำหนดการรับคำสั่งซื้อ</span>
         <span className={styles.campaignVisualDate}>
-          เริ่ม {formatIsoDateTime(campaign.openAt)}
+          ปิดรับ {formatIsoDateTime(campaign.closeAt)}
         </span>
       </div>
 

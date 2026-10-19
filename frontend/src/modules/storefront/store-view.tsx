@@ -154,15 +154,22 @@ export function StoreView() {
   }
 
   const { store, products, campaigns } = state.data;
+  const openCampaigns = campaigns.filter((campaign) => campaign.status === "OPEN");
+  const orderedCampaigns = [
+    ...openCampaigns,
+    ...campaigns.filter((campaign) => campaign.status !== "OPEN"),
+  ];
 
   return (
     <div className={styles.page}>
       <StorefrontHeader />
 
       <main className={`${styles.main} ${styles.storeMain}`}>
-        <Link href="/" className={styles.backLink}>
-          ร้านค้าทั้งหมด
-        </Link>
+        <nav className={styles.breadcrumbs} aria-label="เส้นทางร้านค้า">
+          <Link href="/">ร้านค้าทั้งหมด</Link>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">{store.name}</span>
+        </nav>
 
         <section className={`${styles.hero} ${styles.storeHero}`}>
           <div className={styles.heroCopy}>
@@ -174,12 +181,18 @@ export function StoreView() {
                 เลือกดูสินค้าและแคมเปญที่ร้านนี้เปิดให้เข้าชม
               </p>
             )}
+            <p className={styles.storeReadiness} role="status">
+              <span className={openCampaigns.length ? styles.readinessDotActive : styles.readinessDot} aria-hidden="true" />
+              {openCampaigns.length > 0
+                ? "มี " + openCampaigns.length + " รอบที่เปิดรับคำสั่งซื้อ"
+                : "ยังไม่มีรอบที่เปิดรับคำสั่งซื้อ ตรวจสอบรายการสินค้าที่ร้านมีได้"}
+            </p>
             <nav className={styles.storeQuickLinks} aria-label="ทางลัดไปรายการในร้าน">
               <a href="#campaign-heading" className={styles.storeQuickLinkPrimary} onClick={(event) => focusStoreSection(event, "campaign-heading")}>
-                ดูแคมเปญ
+                ดูรอบพรีออเดอร์
               </a>
               <a href="#product-heading" className={styles.storeQuickLinkSecondary} onClick={(event) => focusStoreSection(event, "product-heading")}>
-                ดูสินค้า
+                เลือกดูสินค้า
               </a>
             </nav>
           </div>
@@ -187,7 +200,7 @@ export function StoreView() {
           <div className={styles.storeHeroAside}>
             <dl className={styles.heroMeta} aria-label="สรุปร้านค้า">
             <div>
-              <dt className={styles.metaLabel}>แคมเปญ</dt>
+              <dt className={styles.metaLabel}>รอบขายทั้งหมด</dt>
               <dd className={styles.metaValue} data-numeric>
                 {campaigns.length}
               </dd>
@@ -205,8 +218,9 @@ export function StoreView() {
         <section className={styles.section} aria-labelledby="campaign-heading">
           <div className={styles.sectionHeader}>
             <div>
+              <span className={styles.sectionKicker}>PRE-ORDER / รอบที่เปิดให้เข้าชม</span>
               <h2 className={styles.sectionTitle} id="campaign-heading" tabIndex={-1}>
-                แคมเปญของร้าน
+                รอบพรีออเดอร์ของร้าน
               </h2>
             </div>
             <p className={styles.sectionDescription}>
@@ -216,7 +230,7 @@ export function StoreView() {
 
           {campaigns.length > 0 ? (
             <div className={styles.cardGrid}>
-              {campaigns.map((campaign) => (
+              {orderedCampaigns.map((campaign) => (
                 <CampaignCard
                   campaign={campaign}
                   key={campaign.campaignId}
@@ -233,6 +247,7 @@ export function StoreView() {
         <section className={styles.section} aria-labelledby="product-heading">
           <div className={styles.sectionHeader}>
             <div>
+              <span className={styles.sectionKicker}>CATALOG / สินค้าที่มีให้ดู</span>
               <h2 className={styles.sectionTitle} id="product-heading" tabIndex={-1}>
                 สินค้าของร้าน
               </h2>

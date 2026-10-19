@@ -87,7 +87,7 @@ describe("ProductionSummaryView", () => {
     );
 
     expect(
-      screen.getByText("ระบุ Campaign ID ด้านบนเพื่อดูจำนวนสินค้าที่ต้องผลิต"),
+      screen.getByText("กรอกรหัสรอบขาย หรือไปยังหน้ารอบขายด้านบนเพื่อค้นหารอบที่ต้องการ ก่อนโหลดจำนวนสินค้าที่ต้องเตรียม"),
     ).toBeInTheDocument();
     expect(mocks.getSummary).not.toHaveBeenCalled();
   });

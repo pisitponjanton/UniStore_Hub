@@ -53,7 +53,7 @@ test("Payment Review approval/rejection state matrix: pending, 409, success, foc
    await expect(select).toBeVisible();
    await select.click();
    const detail=page.getByLabel("รายละเอียดการชำระเงิน");
-   await expect(detail.getByRole("heading",{name:"Payment "+paymentId})).toBeVisible();
+   await expect(detail.getByRole("heading",{name:"หลักฐานชำระเงิน "+paymentId.slice(0, 12)})).toBeVisible();
    return detail;
   }
   let detail=await select();

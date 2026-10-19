@@ -123,7 +123,7 @@ for(const role of ["staff","organizationAdmin","platformAdmin"] as Role[]){
     await expect(orgLink).toHaveAttribute("href","/org/select/");
     await orgLink.click();
     await expect(page).toHaveURL(frontend+"/org/select/");
-    await expect(page.getByRole("heading",{name:"เลือกหน่วยงานที่จะทำงาน",level:1})).toBeVisible();
+    await expect(page.getByRole("heading",{name:"วันนี้จะทำงานกับหน่วยงานไหน?",level:1})).toBeVisible();
     await capture(page,sourceId+(role==="staff"?"-06":"-14"),"organization-switch","Role authorized Organization switch opens the correct selector");
     await page.goto(frontend+initial,{waitUntil:"domcontentloaded"});
     await expect(page.getByRole("button",{name:"เปิดเมนูหลัก"})).toBeVisible();

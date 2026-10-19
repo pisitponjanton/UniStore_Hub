@@ -1,0 +1,65 @@
+{
+  "scope": "Bounded browser design-quality coverage; not exhaustive action-state/production signoff",
+  "canonicalRoutes": 28,
+  "authorizedRouteRolePairs": 39,
+  "viewports": [
+    320,
+    390,
+    768,
+    1024,
+    1440
+  ],
+  "primaryRoleViewportChecks": 140,
+  "secondaryRoleViewportChecks": 55,
+  "totalRouteRoleViewportChecks": 195,
+  "primaryOutcomes": {
+    "CAPTURED": 140
+  },
+  "axeWCAG22AA": "0 violations in 39 route-role checks at 390px using supported axe tags",
+  "routeRolePageErrors": 0,
+  "blockedApiWrites": 0,
+  "darkThemeRepresentativeRoutes": 5,
+  "themeAnd200PercentRootTextChecks": 10,
+  "representativeModalScenarios": 3,
+  "modalBrowserEngines": [
+    "chromium",
+    "firefox",
+    "webkit"
+  ],
+  "modalThemes": [
+    "light",
+    "dark"
+  ],
+  "modalWidths": [
+    320,
+    390,
+    768,
+    1440
+  ],
+  "modalEvaluatedCombinations": 72,
+  "sourceDeclaredActionIds": 257,
+  "actionsAllRoleStateCertified": 0,
+  "status": {
+    "primaryRouteRoleViewport": "PASS",
+    "additionalAuthorizedRouteRoleViewport": "PASS",
+    "darkThemeContrastRepresentatives": "PASS",
+    "modalOpenEscapeFocusFixture": "PASS",
+    "all257ActionsAllRoleState": "NOT_TESTED",
+    "nativeBrowserZoom200Percent": "NOT_TESTED",
+    "physicalDevices": "NOT_TESTED",
+    "voiceOverNVDA": "NOT_TESTED",
+    "persistentBackendBusinessMutations": "NOT_TESTED"
+  },
+  "fixes": [
+    "Storefront input and select on light fixed backgrounds now use explicit dark readable ink in dark theme",
+    "Organization selector count uses direct second-span dark text selector independent of additional jump link",
+    "Shell test asserted updated organization selector heading"
+  ],
+  "evidencePaths": [
+    "frontend/quality-audit/.evidence/design-quality/responsive-28routes-5widths.json",
+    "frontend/quality-audit/.evidence/design-quality/theme-200pct-matrix.json",
+    "frontend/quality-audit/.evidence/design-quality/secondary-roles-6c9df298-6e55-4975-bd57-31c10e23991c/secondary-route-role-matrix.json",
+    "frontend/e2e/quality-audit/multi-role-modal-accessibility.spec.ts",
+    "frontend/e2e/quality-audit/shared-page-states.spec.ts"
+  ]
+}

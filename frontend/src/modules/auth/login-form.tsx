@@ -20,7 +20,7 @@ import {
   validateLoginFields,
   type AuthFieldErrors,
 } from "./auth-validation";
-import { getAuthReturnPath } from "./return-route";
+import { describeAuthReturnDestination, getAuthReturnPath } from "./return-route";
 import { authSession } from "./session";
 import { useAuthNavigationContext } from "./use-auth-navigation-context";
 
@@ -90,16 +90,18 @@ export function LoginForm() {
   return (
     <div className={styles.formShell}>
       <div className={styles.headingGroup}>
-        <h2 className={styles.title}>เข้าสู่บัญชีของคุณ</h2>
+        <h2 className={styles.title}>เข้าสู่ระบบเพื่อทำรายการต่อ</h2>
         <p className={styles.description}>
-          ใช้อีเมลและรหัสผ่านเดิมเพื่อกลับไปดูรายการที่กำลังดำเนินการ
+          ใช้อีเมลและรหัสผ่านที่สมัครไว้ เพื่อดูคำสั่งซื้อหรือกลับไปยังรายการที่ค้างอยู่
         </p>
       </div>
 
       {navigation.hasReturnContext ? (
-        <Notice tone="info" title="ทำรายการเดิมต่อได้ทันที">
-          หลังเข้าสู่ระบบ ระบบจะพาคุณกลับไปยังหน้าที่กำลังใช้งานก่อนหน้านี้
-        </Notice>
+        <div className={styles.continueContext} role="status">
+          <span className={styles.continueContextLabel}>ขั้นตอนที่คุณกำลังจะกลับไป</span>
+          <strong>{describeAuthReturnDestination(navigation.returnPath)}</strong>
+          <small>{"เข้าสู่ระบบสำเร็จแล้วระบบจะพากลับไปยังหน้านั้น"}</small>
+        </div>
       ) : null}
 
       <form className={styles.form} onSubmit={handleSubmit} noValidate>

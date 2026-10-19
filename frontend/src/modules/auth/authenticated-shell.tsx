@@ -65,6 +65,27 @@ export function AuthenticatedShell({
     organizationId,
   });
 
+  const activeMemberships = auth.memberships.filter(
+    (item) => item.status === "ACTIVE",
+  );
+  const workAreas = [
+    { id: "customer" as const, href: "/", label: "ซื้อสินค้า" },
+    ...(activeMemberships.length > 0
+      ? [{
+          id: "organization" as const,
+          href: "/org/select/",
+          label: "จัดการหน่วยงาน",
+        }]
+      : []),
+    ...(auth.user.platformRole === "PLATFORM_ADMIN"
+      ? [{
+          id: "platform" as const,
+          href: "/platform/summary/",
+          label: "ดูแลแพลตฟอร์ม",
+        }]
+      : []),
+  ];
+
   return (
     <ApplicationShell
       groups={groups}
@@ -86,9 +107,8 @@ export function AuthenticatedShell({
             : "สิทธิ์: เจ้าหน้าที่"
           : undefined
       }
-      showOrganizationSwitcher={auth.memberships.some(
-        (item) => item.status === "ACTIVE",
-      )}
+      showOrganizationSwitcher={activeMemberships.length > 0}
+      workAreas={workAreas}
       onLogout={() => {
         authSession.logout();
         router.push("/");

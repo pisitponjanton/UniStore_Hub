@@ -1,5 +1,7 @@
 "use client";
 
+import { OrganizationAdminNav } from "@/modules/organizations/organization-admin-nav";
+
 import { AsyncPageFallback } from "@/components/ui/async-page";
 import { LoadedDirectoryControls } from "@/modules/organization-directory/loaded-directory-controls";
 import { searchLoadedItems, visibleLoadedItems } from "@/modules/organization-directory/loaded-directory-helpers";
@@ -341,11 +343,12 @@ export function StaffView({
   return (
     <div className={styles.page}>
       <main className={styles.main}>
+        <OrganizationAdminNav organizationId={organizationId} current="staff" />
         <header className={styles.header}>
           <div className={styles.headerCopy}>
             <h1 className={styles.title}>บุคลากรและสิทธิ์</h1>
             <p className={styles.description}>
-              เพิ่มผู้ใช้ที่มีบัญชีอยู่แล้ว กำหนดบทบาท และจัดการสมาชิกของหน่วยงาน
+              เริ่มจากค้นหาสมาชิกและตรวจสิทธิ์ปัจจุบัน การเปลี่ยนบทบาทหรือนำสมาชิกออกต้องยืนยันก่อนทุกครั้ง
             </p>
           </div>
         </header>
@@ -396,7 +399,7 @@ export function StaffView({
                   สมาชิกในหน่วยงาน
                 </h2>
                 <p className={styles.sectionDescription}>
-                  การเปลี่ยนบทบาทและการนำออกต้องยืนยันก่อนทุกครั้ง
+                  ค้นหาจากรายชื่อที่โหลดแล้ว ตรวจบทบาทและสถานะก่อนดำเนินการ
                 </p>
               </div>
               <span className={styles.sectionMeta}>
@@ -551,7 +554,7 @@ export function StaffView({
             <div className={styles.panelHeading}>
               <h2 className={styles.sectionTitle}>เพิ่มสมาชิก</h2>
               <p className={styles.sectionDescription}>
-                ใช้อีเมลของผู้ใช้ที่สมัครบัญชี UniStore Hub แล้ว
+                เพิ่มเฉพาะผู้ที่สมัครบัญชีไว้แล้ว และตรวจบทบาทก่อนกดยืนยันเพิ่มสมาชิก
               </p>
             </div>
 

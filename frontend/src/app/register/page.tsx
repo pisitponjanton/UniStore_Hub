@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 export default function RegisterPage() {
   return (
     <AuthPageFrame
-      introTitle="สร้างบัญชีสำหรับซื้อสินค้าใน UniStore Hub"
+      introTitle="สั่งซื้อและติดตามสินค้าได้ในที่เดียว"
       introDescription="ใช้บัญชีเดียวเพื่อสั่งสินค้า ติดตามการชำระเงิน และดูข้อมูลรับสินค้า พื้นที่หน่วยงานจะแสดงตามสิทธิ์ที่บัญชีได้รับ"
     >
       <AuthEntryState>

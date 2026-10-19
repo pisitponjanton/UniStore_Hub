@@ -2,20 +2,20 @@
   color-scheme: light;
 
   /* Editorial commerce — restrained semantic surfaces and status tokens */
-  --canvas: #f6f6f4;
+  --canvas: #f7f7f3;
   --surface: #ffffff;
   --surface-raised: #ffffff;
-  --surface-muted: #f0f0ee;
-  --surface-inset: #f8f8f7;
-  --surface-strong: #e5e5e3;
-  --surface-hover: #f3f2f0;
-  --surface-selected: #f0ecfa;
+  --surface-muted: #f1f3ef;
+  --surface-inset: #fafaf8;
+  --surface-strong: #dce5df;
+  --surface-hover: #f0f5f1;
+  --surface-selected: #e0f1ed;
 
   /* Text */
-  --ink: #1e1d23;
-  --ink-secondary: #55535f;
-  --ink-tertiary: #716e7c;
-  --ink-muted: #817a8e;
+  --ink: #152c30;
+  --ink-secondary: #475c5e;
+  --ink-tertiary: #556b6d;
+  --ink-muted: #64787b;
   --ink-inverse: #ffffff;
 
   /* Structure */
@@ -26,13 +26,13 @@
   --control-line-hover: rgb(31 27 45 / 60%);
 
   /* Brand */
-  --brand: #603bbd;
-  --brand-hover: #4b2d98;
-  --brand-strong: #392073;
-  --brand-soft: #eeeaf8;
-  --brand-soft-strong: #e4dcf5;
+  --brand: #145e63;
+  --brand-hover: #0d484d;
+  --brand-strong: #0a4045;
+  --brand-soft: #e2f1ed;
+  --brand-soft-strong: #cce8e1;
   --brand-on: #ffffff;
-  --brand-line: #c7b8ef;
+  --brand-line: #9acac0;
 
   /* Compatibility aliases while route-level v3 rollout is in progress. */
   --campus: var(--brand);
@@ -68,8 +68,8 @@
   --info-line: color-mix(in srgb, var(--info) 28%, var(--line));
 
   /* Interaction */
-  --focus: #6d3ae0;
-  --selection: #ded2ff;
+  --focus: #147a84;
+  --selection: #cae9e2;
   --overlay-scrim: rgb(20 14 36 / 58%);
   --media-paper: #ffffff;
   --media-paper-line: rgb(31 27 45 / 12%);
@@ -87,11 +87,11 @@
   --on-dark-surface-hover: rgb(255 255 255 / 16%);
 
   /* Controlled gradient families */
-  --gradient-hero: linear-gradient(128deg, #171421 0%, #30223d 58%, #322359 100%);
+  --gradient-hero: linear-gradient(128deg, #10282b 0%, #164a4f 100%);
   --gradient-ambient: linear-gradient(135deg, #f4edff 0%, #eaf7ff 52%, #eaf8f0 100%);
   --gradient-warm: linear-gradient(135deg, #fff1ba 0%, #ffe2d6 52%, #ede7ff 100%);
   --gradient-premium: linear-gradient(130deg, #171421 0%, #30243e 100%);
-  --gradient-brand-soft: linear-gradient(135deg, #f6f4fa 0%, #f7f7f6 100%);
+  --gradient-brand-soft: linear-gradient(135deg, #ecf4f0 0%, #f7f7f3 100%);
   --gradient-product-panel:
     linear-gradient(
       135deg,
@@ -107,7 +107,7 @@
   --gradient-surface-subtle: linear-gradient(135deg, #ffffff 0%, #fafaf9 100%);
   --gradient-attention-row: linear-gradient(90deg, #fff7df 0%, #ffffff 72%);
   --gradient-ops-canvas:
-    linear-gradient(180deg, #f7f5ff 0, #f7f5ff 220px, #fbfaff 520px, #f7f5ff 100%);
+    linear-gradient(180deg, #eef4f1 0, #f7f8f4 230px, #f7f7f3 100%);
   --canvas-customer-ambient:
     var(--canvas);
 
@@ -177,7 +177,7 @@
   --page-gutter-compact: 16px;
   --page-block-start: 32px;
   --page-block-end: 72px;
-  --sidebar-width: 264px;
+  --sidebar-width: 276px;
 
   /* Density calibration */
   --density-customer: 1;
@@ -203,8 +203,8 @@
   --shadow-feature: 0 12px 34px rgb(20 18 33 / 9%);
   --shadow-floating: var(--shadow-raised);
   --shadow-overlay: 0 28px 70px rgb(20 14 36 / 24%);
-  --shadow-action: 0 5px 14px rgb(45 28 82 / 12%);
-  --shadow-action-hover: 0 7px 17px rgb(45 28 82 / 17%);
+  --shadow-action: 0 3px 10px rgb(13 72 77 / 11%);
+  --shadow-action-hover: 0 6px 16px rgb(13 72 77 / 16%);
   --shadow-media: 0 12px 22px rgb(20 18 33 / 9%);
   --shadow-media-strong: 0 18px 30px rgb(20 18 33 / 12%);
   --shadow-media-soft: 0 7px 18px rgb(20 18 33 / 7%);
@@ -233,19 +233,19 @@
   :root {
     color-scheme: dark;
 
-    --canvas: #151220;
-    --surface: #1b1727;
-    --surface-raised: #211c30;
-    --surface-muted: #282239;
-    --surface-inset: #100d18;
-    --surface-strong: #332c44;
-    --surface-hover: #282239;
-    --surface-selected: #33264a;
+    --canvas: #101e23;
+    --surface: #1c2c31;
+    --surface-raised: #24363b;
+    --surface-muted: #263d42;
+    --surface-inset: #13282e;
+    --surface-strong: #354c51;
+    --surface-hover: #263d42;
+    --surface-selected: #224c4d;
 
-    --ink: #f5f1ff;
-    --ink-secondary: #c8c1d8;
-    --ink-tertiary: #a39bad;
-    --ink-muted: #8e859a;
+    --ink: #f4f8f6;
+    --ink-secondary: #c4d8d4;
+    --ink-tertiary: #aecbc5;
+    --ink-muted: #93b4ae;
     --ink-inverse: #17101f;
 
     --line: rgb(245 241 255 / 14%);
@@ -254,13 +254,13 @@
     --control-line: rgb(245 241 255 / 38%);
     --control-line-hover: rgb(245 241 255 / 58%);
 
-    --brand: #b39cff;
-    --brand-hover: #c2b0ff;
-    --brand-strong: #ded2ff;
-    --brand-soft: #282239;
-    --brand-soft-strong: #3c3155;
-    --brand-on: #17101f;
-    --brand-line: #5e4b87;
+    --brand: #8cdbce;
+    --brand-hover: #b1ede0;
+    --brand-strong: #d0f6ed;
+    --brand-soft: #234348;
+    --brand-soft-strong: #2c5c60;
+    --brand-on: #10272c;
+    --brand-line: #508780;
 
     --accent-lavender: #33264a;
     --accent-sky: #19344d;
@@ -284,8 +284,8 @@
     --info: #8ccbff;
     --info-soft: #17304a;
 
-    --focus: #b39cff;
-    --selection: #3c3155;
+    --focus: #92eadb;
+    --selection: #2c5c60;
     --overlay-scrim: rgb(7 5 13 / 72%);
     --media-paper: #f8f6fc;
     --media-paper-line: rgb(0 0 0 / 14%);
@@ -309,7 +309,7 @@
     --gradient-surface-subtle: linear-gradient(135deg, #1b1727 0%, #211c30 100%);
     --gradient-attention-row: linear-gradient(90deg, #342814 0%, #1b1727 72%);
     --gradient-ops-canvas:
-      linear-gradient(180deg, #151220 0, #151220 220px, #1b1727 520px, #151220 100%);
+      linear-gradient(180deg, #111f24 0, #172a2f 250px, #101e23 100%);
     --canvas-customer-ambient:
       radial-gradient(circle at 12% 12%, rgb(25 52 77 / 42%), transparent 30%),
       radial-gradient(circle at 86% 24%, rgb(53 32 100 / 42%), transparent 32%),

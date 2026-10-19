@@ -1388,3 +1388,36 @@
 /* Keep terminal customer cancellation feedback visible after modal exit. */
 .focusableOrderFeedback { scroll-margin-top: 108px; outline: none; }
 .focusableOrderFeedback:focus-visible { outline: 3px solid currentColor; outline-offset: 3px; }
+
+/* Buyer inbox first: actionable items and the next safe step are the visual anchor. */
+.header, .detailHero {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: none;
+  border-radius: 16px;
+}
+.header::before, .header::after, .detailHero::before, .detailHero::after { content: none; display: none; }
+.header .title, .detailHero .title { color: var(--ink); font-weight: 800; letter-spacing: -.035em; }
+.orderOverview { border: 1px solid var(--line); background: var(--surface); padding: 14px; border-radius: 13px; }
+.overviewPrimary[data-has-attention="true"] { background: var(--brand-soft); border-radius: 9px; }
+.overviewPrimary[data-has-attention="true"] strong { color: var(--brand-strong); }
+.orderLedger { gap: 11px; }
+.orderRow { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); box-shadow: none; }
+.orderRow[data-needs-action="true"] { border-color: var(--brand-line); box-shadow: inset 3px 0 0 var(--brand); }
+.orderRow:hover { transform: none; border-color: var(--brand-line); box-shadow: inset 3px 0 0 var(--brand); }
+.orderNextStep { color: var(--ink); font-size: 1.05rem; font-weight: 780; }
+.orderId, .orderCode { font-size: .7rem; overflow-wrap: anywhere; }
+.detailHero { align-items: center; }
+.detailAmount { box-shadow: none; background: var(--brand-soft); border-radius: 11px; border: 1px solid var(--brand-line); }
+.detailAmount .totalValue { color: var(--brand-strong); }
+.currentState { margin-top: -1px; }
+.journeySection, .orderContext, .totalPanel, .orderTools { box-shadow: none; }
+.journeyList { gap: 9px; }
+.journeyStep { border: 1px solid var(--line); border-radius: 10px; }
+.journeyStep[data-state="current"] { background: var(--brand-soft); border-color: var(--brand-line); }
+@media (max-width: 760px) {
+  .header, .detailHero { padding: 17px; }
+  .orderOverview { padding: 10px; }
+  .orderRow { padding: 13px; }
+  .detailAmount { min-height: 0; padding: 12px; }
+}

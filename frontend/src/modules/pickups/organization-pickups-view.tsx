@@ -1,5 +1,7 @@
 "use client";
 
+import { StaffOperationNav } from "@/modules/operations/staff-operation-nav";
+
 import { AsyncPageFallback } from "@/components/ui/async-page";
 import { useQueueFilterFeedback } from "@/modules/operations/use-queue-filter-feedback";
 import { QueuePriorityControls, QueueFilterEmpty } from "@/modules/operations/queue-priority-controls";
@@ -534,6 +536,7 @@ export function OrganizationPickupsView({
   return (
     <div className={styles.page}>
       <main className={styles.main}>
+        <StaffOperationNav organizationId={organizationId} current="pickups" />
         <header className={styles.header}>
           <div className={styles.headerCopy}>
             <h1 className={styles.title}>จุดรับสินค้า</h1>
@@ -641,7 +644,7 @@ export function OrganizationPickupsView({
                       <div className={styles.rowMain}>
                         <div className={styles.rowHeading}>
                           <h3 className={styles.cardTitle} title={`Pickup ${pickup.pickupId}`}>
-                            Pickup {pickup.pickupId.slice(0, 12)}
+                            รายการรับสินค้า {pickup.pickupId.slice(0, 12)}
                           </h3>
                           <Badge tone={pickupTone(pickup.status)}>
                             {getPickupStatusLabel(pickup.status)}
@@ -653,7 +656,7 @@ export function OrganizationPickupsView({
                             {pickup.token}
                           </span>
                           <span className={styles.meta}>
-                            Order: {pickup.orderId.slice(0, 12)}
+                            คำสั่งซื้อ {pickup.orderId.slice(0, 12)}
                           </span>
                           <time className={styles.meta} dateTime={pickup.updatedAt}>
                             อัปเดต {formatIsoDateTime(pickup.updatedAt)}
@@ -725,7 +728,7 @@ export function OrganizationPickupsView({
                       รายการที่กำลังตรวจสอบ
                     </span>
                     <h2 className={styles.detailTitle}>
-                      Pickup {selected.pickup.pickupId}
+                      รายการรับสินค้า {selected.pickup.pickupId.slice(0, 12)}
                     </h2>
                   </div>
 
@@ -739,7 +742,7 @@ export function OrganizationPickupsView({
                 </div>
 
                 <div className={styles.tokenPanel}>
-                  <span className={styles.tokenLabel}>Pickup token</span>
+                  <span className={styles.tokenLabel}>รหัสรับสินค้า</span>
                   <strong className={styles.tokenValue}>
                     {selected.pickup.token}
                   </strong>
@@ -904,9 +907,9 @@ export function OrganizationPickupsView({
               </div>
             ) : (
               <div className={styles.emptyDetail}>
-                <strong>เลือก Pickup เพื่อเริ่มตรวจสอบ</strong>
+                <strong>เลือกรายการเพื่อเริ่มตรวจรับสินค้า</strong>
                 <span>
-                  ระบบจะโหลด Pickup และ Order ล่าสุดก่อนเปิด action ยืนยันรับสินค้า
+                  ระบบจะตรวจข้อมูลรับสินค้าและคำสั่งซื้อล่าสุดก่อนเปิดปุ่มยืนยัน
                 </span>
               </div>
             )}

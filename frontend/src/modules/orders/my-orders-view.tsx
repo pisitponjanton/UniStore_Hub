@@ -1,5 +1,7 @@
 "use client";
 
+import { CustomerJourneyNav } from "./customer-journey-nav";
+
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -251,6 +253,7 @@ export function MyOrdersView() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
+        <CustomerJourneyNav current="orders" />
         <header className={styles.header}>
           <div className={styles.headerCopy}>
             <h1 className={styles.title}>คำสั่งซื้อของฉัน</h1>

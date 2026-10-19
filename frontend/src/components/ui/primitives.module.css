@@ -1145,3 +1145,36 @@
 }
 .stateFallbackLink:hover { background: var(--surface-muted); }
 .stateFallbackLink:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+
+/* Foundation control system — consistent focus, elevation and touch feedback */
+.button {
+  border-radius: 11px;
+  font-weight: 725;
+  box-shadow: none;
+}
+.buttonPrimary {
+  box-shadow: none;
+}
+.buttonPrimary:hover:not(:disabled) {
+  box-shadow: 0 5px 15px rgb(9 64 69 / 14%);
+}
+.buttonSecondary {
+  border-color: var(--brand-line);
+}
+.button:disabled {
+  opacity: .65;
+}
+.fieldControl {
+  border-radius: 11px;
+  background: var(--surface);
+  box-shadow: none;
+}
+.fieldLabel { font-weight: 700; }
+.overlay { backdrop-filter: blur(3px); }
+.dialogContent {
+  border: 1px solid var(--line);
+  box-shadow: 0 28px 70px rgb(11 36 40 / 21%);
+}
+@media (prefers-reduced-motion: reduce) {
+  .button, .fieldControl { transition: none; }
+}

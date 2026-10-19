@@ -1,0 +1,76 @@
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 20px;
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: var(--surface);
+}
+.navIntro {
+  min-width: 135px;
+  display: grid;
+  gap: 2px;
+}
+.navCaption {
+  color: var(--brand-strong);
+  font-size: .63rem;
+  font-weight: 780;
+  letter-spacing: .09em;
+}
+.navIntro strong { color: var(--ink); font-size: .81rem; font-weight: 780; }
+.tabList { min-width: 0; display: flex; flex-wrap: wrap; gap: 5px; }
+.tab {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 13px;
+  border-radius: 9px;
+  color: var(--ink-secondary);
+  background: transparent;
+  font-size: .8rem;
+  font-weight: 720;
+  white-space: nowrap;
+}
+a.tab:hover { background: var(--surface-muted); text-decoration: none; color: var(--ink); }
+.tab[data-active="true"] { background: var(--brand-soft); color: var(--brand-strong); }
+.contextLink {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  gap: 5px;
+  color: var(--brand-strong);
+  font-size: .79rem;
+  font-weight: 760;
+  text-underline-offset: 3px;
+}
+.contextLink:hover { text-decoration: underline; }
+.nav a:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+@media (max-width: 760px) {
+  .nav { padding: 9px; gap: 5px 9px; }
+  .navIntro { width: 100%; min-width: 0; padding: 3px 6px; gap: 0; }
+  .navIntro strong { display: none; }
+  .tabList { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); width: 100%; gap: 3px; }
+  .tab { min-width: 0; padding: 9px 4px; font-size: .73rem; white-space: normal; text-align: center; }
+  .contextLink { margin-left: 6px; min-height: 34px; font-size: .75rem; }
+}
+@media (max-width: 340px) {
+  .tab { font-size: .7rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav a { transition: none; }
+}
+
+
+/* The authenticated application shell already tells users where they are.
+   Keep this secondary cross-task navigation to one light row on small devices. */
+@media (max-width: 760px) {
+  .nav { padding: 4px; gap: 2px; border-radius: 10px; }
+  .navIntro { display: none; }
+  .tabList { gap: 1px; }
+  .tab { min-height: 38px; padding: 6px 3px; }
+  .contextLink { display: none; }
+}

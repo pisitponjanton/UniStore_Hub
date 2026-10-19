@@ -59,6 +59,23 @@ test("Audit filters, metadata, cursor, server 503 and recovery with zero writes"
     const page=await ctx.newPage();
     await page.goto(frontend+"/org/audit/?organizationId="+ids.organizationId,{waitUntil:"domcontentloaded"});
     await expect(page.getByRole("heading",{name:"ประวัติการทำรายการ",level:1})).toBeVisible({timeout:16000});
+    const cardReadability=await page.evaluate(()=>{
+      const table=document.querySelector("main table");
+      const row=table?.querySelector("tbody tr");
+      const cell=row?.querySelector("td");
+      const caption=table?.querySelector("caption");
+      return {
+        tableWidth:table?.getBoundingClientRect().width??0,
+        rowDisplay:row?getComputedStyle(row).display:null,
+        cellDisplay:cell?getComputedStyle(cell).display:null,
+        captionClipped:caption?getComputedStyle(caption).clipPath:null,
+        overflow:Math.max(0,document.documentElement.scrollWidth-innerWidth),
+      };
+    });
+    expect(cardReadability.overflow).toBeLessThanOrEqual(1);
+    expect(cardReadability.rowDisplay).toBe("block");
+    expect(cardReadability.cellDisplay).toBe("grid");
+    expect(cardReadability.captionClipped).toBe("inset(50%)");
     const details=page.locator("main details").first();
     await details.locator("summary").click();await expect(details).toHaveAttribute("open","");
     await expect(details.locator("pre")).toContainText('"source": "synthetic-read-only"');

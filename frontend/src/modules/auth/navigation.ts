@@ -164,41 +164,14 @@ export function buildOrganizationNavigationGroups(
 
   return [
     {
-      label: "หน่วยงาน",
-      items: [
-        {
-          label: "แดชบอร์ด",
-          href: withOrganization("/org/dashboard/", organizationId),
-        },
-        {
-          label: "ข้อมูลหน่วยงาน",
-          href: withOrganization("/org/settings/", organizationId),
-        },
-        {
-          label: "บุคลากร",
-          href: withOrganization("/org/staff/", organizationId),
-        },
-      ],
+      label: "เริ่มงาน",
+      items: [{
+        label: "แดชบอร์ด",
+        href: withOrganization("/org/dashboard/", organizationId),
+      }],
     },
     {
-      label: "ร้านค้าและแคมเปญ",
-      items: [
-        {
-          label: "ร้านค้า",
-          href: withOrganization("/org/stores/", organizationId),
-        },
-        {
-          label: "สินค้า",
-          href: withOrganization("/org/products/", organizationId),
-        },
-        {
-          label: "แคมเปญ",
-          href: withOrganization("/org/campaigns/", organizationId),
-        },
-      ],
-    },
-    {
-      label: "งานปฏิบัติการ",
+      label: "คำสั่งซื้อและการส่งมอบ",
       items: [
         ...organizationOperationalItems(organizationId),
         {
@@ -208,12 +181,19 @@ export function buildOrganizationNavigationGroups(
       ],
     },
     {
-      label: "ตรวจสอบ",
+      label: "ร้านค้าและพรีออเดอร์",
       items: [
-        {
-          label: "ประวัติการทำรายการ",
-          href: withOrganization("/org/audit/", organizationId),
-        },
+        { label: "ร้านค้า", href: withOrganization("/org/stores/", organizationId) },
+        { label: "สินค้า", href: withOrganization("/org/products/", organizationId) },
+        { label: "แคมเปญ", href: withOrganization("/org/campaigns/", organizationId) },
+      ],
+    },
+    {
+      label: "ทีมและการตั้งค่า",
+      items: [
+        { label: "บุคลากร", href: withOrganization("/org/staff/", organizationId) },
+        { label: "ข้อมูลหน่วยงาน", href: withOrganization("/org/settings/", organizationId) },
+        { label: "ประวัติการทำรายการ", href: withOrganization("/org/audit/", organizationId) },
       ],
     },
   ];

@@ -437,3 +437,36 @@
   .grid > .section { order: -1; }
   .grid > .panel { order: 0; }
 }
+
+/* Task-first store inventory and safe, contextual editing. */
+.page { background: var(--canvas); }
+.main { gap: clamp(14px, 2vw, 24px); padding-top: clamp(13px, 2vw, 27px); }
+.header { padding: clamp(18px, 2.8vw, 32px); background: var(--surface); border: 1px solid var(--line); border-radius: 16px; box-shadow: none; }
+.header::before,.header::after { content: none; display: none; }
+.title { font-size: clamp(1.82rem, 3.1vw, 2.7rem); line-height: 1.15; letter-spacing: -.03em; color: var(--ink); }
+.header .description { font-size: .9rem; line-height: 1.55; max-width: 68ch; color: var(--ink-secondary); }
+.summaryStrip { gap: 9px; }
+.summaryStrip > div,.summaryStrip > div:nth-child(n) { min-height: 86px; padding: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 11px; box-shadow: none; }
+.summaryStrip strong { font-size: clamp(1.45rem, 2.4vw, 1.9rem); font-weight: 800; color: var(--ink); }
+.grid { align-items: start; gap: 16px; }
+.section { gap: 13px; }
+.sectionTitle { font-size: clamp(1.16rem, 2vw, 1.55rem); letter-spacing: -.02em; }
+.sectionDescription { font-size: .82rem; line-height: 1.55; }
+.list { gap: 9px; }
+.row,.rowSelected { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); box-shadow: none; padding: 15px; }
+.row::before,.rowSelected::before { content: none; display: none; }
+.row:hover { transform: none; border-color: var(--brand-line); box-shadow: none; }
+.rowSelected { border-color: var(--brand-line); background: var(--brand-soft); box-shadow: inset 3px 0 0 var(--brand); }
+.cardTitle { color: var(--ink); font-size: .98rem; font-weight: 790; }
+.panel,.editPanel { background: var(--surface); border: 1px solid var(--line); border-radius: 13px; padding: 19px; box-shadow: none; }
+.editPanel::before { content: none; display: none; }
+.editHeader { gap: 9px; }
+.editMeta .meta { overflow-wrap: anywhere; }
+.editActions button { min-height: 43px; border-radius: 9px; }
+@media(max-width:760px) {
+ .summaryStrip { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 6px; }
+ .summaryStrip > div,.summaryStrip > div:nth-child(n) { min-height: 76px; padding: 11px; }
+ .summaryStrip strong { font-size: 1.45rem; }
+ .row,.panel,.editPanel { padding: 14px; }
+}
+@media(max-width:380px) { .summaryLabel { font-size: .67rem; } }

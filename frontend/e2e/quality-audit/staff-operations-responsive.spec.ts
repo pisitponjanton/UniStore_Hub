@@ -8,7 +8,7 @@ import { localAuditTargets } from "./fixture-guard";
 test("Staff Orders, Payments, Pickups read-only action queues and safe dialogs", async ({ browser, request }) => {
   test.setTimeout(210_000);
   const { frontend } = localAuditTargets();
-  const evidenceDir = join("test-results", "quality-audit", "uxqa-" + randomUUID(), "phase3");
+  const evidenceDir = join("test-results", "quality-audit", "uxqa-" + randomUUID(), "staff-operations");
   await mkdir(evidenceDir, { recursive: true });
   const org = "?organizationId=" + encodeURIComponent(ids.organizationId);
   const stages = [
@@ -38,6 +38,19 @@ test("Staff Orders, Payments, Pickups read-only action queues and safe dialogs",
       await expect(page.getByRole("heading", { name: stage.heading, level: 1 })).toBeVisible({ timeout: 20000 });
       const queue = page.locator("#" + stage.listId);
       await expect(queue).toBeVisible({ timeout: 20000 });
+      const queueNav = page.getByRole("navigation", { name: "คิวงานเจ้าหน้าที่" });
+      await expect(queueNav).toBeVisible();
+      const orgParam = "organizationId=" + encodeURIComponent(ids.organizationId);
+      if (stage.name === "orders") {
+        await expect(queueNav.getByRole("link", { name: "ตรวจชำระเงิน" }))
+          .toHaveAttribute("href", new RegExp("/org/payments/?\\?" + orgParam));
+        await expect(queueNav.locator('[aria-current="page"]')).toHaveText("คำสั่งซื้อ");
+      } else if (stage.name === "payments") {
+        await expect(queueNav.locator('[aria-current="page"]')).toHaveText("ตรวจชำระเงิน");
+      } else {
+        await expect(queueNav.locator('[aria-current="page"]')).toHaveText("รับสินค้า");
+      }
+      await expect(queueNav.getByRole("link", { name: "คำสั่งซื้อ" })).toHaveCount(stage.name === "orders" ? 0 : 1);
       const controls = page.getByRole("group", { name: "มุมมองรายการที่โหลดแล้ว" });
       await expect(controls).toBeVisible({ timeout: 18000 });
       const all = controls.getByRole("button", { name: /^ทั้งหมด/ });
@@ -65,12 +78,32 @@ test("Staff Orders, Payments, Pickups read-only action queues and safe dialogs",
       }
 
       await page.setViewportSize({ width: 390, height: 844 });
+      if (stage.name === "orders") {
+        const detailLink = page.locator('article a[href*="/org/orders/view/"]').first();
+        await expect(detailLink).toBeVisible();
+        await detailLink.click();
+        await expect(page.getByRole("heading", { name: "รายละเอียดคำสั่งซื้อ", level: 1 }))
+          .toBeVisible({ timeout: 17000 });
+        const nextTask = page.getByRole("complementary", { name: "แนวทางดำเนินการสำหรับสถานะนี้" });
+        await expect(nextTask).toBeVisible();
+        await expect(page.getByRole("navigation", { name: "คิวงานเจ้าหน้าที่" })
+          .getByRole("link", { name: "คำสั่งซื้อ" })).toHaveAttribute("href", new RegExp(orgParam));
+        await page.screenshot({ path: join(evidenceDir, "order-detail-390.png"), animations: "disabled" });
+        await page.setViewportSize({ width: 1440, height: 900 });
+        const detailOverflow = await page.evaluate(() => Math.max(0, document.documentElement.scrollWidth - innerWidth));
+        expect(detailOverflow).toBeLessThanOrEqual(1);
+        await page.screenshot({ path: join(evidenceDir, "order-detail-1440.png"), animations: "disabled" });
+        await page.setViewportSize({ width: 390, height: 844 });
+        await page.getByRole("link", { name: "กลับรายการคำสั่งซื้อ" }).click();
+        await expect(page.getByRole("heading", { name: "คำสั่งซื้อของหน่วยงาน", level: 1 }))
+          .toBeVisible({ timeout: 17000 });
+      }
       if (stage.name === "payments") {
         const select = page.getByRole("button", { name: /^ตรวจสอบ การชำระเงิน/ }).first();
         await expect(select).toBeVisible();
         await select.click();
         const detail = page.locator("#staff-payment-detail");
-        await expect(detail.getByRole("heading", { name: /^Payment / })).toBeVisible({ timeout: 20000 });
+        await expect(detail.getByRole("heading", { name: /^หลักฐานชำระเงิน / })).toBeVisible({ timeout: 20000 });
         await expect(detail).toBeFocused();
         const reject = page.getByRole("button", { name: "ปฏิเสธการชำระเงิน" });
         if (await reject.isVisible()) {

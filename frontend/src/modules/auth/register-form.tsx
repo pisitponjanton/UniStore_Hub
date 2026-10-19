@@ -20,7 +20,7 @@ import {
   validateRegisterFields,
   type AuthFieldErrors,
 } from "./auth-validation";
-import { getAuthReturnPath } from "./return-route";
+import { describeAuthReturnDestination, getAuthReturnPath } from "./return-route";
 import { authSession } from "./session";
 import { useAuthNavigationContext } from "./use-auth-navigation-context";
 
@@ -98,16 +98,18 @@ export function RegisterForm() {
   return (
     <div className={styles.formShell}>
       <div className={styles.headingGroup}>
-        <h2 className={styles.title}>สร้างบัญชีของคุณ</h2>
+        <h2 className={styles.title}>สร้างบัญชีสำหรับสั่งซื้อ</h2>
         <p className={styles.description}>
-          ใช้บัญชีเดียวสำหรับสั่งซื้อ ติดตามการชำระเงิน และดูข้อมูลรับสินค้า
+          สมัครเพื่อสั่งสินค้า ติดตามการชำระเงิน และดูข้อมูลรับสินค้าในที่เดียว
         </p>
       </div>
 
       {navigation.hasReturnContext ? (
-        <Notice tone="info" title="สมัครแล้วกลับไปทำรายการต่อ">
-          เมื่อสร้างบัญชีสำเร็จ ระบบจะพาคุณกลับไปยังหน้าที่กำลังใช้งานก่อนหน้านี้
-        </Notice>
+        <div className={styles.continueContext} role="status">
+          <span className={styles.continueContextLabel}>ขั้นตอนที่คุณกำลังจะกลับไป</span>
+          <strong>{describeAuthReturnDestination(navigation.returnPath)}</strong>
+          <small>{"สมัครสมาชิกสำเร็จแล้วระบบจะพากลับไปยังหน้านั้น"}</small>
+        </div>
       ) : null}
 
       <form className={styles.form} onSubmit={handleSubmit} noValidate>

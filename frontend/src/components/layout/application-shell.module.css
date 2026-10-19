@@ -847,3 +847,198 @@
     transform: none;
   }
 }
+
+/* Workspace Foundation: visible context, real task hierarchy and a single quiet shell.
+   Desktop uses a unified navigation rail. Mobile preserves the same navigation authority. */
+.shell {
+  background: var(--canvas);
+}
+.sidebar {
+  gap: 0;
+  padding: 0;
+  background: #132a30;
+  border-right-color: rgb(241 250 245 / 12%);
+}
+.sidebarTop {
+  min-height: 86px;
+  padding: 20px 22px 12px;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.brandMark {
+  border-radius: 13px;
+  background: #e3b984;
+  color: #142c31;
+  box-shadow: none;
+}
+.brandMark::before,
+.brandMark::after {
+  content: none;
+}
+.brandCopy strong {
+  color: #f8faf7;
+  font-size: 1.13rem;
+  letter-spacing: -0.035em;
+}
+.brandCopy span {
+  color: #bfd5d0;
+  font-size: 0.685rem;
+  letter-spacing: 0.015em;
+}
+.desktopScope {
+  min-height: 24px;
+  padding: 0;
+  background: transparent;
+  color: #a8cec5;
+}
+.desktopScopeLabel {
+  font-size: 0.7rem;
+  font-weight: 650;
+}
+.sidebarPanel {
+  margin: 0 12px 12px;
+  border: 1px solid rgb(241 250 245 / 10%);
+  border-radius: 15px;
+  background: #1b3339;
+  box-shadow: none;
+}
+.sidebarBody {
+  gap: 14px;
+  padding: 15px 11px 11px;
+}
+.workspaceSummary {
+  gap: 5px;
+  border: 1px solid rgb(244 255 250 / 9%);
+  border-radius: 11px;
+  background: #294349;
+  padding: 14px;
+}
+.workspaceSummary::after { content: none; }
+.workspaceTitle { color: #fbfffc; font-size: .92rem; }
+.workspaceDescription, .workspaceReference { color: #cbddd8; }
+.workspaceReference span { color: #c1d7d0; }
+.workspaceReference strong { color: #fff; font-family: var(--font-sans); }
+.workspaceTechnical { color: #c2d8d0; }
+.workspaceTechnical summary { color: #d9eee4; }
+.navigation { gap: 17px; padding-inline: 2px; }
+.groupHeading { padding-inline: 12px; }
+.groupLabel, .group[data-active-group="true"] .groupLabel {
+  color: #9ebdb6;
+  font-size: .7rem;
+  letter-spacing: .035em;
+  font-weight: 700;
+}
+.groupList { gap: 3px; }
+.navLink {
+  grid-template-columns: 21px minmax(0, 1fr) 4px;
+  min-height: 42px;
+  gap: 10px;
+  padding-inline: 11px;
+  color: #d0e0dc;
+  font-size: .85rem;
+  font-weight: 570;
+}
+.navIcon { display: flex; align-items: center; justify-content: center; color: #a5c4bb; }
+.navLink:hover { transform: none; color: #fff; background: rgb(255 255 255 / 10%); }
+.navLinkActive {
+  color: #13343a;
+  background: #d9ede2;
+  border-color: transparent;
+  box-shadow: none;
+}
+.navLinkActive .navIcon { color: #17575b; }
+.navLinkActive:hover { color: #13343a; background: #d9ede2; }
+.navState { width: 4px; height: 15px; border: 0; border-radius: 3px; }
+.navLinkActive .navState { background: #166268; box-shadow: none; }
+.sidebarFooter { border-top-color: rgb(255 255 255 / 12%); }
+.userBlock { grid-template-columns: 34px minmax(0, 1fr); background: transparent; }
+.userAvatar { width: 34px; height: 34px; background: #d9ede2; color: #15363a; }
+.userLabel, .userEmail { color: #bbd4cd; }
+.userName { color: #f7faf6; }
+.switchOrganization { color: #e8f9f2; border-color: rgb(255 255 255 / 22%); background: #29474d; }
+.switchOrganization:hover { background: #345a60; border-color: rgb(255 255 255 / 42%); }
+.footerActions :global(button) { color: #eff8f3; border: 1px solid rgb(255 255 255 / 18%); }
+.content {
+  background: var(--canvas);
+  min-width: 0;
+}
+.orientation {
+  position: relative;
+  z-index: var(--z-content-overlap);
+  min-height: 61px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px var(--page-gutter);
+  border-bottom: 1px solid var(--line-soft);
+  background: var(--surface);
+}
+.orientationPath {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--ink-tertiary);
+  font-size: .83rem;
+  white-space: nowrap;
+}
+.orientationPath strong { overflow: hidden; text-overflow: ellipsis; color: var(--ink); font-weight: 730; }
+.orientationArea { flex-shrink: 0; }
+.workAreaNavigation {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.workAreaLink {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 12px;
+  border-radius: 9px;
+  border: 1px solid transparent;
+  font-size: .76rem;
+  font-weight: 680;
+  color: var(--ink-secondary);
+}
+.workAreaLink:hover { background: var(--surface-hover); color: var(--ink); text-decoration: none; }
+.workAreaLinkCurrent { border-color: var(--brand-line); color: var(--brand-strong); background: var(--brand-soft); }
+.workAreaLinkCurrent:hover { color: var(--brand-strong); background: var(--brand-soft-strong); }
+
+@media (max-width: 900px) {
+  .sidebar { border-bottom-color: rgb(241 250 245 / 20%); background: #132a30; }
+  .sidebarTop { min-height: 65px; padding-block: 8px; background: #132a30; }
+  .mobileCurrent { background: #132a30; color: #f9fffc; }
+  .mobileCurrentScope { color: #e5f5ec; background: #34575b; }
+  .mobileCurrentValue { color: #f5fffb; }
+  .mobileCurrentDivider { background: rgb(255 255 255 / 26%); }
+  .menuButton { background: #28484e; border-color: rgb(255 255 255 / 23%); color: #ecfbf4; }
+  .menuButton:hover { background: #31565c; }
+  .menuButton:active { background: #28484e; }
+  .menuIcon span { background: #ecfbf4; }
+  .sidebarPanel { inset: 0 auto 0 0; height: 100dvh; margin: 0; border-radius: 0 18px 18px 0; background: #1b3339; }
+  .sidebarBody { padding: 14px 12px; }
+  .mobilePanelHeader { background: #132a30; border-bottom-color: rgb(255 255 255 / 13%); }
+  .mobilePanelHeader strong { color: #f6fff9; }
+  .mobilePanelLabel { color: #a6d0c7; }
+  .drawerClose { background: #26434a; border-color: rgb(255 255 255 / 22%); color: #fff; }
+  .drawerClose:hover { background: #345860; }
+  .orientation { min-height: 52px; padding: 7px var(--page-gutter); }
+  .orientationPath { display: none; }
+  .workAreaNavigation { justify-content: flex-start; flex-wrap: nowrap; overflow-x: auto; width: 100%; scrollbar-width: none; }
+  .workAreaNavigation::-webkit-scrollbar { display: none; }
+  .workAreaLink { white-space: nowrap; flex-shrink: 0; min-height: 37px; }
+}
+@media (max-width: 620px) {
+  .brandCopy strong { font-size: 1.05rem; }
+  .orientation { padding-inline: 13px; }
+  .workAreaLink { padding-inline: 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .workAreaLink, .orientation { transition: none; }
+}

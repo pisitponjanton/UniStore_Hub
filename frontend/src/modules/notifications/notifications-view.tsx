@@ -1,5 +1,7 @@
 "use client";
 
+import { CustomerJourneyNav } from "@/modules/orders/customer-journey-nav";
+
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { myOrderHref } from "@/modules/orders/order-tracking-helpers";
@@ -320,6 +322,7 @@ export function NotificationsView() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
+        <CustomerJourneyNav current="notifications" />
         <header className={styles.header}>
           <div className={styles.headerCopy}>
             <h1 className={styles.title}>การแจ้งเตือน</h1>

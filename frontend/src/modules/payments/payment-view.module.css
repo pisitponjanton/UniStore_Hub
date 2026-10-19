@@ -652,3 +652,20 @@
 /* Keep terminal payment-upload feedback discoverable after the submit control changes. */
 .actionFeedback { scroll-margin-top: 108px; outline: none; }
 .actionFeedback:focus-visible { outline: 3px solid currentColor; outline-offset: 3px; }
+
+/* Payment action surface: authoritative amount and review state ahead of form noise. */
+.header { border-radius: 16px; border: 1px solid var(--line); }
+.headerAmount { border-color: var(--brand-line); background: var(--brand-soft); }
+.headerAmount .amount { color: var(--brand-strong); font-weight: 800; }
+.paymentFacts { gap: 10px; }
+.paymentFacts > div:nth-child(n) { min-height: 76px; border-radius: 10px; padding: 14px; }
+.uploadSection { border: 1px solid var(--line); border-radius: 14px; box-shadow: none; }
+.uploadForm { border-radius: 11px; }
+.progressPanel { border: 1px solid var(--brand-line); border-radius: 11px; }
+.progressCurrent { color: var(--ink); }
+.reviewSummary { border-radius: 12px; }
+@media (max-width: 760px) {
+  .header { padding: 17px; }
+  .headerAmount { padding: 13px; }
+  .paymentFacts { gap: 6px; }
+}

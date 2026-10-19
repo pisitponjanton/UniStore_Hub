@@ -50,6 +50,22 @@ test("safe customer journey, actionable orders and visual breakpoints", async ({
       page.on("pageerror", error => errors.push(error.message.slice(0, 140)));
       await page.goto(frontend + c.url, { waitUntil: "domcontentloaded" });
       await expect(page.locator("main h1")).toBeVisible({ timeout: 18000 });
+      if (["checkout", "my-orders", "notifications", "order-detail", "payment", "pickup"].includes(c.name)) {
+        const customerNav = page.getByRole("navigation", { name: "เส้นทางผู้ซื้อ" });
+        await expect(customerNav).toBeVisible();
+        if (c.name === "checkout") {
+          await expect(customerNav.getByRole("link", { name: "ค้นหาร้านค้า" })).toHaveAttribute("href", "/");
+        } else {
+          await expect(customerNav.getByRole("link", { name: "ค้นหาร้านค้า" })).toHaveAttribute("href", "/");
+        }
+        if (c.name === "notifications") {
+          await expect(customerNav.getByRole("link", { name: "คำสั่งซื้อ" })).toHaveAttribute("href", "/my/orders/");
+        }
+        if (c.name === "payment" || c.name === "pickup") {
+          await expect(customerNav.locator('a[href*="/my/order/"]').first())
+            .toHaveAttribute("href", /\/my\/order\/\?orderId=/);
+        }
+      }
       if (c.name === "my-orders") {
         await expect(page.getByRole("group", { name: "กรองคำสั่งซื้อที่โหลดแล้ว" })).toBeVisible({ timeout: 18000 });
         await expect(page.getByRole("button", { name: /^ต้องทำต่อ/ })).toHaveAttribute("aria-pressed", "true");
@@ -76,6 +92,12 @@ test("safe customer journey, actionable orders and visual breakpoints", async ({
         expect(metric.heading, c.name).toBeTruthy();
         expect(metric.overflow, c.name + " " + width).toBeLessThanOrEqual(1);
         await page.screenshot({ path: join(evidenceDir, c.name + "-" + width + ".png"), animations: "disabled" });
+      }
+      if (c.name === "notifications") {
+        await page.getByRole("navigation", { name: "เส้นทางผู้ซื้อ" })
+          .getByRole("link", { name: "คำสั่งซื้อ" }).click();
+        await expect(page).toHaveURL(frontend + "/my/orders/");
+        await expect(page.getByRole("heading", { name: "คำสั่งซื้อของฉัน" })).toBeVisible();
       }
       await page.close();
     }

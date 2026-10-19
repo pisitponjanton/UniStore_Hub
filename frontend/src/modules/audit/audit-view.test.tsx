@@ -73,16 +73,16 @@ describe("AuditView", () => {
 
     await screen.findByText("PAYMENT_APPROVED");
 
-    fireEvent.change(screen.getByLabelText("Actor ID"), {
+    fireEvent.change(screen.getByLabelText("ผู้ดำเนินการ (Actor ID)"), {
       target: { value: "  staff-2  " },
     });
-    fireEvent.change(screen.getByLabelText("Action"), {
+    fireEvent.change(screen.getByLabelText("การทำรายการ (Action)"), {
       target: { value: "  PICKUP_CONFIRMED  " },
     });
-    fireEvent.change(screen.getByLabelText("Resource Type"), {
+    fireEvent.change(screen.getByLabelText("ประเภทข้อมูล (Resource Type)"), {
       target: { value: "  PICKUP  " },
     });
-    fireEvent.change(screen.getByLabelText("Resource ID"), {
+    fireEvent.change(screen.getByLabelText("รหัสรายการ (Resource ID)"), {
       target: { value: "  pickup-1  " },
     });
 

@@ -1,5 +1,7 @@
 "use client";
 
+import { PlatformWorkspaceNav } from "./platform-workspace-nav";
+
 import { AsyncPageFallback } from "@/components/ui/async-page";
 import { LoadedDirectoryControls } from "@/modules/organization-directory/loaded-directory-controls";
 import { searchLoadedItems, visibleLoadedItems } from "@/modules/organization-directory/loaded-directory-helpers";
@@ -275,6 +277,7 @@ export function PlatformOrganizationsView() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
+        <PlatformWorkspaceNav current="organizations" />
         <header className={styles.header}>
           <div className={styles.headerCopy}>
             <h1 className={styles.title}>จัดการหน่วยงาน</h1>
@@ -329,6 +332,41 @@ export function PlatformOrganizationsView() {
         </Notice>
 
         <section
+          className={styles.priorityStrip}
+          aria-label="สรุปหน่วยงานที่ต้องดูแล"
+        >
+          <article className={styles.priorityItem} data-attention={pendingCount > 0 || undefined}>
+            <span className={styles.metricLabel}>รออนุมัติ</span>
+            <strong className={styles.priorityValue} data-numeric>
+              {pendingCount.toLocaleString("th-TH")}
+            </strong>
+            <span className={styles.metricHint}>
+              รายการที่ต้องตรวจและตัดสินใจจากสถานะ PENDING
+            </span>
+          </article>
+
+          <article className={styles.priorityItem}>
+            <span className={styles.metricLabel}>ใช้งานอยู่</span>
+            <strong className={styles.priorityValue} data-numeric>
+              {activeCount.toLocaleString("th-TH")}
+            </strong>
+            <span className={styles.metricHint}>
+              หน่วยงานที่อยู่ในสถานะ ACTIVE
+            </span>
+          </article>
+
+          <article className={styles.priorityItem}>
+            <span className={styles.metricLabel}>ถูกระงับ</span>
+            <strong className={styles.priorityValue} data-numeric>
+              {suspendedCount.toLocaleString("th-TH")}
+            </strong>
+            <span className={styles.metricHint}>
+              หน่วยงานที่อยู่ในสถานะ SUSPENDED
+            </span>
+          </article>
+        </section>
+
+        <section
           className={styles.section}
           aria-labelledby="platform-organizations-title"
         >
@@ -341,7 +379,7 @@ export function PlatformOrganizationsView() {
                 หน่วยงานทั้งหมด
               </h2>
               <p className={styles.sectionDescription}>
-                สถานะปัจจุบันเป็นตัวกำหนด action ที่เปิดให้ทำในแต่ละรายการ
+                เริ่มจากหน่วยงานรออนุมัติ แล้วตรวจชื่อ ผู้สร้าง และสถานะก่อนยืนยันการเปลี่ยนแปลง
               </p>
             </div>
           </div>
@@ -424,7 +462,7 @@ export function PlatformOrganizationsView() {
                       <dl className={styles.metaGrid}>
                         <div className={styles.metaItem}>
                           <dt className={styles.metaLabel}>
-                            Organization ID
+                            รหัสหน่วยงาน
                           </dt>
                           <dd className={styles.code}>
                             {organization.organizationId}
@@ -432,7 +470,7 @@ export function PlatformOrganizationsView() {
                         </div>
                         <div className={styles.metaItem}>
                           <dt className={styles.metaLabel}>
-                            Created by
+                            รหัสผู้สร้าง
                           </dt>
                           <dd className={styles.code}>
                             {organization.createdBy}
@@ -509,7 +547,7 @@ export function PlatformOrganizationsView() {
                                 </Button>
                               }
                               title={`อนุมัติ ${organization.name}?`}
-                              description="ระบบจะเปลี่ยนสถานะหน่วยงานจาก PENDING เป็น ACTIVE และบันทึกผลการดำเนินการ"
+                              description="ตรวจชื่อหน่วยงานและสถานะ PENDING ให้ตรงก่อนยืนยัน เมื่ออนุมัติ ระบบจะเปลี่ยนเป็น ACTIVE และบันทึกผลตามกฎเดิม"
                               confirmLabel="ยืนยันอนุมัติ"
                               pending={
                                 isPending &&
@@ -563,7 +601,7 @@ export function PlatformOrganizationsView() {
                                 </Button>
                               }
                               title={`ระงับ ${organization.name}?`}
-                              description="ระบบจะเปลี่ยนสถานะหน่วยงานเป็น SUSPENDED และบันทึกผลการดำเนินการ"
+                              description="ตรวจชื่อหน่วยงานให้ถูกต้องก่อนยืนยัน เมื่อระงับ ระบบจะเปลี่ยนสถานะเป็น SUSPENDED และบันทึกผลตามกฎเดิม"
                               confirmLabel="ยืนยันระงับ"
                               pending={
                                 isPending &&
@@ -591,40 +629,7 @@ export function PlatformOrganizationsView() {
             </div>
           )}
         </section>
-        <section
-          className={styles.priorityStrip}
-          aria-label="สรุปหน่วยงานที่ต้องดูแล"
-        >
-          <article className={styles.priorityItem} data-attention={pendingCount > 0 || undefined}>
-            <span className={styles.metricLabel}>รออนุมัติ</span>
-            <strong className={styles.priorityValue} data-numeric>
-              {pendingCount.toLocaleString("th-TH")}
-            </strong>
-            <span className={styles.metricHint}>
-              รายการที่ต้องตรวจและตัดสินใจจากสถานะ PENDING
-            </span>
-          </article>
 
-          <article className={styles.priorityItem}>
-            <span className={styles.metricLabel}>ใช้งานอยู่</span>
-            <strong className={styles.priorityValue} data-numeric>
-              {activeCount.toLocaleString("th-TH")}
-            </strong>
-            <span className={styles.metricHint}>
-              หน่วยงานที่อยู่ในสถานะ ACTIVE
-            </span>
-          </article>
-
-          <article className={styles.priorityItem}>
-            <span className={styles.metricLabel}>ถูกระงับ</span>
-            <strong className={styles.priorityValue} data-numeric>
-              {suspendedCount.toLocaleString("th-TH")}
-            </strong>
-            <span className={styles.metricHint}>
-              หน่วยงานที่อยู่ในสถานะ SUSPENDED
-            </span>
-          </article>
-        </section>
 
       </main>
     </div>

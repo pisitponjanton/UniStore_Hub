@@ -558,3 +558,41 @@
   .grid > .section { order: -1; }
   .grid > .panel { order: 0; }
 }
+
+/* Product catalog: identify product first, reveal edit/variant/image operations deliberately. */
+.page { background: var(--canvas); }
+.main { gap: clamp(14px, 2vw, 24px); padding-top: clamp(13px, 2vw, 27px); }
+.header { padding: clamp(18px, 2.8vw, 32px); background: var(--surface); border: 1px solid var(--line); border-radius: 16px; box-shadow: none; }
+.header::before,.header::after { content: none; display: none; }
+.title { font-size: clamp(1.82rem, 3.1vw, 2.7rem); line-height: 1.15; letter-spacing: -.03em; color: var(--ink); }
+.header .description { color: var(--ink-secondary); font-size: .9rem; line-height: 1.55; max-width: 70ch; }
+.summaryStrip { gap: 9px; }
+.summaryStrip > div,.summaryStrip > div:nth-child(n) { min-height: 86px; padding: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 11px; box-shadow: none; }
+.summaryStrip strong { font-size: clamp(1.4rem, 2.5vw, 1.88rem); color: var(--ink); font-weight: 800; }
+.summaryText { font-size: .88rem !important; line-height: 1.4; overflow-wrap: anywhere; }
+.grid { align-items: start; gap: 16px; }
+.section { gap: 12px; }
+.sectionTitle { font-size: clamp(1.16rem, 2vw, 1.58rem); letter-spacing: -.02em; }
+.sectionDescription { font-size: .83rem; line-height: 1.55; }
+.toolbar { border: 1px solid var(--line); border-radius: 11px; background: var(--surface); padding: 12px; }
+.list { gap: 9px; }
+.row,.rowSelected { padding: 13px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); box-shadow: none; }
+.row:hover { transform: none; border-color: var(--brand-line); background: var(--surface); box-shadow: none; }
+.rowSelected { border-color: var(--brand-line); background: var(--brand-soft); box-shadow: inset 3px 0 0 var(--brand); }
+.rowSelected::before,.rowSelected::after { content: none; display: none; }
+.productMedia { border-radius: 10px; background: var(--surface-muted); }
+.cardTitle { color: var(--ink); font-size: .97rem; font-weight: 790; }
+.panel,.editor { background: var(--surface); border: 1px solid var(--line); border-radius: 13px; padding: 18px; box-shadow: none; }
+.editor::before { content: none; display: none; }
+.editorSection { padding: 15px; border: 1px solid var(--line); border-radius: 11px; background: var(--surface); box-shadow: none; }
+.editorSection + .editorSection { border: 1px solid var(--line); }
+.editorSectionTitle { font-size: 1.1rem; }
+.editorActions button { min-height: 43px; border-radius: 9px; }
+@media (max-width:760px) {
+ .summaryStrip { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 7px; }
+ .summaryStrip > div,.summaryStrip > div:nth-child(n) { min-height: 73px; padding: 10px; }
+ .summaryStrip strong { font-size: 1.48rem; }
+ .toolbar,.panel,.editor { padding: 13px; }
+ .editorSection { padding: 12px; }
+ .row { padding: 10px; }
+}

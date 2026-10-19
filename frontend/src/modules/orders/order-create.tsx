@@ -1,5 +1,7 @@
 "use client";
 
+import { CustomerJourneyNav } from "./customer-journey-nav";
+
 import { PageLoadingRows, PageStateHeading } from "@/components/ui/async-page";
 
 import Link from "next/link";
@@ -360,6 +362,7 @@ export function OrderCreateView() {
         <StorefrontHeader />
 
         <main className={styles.successMain}>
+          <CustomerJourneyNav current="orders" />
           <div className={styles.successMarker} aria-hidden="true" />
 
           <header className={styles.successHeading}>
@@ -448,6 +451,7 @@ export function OrderCreateView() {
       <StorefrontHeader />
 
       <main className={styles.main}>
+        <CustomerJourneyNav current="checkout" />
         <Link
           href={productHref({
             organizationId: context.organizationId,
@@ -581,7 +585,7 @@ export function OrderCreateView() {
             noValidate
           >
             <div className={styles.confirmHeading}>
-              <h2 id="confirm-heading">จำนวนและยอดประมาณการ</h2>
+              <h2 id="confirm-heading">ตรวจจำนวนและยอด</h2>
               <p>ตรวจจำนวนด้านล่างให้ถูกต้องก่อนกดยืนยัน</p>
               {selection ? (
                 <p className={styles.confirmContext} aria-label="สินค้าที่กำลังสั่ง">

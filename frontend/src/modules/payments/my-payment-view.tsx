@@ -1,5 +1,7 @@
 "use client";
 
+import { CustomerJourneyNav } from "@/modules/orders/customer-journey-nav";
+
 import { PageLoadingRows, PageStateHeading } from "@/components/ui/async-page";
 
 import Link from "next/link";
@@ -412,6 +414,7 @@ export function MyPaymentView() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
+        <CustomerJourneyNav current="payment" orderId={order.orderId} />
         <Link href={myOrderHref(order.orderId)} className={styles.backLink}>
           กลับรายละเอียดคำสั่งซื้อ
         </Link>

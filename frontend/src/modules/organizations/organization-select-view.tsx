@@ -245,13 +245,14 @@ export function OrganizationSelectView() {
   }
 
   return (
-    <div className={styles.page}>
+    <div className={styles.page} data-page="organization-entry">
       <main className={styles.main}>
         <header className={styles.workspaceHeader} data-workspace-state={loadState.status}>
           <div className={styles.headerCopy}>
-            <h1 id="organization-select-heading" tabIndex={-1} className={styles.title}>เลือกหน่วยงานที่จะทำงาน</h1>
+            <span className={styles.entryEyebrow}>พื้นที่ทำงาน / หน่วยงานที่ได้รับสิทธิ์</span>
+            <h1 id="organization-select-heading" tabIndex={-1} className={styles.title}>วันนี้จะทำงานกับหน่วยงานไหน?</h1>
             <p className={styles.description}>
-              สิทธิ์ของบัญชีอาจต่างกันในแต่ละหน่วยงาน เลือกพื้นที่ให้ถูกก่อนเริ่มงานเพื่อให้เมนูและข้อมูลอยู่ในบริบทเดียวกัน
+              เลือกหน่วยงานของคุณเพื่อเปิดงานที่ได้รับมอบหมาย แต่ละแห่งมีบทบาทและสิทธิ์แยกจากกัน
             </p>
           </div>
 
@@ -265,6 +266,7 @@ export function OrganizationSelectView() {
               <span className={styles.headerSummaryLabel}>เข้าถึงได้</span>
               <strong data-numeric>{accessible.length}</strong>
               <span>หน่วยงาน</span>
+              <a href="#organizations" className={styles.workspaceJump}>ไปที่รายชื่อ ↓</a>
             </div>
           ) : null}
         </header>
@@ -285,11 +287,11 @@ export function OrganizationSelectView() {
             <div className={styles.sectionHeading}>
               <div>
                 <h2 className={styles.sectionTitle} id="organizations">
-                  หน่วยงานของคุณ
+                  เลือกพื้นที่เพื่อเริ่มงาน
                 </h2>
               </div>
               <p className={styles.sectionDescription}>
-                สถานะหน่วยงานและบทบาทด้านล่างเป็นข้อมูลปัจจุบันของบัญชี
+                ดูสถานะและสิทธิ์ของแต่ละหน่วยงาน แล้วกดเข้าใช้งานที่ต้องการ
               </p>
             </div>
 
@@ -372,9 +374,12 @@ export function OrganizationSelectView() {
                           "ยังไม่มีคำอธิบายหน่วยงาน"}
                       </p>
 
-                      <span className={styles.organizationReference} data-technical>
-                        {organization.organizationId}
-                      </span>
+                      <details className={styles.organizationTechnical}>
+                        <summary>ดูรหัสหน่วยงาน</summary>
+                        <code className={styles.organizationReference} data-technical>
+                          {organization.organizationId}
+                        </code>
+                      </details>
                     </div>
 
                     <div className={styles.organizationAction}>
@@ -400,10 +405,10 @@ export function OrganizationSelectView() {
           <aside className={styles.createPanel} aria-labelledby="create-organization">
             <div className={styles.createPanelHeading}>
               <h2 className={styles.sectionTitle} id="create-organization">
-                สร้างหน่วยงาน
+                ต้องการพื้นที่ใหม่?
               </h2>
               <p className={styles.sectionDescription}>
-                ผู้สร้างจะเป็นผู้ดูแลหน่วยงาน และหน่วยงานใหม่จะเริ่มในสถานะรออนุมัติจากส่วนกลาง
+                สร้างหน่วยงานเฉพาะเมื่อยังไม่มีพื้นที่ที่ต้องการ ผู้สร้างจะเป็นผู้ดูแลและต้องรออนุมัติจากส่วนกลาง
               </p>
             </div>
 

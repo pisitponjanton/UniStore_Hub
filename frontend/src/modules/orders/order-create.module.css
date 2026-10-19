@@ -971,3 +971,23 @@
   .progress li > strong { font-size: 0.7rem; }
   .reviewFacts { grid-template-columns: 1fr; }
 }
+
+/* Purchase review: quantity, eligibility and amount remain the primary actions. */
+.header { border-radius: 16px; background: var(--surface); }
+.header .title { font-weight: 800; letter-spacing: -.035em; }
+.progress { gap: 5px; }
+.progress li { border-radius: 9px; }
+.progressCurrent { background: var(--brand-soft); color: var(--brand-strong); }
+.contentGrid { align-items: start; gap: 16px; }
+.reviewPanel { border-radius: 14px; background: var(--surface); box-shadow: none; }
+.confirmPanel { border: 1px solid var(--brand-line); border-radius: 14px; background: var(--surface); box-shadow: none; }
+.estimate { background: var(--brand-soft); border: 1px solid var(--brand-line); border-radius: 11px; }
+.estimateValue { color: var(--brand-strong); }
+.successMain { gap: 16px; }
+.successSummary { border-radius: 12px; box-shadow: none; }
+@media (max-width: 760px) {
+  .header { padding: 16px; }
+  .confirmPanel { padding: 16px; }
+  .contentGrid { gap: 10px; }
+  .reviewPanel { padding: 14px; }
+}
