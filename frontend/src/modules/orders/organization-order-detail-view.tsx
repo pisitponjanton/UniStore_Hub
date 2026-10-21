@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import {
   Button,
   ConfirmDialog,
+  Dialog,
   ErrorState,
   ForbiddenState,
   LoadingState,
@@ -44,9 +45,15 @@ type DetailState =
 export function OrganizationOrderDetailView({
   organizationId,
   orderId,
+  presentation = "page",
+  onClose,
+  onOrderUpdated,
 }: {
   organizationId: string;
   orderId: string;
+  presentation?: "page" | "dialog";
+  onClose?: () => void;
+  onOrderUpdated?: (order: OrderDTO) => void;
 }) {
   const auth = useAuthSession();
   const [state, setState] = useState<DetailState>({
@@ -122,6 +129,42 @@ export function OrganizationOrderDetailView({
       state.order.status,
     );
 
+  if (presentation === "dialog" && state.status !== "success") {
+    return (
+      <Dialog
+        open
+        onOpenChange={(open) => {
+          if (!open) onClose?.();
+        }}
+        title={`Order ${orderId}`}
+        description="รายละเอียดสถานะและรายการสินค้าในคำสั่งซื้อ"
+        size="wide"
+      >
+        {state.status === "loading" ? (
+          <LoadingState
+            layout="details"
+            title="กำลังโหลดรายละเอียดคำสั่งซื้อ"
+            description="กำลังดึงสถานะ รายการสินค้า และยอดล่าสุด"
+          />
+        ) : null}
+        {state.status === "notFound" ? (
+          <ErrorState
+            title="ไม่พบคำสั่งซื้อ"
+            description="คำสั่งซื้อนี้อาจไม่มีอยู่ในหน่วยงาน หรือไม่สามารถเข้าถึงได้"
+          />
+        ) : null}
+        {state.status === "unauthorized" ? <UnauthorizedState /> : null}
+        {state.status === "forbidden" ? <ForbiddenState /> : null}
+        {state.status === "error" ? (
+          <ErrorState
+            title="ไม่สามารถโหลดคำสั่งซื้อได้"
+            description="กรุณาลองโหลดรายละเอียดอีกครั้ง"
+          />
+        ) : null}
+      </Dialog>
+    );
+  }
+
   async function handleCancel() {
     if (
       state.status !== "success" ||
@@ -146,6 +189,7 @@ export function OrganizationOrderDetailView({
         status: "success",
         order: cancelled,
       });
+      onOrderUpdated?.(cancelled);
       setActionSuccess("ยกเลิกคำสั่งซื้อแล้ว");
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
@@ -171,6 +215,7 @@ export function OrganizationOrderDetailView({
             status: "success",
             order: refreshed,
           });
+          onOrderUpdated?.(refreshed);
         } catch {
           // Preserve the last known Order and the original conflict message.
         }
@@ -192,6 +237,7 @@ export function OrganizationOrderDetailView({
         <main className={styles.stateWrap}>
           {state.status === "loading" ? (
             <LoadingState
+              layout="details"
               title="กำลังโหลดรายละเอียดคำสั่งซื้อ"
               description="กำลังดึงสถานะ รายการสินค้า และยอดล่าสุด"
             />
@@ -233,15 +279,14 @@ export function OrganizationOrderDetailView({
   const isAdmin =
     membership?.role === "ORGANIZATION_ADMIN";
 
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Link
+  const detailContent = (
+    <>
+      {presentation === "page" ? <Link
           href={organizationOrdersHref(organizationId)}
           className={styles.backLink}
         >
           กลับรายการคำสั่งซื้อ
-        </Link>
+        </Link> : null}
 
         <section className={styles.detailHero}>
           <div className={styles.detailTop}>
@@ -399,7 +444,28 @@ export function OrganizationOrderDetailView({
             />
           ) : null}
         </div>
-      </main>
+    </>
+  );
+
+  if (presentation === "dialog") {
+    return (
+      <Dialog
+        open
+        onOpenChange={(open) => {
+          if (!open) onClose?.();
+        }}
+        title={`Order ${order.orderId}`}
+        description="รายละเอียดสถานะและรายการสินค้าในคำสั่งซื้อ"
+        size="wide"
+      >
+        <div className={styles.detailDialogContent}>{detailContent}</div>
+      </Dialog>
+    );
+  }
+
+  return (
+    <div className={styles.page}>
+      <main className={styles.main}>{detailContent}</main>
     </div>
   );
 }

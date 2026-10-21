@@ -26,6 +26,16 @@ describe("shared async and access states", () => {
     expect(
       screen.getByRole("heading", { name: "กำลังโหลดรายการ" }),
     ).toBeInTheDocument();
+    expect(status.querySelector('[data-layout="list"]')).toBeInTheDocument();
+    expect(status.querySelector('[aria-hidden="true"]')).toBeInTheDocument();
+  });
+
+  it("renders layout-specific metric placeholders for summary screens", () => {
+    render(<LoadingState title="กำลังโหลดภาพรวม" layout="metrics" />);
+
+    const status = screen.getByRole("status");
+    expect(status.querySelector('[data-layout="metrics"]')).toBeInTheDocument();
+    expect(status.querySelector('[data-layout="metrics"]')?.children).toHaveLength(3);
   });
 
   it("renders an explicit empty state without generic English chrome", () => {

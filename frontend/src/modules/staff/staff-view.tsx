@@ -6,13 +6,16 @@ import {
   Badge,
   Button,
   ConfirmDialog,
+  Dialog,
   EmptyState,
   ErrorState,
   ErrorSummary,
   LoadingState,
   Notice,
+  PaginationControls,
   SelectField,
   TextField,
+  usePagination,
   useErrorSummaryFocus,
 } from "@/components";
 import {
@@ -98,6 +101,7 @@ export function StaffView({
     status: "loading",
   });
   const [email, setEmail] = useState("");
+  const [inviteOpen, setInviteOpen] = useState(false);
   const [addRole, setAddRole] =
     useState<MembershipRole>("STAFF");
   const [emailError, setEmailError] = useState<string | undefined>();
@@ -171,6 +175,7 @@ export function StaffView({
 
   const members =
     state.status === "success" ? state.members : [];
+  const memberPagination = usePagination(members, 10);
 
   const adminCount = activeAdminCount(members);
   const activeMembers = members.filter(
@@ -210,6 +215,7 @@ export function StaffView({
       setEmail("");
       setAddRole("STAFF");
       setNotice(`เพิ่ม ${normalizedEmail} เป็นบุคลากรแล้ว`);
+      setInviteOpen(false);
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();
@@ -378,16 +384,17 @@ export function StaffView({
               <span className={styles.sectionMeta}>
                 {members.length.toLocaleString("th-TH")} รายการ
               </span>
+              <Button onClick={() => setInviteOpen(true)}>เชิญสมาชิก</Button>
             </div>
 
             {members.length === 0 ? (
               <EmptyState
                 title="ยังไม่มีสมาชิก"
-                description="เพิ่มสมาชิกด้วยอีเมลจากแบบฟอร์มด้านข้าง"
+                description="เลือกเพิ่มสมาชิกเพื่อเชิญผู้ใช้เข้าสู่หน่วยงาน"
               />
             ) : (
               <div className={styles.memberList}>
-                {members.map((member) => {
+                {memberPagination.items.map((member) => {
                   const finalAdmin = isFinalActiveAdmin(member, members);
                   const draftRole =
                     roleDrafts[member.userId] ?? member.role;
@@ -510,8 +517,10 @@ export function StaffView({
                 })}
               </div>
             )}
+            <PaginationControls {...memberPagination} label="แบ่งหน้าสมาชิก" />
           </section>
 
+          <Dialog open={inviteOpen} onOpenChange={setInviteOpen} title="เพิ่มสมาชิก" description="เชิญผู้ใช้ที่มีบัญชี UniStore Hub เข้าร่วมหน่วยงาน">
           <aside className={styles.panel}>
             <div className={styles.panelHeading}>
               <h2 className={styles.sectionTitle}>เพิ่มสมาชิก</h2>
@@ -588,6 +597,7 @@ export function StaffView({
               </Button>
             </form>
           </aside>
+          </Dialog>
         </div>
       </main>
     </div>

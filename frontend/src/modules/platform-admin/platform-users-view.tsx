@@ -9,6 +9,7 @@ import {
   ForbiddenState,
   LoadingState,
   Notice,
+  PaginationControls,
   Table,
   TableBody,
   TableCell,
@@ -16,6 +17,7 @@ import {
   TableHeaderCell,
   TableRow,
   UnauthorizedState,
+  usePagination,
 } from "@/components";
 import {
   authSession,
@@ -43,6 +45,10 @@ export function PlatformUsersView() {
   const [state, setState] = useState<UsersState>({
     status: "loading",
   });
+  const userPagination = usePagination(
+    state.status === "success" ? state.users : [],
+    12,
+  );
 
   useEffect(() => {
     const controller = new AbortController();
@@ -224,6 +230,7 @@ export function PlatformUsersView() {
               description="Platform ยังไม่มี User ในระบบ"
             />
           ) : (
+            <>
             <Table
               caption="รายการผู้ใช้ระดับ Platform"
               density="compact"
@@ -239,7 +246,7 @@ export function PlatformUsersView() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {state.users.map((user) => (
+                {userPagination.items.map((user) => (
                   <TableRow key={user.userId}>
                     <TableCell>
                       <div className={styles.userIdentity}>
@@ -280,6 +287,8 @@ export function PlatformUsersView() {
                 ))}
               </TableBody>
             </Table>
+            <PaginationControls {...userPagination} label="แบ่งหน้าผู้ใช้" />
+            </>
           )}
         </section>
       </main>

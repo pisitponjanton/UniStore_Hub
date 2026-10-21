@@ -97,6 +97,7 @@ describe("StaffView", () => {
     render(<StaffView organizationId="org-1" />);
 
     await screen.findByRole("heading", { name: "Admin One" });
+    fireEvent.click(screen.getByRole("button", { name: "เชิญสมาชิก" }));
 
     fireEvent.change(screen.getByRole("textbox", { name: /อีเมลผู้ใช้/ }), {
       target: { value: "  NEW@Example.COM  " },
@@ -127,6 +128,7 @@ describe("StaffView", () => {
 
     await screen.findByRole("heading", { name: "Admin One" });
 
+    fireEvent.click(screen.getByRole("button", { name: "เชิญสมาชิก" }));
     fireEvent.change(screen.getByRole("textbox", { name: /อีเมลผู้ใช้/ }), {
       target: { value: "not-an-email" },
     });

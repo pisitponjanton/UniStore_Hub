@@ -7,6 +7,7 @@ import {
   getSeedRoleCredentials,
   LOCAL_SEED_ENTITY_IDS,
 } from "./support/seed-auth";
+import { createSeedOpenCampaign } from "./support/customer-commerce-fixtures";
 
 function expectNoUnexpectedDiagnostics(
   events: Parameters<typeof unexpectedDiagnostics>[0],
@@ -16,8 +17,13 @@ function expectNoUnexpectedDiagnostics(
 
 test("anonymous user can discover stores and navigate public Storefront routes", async ({
   page,
+  request,
   qaEvents,
 }) => {
+  const { campaignId, campaignName } = await createSeedOpenCampaign(
+    request,
+    `anonymous-${Date.now()}`,
+  );
   await page.goto("/");
 
   await expect(
@@ -42,19 +48,30 @@ test("anonymous user can discover stores and navigate public Storefront routes",
   ).toBeVisible();
 
   const campaignLink = page
-    .getByRole("link", { name: /Local Demo Campaign/ })
+    .getByRole("link", { name: new RegExp(campaignName) })
     .first();
+  const campaignPagination = page.getByRole("navigation", {
+    name: "แบ่งหน้าแคมเปญ",
+  });
+  for (let index = 0; index < 12; index += 1) {
+    if (await campaignLink.isVisible().catch(() => false)) break;
+    const nextCampaignPage = campaignPagination.getByRole("button", {
+      name: "ถัดไป",
+    });
+    if (await nextCampaignPage.isDisabled()) break;
+    await nextCampaignPage.click();
+  }
   await expect(campaignLink).toBeVisible();
   await campaignLink.click();
 
   await expect(page).toHaveURL(
     new RegExp(
-      `/campaigns/view/\\?organizationId=${LOCAL_SEED_ENTITY_IDS.organizationId}&campaignId=${LOCAL_SEED_ENTITY_IDS.campaignId}`,
+      `/campaigns/view/\\?organizationId=${LOCAL_SEED_ENTITY_IDS.organizationId}&campaignId=${campaignId}`,
     ),
   );
   await expect(
     page.getByRole("heading", {
-      name: "Local Demo Campaign",
+      name: campaignName,
       level: 1,
     }),
   ).toBeVisible();

@@ -125,15 +125,15 @@
 
 .detailLinkPrimary,
 .primaryActionLink {
-  background: var(--brand);
-  color: var(--brand-on);
+  background: var(--action-primary);
+  color: var(--action-primary-on);
   box-shadow: var(--shadow-action);
 }
 
 .detailLinkPrimary:hover,
 .primaryActionLink:hover {
   transform: translateY(-2px);
-  background: var(--brand-hover);
+  background: var(--action-primary-hover);
   box-shadow: var(--shadow-action-hover);
   text-decoration: none;
 }
@@ -656,9 +656,9 @@
 }
 
 .journeyStep[data-state="current"] .journeyIndex {
-  border-color: var(--brand);
-  background: var(--brand);
-  color: var(--brand-on);
+  border-color: var(--action-primary);
+  background: var(--action-primary);
+  color: var(--action-primary-on);
 }
 
 .journeyStep[data-state="current"] .journeyStateLabel {
@@ -838,12 +838,12 @@
 
 .totalRowPrimary {
   justify-items: end;
-  background: var(--brand);
-  color: var(--brand-on);
+  background: var(--brand-soft);
+  color: var(--ink);
 }
 
 .totalRowPrimary .totalValue {
-  color: var(--brand-on);
+  color: var(--brand-strong);
 }
 
 .totalRowPrimary strong {
@@ -1115,5 +1115,172 @@
   .destructiveAction {
     margin-left: 0;
     padding-top: var(--space-2);
+  }
+}
+
+/* Phase 4: workflow-first customer order tracking */
+.header,
+.detailHero {
+  padding: clamp(24px, 3.5vw, 40px);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: none;
+}
+
+.header::before,
+.header::after,
+.detailHero::before,
+.detailHero::after,
+.overviewPrimary::after,
+.orderRow::before {
+  content: none;
+}
+
+.title,
+.detailHero .title {
+  max-width: 22ch;
+  color: var(--ink);
+  font-size: clamp(1.875rem, 3.2vw, 2.75rem);
+  line-height: 1.12;
+  letter-spacing: -0.028em;
+}
+
+.description {
+  color: var(--ink-secondary);
+  font-size: var(--text-body);
+}
+
+.headerAction {
+  border-color: var(--line);
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.headerAction:hover,
+.detailLink:hover,
+.detailLinkPrimary:hover,
+.primaryActionLink:hover,
+.secondaryActionLink:hover,
+.backLink:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.orderOverview {
+  grid-template-columns: minmax(160px, 0.3fr) minmax(0, 1fr) minmax(160px, 0.3fr);
+}
+
+.overviewPrimary,
+.overviewDescription,
+.overviewLoaded,
+.overviewPrimary[data-has-attention="true"] {
+  min-height: 116px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: none;
+}
+
+.overviewPrimary[data-has-attention="true"] {
+  border-color: color-mix(in srgb, var(--warning) 34%, var(--line));
+  background: color-mix(in srgb, var(--warning-soft) 54%, var(--surface));
+}
+
+.orderRow,
+.orderRow[data-needs-action="true"] {
+  border-color: var(--line);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  box-shadow: none;
+}
+
+.orderRow[data-needs-action="true"] {
+  border-color: color-mix(in srgb, var(--brand) 34%, var(--line));
+  background: var(--brand-soft);
+}
+
+.orderRow:hover {
+  transform: none;
+  border-color: var(--control-line);
+  box-shadow: none;
+}
+
+.detailHero .orderCode {
+  border-color: var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-muted);
+  color: var(--ink-secondary);
+}
+
+.detailAmount {
+  min-height: 120px;
+  border-color: var(--line);
+  background: var(--surface-muted);
+  box-shadow: none;
+}
+
+.detailAmount .summaryLabel,
+.detailAmount .detailUpdated {
+  color: var(--ink-tertiary);
+}
+
+.detailAmount .totalValue {
+  color: var(--brand-strong);
+}
+
+.journeyStep,
+.journeyStep:nth-child(1),
+.journeyStep:nth-child(2),
+.journeyStep:nth-child(3),
+.journeyStep:nth-child(4) {
+  border: 1px solid var(--line);
+  background: var(--surface-muted);
+  box-shadow: none;
+}
+
+.journeyStep[data-state="current"] {
+  transform: none;
+  border-color: var(--brand);
+  background: var(--brand-soft);
+  box-shadow: none;
+}
+
+.contextLead,
+.orderFacts > div,
+.orderFacts > div:nth-child(2),
+.orderFacts > div:nth-child(3),
+.itemList,
+.totalPanel,
+.orderTools {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: none;
+}
+
+.itemVariant {
+  border-radius: var(--radius-sm);
+}
+
+.totalPanel {
+  background: var(--surface-muted);
+}
+
+.totalPanel > div:first-child {
+  background: var(--surface);
+}
+
+.detailLinkPrimary,
+.primaryActionLink {
+  box-shadow: none;
+}
+
+@media (max-width: 1040px) {
+  .orderOverview {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .orderOverview {
+    grid-template-columns: 1fr;
   }
 }

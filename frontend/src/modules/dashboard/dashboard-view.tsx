@@ -210,6 +210,7 @@ export function DashboardView({
         <main className={styles.stateWrap}>
           {state.status === "loading" ? (
             <LoadingState
+              layout="metrics"
               title="กำลังโหลดแดชบอร์ดหน่วยงาน"
               description="กำลังสรุปข้อมูลร้านค้า สินค้า คำสั่งซื้อ และการชำระเงิน"
             />

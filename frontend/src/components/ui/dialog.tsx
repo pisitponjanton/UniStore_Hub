@@ -1,7 +1,7 @@
 "use client";
 
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import type { ReactNode } from "react";
+import { useRef, type ReactNode } from "react";
 
 import { Button } from "./button";
 import styles from "./primitives.module.css";
@@ -15,6 +15,7 @@ export interface DialogProps {
   children?: ReactNode;
   footer?: ReactNode;
   closeLabel?: string;
+  size?: "default" | "wide";
 }
 
 export function Dialog({
@@ -26,7 +27,10 @@ export function Dialog({
   children,
   footer,
   closeLabel = "ปิด",
+  size = "default",
 }: DialogProps) {
+  const returnFocusTarget = useRef<HTMLElement | null>(null);
+
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       {trigger ? (
@@ -34,7 +38,26 @@ export function Dialog({
       ) : null}
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className={styles.overlay} />
-        <DialogPrimitive.Content className={styles.dialogContent}>
+        <DialogPrimitive.Content
+          className={`${styles.dialogContent} ${size === "wide" ? styles.dialogWide : ""}`}
+          onOpenAutoFocus={() => {
+            if (!trigger && typeof document !== "undefined") {
+              const activeElement = document.activeElement;
+              returnFocusTarget.current =
+                activeElement instanceof HTMLElement &&
+                activeElement !== document.body
+                  ? activeElement
+                  : null;
+            }
+          }}
+          onCloseAutoFocus={(event) => {
+            if (!trigger && returnFocusTarget.current?.isConnected) {
+              event.preventDefault();
+              returnFocusTarget.current.focus({ preventScroll: true });
+            }
+            returnFocusTarget.current = null;
+          }}
+        >
           <div className={styles.dialogHeader}>
             <DialogPrimitive.Title className={styles.dialogTitle}>
               {title}
@@ -45,7 +68,11 @@ export function Dialog({
               </DialogPrimitive.Description>
             ) : null}
           </div>
-          {children ? <div className={styles.dialogBody}>{children}</div> : null}
+          {children ? (
+            <div className={`${styles.dialogBody} scrollbarOnHover`}>
+              {children}
+            </div>
+          ) : null}
           {footer ? <div className={styles.dialogFooter}>{footer}</div> : null}
           <DialogPrimitive.Close className={styles.dialogClose} aria-label={closeLabel}>
             <span className={styles.dialogCloseSymbol} aria-hidden="true" />

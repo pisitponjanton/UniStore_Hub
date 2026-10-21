@@ -6,6 +6,7 @@ import {
   unexpectedDiagnostics,
   type QaDiagnosticEvent,
 } from "./support/qa-fixture";
+import { chooseCustomOption } from "./support/custom-select";
 import {
   apiJson,
   registerDisposableCustomer,
@@ -218,15 +219,17 @@ test("golden cross-role flow propagates Platform approval, Customer payment reje
     `/org/staff/?organizationId=${organizationId}`,
   );
 
+  await page.getByRole("button", { name: "เชิญสมาชิก" }).click();
+  const staffInviteDialog = page.getByRole("dialog", { name: "เพิ่มสมาชิก" });
+
   await page.locator("#staff-email").fill(
     LOCAL_SEED_USERS.staff,
   );
-  await page.locator("#staff-role").selectOption("STAFF");
-  await page
-    .getByRole("button", {
-      name: "เพิ่มสมาชิก",
-    })
-    .click();
+  await chooseCustomOption(
+    page.getByRole("combobox", { name: "บทบาทเริ่มต้น" }),
+    "เจ้าหน้าที่",
+  );
+  await staffInviteDialog.getByRole("button", { name: "เพิ่มสมาชิก" }).click();
 
   const staffCard = page
     .locator("article")
@@ -234,7 +237,7 @@ test("golden cross-role flow propagates Platform approval, Customer payment reje
     .first();
   await expect(staffCard).toBeVisible();
   await expect(
-    staffCard.getByLabel("บทบาท"),
+    staffCard.locator('select[id$="-native"]'),
   ).toHaveValue("STAFF");
 
   // Setup catalog through the authoritative API. The cross-role test focuses
@@ -275,9 +278,7 @@ test("golden cross-role flow propagates Platform approval, Customer payment reje
   );
 
   const variantName = "Golden Variant";
-  const variant = await apiJson<{
-    variantId: string;
-  }>(
+  await apiJson(
     request,
     `/organizations/${organizationId}/products/${product.productId}/variants`,
     {
@@ -358,12 +359,14 @@ test("golden cross-role flow propagates Platform approval, Customer payment reje
       level: 1,
     }),
   ).toBeVisible();
-  await page
-    .getByLabel("ตัวเลือกสินค้า")
-    .selectOption(variant.variantId);
-  await page
-    .getByLabel("แคมเปญ")
-    .selectOption(campaign.campaignId);
+  await chooseCustomOption(
+    page.getByRole("combobox", { name: "ตัวเลือกสินค้า" }),
+    variantName,
+  );
+  await chooseCustomOption(
+    page.getByRole("combobox", { name: "แคมเปญ" }),
+    campaignName,
+  );
   await page.getByLabel("จำนวน").fill("2");
 
   await page
@@ -451,9 +454,7 @@ test("golden cross-role flow propagates Platform approval, Customer payment reje
     })
     .click();
 
-  let paymentDetail = page.locator(
-    'aside[aria-label="รายละเอียดการชำระเงิน"]',
-  );
+  let paymentDetail = page.getByRole("dialog", { name: "ตรวจสอบการชำระเงิน" });
   await paymentDetail
     .getByRole("button", {
       name: "ปฏิเสธการชำระเงิน",
@@ -560,9 +561,7 @@ test("golden cross-role flow propagates Platform approval, Customer payment reje
     })
     .click();
 
-  paymentDetail = page.locator(
-    'aside[aria-label="รายละเอียดการชำระเงิน"]',
-  );
+  paymentDetail = page.getByRole("dialog", { name: "ตรวจสอบการชำระเงิน" });
   await paymentDetail
     .getByRole("button", {
       name: "อนุมัติการชำระเงิน",
@@ -726,9 +725,7 @@ test("golden cross-role flow propagates Platform approval, Customer payment reje
     })
     .click();
 
-  const pickupDetail = page.locator(
-    'aside[aria-label="รายละเอียด Pickup"]',
-  );
+  const pickupDetail = page.getByRole("dialog", { name: "รายละเอียดการรับสินค้า" });
   await pickupDetail
     .getByRole("button", {
       name: "ยืนยันรับสินค้า",
@@ -850,6 +847,7 @@ test("golden cross-role flow propagates Platform approval, Customer payment reje
   // Platform Admin still sees the Organization as ACTIVE after business flow.
   await switchBrowserSession(page, platformToken);
   await page.goto("/platform/organizations/");
+  await page.getByRole("textbox", { name: "ค้นหาหน่วยงาน" }).fill(organizationName);
   organizationRow = page
     .locator("article")
     .filter({ hasText: organizationName })

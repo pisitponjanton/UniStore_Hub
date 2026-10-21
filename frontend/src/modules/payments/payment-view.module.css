@@ -570,3 +570,86 @@
     box-shadow: 0 -8px 24px color-mix(in srgb, var(--ink) 8%, transparent);
   }
 }
+
+/* Phase 4 — formal customer payment workflow */
+.header {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: none;
+  padding: clamp(1.25rem, 3vw, 2rem);
+}
+
+.header::before,
+.header::after,
+.selectedFile::after {
+  content: none;
+}
+
+.title {
+  color: var(--ink);
+  font-size: clamp(1.875rem, 4vw, 2.75rem);
+  line-height: 1.12;
+}
+
+.description {
+  color: var(--ink-secondary);
+}
+
+.headerAmount {
+  min-height: 7.5rem;
+  border: 1px solid var(--line);
+  background: var(--surface-muted);
+  box-shadow: none;
+}
+
+.headerAmount span {
+  color: var(--ink-tertiary);
+}
+
+.headerAmount strong {
+  color: var(--brand-strong);
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+}
+
+.paymentFacts > div {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: none;
+}
+
+.uploadSection,
+.reviewSummary {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: none;
+}
+
+.selectedFile,
+.noFileState,
+.progressPanel {
+  border: 1px solid var(--line);
+  background: var(--surface-muted);
+  box-shadow: none;
+}
+
+.progressCurrent,
+.progressStep {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: none;
+}
+
+.progressCurrent {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+}
+
+.backLink:hover {
+  transform: none;
+}
+
+@media (max-width: 760px) {
+  .actions {
+    box-shadow: none;
+  }
+}

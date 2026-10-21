@@ -135,9 +135,8 @@ describe("OrganizationPickupsView", () => {
     fireEvent.change(screen.getByLabelText("Campaign ID"), {
       target: { value: "  campaign-2  " },
     });
-    fireEvent.change(screen.getByLabelText("สถานะ Pickup"), {
-      target: { value: "RECEIVED" },
-    });
+    fireEvent.click(screen.getByRole("combobox", { name: "สถานะ Pickup" }));
+    fireEvent.click(screen.getByRole("option", { name: "รับสินค้าแล้ว" }));
 
     fireEvent.click(
       screen.getByRole("button", {

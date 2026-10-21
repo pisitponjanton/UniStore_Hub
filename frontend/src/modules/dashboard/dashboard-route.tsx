@@ -38,7 +38,7 @@ export function DashboardRoute() {
   }, []);
 
   if (organizationId === undefined) {
-    return <LoadingState title="กำลังเตรียมแดชบอร์ด" />;
+    return <LoadingState title="กำลังเตรียมแดชบอร์ด" layout="compact" />;
   }
 
   return (

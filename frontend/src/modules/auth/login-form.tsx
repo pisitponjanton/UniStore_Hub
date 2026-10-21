@@ -21,6 +21,7 @@ import {
   type AuthFieldErrors,
 } from "./auth-validation";
 import { getAuthReturnPath } from "./return-route";
+import { getAuthenticatedHomePath } from "./navigation";
 import { authSession } from "./session";
 import { useAuthNavigationContext } from "./use-auth-navigation-context";
 
@@ -75,7 +76,11 @@ export function LoginForm() {
         throw new Error("SESSION_RESTORE_FAILED");
       }
 
-      window.location.assign(getAuthReturnPath(window.location.search));
+      const returnPath = getAuthReturnPath(window.location.search);
+      const destination =
+        returnPath === "/" ? getAuthenticatedHomePath(state) : returnPath;
+
+      window.location.assign(destination);
     } catch (error) {
       setServerError(
         error instanceof ApiClientError

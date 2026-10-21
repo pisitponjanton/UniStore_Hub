@@ -7,7 +7,7 @@
   padding: 0 var(--space-4);
   border: 1px solid transparent;
   border-radius: var(--radius-control);
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1.2;
   cursor: pointer;
   user-select: none;
@@ -21,12 +21,12 @@
 }
 
 .button:hover:not(:disabled) {
-  transform: translateY(-1px);
   text-decoration: none;
 }
 
 .button:active:not(:disabled) {
-  transform: translateY(0) scale(0.985);
+  transform: scale(0.985);
+  box-shadow: none;
 }
 
 .button:disabled {
@@ -36,25 +36,25 @@
 }
 
 .buttonPrimary {
-  background: var(--brand);
-  color: var(--brand-on);
+  background: var(--action-primary);
+  color: var(--action-primary-on);
   box-shadow: var(--shadow-action);
 }
 
 .buttonPrimary:hover:not(:disabled) {
-  background: var(--brand-hover);
+  background: var(--action-primary-hover);
   box-shadow: var(--shadow-action-hover);
 }
 
 .buttonSecondary {
-  background: var(--brand-soft);
-  color: var(--brand-strong);
-  border-color: color-mix(in srgb, var(--brand) 16%, var(--line));
+  background: var(--surface);
+  color: var(--ink);
+  border-color: var(--line);
 }
 
 .buttonSecondary:hover:not(:disabled) {
-  background: var(--brand-soft-strong);
-  border-color: color-mix(in srgb, var(--brand) 30%, var(--line));
+  background: var(--surface-hover);
+  border-color: var(--control-line);
 }
 
 .buttonQuiet {
@@ -70,12 +70,12 @@
 .buttonDanger {
   background: var(--danger);
   color: var(--danger-on);
-  box-shadow: var(--shadow-subtle);
+  box-shadow: none;
 }
 
 .buttonDanger:hover:not(:disabled) {
   background: color-mix(in srgb, var(--danger) 88%, var(--ink));
-  box-shadow: var(--shadow-raised);
+  box-shadow: none;
 }
 
 .buttonSmall {
@@ -131,7 +131,7 @@
   border-radius: var(--radius-control);
   background: var(--surface-inset);
   color: var(--ink);
-  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--surface) 54%, transparent);
+  box-shadow: none;
   transition:
     border-color var(--motion-standard) var(--motion-ease-out),
     background-color var(--motion-standard) var(--motion-ease-out),
@@ -166,13 +166,165 @@
   box-shadow: none;
 }
 
-.selectControl {
-  padding-right: var(--space-10);
-  cursor: pointer;
+.selectShell {
+  position: relative;
+  display: block;
+  min-width: 0;
 }
 
-.selectControl:disabled {
+.nativeSelect {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.selectTrigger {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  min-height: var(--control-height-lg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 0 42px 0 var(--space-4);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 1px 2px rgb(16 24 40 / 4%);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color var(--motion-standard) var(--motion-ease-out),
+    background-color var(--motion-standard) var(--motion-ease-out),
+    box-shadow var(--motion-standard) var(--motion-ease-out);
+}
+
+.selectTrigger:hover:not(:disabled) {
+  border-color: var(--control-line-hover);
+  background: var(--surface);
+  box-shadow: 0 2px 5px rgb(16 24 40 / 7%);
+}
+
+.selectTrigger:focus-visible {
+  border-color: var(--focus);
+  outline: 3px solid color-mix(in srgb, var(--focus) 28%, transparent);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--focus) 12%, transparent);
+}
+
+.selectTrigger:disabled {
+  border-color: var(--line);
+  background: var(--surface-muted);
+  color: var(--ink-muted);
+  box-shadow: none;
   cursor: not-allowed;
+}
+
+.selectValue {
+  min-width: 0;
+  overflow: hidden;
+  color: inherit;
+  font-weight: 550;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.selectPlaceholder {
+  color: var(--ink-muted);
+  font-weight: 450;
+}
+
+.selectChevron {
+  position: absolute;
+  top: 50%;
+  right: var(--space-4);
+  width: 18px;
+  height: 18px;
+  color: var(--ink-tertiary);
+  pointer-events: none;
+  transform: translateY(-50%);
+  transition:
+    color var(--motion-standard) var(--motion-ease-out),
+    transform var(--motion-standard) var(--motion-ease-out);
+}
+
+.selectChevronOpen {
+  color: var(--brand-strong);
+  transform: translateY(-50%) rotate(180deg);
+}
+
+.selectMenu {
+  position: fixed;
+  z-index: 70;
+  display: grid;
+  gap: 3px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+  box-shadow: 0 14px 36px rgb(20 20 20 / 16%), 0 2px 6px rgb(20 20 20 / 8%);
+  animation: dropdownIn 150ms var(--motion-ease-out) both;
+}
+
+.selectOption {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--ink-secondary);
+  font-size: var(--text-body);
+  line-height: 1.4;
+  cursor: pointer;
+  transition:
+    color var(--motion-fast) var(--motion-ease-out),
+    background-color var(--motion-fast) var(--motion-ease-out);
+}
+
+.selectOption:hover,
+.selectOptionActive {
+  background: var(--surface-hover);
+  color: var(--ink);
+}
+
+.selectOptionSelected {
+  background: var(--brand-soft);
+  color: var(--brand-strong);
+  font-weight: 650;
+}
+
+.selectOptionSelected.selectOptionActive,
+.selectOptionSelected:hover {
+  background: var(--brand-soft-strong);
+}
+
+.selectOptionDisabled {
+  color: var(--ink-muted);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.selectOptionLabel {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.selectOption svg {
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  color: var(--brand-strong);
 }
 
 .textarea {
@@ -306,7 +458,7 @@
   gap: var(--space-2);
   padding: 3px 10px;
   border: 1px solid transparent;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-sm);
   font-size: var(--text-caption);
   font-weight: 700;
   line-height: 1.3;
@@ -354,9 +506,9 @@
 
 .card {
   background: var(--surface);
-  border: 1px solid color-mix(in srgb, var(--line) 64%, transparent);
+  border: 1px solid var(--line);
   border-radius: var(--radius-card);
-  box-shadow: var(--shadow-subtle);
+  box-shadow: none;
 }
 
 .cardMuted {
@@ -374,15 +526,15 @@
 
 .cardRaised {
   background: var(--surface);
-  border-color: transparent;
+  border-color: var(--line);
   box-shadow: var(--shadow-raised);
 }
 
 .cardFeature {
-  background: var(--gradient-brand-soft);
-  border-color: color-mix(in srgb, var(--brand) 12%, transparent);
+  background: var(--surface);
+  border-color: var(--line);
   border-radius: var(--radius-feature);
-  box-shadow: var(--shadow-feature);
+  box-shadow: none;
 }
 
 .cardActions {
@@ -519,6 +671,189 @@
   border-radius: 50%;
 }
 
+.loadingPreview {
+  position: relative;
+  width: 100%;
+  display: grid;
+  gap: 8px;
+  overflow: hidden;
+  padding: 7px;
+  border-radius: var(--radius-md);
+  isolation: isolate;
+}
+
+.loadingPreview::after {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  content: "";
+  transform: translateX(-100%);
+  background: linear-gradient(
+    100deg,
+    transparent 12%,
+    color-mix(in srgb, var(--surface) 66%, transparent) 48%,
+    transparent 82%
+  );
+  pointer-events: none;
+  animation: skeletonSweep 1.55s var(--motion-ease-out) infinite;
+}
+
+.loadingRow,
+.loadingMetric,
+.loadingDetail,
+.loadingCard {
+  min-width: 0;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.loadingRow {
+  min-height: 54px;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) 64px;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+}
+
+.loadingAvatar,
+.loadingRowTitle,
+.loadingRowMeta,
+.loadingRowAside,
+.loadingMetricLabel,
+.loadingMetricValue,
+.loadingDetailLabel,
+.loadingDetailValue,
+.loadingCardImage,
+.loadingCardLine,
+.loadingCardLineShort,
+.loadingCompactBar {
+  display: block;
+  border-radius: var(--radius-xs);
+  background: color-mix(in srgb, var(--surface-strong) 80%, var(--surface-muted));
+}
+
+.loadingAvatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+
+.loadingRowCopy {
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.loadingRowTitle {
+  width: min(72%, 220px);
+  height: 10px;
+}
+
+.loadingRowMeta {
+  width: min(48%, 148px);
+  height: 7px;
+}
+
+.loadingRowAside {
+  width: 100%;
+  height: 10px;
+}
+
+.loadingPreview[data-layout="metrics"] {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.loadingMetric {
+  min-height: 82px;
+  display: grid;
+  align-content: space-between;
+  gap: 16px;
+  padding: 14px;
+}
+
+.loadingMetricLabel {
+  width: min(70%, 92px);
+  height: 8px;
+}
+
+.loadingMetricValue {
+  width: min(52%, 68px);
+  height: 20px;
+}
+
+.loadingPreview[data-layout="details"] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.loadingDetail {
+  min-height: 54px;
+  display: grid;
+  align-content: center;
+  gap: 7px;
+  padding: 9px 11px;
+}
+
+.loadingDetailLabel {
+  width: min(42%, 72px);
+  height: 7px;
+}
+
+.loadingDetailValue {
+  width: min(78%, 180px);
+  height: 10px;
+}
+
+.loadingPreview[data-layout="cards"] {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.loadingCard {
+  min-height: 108px;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 8px;
+}
+
+.loadingCardImage {
+  width: 100%;
+  height: 56px;
+  margin-bottom: 2px;
+}
+
+.loadingCardLine {
+  width: 78%;
+  height: 8px;
+}
+
+.loadingCardLineShort {
+  width: 48%;
+  height: 7px;
+}
+
+.loadingPreview[data-layout="compact"] {
+  width: min(100%, 280px);
+  gap: 7px;
+  padding: 0;
+}
+
+.loadingPreview[data-layout="details"] > *,
+.loadingPreview[data-layout="metrics"] > *,
+.loadingPreview[data-layout="cards"] > *,
+.loadingPreview[data-layout="list"] > * {
+  position: relative;
+}
+
+.loadingCompactBar {
+  height: 10px;
+}
+
+.loadingCompactBar:last-child {
+  width: 68%;
+}
+
 .overlay {
   position: fixed;
   inset: 0;
@@ -533,16 +868,25 @@
   top: 50%;
   left: 50%;
   width: min(calc(100vw - 32px), 620px);
+  min-width: 0;
+  max-width: calc(100vw - 32px);
   max-height: min(88dvh, 780px);
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  overscroll-behavior: contain;
   transform: translate(-50%, -50%);
   background: var(--surface);
   border: 1px solid var(--line-soft);
   border-radius: var(--radius-feature);
   box-shadow: var(--shadow-overlay);
   animation: dialogIn var(--motion-standard) var(--motion-ease-out);
+}
+
+.dialogWide {
+  width: min(calc(100vw - 32px), 920px);
+  max-width: calc(100vw - 32px);
+  max-height: 90dvh;
 }
 
 .dialogHeader {
@@ -553,27 +897,42 @@
 }
 
 .dialogTitle {
+  min-width: 0;
   color: var(--ink);
   font-size: var(--text-title);
   font-weight: 700;
+  overflow-wrap: anywhere;
 }
 
 .dialogDescription {
+  min-width: 0;
   max-width: 68ch;
   color: var(--ink-secondary);
   line-height: 1.65;
+  overflow-wrap: anywhere;
 }
 
 .dialogBody {
+  width: 100%;
+  min-width: 0;
   min-height: 0;
+  container-name: dialog-content;
+  container-type: inline-size;
   overflow-y: auto;
+  overflow-x: auto;
   overscroll-behavior: contain;
   scrollbar-gutter: stable;
   padding: var(--space-5) var(--space-6);
   border-top: 1px solid var(--line-soft);
 }
 
+.dialogBody > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
 .dialogFooter {
+  min-width: 0;
   display: flex;
   justify-content: flex-end;
   flex-wrap: wrap;
@@ -735,16 +1094,16 @@
   background: var(--surface);
   border: 1px solid var(--line-soft);
   border-radius: var(--radius-feature);
-  box-shadow: var(--shadow-subtle);
+  box-shadow: none;
 }
 
 .statePanel[data-state-kind="loading"] {
-  background: var(--gradient-brand-soft);
-  border-color: color-mix(in srgb, var(--brand) 12%, transparent);
+  background: var(--surface-muted);
+  border-color: var(--line);
 }
 
 .statePanel[data-state-kind="empty"] {
-  background: color-mix(in srgb, var(--accent-sky) 44%, var(--surface));
+  background: var(--surface-muted);
 }
 
 .statePanel[data-state-kind="error"],
@@ -779,7 +1138,7 @@
   align-items: center;
   gap: var(--space-2);
   padding-inline: 10px;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-sm);
   background: var(--surface-muted);
   color: var(--ink-tertiary);
   font-size: var(--text-caption);
@@ -850,9 +1209,9 @@
 }
 
 .pageHeaderCustomer {
-  margin-bottom: var(--space-8);
-  padding-block: var(--space-4) var(--space-6);
-  border-bottom: 0;
+  margin-bottom: var(--space-6);
+  padding-block: 0 var(--space-4);
+  border-bottom: 1px solid var(--line-soft);
 }
 
 .pageHeadingGroup {
@@ -878,8 +1237,8 @@
 }
 
 .pageHeaderCustomer .pageTitle {
-  max-width: 18ch;
-  font-size: var(--text-display);
+  max-width: 24ch;
+  font-size: var(--text-heading);
   letter-spacing: var(--tracking-tight);
 }
 
@@ -890,7 +1249,7 @@
 
 .pageHeaderCustomer .pageDescription {
   max-width: 62ch;
-  font-size: var(--text-body-lg);
+  font-size: var(--text-body);
 }
 
 .pageMeta {
@@ -974,6 +1333,18 @@
     min-height: var(--control-height);
   }
 
+  .loadingPreview[data-layout="metrics"] {
+    grid-template-columns: 1fr;
+  }
+
+  .loadingPreview[data-layout="details"] {
+    grid-template-columns: 1fr;
+  }
+
+  .loadingPreview[data-layout="cards"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .pageShell {
     padding-inline: var(--page-gutter-compact);
   }
@@ -990,8 +1361,14 @@
 
   .dialogContent {
     width: calc(100vw - 16px);
+    max-width: calc(100vw - 16px);
     max-height: calc(100dvh - 16px);
     border-radius: var(--radius-card);
+  }
+
+  .dialogWide {
+    width: calc(100vw - 16px);
+    max-width: calc(100vw - 16px);
   }
 
   .dialogHeader {
@@ -1018,6 +1395,13 @@
 @keyframes fadeIn {
   from {
     opacity: 0;
+  }
+}
+
+@keyframes dropdownIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.99);
   }
 }
 
@@ -1288,7 +1672,13 @@
 
   .dialogContent {
     width: calc(100vw - 12px);
+    max-width: calc(100vw - 12px);
     max-height: calc(100dvh - 12px);
+  }
+
+  .dialogWide {
+    width: calc(100vw - 12px);
+    max-width: calc(100vw - 12px);
   }
 
   .statePanel {
@@ -1299,6 +1689,11 @@
 @media (prefers-reduced-motion: reduce) {
   .button,
   .fieldControl,
+  .selectTrigger,
+  .selectChevron,
+  .selectOption,
+  .selectMenu,
+  .loadingPreview,
   .fileControl,
   .tableBodyRow,
   .dialogBackdrop,
@@ -1316,7 +1711,9 @@
 
   .buttonSpinner,
   .spinner,
-  .skeleton {
+  .skeleton,
+  .loadingPreview,
+  .selectMenu {
     animation: none !important;
   }
 }

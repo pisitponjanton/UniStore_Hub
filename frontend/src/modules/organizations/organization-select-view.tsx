@@ -12,8 +12,10 @@ import {
   useErrorSummaryFocus,
   LoadingState,
   Notice,
+  PaginationControls,
   TextareaField,
   TextField,
+  usePagination,
 } from "@/components";
 import {
   authSession,
@@ -131,6 +133,7 @@ export function OrganizationSelectView() {
       auth.memberships,
     );
   }, [auth, loadState]);
+  const organizationPagination = usePagination(accessible, 8);
 
   function handleSelect(
     organizationId: string,
@@ -256,6 +259,7 @@ export function OrganizationSelectView() {
 
             {loadState.status === "loading" ? (
               <LoadingState
+                layout="cards"
                 title="กำลังโหลดหน่วยงาน"
                 description="กำลังตรวจสอบหน่วยงานและสิทธิ์ที่บัญชีนี้เข้าถึงได้"
               />
@@ -287,7 +291,7 @@ export function OrganizationSelectView() {
 
             {loadState.status === "success" && accessible.length > 0 ? (
               <ul className={styles.organizationList}>
-                {accessible.map(({ organization, membership }) => (
+                {organizationPagination.items.map(({ organization, membership }) => (
                   <li
                     className={styles.organizationRow}
                     key={organization.organizationId}
@@ -342,6 +346,7 @@ export function OrganizationSelectView() {
                 ))}
               </ul>
             ) : null}
+            <PaginationControls {...organizationPagination} label="แบ่งหน้าหน่วยงาน" />
           </section>
 
           <aside className={styles.createPanel} aria-labelledby="create-organization">

@@ -169,7 +169,7 @@ export function ProductView() {
         <StorefrontHeader />
         <main className={styles.stateWrap}>
           {state.status === "loading" ? (
-            <LoadingState title="กำลังโหลดสินค้า" />
+            <LoadingState title="กำลังโหลดสินค้า" layout="details" />
           ) : null}
           {state.status === "invalid" ? (
             <ErrorState

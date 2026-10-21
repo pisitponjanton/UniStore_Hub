@@ -76,12 +76,8 @@ describe("ProductManagementView", () => {
 
     await screen.findByText("Faculty Shirt");
 
-    fireEvent.change(
-      screen.getByLabelText("กรองตามร้านค้า"),
-      {
-        target: { value: "store-1" },
-      },
-    );
+    fireEvent.click(screen.getByRole("combobox", { name: "กรองตามร้านค้า" }));
+    fireEvent.click(screen.getByRole("option", { name: "Main Store" }));
 
     await waitFor(() => {
       expect(mocks.listProducts).toHaveBeenLastCalledWith(
@@ -104,6 +100,7 @@ describe("ProductManagementView", () => {
     render(<ProductManagementView organizationId="org-1" />);
 
     await screen.findByText("Faculty Shirt");
+    fireEvent.click(screen.getByRole("button", { name: "เพิ่มสินค้า" }));
 
     fireEvent.change(
       screen.getByLabelText(/ชื่อสินค้า/),
@@ -185,6 +182,7 @@ describe("ProductManagementView", () => {
 
     await screen.findByText("Faculty Shirt");
 
+    fireEvent.click(screen.getByRole("button", { name: "เพิ่มสินค้า" }));
     fireEvent.click(
       screen.getByRole("button", { name: "สร้างสินค้า" }),
     );

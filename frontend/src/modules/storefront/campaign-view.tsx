@@ -97,7 +97,7 @@ export function CampaignView() {
         <StorefrontHeader />
         <main className={styles.stateWrap}>
           {state.status === "loading" ? (
-            <LoadingState title="กำลังโหลดแคมเปญ" />
+            <LoadingState title="กำลังโหลดแคมเปญ" layout="details" />
           ) : null}
           {state.status === "invalid" ? (
             <ErrorState

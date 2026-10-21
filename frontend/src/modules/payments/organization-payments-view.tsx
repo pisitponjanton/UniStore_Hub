@@ -132,6 +132,7 @@ export function OrganizationPaymentsView({
 
   const [selected, setSelected] =
     useState<SelectedPaymentState | null>(null);
+  const [reviewOpen, setReviewOpen] = useState(false);
   const [detailLoadingId, setDetailLoadingId] =
     useState<string | null>(null);
 
@@ -871,6 +872,8 @@ export function OrganizationPaymentsView({
                           pendingLabel="กำลังโหลด"
                           disabled={reviewPending !== null}
                           onClick={() => {
+                            setSelected(null);
+                            setReviewOpen(true);
                             void selectPayment(payment);
                           }}
                         >
@@ -899,7 +902,16 @@ export function OrganizationPaymentsView({
             ) : null}
           </section>
 
-          <aside aria-label="รายละเอียดการชำระเงิน">
+          <Dialog
+            open={reviewOpen}
+            onOpenChange={(open) => {
+              setReviewOpen(open);
+              if (!open) setSelected(null);
+            }}
+            title="ตรวจสอบการชำระเงิน"
+            description="ตรวจสอบข้อมูลการชำระเงินและคำสั่งซื้อก่อนตัดสินผล"
+            size="wide"
+          >
             {selected ? (
               <div className={styles.detailPanel}>
                 <div className={styles.detailHeader}>
@@ -1222,14 +1234,18 @@ export function OrganizationPaymentsView({
                 </Dialog>
               </div>
             ) : (
-              <div className={styles.emptyDetail}>
-                <strong>เลือก Payment เพื่อเริ่มตรวจสอบ</strong>
-                <span>
-                  ระบบจะโหลด Payment และ Order ล่าสุดก่อนแสดงสลิปและ action ตัดสินผล
-                </span>
-              </div>
+              detailLoadingId ? (
+                <LoadingState title="กำลังโหลดรายละเอียดการชำระเงิน" layout="details" />
+              ) : (
+                <ErrorState
+                  title="ไม่สามารถเปิดรายละเอียดได้"
+                  description={
+                    inlineError ?? "กรุณาปิดหน้าต่างแล้วลองอีกครั้ง"
+                  }
+                />
+              )
             )}
-          </aside>
+          </Dialog>
         </div>
       </main>
     </div>

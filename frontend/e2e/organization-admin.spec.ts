@@ -19,6 +19,7 @@ import {
   createApprovedAdminOrganization,
   establishAdminOrganizationSession,
 } from "./support/organization-admin-fixtures";
+import { chooseCustomOption } from "./support/custom-select";
 import {
   establishSeedRoleSession,
   getSeedRoleToken,
@@ -257,14 +258,13 @@ test("Organization Admin can manage members and Store lifecycle with confirmatio
     `/org/staff/?organizationId=${fixture.organizationId}`,
   );
 
+  await page.getByRole("button", { name: "เชิญสมาชิก" }).click();
+  const inviteDialog = page.getByRole("dialog", { name: "เพิ่มสมาชิก" });
+
   await page
     .locator("#staff-email")
     .fill("invalid");
-  await page
-    .getByRole("button", {
-      name: "เพิ่มสมาชิก",
-    })
-    .click();
+  await inviteDialog.getByRole("button", { name: "เพิ่มสมาชิก" }).click();
   await expect(
     page.locator("#staff-email-error"),
   ).toHaveText("กรุณาระบุอีเมลที่ถูกต้อง");
@@ -285,7 +285,10 @@ test("Organization Admin can manage members and Store lifecycle with confirmatio
   });
 
   await page.locator("#staff-email").fill(member.email);
-  await page.locator("#staff-role").selectOption("STAFF");
+  await chooseCustomOption(
+    page.getByRole("combobox", { name: "บทบาทเริ่มต้น" }),
+    "เจ้าหน้าที่",
+  );
   await page
     .getByRole("button", {
       name: "เพิ่มสมาชิก",
@@ -305,7 +308,7 @@ test("Organization Admin can manage members and Store lifecycle with confirmatio
   await expect(memberCard).toBeVisible();
 
   const roleSelect = memberCard.getByLabel("บทบาท");
-  await roleSelect.selectOption("ORGANIZATION_ADMIN");
+  await chooseCustomOption(roleSelect, "ผู้ดูแลหน่วยงาน");
   await memberCard
     .getByRole("button", {
       name: "บันทึกบทบาท",
@@ -347,9 +350,12 @@ test("Organization Admin can manage members and Store lifecycle with confirmatio
     .filter({ hasText: member.email })
     .first();
   await expect(
-    memberCard.getByLabel("บทบาท"),
+    memberCard.locator('select[id$="-native"]'),
   ).toHaveValue("ORGANIZATION_ADMIN");
-  await memberCard.getByLabel("บทบาท").selectOption("STAFF");
+  await chooseCustomOption(
+    memberCard.getByRole("combobox", { name: "บทบาท" }),
+    "เจ้าหน้าที่",
+  );
   await memberCard
     .getByRole("button", {
       name: "บันทึกบทบาท",
@@ -427,11 +433,9 @@ test("Organization Admin can manage members and Store lifecycle with confirmatio
     `/org/stores/?organizationId=${fixture.organizationId}`,
   );
 
-  await page
-    .getByRole("button", {
-      name: "สร้างร้านค้า",
-    })
-    .click();
+  await page.getByRole("button", { name: "เพิ่มร้านค้า" }).click();
+  const storeCreateDialog = page.getByRole("dialog", { name: "สร้างร้านค้าใหม่" });
+  await storeCreateDialog.getByRole("button", { name: "สร้างร้านค้า", exact: true }).click();
   await expect(
     page.locator("#store-create-name-error"),
   ).toHaveText("กรุณาระบุชื่อร้านค้า");
@@ -456,11 +460,7 @@ test("Organization Admin can manage members and Store lifecycle with confirmatio
   await page
     .locator("#store-create-description")
     .fill("Admin browser Store");
-  await page
-    .getByRole("button", {
-      name: "สร้างร้านค้า",
-    })
-    .click();
+  await storeCreateDialog.getByRole("button", { name: "สร้างร้านค้า", exact: true }).click();
 
   await expect(
     page.getByText(`สร้างร้านค้า ${storeName} แล้ว`),
@@ -489,6 +489,7 @@ test("Organization Admin can manage members and Store lifecycle with confirmatio
     ),
   ).toBeVisible();
 
+  await page.getByRole("button", { name: "ปิดส่วนแก้ไข" }).click();
   storeCard = page
     .locator("article")
     .filter({ hasText: editedStoreName })
@@ -576,15 +577,11 @@ test("Organization Admin can create and manage Product, Variant, and Product ima
     `/org/products/?organizationId=${fixture.organizationId}`,
   );
 
-  await page
-    .getByRole("button", {
-      name: "สร้างสินค้า",
-    })
-    .click();
+  await page.getByRole("button", { name: "เพิ่มสินค้า" }).click();
+  const productCreateDialog = page.getByRole("dialog", { name: "สร้างสินค้าใหม่" });
   // With exactly one Store, the UI preselects it for faster creation.
-  await expect(
-    page.locator("#product-create-store"),
-  ).toHaveValue(store.storeId);
+  await expect(page.locator("#product-create-store-native")).toHaveValue(store.storeId);
+  await productCreateDialog.getByRole("button", { name: "สร้างสินค้า", exact: true }).click();
   await expect(
     page.locator("#product-create-name-error"),
   ).toHaveText("กรุณาระบุชื่อสินค้า");
@@ -605,18 +602,15 @@ test("Organization Admin can create and manage Product, Variant, and Product ima
   });
 
   const productName = `QA Product ${Date.now()}`;
-  await page
-    .locator("#product-create-store")
-    .selectOption(store.storeId);
+  await chooseCustomOption(
+    page.getByRole("combobox", { name: "ร้านค้า" }),
+    /Product Store/,
+  );
   await page.locator("#product-create-name").fill(productName);
   await page
     .locator("#product-create-description")
     .fill("Admin browser Product");
-  await page
-    .getByRole("button", {
-      name: "สร้างสินค้า",
-    })
-    .click();
+  await productCreateDialog.getByRole("button", { name: "สร้างสินค้า", exact: true }).click();
 
   await expect(
     page.getByText(`สร้างสินค้า ${productName} แล้ว`),
@@ -786,6 +780,7 @@ test("Organization Admin can create and manage Product, Variant, and Product ima
     ),
   ).toBeVisible();
 
+  await page.getByRole("button", { name: "ปิดส่วนแก้ไข" }).click();
   productCard = page
     .locator("article")
     .filter({ hasText: editedProductName })
@@ -844,15 +839,11 @@ test("Organization Admin can create a Campaign, move it through lifecycle states
     `/org/campaigns/?organizationId=${fixture.organizationId}`,
   );
 
-  await page
-    .getByRole("button", {
-      name: "สร้างแคมเปญ",
-    })
-    .click();
+  await page.getByRole("button", { name: "เพิ่มแคมเปญ" }).click();
+  const campaignCreateDialog = page.getByRole("dialog", { name: "สร้างแคมเปญ" });
   // With exactly one Store, the UI preselects it for faster creation.
-  await expect(
-    page.locator("#campaign-create-store"),
-  ).toHaveValue(store.storeId);
+  await expect(page.locator("#campaign-create-store-native")).toHaveValue(store.storeId);
+  await campaignCreateDialog.getByRole("button", { name: "สร้างแคมเปญ", exact: true }).click();
   await expect(
     page.locator("#campaign-create-name-error"),
   ).toHaveText("กรุณาระบุชื่อ Campaign");
@@ -872,9 +863,10 @@ test("Organization Admin can create a Campaign, move it through lifecycle states
   });
 
   const campaignName = `QA Campaign ${Date.now()}`;
-  await page
-    .locator("#campaign-create-store")
-    .selectOption(store.storeId);
+  await chooseCustomOption(
+    page.getByRole("combobox", { name: "ร้านค้า" }),
+    /Campaign Store/,
+  );
   await page
     .locator("#campaign-create-name")
     .fill(campaignName);
@@ -891,11 +883,7 @@ test("Organization Admin can create a Campaign, move it through lifecycle states
     .locator("#campaign-create-pickup")
     .fill("2031-01-20T09:00");
 
-  await page
-    .getByRole("button", {
-      name: "สร้างแคมเปญ",
-    })
-    .click();
+  await campaignCreateDialog.getByRole("button", { name: "สร้างแคมเปญ", exact: true }).click();
   await expect(
     page.getByText(
       `สร้างแคมเปญ ${campaignName} เป็นฉบับร่างแล้ว`,
@@ -1131,7 +1119,7 @@ test("Organization Admin can perform Admin-only Order cancellation and use opera
     .click();
 
   await page
-    .locator('aside[aria-label="รายละเอียดการชำระเงิน"]')
+    .getByRole("dialog", { name: "ตรวจสอบการชำระเงิน" })
     .getByRole("button", {
       name: "อนุมัติการชำระเงิน",
     })
@@ -1179,7 +1167,7 @@ test("Organization Admin can perform Admin-only Order cancellation and use opera
     .click();
 
   await page
-    .locator('aside[aria-label="รายละเอียด Pickup"]')
+    .getByRole("dialog", { name: "รายละเอียดการรับสินค้า" })
     .getByRole("button", {
       name: "ยืนยันรับสินค้า",
     })

@@ -109,7 +109,7 @@
 
 .grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.55fr) minmax(320px, 0.68fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: clamp(28px, 4vw, 52px);
   align-items: start;
 }
@@ -287,8 +287,19 @@
   content: "";
   position: absolute;
   inset: 0 0 auto;
-  height: 4px;
-  background: linear-gradient(90deg, var(--brand), var(--accent-sky-strong), var(--accent-coral-strong));
+  height: 0;
+  background: none;
+}
+
+.editPanel {
+  border-color: var(--line);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  box-shadow: none;
+}
+
+.editPanel::before {
+  content: none;
 }
 
 .editHeader {
@@ -400,5 +411,107 @@
 
   .row:hover {
     transform: none;
+  }
+}
+
+@container dialog-content (max-width: 500px) {
+  .editHeader,
+  .editForm {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Phase 5: neutral operational surfaces */
+.header {
+  border-color: var(--ops-line);
+  background: linear-gradient(112deg, var(--ops-header) 0 82%, var(--brand-soft) 82% 100%);
+  box-shadow: var(--shadow-subtle);
+}
+
+.header::after {
+  content: none;
+}
+
+.summaryStrip {
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid var(--ops-line);
+  border-radius: var(--radius-card);
+  background: var(--ops-surface);
+  box-shadow: var(--shadow-subtle);
+}
+
+.summaryStrip > div,
+.summaryStrip > div:nth-child(2),
+.summaryStrip > div:nth-child(3) {
+  border: 0;
+  border-right: 1px solid var(--ops-line-soft);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.summaryStrip > div:last-child {
+  border-right: 0;
+}
+
+.section,
+.panel,
+.editPanel,
+.row {
+  border-color: var(--ops-line);
+  background: var(--ops-surface);
+}
+
+.panel,
+.editPanel,
+.row {
+  box-shadow: var(--shadow-subtle);
+}
+
+.row::before,
+.rowSelected::before,
+.editPanel::before {
+  content: none;
+}
+
+.row:hover,
+.rowSelected {
+  border-color: var(--line-strong);
+  background: var(--ops-surface-hover);
+}
+
+@media (max-width: 640px) {
+  .summaryStrip > div,
+  .summaryStrip > div:nth-child(2),
+  .summaryStrip > div:nth-child(3) {
+    border-right: 0;
+    border-bottom: 1px solid var(--ops-line-soft);
+  }
+
+  .summaryStrip > div:last-child {
+    border-bottom: 0;
+  }
+}
+
+.header {
+  padding: 0 0 var(--space-5);
+  border: 0;
+  border-bottom: 1px solid var(--line-soft);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.section {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+
+@container dialog-content (max-width: 500px) {
+  .editHeader,
+  .editForm {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

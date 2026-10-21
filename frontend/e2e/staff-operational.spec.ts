@@ -12,6 +12,7 @@ import {
   createStaffPaymentReviewFixture,
   createStaffPendingOrderFixture,
 } from "./support/staff-operational-fixtures";
+import { chooseCustomOption } from "./support/custom-select";
 import {
   establishSeedRoleSession,
   getSeedRoleToken,
@@ -157,13 +158,14 @@ test("Staff can filter Organization Orders, open a real detail, and cannot use t
 
   await page
     .locator("#organization-orders-campaign")
-    .fill(LOCAL_SEED_ENTITY_IDS.campaignId);
+    .fill(fixture.campaignId);
   await page
     .locator("#organization-orders-customer")
     .fill(fixture.customerId);
-  await page
-    .locator("#organization-orders-status")
-    .selectOption("PENDING_PAYMENT");
+  await chooseCustomOption(
+    page.getByRole("combobox", { name: "สถานะ Order" }),
+    "รอชำระเงิน",
+  );
 
   await page
     .getByRole("button", {
@@ -197,13 +199,14 @@ test("Staff can filter Organization Orders, open a real detail, and cannot use t
 
   await page
     .locator("#organization-orders-campaign")
-    .fill(LOCAL_SEED_ENTITY_IDS.campaignId);
+    .fill(fixture.campaignId);
   await page
     .locator("#organization-orders-customer")
     .fill(fixture.customerId);
-  await page
-    .locator("#organization-orders-status")
-    .selectOption("PENDING_PAYMENT");
+  await chooseCustomOption(
+    page.getByRole("combobox", { name: "สถานะ Order" }),
+    "รอชำระเงิน",
+  );
   await page
     .getByRole("button", {
       name: "ใช้ตัวกรอง",
@@ -216,7 +219,7 @@ test("Staff can filter Organization Orders, open a real detail, and cannot use t
     ),
   });
   await filteredRow
-    .getByRole("link", {
+    .getByRole("button", {
       name: `ดูรายละเอียดคำสั่งซื้อ ${fixture.orderId}`,
     })
     .click();
@@ -228,7 +231,9 @@ test("Staff can filter Organization Orders, open a real detail, and cannot use t
     }),
   ).toBeVisible();
   await expect(
-    page.getByText(`Order ${fixture.orderId}`),
+    page.getByRole("dialog").getByRole("heading", {
+      name: `Order ${fixture.orderId}`,
+    }),
   ).toBeVisible();
   await expect(
     page.getByRole("button", {
@@ -260,9 +265,10 @@ test("Staff can inspect the Payment slip and approve a real PAYMENT_REVIEW item"
     `/org/payments/?organizationId=${LOCAL_SEED_ENTITY_IDS.organizationId}`,
   );
 
-  await page
-    .locator("#payment-review-status")
-    .selectOption("PENDING_REVIEW");
+  await chooseCustomOption(
+    page.getByRole("combobox", { name: "สถานะ Payment" }),
+    "รอตรวจสอบ",
+  );
   await page
     .locator("#payment-review-order")
     .fill(fixture.orderId);
@@ -285,9 +291,7 @@ test("Staff can inspect the Payment slip and approve a real PAYMENT_REVIEW item"
     })
     .click();
 
-  const detail = page.locator(
-    'aside[aria-label="รายละเอียดการชำระเงิน"]',
-  );
+  const detail = page.getByRole("dialog", { name: "ตรวจสอบการชำระเงิน" });
   await expect(detail).toContainText(
     `Payment ${fixture.paymentId}`,
   );
@@ -418,9 +422,7 @@ test("Staff reject dialog records Back and validation behavior, then rejects a r
     })
     .click();
 
-  const detail = page.locator(
-    'aside[aria-label="รายละเอียดการชำระเงิน"]',
-  );
+  const detail = page.getByRole("dialog", { name: "ตรวจสอบการชำระเงิน" });
 
   await detail
     .getByRole("button", {
@@ -556,9 +558,10 @@ test("Staff can filter and confirm a READY Pickup and duplicate confirmation ref
   await page
     .locator("#pickup-token-filter")
     .fill(normal.pickupToken);
-  await page
-    .locator("#pickup-status-filter")
-    .selectOption("READY");
+  await chooseCustomOption(
+    page.getByRole("combobox", { name: "สถานะ Pickup" }),
+    "พร้อมรับสินค้า",
+  );
   await page
     .getByRole("button", {
       name: "ใช้ตัวกรอง",
@@ -577,9 +580,7 @@ test("Staff can filter and confirm a READY Pickup and duplicate confirmation ref
     })
     .click();
 
-  let detail = page.locator(
-    'aside[aria-label="รายละเอียด Pickup"]',
-  );
+  let detail = page.getByRole("dialog", { name: "รายละเอียดการรับสินค้า" });
   await expect(detail).toContainText(
     normal.pickupToken,
   );
@@ -656,9 +657,7 @@ test("Staff can filter and confirm a READY Pickup and duplicate confirmation ref
     })
     .click();
 
-  detail = page.locator(
-    'aside[aria-label="รายละเอียด Pickup"]',
-  );
+  detail = page.getByRole("dialog", { name: "รายละเอียดการรับสินค้า" });
   await expect(
     detail.getByRole("button", {
       name: "ยืนยันรับสินค้า",

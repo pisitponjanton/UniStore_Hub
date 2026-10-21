@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import {
   Badge,
   Button,
+  Dialog,
   EmptyState,
   ErrorState,
   ErrorSummary,
@@ -201,6 +202,7 @@ export function CampaignManagementView({
   const [createErrors, setCreateErrors] =
     useState<CampaignFormErrors>({});
   const [creating, setCreating] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
 
   const [selectedCampaign, setSelectedCampaign] =
     useState<CampaignDTO | null>(null);
@@ -457,6 +459,7 @@ export function CampaignManagementView({
       }));
       setCreateErrors({});
       setNotice(`สร้างแคมเปญ ${created.name} เป็นฉบับร่างแล้ว`);
+      setCreateOpen(false);
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();
@@ -694,6 +697,7 @@ export function CampaignManagementView({
               <span className={styles.sectionMeta}>
                 {hasFilters ? "กำลังใช้ตัวกรอง" : "ทุกขอบเขตที่โหลด"}
               </span>
+              <Button onClick={() => setCreateOpen(true)}>เพิ่มแคมเปญ</Button>
             </div>
 
             <div className={styles.toolbar} aria-busy={listLoading}>
@@ -775,7 +779,7 @@ export function CampaignManagementView({
                 description={
                   hasFilters
                     ? "ไม่มีแคมเปญที่ตรงกับตัวกรองนี้"
-                    : "สร้างแคมเปญแรกจากแบบฟอร์มด้านข้าง"
+                    : "เลือกสร้างแคมเปญเพื่อเริ่มแคมเปญแรก"
                 }
               />
             ) : (
@@ -874,6 +878,7 @@ export function CampaignManagementView({
             ) : null}
           </section>
 
+          <Dialog open={createOpen} onOpenChange={setCreateOpen} title="สร้างแคมเปญ" description="กำหนดร้านค้า ชื่อ และช่วงเวลาสำหรับแคมเปญใหม่" size="wide">
           <aside className={styles.panel}>
             <div className={styles.panelHeading}>
               <h2 className={styles.sectionTitle}>สร้างแคมเปญ</h2>
@@ -989,8 +994,18 @@ export function CampaignManagementView({
               </Button>
             </form>
           </aside>
+          </Dialog>
         </div>
 
+        <Dialog
+          open={selectedCampaign !== null}
+          onOpenChange={(open) => {
+            if (!open) setSelectedCampaign(null);
+          }}
+          title={selectedCampaign?.name ?? "รายละเอียดแคมเปญ"}
+          description="ตรวจสอบรายละเอียด กำหนดการ และจัดการสถานะแคมเปญ"
+          size="wide"
+        >
         {selectedCampaign ? (
           <section
             className={styles.detailPanel}
@@ -1281,6 +1296,7 @@ export function CampaignManagementView({
             )}
           </section>
         ) : null}
+        </Dialog>
       </main>
     </div>
   );

@@ -408,6 +408,7 @@ export function ProductionSummaryView({
 
         {state.status === "loading" ? (
           <LoadingState
+            layout="metrics"
             title="กำลังโหลดสรุปการผลิต"
             description="กำลังเตรียมจำนวนสินค้าและตัวเลือกของแคมเปญ"
           />

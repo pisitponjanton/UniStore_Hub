@@ -18,6 +18,7 @@ import {
   buildOrganizationNavigation,
   buildOrganizationNavigationGroups,
   buildPlatformNavigation,
+  getAuthenticatedHomePath,
   isNavigationItemActive,
 } from "./navigation";
 
@@ -97,6 +98,71 @@ describe("organization access", () => {
 });
 
 describe("role-aware navigation", () => {
+  it("routes each signed-in role to its primary workspace", () => {
+    expect(
+      getAuthenticatedHomePath({ ...session, memberships: [] }),
+    ).toBe("/my/orders/");
+
+    expect(getAuthenticatedHomePath(session)).toBe(
+      "/org/dashboard/?organizationId=org-admin",
+    );
+
+    expect(
+      getAuthenticatedHomePath({
+        ...session,
+        memberships: [memberships[1]],
+      }),
+    ).toBe("/org/orders/?organizationId=org-staff");
+
+    expect(
+      getAuthenticatedHomePath({
+        ...session,
+        user: { ...session.user, platformRole: "PLATFORM_ADMIN" },
+      }),
+    ).toBe("/platform/summary/");
+  });
+
+  it("links the storefront navigation directly to the store catalog", () => {
+    const storefront = buildNavigationGroups({
+      user: session.user,
+      memberships: [],
+    })[0]?.items[0];
+
+    expect(storefront).toEqual({
+      label: "หน้าร้านค้า",
+      href: "/stores/",
+    });
+    expect(storefront && isNavigationItemActive("/stores/", storefront)).toBe(
+      true,
+    );
+  });
+
+  it("filters cross-role navigation groups by the active URL scope", () => {
+    const groups = buildNavigationGroups({
+      user: { ...session.user, platformRole: "PLATFORM_ADMIN" },
+      memberships,
+      organizationId: "org-staff",
+    });
+    const activeGroups = (pathname: string) =>
+      pathname.startsWith("/platform")
+        ? groups.filter((group) => group.label === "ผู้ดูแลแพลตฟอร์ม")
+        : pathname.startsWith("/org")
+          ? groups.filter((group) => group.label !== "ผู้ดูแลแพลตฟอร์ม")
+          : groups.filter((group) => group.label === "บัญชีของฉัน");
+
+    expect(activeGroups("/stores/").flatMap((group) => group.items.map((item) => item.href))).toEqual([
+      "/stores/",
+      "/my/orders/",
+      "/notifications/",
+    ]);
+    expect(activeGroups("/org/orders/").some((group) => group.label === "ผู้ดูแลแพลตฟอร์ม")).toBe(false);
+    expect(activeGroups("/platform/summary/").flatMap((group) => group.items.map((item) => item.href))).toEqual([
+      "/platform/summary/",
+      "/platform/organizations/",
+      "/platform/users/",
+    ]);
+  });
+
   it("keeps production and management links away from Staff navigation", () => {
     const group = buildOrganizationNavigation("org-staff", "STAFF");
     const labels = group.items.map((item) => item.label);
@@ -169,7 +235,7 @@ describe("role-aware navigation", () => {
     ]);
   });
 
-  it("combines customer, organization, and platform groups without treating membership as platform authority", () => {
+  it("builds available customer, organization, and platform groups without treating membership as platform authority", () => {
     const groups = buildNavigationGroups({
       user: {
         ...session.user,

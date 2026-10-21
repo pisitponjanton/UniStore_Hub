@@ -118,6 +118,52 @@ describe("PlatformOrganizationsView", () => {
     ).toBeInTheDocument();
   });
 
+  it("exposes the pending governance workload as a keyboard-reachable shortcut", async () => {
+    mocks.listOrganizations.mockResolvedValue({
+      items: [
+        organization(),
+        organization({
+          organizationId: "org-active",
+          name: "Active Store",
+          status: "ACTIVE",
+        }),
+      ],
+      nextCursor: null,
+    });
+
+    render(<PlatformOrganizationsView />);
+
+    const shortcut = await screen.findByRole("link", {
+      name: "งานที่ต้องตัดสินใจ 1 หน่วยงานรออนุมัติ ไปยังรายการ",
+    });
+    expect(shortcut).toHaveAttribute("href", "#platform-organizations-title");
+  });
+
+  it("filters organizations locally by name or status without changing the API query", async () => {
+    mocks.listOrganizations.mockResolvedValue({
+      items: [
+        organization(),
+        organization({ organizationId: "org-active", name: "Active Store", status: "ACTIVE" }),
+      ],
+      nextCursor: null,
+    });
+
+    render(<PlatformOrganizationsView />);
+    await screen.findByText("Student Store");
+
+    fireEvent.click(screen.getByRole("combobox", { name: "สถานะ" }));
+    fireEvent.click(screen.getByRole("option", { name: "ใช้งาน" }));
+    expect(screen.getByText("Active Store")).toBeInTheDocument();
+    expect(screen.queryAllByText("Student Store")).toHaveLength(0);
+
+    fireEvent.click(screen.getByRole("combobox", { name: "สถานะ" }));
+    fireEvent.click(screen.getByRole("option", { name: "ทุกสถานะ" }));
+    fireEvent.change(screen.getByRole("textbox", { name: "ค้นหาหน่วยงาน" }), { target: { value: "Student" } });
+    expect(screen.getByText("Student Store")).toBeInTheDocument();
+    expect(screen.queryAllByText("Active Store")).toHaveLength(0);
+    expect(mocks.listOrganizations).toHaveBeenCalledTimes(1);
+  });
+
   it("confirms approval and applies the Backend-returned OrganizationDTO", async () => {
     mocks.approveOrganization.mockResolvedValue(
       organization({

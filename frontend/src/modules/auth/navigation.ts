@@ -1,6 +1,7 @@
 import type {
   CurrentMembershipDTO,
   CurrentUserDTO,
+  CurrentUserSessionDTO,
   MembershipRole,
 } from "@/types";
 
@@ -28,7 +29,7 @@ export function isNavigationItemActive(
   item: NavigationItem,
 ): boolean {
   const currentPath = normalizeNavigationPath(pathname);
-  const hrefPath = item.href.split("?")[0] ?? item.href;
+  const hrefPath = item.href.split(/[?#]/)[0] ?? item.href;
   const candidates = [hrefPath, ...(item.activePaths ?? [])];
 
   return candidates.some((candidate) => {
@@ -90,7 +91,10 @@ export function buildCustomerNavigation(): NavigationGroup {
   return {
     label: "บัญชีของฉัน",
     items: [
-      { label: "หน้าร้านค้า", href: "/" },
+      {
+        label: "หน้าร้านค้า",
+        href: "/stores/",
+      },
       {
         label: "คำสั่งซื้อของฉัน",
         href: "/my/orders/",
@@ -99,6 +103,26 @@ export function buildCustomerNavigation(): NavigationGroup {
       { label: "การแจ้งเตือน", href: "/notifications/" },
     ],
   };
+}
+
+export function getAuthenticatedHomePath(
+  session: CurrentUserSessionDTO,
+): string {
+  if (session.user.platformRole === "PLATFORM_ADMIN") {
+    return "/platform/summary/";
+  }
+
+  const membership = session.memberships.find(
+    (candidate) => candidate.status === "ACTIVE",
+  );
+
+  if (!membership) {
+    return "/my/orders/";
+  }
+
+  return membership.role === "ORGANIZATION_ADMIN"
+    ? withOrganization("/org/dashboard/", membership.organizationId)
+    : withOrganization("/org/orders/", membership.organizationId);
 }
 
 export function buildOrganizationNavigation(

@@ -6,14 +6,17 @@ import {
   Badge,
   Button,
   ConfirmDialog,
+  Dialog,
   EmptyState,
   ErrorState,
   ErrorSummary,
   useErrorSummaryFocus,
   LoadingState,
   Notice,
+  PaginationControls,
   TextareaField,
   TextField,
+  usePagination,
 } from "@/components";
 import {
   authSession,
@@ -61,6 +64,7 @@ export function StoreManagementView({
 
   const [createName, setCreateName] = useState("");
   const [createDescription, setCreateDescription] = useState("");
+  const [createOpen, setCreateOpen] = useState(false);
   const [createNameError, setCreateNameError] = useState<string | undefined>();
   const [creating, setCreating] = useState(false);
 
@@ -74,6 +78,10 @@ export function StoreManagementView({
 
   const [inlineError, setInlineError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const storePagination = usePagination(
+    state.status === "success" ? state.stores : [],
+    10,
+  );
 
   useEffect(() => {
     const controller = new AbortController();
@@ -149,6 +157,7 @@ export function StoreManagementView({
       setCreateName("");
       setCreateDescription("");
       setNotice(`สร้างร้านค้า ${created.name} แล้ว`);
+      setCreateOpen(false);
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();
@@ -302,6 +311,7 @@ export function StoreManagementView({
         <main className={styles.stateWrap}>
           {state.status === "loading" ? (
             <LoadingState
+              layout="details"
               title="กำลังโหลดร้านค้า"
               description="กำลังดึงร้านค้าและสถานะล่าสุดของหน่วยงาน"
             />
@@ -378,16 +388,17 @@ export function StoreManagementView({
               <span className={styles.sectionMeta}>
                 {state.stores.length.toLocaleString("th-TH")} รายการ
               </span>
+              <Button onClick={() => setCreateOpen(true)}>เพิ่มร้านค้า</Button>
             </div>
 
             {state.stores.length === 0 ? (
               <EmptyState
                 title="ยังไม่มีร้านค้า"
-                description="สร้างร้านค้าแรกจากแบบฟอร์มด้านข้าง"
+                description="เลือกเพิ่มร้านค้าเพื่อสร้างหน้าร้านแรกของหน่วยงาน"
               />
             ) : (
               <div className={styles.list}>
-                {state.stores.map((store) => {
+                {storePagination.items.map((store) => {
                   const loading = loadingStoreId === store.storeId;
                   const changingStatus = statusStoreId === store.storeId;
                   const busy =
@@ -478,8 +489,10 @@ export function StoreManagementView({
                 })}
               </div>
             )}
+            <PaginationControls {...storePagination} label="แบ่งหน้าร้านค้า" />
           </section>
 
+          <Dialog open={createOpen} onOpenChange={setCreateOpen} title="สร้างร้านค้าใหม่" description="เพิ่มร้านค้าในหน่วยงานของคุณ" size="wide">
           <aside className={styles.panel}>
             <div className={styles.panelHeading}>
               <h2 className={styles.sectionTitle}>สร้างร้านค้าใหม่</h2>
@@ -508,13 +521,6 @@ export function StoreManagementView({
                 }}
                 error={createNameError}
                 announceError={false}
-                onBlur={() => {
-                  const validation = validateStoreForm({
-                    name: createName,
-                    description: createDescription,
-                  });
-                  setCreateNameError(validation.errors.name);
-                }}
                 required
                 disabled={creating}
               />
@@ -540,8 +546,18 @@ export function StoreManagementView({
               </Button>
             </form>
           </aside>
+          </Dialog>
         </div>
 
+        <Dialog
+          open={selectedStore !== null}
+          onOpenChange={(open) => {
+            if (!open) setSelectedStore(null);
+          }}
+          title={selectedStore ? `แก้ไข ${selectedStore.name}` : "แก้ไขร้านค้า"}
+          description="แก้ไขรายละเอียดร้านค้าและบันทึกการเปลี่ยนแปลง"
+          size="wide"
+        >
         {selectedStore ? (
           <section className={styles.editPanel} aria-labelledby="store-edit-title">
             <div className={styles.editHeader}>
@@ -621,6 +637,7 @@ export function StoreManagementView({
             </form>
           </section>
         ) : null}
+        </Dialog>
       </main>
     </div>
   );

@@ -427,9 +427,9 @@ for (const viewport of responsiveViewports) {
     );
     await inspectPayment.click();
 
-    const paymentDetail = page.locator(
-      'aside[aria-label="รายละเอียดการชำระเงิน"]',
-    );
+    const paymentDetail = page.getByRole("dialog", {
+      name: "ตรวจสอบการชำระเงิน",
+    });
     await expect(paymentDetail).toBeVisible();
     await assertNoPageOverflow(
       page,

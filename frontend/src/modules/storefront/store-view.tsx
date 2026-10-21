@@ -3,7 +3,12 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-import { ErrorState, LoadingState } from "@/components";
+import {
+  ErrorState,
+  LoadingState,
+  PaginationControls,
+  usePagination,
+} from "@/components";
 import { ApiClientError } from "@/services";
 import { getRequiredQueryId } from "@/utils";
 
@@ -27,6 +32,14 @@ type StoreViewState =
 
 export function StoreView() {
   const [state, setState] = useState<StoreViewState>({ status: "loading" });
+  const campaignPagination = usePagination(
+    state.status === "success" ? state.data.campaigns : [],
+    8,
+  );
+  const productPagination = usePagination(
+    state.status === "success" ? state.data.products : [],
+    12,
+  );
 
   useEffect(() => {
     const controller = new AbortController();
@@ -83,7 +96,7 @@ export function StoreView() {
         <StorefrontHeader />
         <main className={styles.stateWrap}>
           {state.status === "loading" ? (
-            <LoadingState title="กำลังโหลดร้านค้า" />
+            <LoadingState title="กำลังโหลดร้านค้า" layout="cards" />
           ) : null}
           {state.status === "invalid" ? (
             <ErrorState
@@ -173,14 +186,17 @@ export function StoreView() {
           </div>
 
           {campaigns.length > 0 ? (
-            <div className={styles.cardGrid}>
-              {campaigns.map((campaign) => (
-                <CampaignCard
-                  campaign={campaign}
-                  key={campaign.campaignId}
-                />
-              ))}
-            </div>
+            <>
+              <div className={styles.cardGrid}>
+                {campaignPagination.items.map((campaign) => (
+                  <CampaignCard
+                    campaign={campaign}
+                    key={campaign.campaignId}
+                  />
+                ))}
+              </div>
+              <PaginationControls {...campaignPagination} label="แบ่งหน้าแคมเปญ" />
+            </>
           ) : (
             <div className={styles.emptyBox}>
               ร้านนี้ยังไม่มีแคมเปญที่เปิดให้ลูกค้าเข้าชม
@@ -201,15 +217,18 @@ export function StoreView() {
           </div>
 
           {products.length > 0 ? (
-            <div className={styles.cardGrid}>
-              {products.map((product) => (
-                <ProductCard
-                  key={product.productId}
-                  organizationId={store.organizationId}
-                  product={product}
-                />
-              ))}
-            </div>
+            <>
+              <div className={styles.cardGrid}>
+                {productPagination.items.map((product) => (
+                  <ProductCard
+                    key={product.productId}
+                    organizationId={store.organizationId}
+                    product={product}
+                  />
+                ))}
+              </div>
+              <PaginationControls {...productPagination} label="แบ่งหน้าสินค้า" />
+            </>
           ) : (
             <div className={styles.emptyBox}>
               ร้านนี้ยังไม่มีสินค้าที่เปิดให้เข้าชม

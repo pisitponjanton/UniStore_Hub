@@ -137,20 +137,24 @@ export async function registerDisposableCustomer(
 export async function createSeedPendingOrder(
   request: APIRequestContext,
   quantity = 1,
-): Promise<{ orderId: string }> {
+): Promise<{ orderId: string; campaignId: string }> {
+  const campaign = await createSeedOpenCampaign(
+    request,
+    `order-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+  );
   const customerToken = await getSeedRoleToken(
     request,
     "customer",
   );
 
-  return apiJson<{ orderId: string }>(
+  const order = await apiJson<{ orderId: string }>(
     request,
     `/organizations/${LOCAL_SEED_ENTITY_IDS.organizationId}/orders`,
     {
       method: "POST",
       token: customerToken,
       data: {
-        campaignId: LOCAL_SEED_ENTITY_IDS.campaignId,
+        campaignId: campaign.campaignId,
         items: [
           {
             productId: LOCAL_SEED_ENTITY_IDS.productId,
@@ -162,6 +166,37 @@ export async function createSeedPendingOrder(
       expectedStatus: 201,
     },
   );
+
+  return { orderId: order.orderId, campaignId: campaign.campaignId };
+}
+
+export async function createSeedOpenCampaign(
+  request: APIRequestContext,
+  runId: string,
+): Promise<{ campaignId: string; campaignName: string }> {
+  const adminToken = await getSeedRoleToken(request, "organizationAdmin");
+  const campaignName = `QA Open Campaign ${runId}`;
+  const campaign = await apiJson<{ campaignId: string }>(
+    request,
+    `/organizations/${LOCAL_SEED_ENTITY_IDS.organizationId}/campaigns`,
+    {
+      method: "POST",
+      token: adminToken,
+      data: {
+        storeId: LOCAL_SEED_ENTITY_IDS.storeId,
+        name: campaignName,
+      },
+      expectedStatus: 201,
+    },
+  );
+
+  await apiJson(
+    request,
+    `/organizations/${LOCAL_SEED_ENTITY_IDS.organizationId}/campaigns/${campaign.campaignId}/open`,
+    { method: "POST", token: adminToken, expectedStatus: 200 },
+  );
+
+  return { ...campaign, campaignName };
 }
 
 export async function createReadyForPickupFixture(

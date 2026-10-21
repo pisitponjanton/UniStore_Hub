@@ -325,6 +325,7 @@ export function MyPaymentView() {
         <main className={styles.stateWrap}>
           {state.status === "loading" ? (
             <LoadingState
+              layout="details"
               title="กำลังโหลดข้อมูลการชำระเงิน"
               description="กำลังตรวจสอบคำสั่งซื้อและสถานะหลักฐานล่าสุด"
             />

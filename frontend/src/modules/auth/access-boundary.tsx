@@ -63,6 +63,7 @@ export function AuthenticatedBoundary({
   if (auth.status === "loading") {
     return (
       <LoadingState
+        layout="compact"
         headingLevel={1}
         title="กำลังตรวจสอบบัญชี"
         description="กำลังตรวจสอบ Session ก่อนเปิดหน้านี้"
@@ -118,6 +119,7 @@ export function OrganizationBoundary({
   if (auth.status === "loading") {
     return (
       <LoadingState
+        layout="compact"
         headingLevel={1}
         title="กำลังตรวจสอบสิทธิ์ของหน่วยงาน"
       />
@@ -193,6 +195,7 @@ export function PlatformAdminBoundary({
   if (auth.status === "loading") {
     return (
       <LoadingState
+        layout="compact"
         headingLevel={1}
         title="กำลังตรวจสอบสิทธิ์ Platform Admin"
       />

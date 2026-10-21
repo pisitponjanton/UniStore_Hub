@@ -15,6 +15,7 @@ export function AuthEntryState({ children }: { children: ReactNode }) {
     return (
       <div className={styles.formShell}>
         <LoadingState
+          layout="compact"
           title="กำลังตรวจสอบบัญชี"
           description="กำลังตรวจสอบว่าคุณมีบัญชีที่เข้าสู่ระบบอยู่แล้วหรือไม่"
         />

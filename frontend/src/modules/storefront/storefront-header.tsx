@@ -1,8 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import brandLogo from "@/assets/unistore-hub-logo.webp";
 import { useAuthSession } from "@/modules/auth";
 
 import styles from "./storefront-view.module.css";
@@ -27,9 +29,16 @@ export function StorefrontHeader() {
     <header className={styles.topbar}>
       <div className={styles.topbarInner}>
         <Link href="/" className={styles.brand} aria-label="UniStore Hub หน้าร้าน">
-          <span className={styles.brandMark} aria-hidden="true">
-            <span />
-          </span>
+          <Image
+            src={brandLogo}
+            alt=""
+            width={38}
+            height={38}
+            className={styles.brandMark}
+            aria-hidden="true"
+            priority
+            sizes="38px"
+          />
           <span className={styles.brandCopy}>
             <strong>UniStore Hub</strong>
             <span>Campus marketplace</span>

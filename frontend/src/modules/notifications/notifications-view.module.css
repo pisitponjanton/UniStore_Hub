@@ -142,8 +142,8 @@
 }
 
 .filterButtonActive {
-  background: var(--brand);
-  color: var(--brand-on);
+  background: var(--brand-soft);
+  color: var(--brand-strong);
   box-shadow: var(--shadow-subtle);
 }
 
@@ -494,4 +494,13 @@
   .authorityNote {
     padding: var(--space-4);
   }
+}
+
+.header {
+  padding: 0 0 var(--space-5);
+  border: 0;
+  border-bottom: 1px solid var(--line-soft);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }

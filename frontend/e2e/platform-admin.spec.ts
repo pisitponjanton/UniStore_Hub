@@ -57,18 +57,7 @@ test("Platform Admin can navigate Platform scope, read live summary counts, and 
     ).toBeVisible();
   }
 
-  for (const label of [
-    "หน้าร้านค้า",
-    "คำสั่งซื้อของฉัน",
-    "การแจ้งเตือน",
-  ]) {
-    await expect(
-      page.getByRole("link", {
-        name: label,
-        exact: true,
-      }),
-    ).toBeVisible();
-  }
+  await expect(page.getByRole("heading", { name: "ผู้ดูแลแพลตฟอร์ม" })).toBeVisible();
 
   await expect(
     page.getByRole("link", {
@@ -122,30 +111,17 @@ test("Platform Admin can navigate Platform scope, read live summary counts, and 
 
   await page
     .getByRole("link", {
-      name: "หน้าร้านค้า",
+      name: "ภาพรวมระบบ",
       exact: true,
     })
     .click();
-  await expect(page).toHaveURL(/\/$/);
+  await expect(page).toHaveURL(/\/platform\/summary\/$/);
   await expect(
     page.getByRole("link", {
-      name: "ภาพรวมระบบ",
+      name: "หน้าร้านค้า",
       exact: true,
-    }),
-  ).toHaveCount(0);
-  await page.goBack();
-  await expect(
-    page.getByRole("heading", {
-      name: "ผู้ใช้ระดับ Platform",
-      level: 1,
     }),
   ).toBeVisible();
-  await page
-    .getByRole("link", {
-      name: "ภาพรวมระบบ",
-      exact: true,
-    })
-    .click();
   await expect(
     page.getByRole("heading", {
       name: "ภาพรวม Platform",
@@ -162,6 +138,7 @@ test("Platform Admin can navigate Platform scope, read live summary counts, and 
       level: 1,
     }),
   ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "ผู้ดูแลแพลตฟอร์ม" })).toHaveCount(0);
 
   await page.goto("/org/select/");
   await expect(
@@ -305,11 +282,12 @@ test("Platform Admin can approve then suspend a real pending Organization throug
   );
   expect(authoritativeOrganization.status).toBe("ACTIVE");
 
-  organizationRow = page
-    .locator("article")
-    .filter({ hasText: organizationName })
-    .first();
-  await expect(organizationRow).toContainText("ใช้งาน");
+  await page.getByRole("combobox", { name: "สถานะ" }).click();
+  await page.getByRole("option", { name: "ใช้งาน", exact: true }).click();
+  await page.getByRole("textbox", { name: "ค้นหาหน่วยงาน" }).fill(organizationName);
+
+  organizationRow = page.locator("article").filter({ hasText: organizationName });
+  await expect(organizationRow).toBeVisible();
   await expect(
     organizationRow.getByRole("button", {
       name: "อนุมัติ",
@@ -351,11 +329,12 @@ test("Platform Admin can approve then suspend a real pending Organization throug
   );
   expect(authoritativeOrganization.status).toBe("SUSPENDED");
 
-  organizationRow = page
-    .locator("article")
-    .filter({ hasText: organizationName })
-    .first();
-  await expect(organizationRow).toContainText("ระงับ");
+  await page.getByRole("combobox", { name: "สถานะ" }).click();
+  await page.getByRole("option", { name: "ระงับ", exact: true }).click();
+  await page.getByRole("textbox", { name: "ค้นหาหน่วยงาน" }).fill(organizationName);
+
+  organizationRow = page.locator("article").filter({ hasText: organizationName });
+  await expect(organizationRow).toBeVisible();
   await expect(
     organizationRow.getByText(
       "ไม่มี action เพิ่มเติมในสถานะนี้",
@@ -433,9 +412,6 @@ test("Platform Admin Users surface is read-only and exposes persisted Platform r
   });
   await expect(usersSection).toBeVisible();
 
-  await expect(
-    usersSection.locator("button"),
-  ).toHaveCount(0);
   await expect(
     usersSection.locator("input, select, textarea"),
   ).toHaveCount(0);

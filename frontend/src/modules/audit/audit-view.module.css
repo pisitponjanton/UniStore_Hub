@@ -453,3 +453,55 @@
     transition: none;
   }
 }
+
+/* Phase 5: neutral audit workspace */
+.header {
+  border-color: var(--ops-line);
+  background: linear-gradient(112deg, var(--ops-surface) 0%, var(--ops-surface) 62%, var(--brand-soft) 100%);
+  box-shadow: var(--shadow-subtle);
+}
+
+.header::after { content: none; }
+
+.headerCount,
+.filterPanel,
+.section {
+  border-color: var(--ops-line);
+  background: var(--ops-surface);
+  box-shadow: none;
+}
+
+.auditTable tbody tr:hover { background: var(--ops-surface-hover); }
+
+.action,
+.metadataDetails summary,
+.metadata { background: var(--ops-surface-muted); }
+
+.header {
+  padding: 0 0 var(--space-5);
+  border: 0;
+  border-bottom: 1px solid var(--line-soft);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.metadataDetails[open] summary {
+  margin-bottom: var(--space-2);
+  color: var(--ink);
+}
+
+.metadata {
+  max-height: min(42vh, 360px);
+  overflow: auto;
+}
+
+.auditTable {
+  min-width: 760px;
+}
+
+.section {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}

@@ -71,6 +71,27 @@ describe("DashboardView", () => {
     });
   });
 
+  it("keeps the contracted zero-data state readable without inventing activity", async () => {
+    mocks.getSummary.mockResolvedValue({
+      totalStores: 0,
+      totalProducts: 0,
+      campaignsByStatus: {},
+      ordersByStatus: {},
+      pendingPaymentReviews: 0,
+      paidOrderCount: 0,
+      paidRevenueSatang: 0,
+    });
+
+    render(<DashboardView organizationId="org-empty" />);
+
+    expect(await screen.findByText("฿0.00")).toBeInTheDocument();
+    expect(screen.getAllByText("0").length).toBeGreaterThan(0);
+    expect(screen.getByRole("heading", { name: "ภาพรวมหน่วยงาน" })).toBeInTheDocument();
+    expect(mocks.getSummary).toHaveBeenCalledWith("org-empty", {
+      signal: expect.any(AbortSignal),
+    });
+  });
+
   it("retries the initial organization report in place after a recoverable error", async () => {
     mocks.getSummary
       .mockRejectedValueOnce(new Error("network"))

@@ -1,9 +1,62 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 
 import { createRef } from "react";
 
-import { ErrorSummary, FileField } from "./fields";
+import { ErrorSummary, FileField, SelectField } from "./fields";
+
+describe("SelectField", () => {
+  it("opens a themed listbox, supports selection, and retains the native change event", () => {
+    const onChange = vi.fn();
+    render(
+      <SelectField id="organization" label="หน่วยงาน" required onChange={onChange}>
+        <option value="">เลือกหน่วยงาน</option>
+        <option value="org-1">คณะวิศวกรรมศาสตร์</option>
+      </SelectField>,
+    );
+
+    const select = screen.getByRole("combobox", { name: "หน่วยงาน" });
+    expect(select).toHaveAttribute("aria-required", "true");
+    fireEvent.click(select);
+
+    const listbox = screen.getByRole("listbox", { name: "หน่วยงาน ตัวเลือก" });
+    expect(listbox).toBeInTheDocument();
+    expect(listbox).toHaveClass("scrollbarOnHover");
+    fireEvent.click(screen.getByRole("option", { name: "คณะวิศวกรรมศาสตร์" }));
+
+    expect(select).toHaveTextContent("คณะวิศวกรรมศาสตร์");
+    expect(onChange).toHaveBeenCalledOnce();
+    expect(onChange.mock.calls[0]?.[0].target.value).toBe("org-1");
+    expect(document.querySelector("svg[aria-hidden='true']")).toBeInTheDocument();
+    expect(document.querySelector("svg[aria-hidden='true']")).toHaveAttribute(
+      "aria-hidden",
+      "true",
+    );
+  });
+  it("supports arrow-key navigation, Enter selection, and Escape dismissal", () => {
+    render(
+      <SelectField id="status" label="สถานะ" defaultValue="draft">
+        <option value="draft">ฉบับร่าง</option>
+        <option value="open">เปิดรับคำสั่งซื้อ</option>
+      </SelectField>,
+    );
+
+    const select = screen.getByRole("combobox", { name: "สถานะ" });
+    fireEvent.keyDown(select, { key: "ArrowDown" });
+    expect(screen.getByRole("listbox")).toBeInTheDocument();
+    expect(select).toHaveAttribute("aria-activedescendant", expect.stringContaining("option-0"));
+
+    fireEvent.keyDown(select, { key: "ArrowDown" });
+    expect(select).toHaveAttribute("aria-activedescendant", expect.stringContaining("option-1"));
+    fireEvent.keyDown(select, { key: "Enter" });
+    expect(select).toHaveTextContent("เปิดรับคำสั่งซื้อ");
+    expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+
+    fireEvent.keyDown(select, { key: "ArrowDown" });
+    fireEvent.keyDown(select, { key: "Escape" });
+    expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+  });
+});
 
 describe("FileField", () => {
   it("keeps label, hint, error, required state, and file semantics connected", () => {

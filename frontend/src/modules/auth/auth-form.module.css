@@ -74,51 +74,11 @@
 }
 
 .brandMark {
-  position: relative;
   width: 38px;
   height: 38px;
   flex: 0 0 auto;
-  display: grid;
-  place-items: center;
-  border-radius: 13px;
-  background: var(--on-dark);
-  box-shadow: var(--shadow-media-soft);
-  transform: rotate(-3deg);
-}
-
-.brandMark::before,
-.brandMark::after,
-.brandMark span {
-  content: "";
-  position: absolute;
-}
-
-.brandMark::before {
-  width: 17px;
-  height: 13px;
-  left: 10px;
-  bottom: 9px;
-  border-radius: 4px 4px 6px 6px;
-  background: var(--brand);
-}
-
-.brandMark::after {
-  width: 13px;
-  height: 8px;
-  left: 12px;
-  top: 8px;
-  border: 3px solid var(--brand);
-  border-bottom: 0;
-  border-radius: 999px 999px 0 0;
-}
-
-.brandMark span {
-  width: 5px;
-  height: 5px;
-  left: 16px;
-  top: 19px;
-  border-radius: 50%;
-  background: var(--brand-on);
+  display: block;
+  object-fit: contain;
 }
 
 .brandCopy {
@@ -557,13 +517,13 @@
 }
 
 .accountActionPrimary {
-  background: var(--brand);
-  color: var(--brand-on);
+  background: var(--action-primary);
+  color: var(--action-primary-on);
   box-shadow: var(--shadow-action);
 }
 
 .accountActionPrimary small {
-  color: color-mix(in srgb, var(--brand-on) 80%, transparent);
+  color: color-mix(in srgb, var(--action-primary-on) 82%, transparent);
 }
 
 .accountActionPrimary:hover {
@@ -802,5 +762,151 @@
   .formShell {
     min-height: 560px;
     align-content: start;
+  }
+}
+
+/* Phase 4: formal, low-distraction authentication */
+.page {
+  grid-template-columns: minmax(320px, 0.76fr) minmax(430px, 1.24fr);
+  gap: 0;
+  padding: 0;
+  background: var(--canvas);
+}
+
+.intro,
+.panel {
+  min-height: 100dvh;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.intro {
+  justify-content: center;
+  padding: clamp(28px, 5vw, 64px);
+  border-right: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.intro::before,
+.intro::after,
+.authVisual,
+.accountJourney {
+  display: none;
+}
+
+.brand {
+  position: absolute;
+  top: clamp(24px, 4vw, 44px);
+  left: clamp(24px, 4vw, 52px);
+}
+
+.brand:hover {
+  transform: none;
+}
+
+.brandMark {
+  transform: none;
+}
+
+.introBody {
+  width: min(100%, 580px);
+  grid-template-columns: 1fr;
+  grid-template-areas: "copy";
+}
+
+.introLabel,
+.panelLabel,
+.accountStatus {
+  border-radius: var(--radius-sm);
+}
+
+.introTitle {
+  max-width: 16ch;
+  font-size: clamp(2.25rem, 4vw, 3.5rem);
+  line-height: 1.08;
+  letter-spacing: -0.032em;
+}
+
+.panel {
+  padding: clamp(28px, 5vw, 72px);
+  background: var(--canvas);
+  box-shadow: inset 1px 0 0 var(--line);
+}
+
+.panelInner {
+  border-color: var(--line);
+  border-radius: var(--radius-card);
+  box-shadow: none;
+}
+
+.title {
+  max-width: 22ch;
+  font-size: clamp(1.75rem, 2.5vw, 2.25rem);
+  line-height: 1.16;
+  letter-spacing: -0.022em;
+}
+
+.formActions button {
+  box-shadow: none;
+}
+
+.passwordToggle {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.passwordToggle:hover:not(:disabled) {
+  transform: none;
+  border-color: var(--control-line);
+  background: var(--surface-hover);
+}
+
+.accountSummary {
+  border: 1px solid var(--line);
+  background: var(--surface-muted);
+  box-shadow: none;
+}
+
+.accountAvatar {
+  border-radius: var(--radius-card);
+  box-shadow: none;
+  transform: none;
+}
+
+.accountActionPrimary,
+.accountActionSecondary {
+  box-shadow: none;
+}
+
+.accountActionPrimary:hover,
+.accountActionSecondary:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+@media (max-width: 860px) {
+  .page {
+    grid-template-columns: 1fr;
+  }
+
+  .intro {
+    min-height: auto;
+    padding: 88px var(--page-gutter) var(--space-8);
+  }
+
+  .brand {
+    top: var(--space-5);
+    left: var(--page-gutter);
+  }
+
+  .introDescription {
+    max-width: 64ch;
+  }
+
+  .panel {
+    min-height: auto;
+    padding: var(--space-6) var(--page-gutter) var(--space-12);
+    box-shadow: none;
   }
 }

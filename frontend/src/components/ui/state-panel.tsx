@@ -10,6 +10,7 @@ type StateKind =
   | "forbidden";
 
 type StateHeadingLevel = 1 | 2;
+export type LoadingLayout = "list" | "cards" | "details" | "metrics" | "compact";
 
 interface StatePanelProps {
   kind: StateKind;
@@ -18,6 +19,7 @@ interface StatePanelProps {
   actions?: ReactNode;
   media?: ReactNode;
   headingLevel?: StateHeadingLevel;
+  loadingLayout?: LoadingLayout;
 }
 
 const stateLabel: Record<Exclude<StateKind, "loading">, string> = {
@@ -34,6 +36,7 @@ export function StatePanel({
   actions,
   media,
   headingLevel = 2,
+  loadingLayout = "list",
 }: StatePanelProps) {
   const Heading = headingLevel === 1 ? "h1" : "h2";
 
@@ -55,7 +58,7 @@ export function StatePanel({
       <div className={styles.stateContent}>
         {media ? <div className={styles.stateMedia}>{media}</div> : null}
         {kind === "loading" ? (
-          <span className={styles.spinner} aria-hidden="true" />
+          <LoadingPlaceholder layout={loadingLayout} />
         ) : (
           <span className={styles.stateLabel}>
             <span className={styles.stateDot} aria-hidden="true" />
@@ -76,10 +79,12 @@ export function LoadingState({
   title = "กำลังโหลดข้อมูล",
   description,
   headingLevel,
+  layout = "list",
 }: {
   title?: ReactNode;
   description?: ReactNode;
   headingLevel?: StateHeadingLevel;
+  layout?: LoadingLayout;
 }) {
   return (
     <StatePanel
@@ -87,7 +92,74 @@ export function LoadingState({
       title={title}
       description={description}
       headingLevel={headingLevel}
+      loadingLayout={layout}
     />
+  );
+}
+
+function LoadingPlaceholder({ layout }: { layout: LoadingLayout }) {
+  if (layout === "compact") {
+    return (
+      <div className={styles.loadingPreview} data-layout={layout} aria-hidden="true">
+        <span className={styles.loadingCompactBar} />
+        <span className={styles.loadingCompactBar} />
+      </div>
+    );
+  }
+
+  if (layout === "metrics") {
+    return (
+      <div className={styles.loadingPreview} data-layout={layout} aria-hidden="true">
+        {Array.from({ length: 3 }, (_, index) => (
+          <div className={styles.loadingMetric} key={index}>
+            <span className={styles.loadingMetricLabel} />
+            <span className={styles.loadingMetricValue} />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (layout === "details") {
+    return (
+      <div className={styles.loadingPreview} data-layout={layout} aria-hidden="true">
+        {Array.from({ length: 4 }, (_, index) => (
+          <div className={styles.loadingDetail} key={index}>
+            <span className={styles.loadingDetailLabel} />
+            <span className={styles.loadingDetailValue} />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (layout === "cards") {
+    return (
+      <div className={styles.loadingPreview} data-layout={layout} aria-hidden="true">
+        {Array.from({ length: 3 }, (_, index) => (
+          <div className={styles.loadingCard} key={index}>
+            <span className={styles.loadingCardImage} />
+            <span className={styles.loadingCardLine} />
+            <span className={styles.loadingCardLineShort} />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.loadingPreview} data-layout="list" aria-hidden="true">
+      {Array.from({ length: 3 }, (_, index) => (
+        <div className={styles.loadingRow} key={index}>
+          <span className={styles.loadingAvatar} />
+          <span className={styles.loadingRowCopy}>
+            <span className={styles.loadingRowTitle} />
+            <span className={styles.loadingRowMeta} />
+          </span>
+          <span className={styles.loadingRowAside} />
+        </div>
+      ))}
+    </div>
   );
 }
 

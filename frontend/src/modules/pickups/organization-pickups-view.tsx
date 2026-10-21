@@ -6,6 +6,7 @@ import {
   Badge,
   Button,
   ConfirmDialog,
+  Dialog,
   EmptyState,
   ErrorState,
   ForbiddenState,
@@ -118,6 +119,7 @@ export function OrganizationPickupsView({
     useState<string | null>(null);
   const [selected, setSelected] =
     useState<SelectedPickupState | null>(null);
+  const [reviewOpen, setReviewOpen] = useState(false);
   const [confirmPending, setConfirmPending] = useState(false);
 
   const [inlineError, setInlineError] = useState<string | null>(
@@ -774,6 +776,8 @@ export function OrganizationPickupsView({
                           pendingLabel="กำลังโหลด"
                           disabled={confirmPending}
                           onClick={() => {
+                            setSelected(null);
+                            setReviewOpen(true);
                             void selectPickup(pickup);
                           }}
                         >
@@ -802,7 +806,16 @@ export function OrganizationPickupsView({
             ) : null}
           </section>
 
-          <aside aria-label="รายละเอียด Pickup">
+          <Dialog
+            open={reviewOpen}
+            onOpenChange={(open) => {
+              setReviewOpen(open);
+              if (!open) setSelected(null);
+            }}
+            title="รายละเอียดการรับสินค้า"
+            description="ตรวจสอบรายการและข้อมูลคำสั่งซื้อก่อนยืนยันการรับสินค้า"
+            size="wide"
+          >
             {selected ? (
               <div className={styles.detailPanel}>
                 <div className={styles.detailHeader}>
@@ -977,14 +990,18 @@ export function OrganizationPickupsView({
                 </div>
               </div>
             ) : (
-              <div className={styles.emptyDetail}>
-                <strong>เลือก Pickup เพื่อเริ่มตรวจสอบ</strong>
-                <span>
-                  ระบบจะโหลด Pickup และ Order ล่าสุดก่อนเปิด action ยืนยันรับสินค้า
-                </span>
-              </div>
+              detailLoadingId ? (
+                <LoadingState title="กำลังโหลดรายละเอียดการรับสินค้า" layout="details" />
+              ) : (
+                <ErrorState
+                  title="ไม่สามารถเปิดรายละเอียดได้"
+                  description={
+                    inlineError ?? "กรุณาปิดหน้าต่างแล้วลองอีกครั้ง"
+                  }
+                />
+              )
             )}
-          </aside>
+          </Dialog>
         </div>
       </main>
     </div>

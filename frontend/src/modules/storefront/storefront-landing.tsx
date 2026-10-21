@@ -33,7 +33,11 @@ function storeHref(organizationId: string, storeId: string): string {
   return `/stores/view/?${params.toString()}`;
 }
 
-export function StorefrontLanding() {
+export function StorefrontLanding({
+  catalogOnly = false,
+}: {
+  catalogOnly?: boolean;
+} = {}) {
   const [state, setState] = useState<LandingState>({ status: "loading" });
   const [loadAttempt, setLoadAttempt] = useState(0);
 
@@ -90,12 +94,18 @@ export function StorefrontLanding() {
   }, [state]);
 
   return (
-    <div className={styles.page}>
-      <StorefrontHeader />
+    <div
+      className={`${styles.page} ${catalogOnly ? styles.catalogPage : ""}`}
+    >
+      {!catalogOnly ? <StorefrontHeader /> : null}
 
       <main>
-        <section className={styles.hero} aria-labelledby="storefront-intro-heading">
-          <div className={styles.heroMain}>
+        {!catalogOnly ? (
+          <section
+            className={styles.hero}
+            aria-labelledby="storefront-intro-heading"
+          >
+            <div className={styles.heroMain}>
             <h1 className={styles.heroTitle} id="storefront-intro-heading">
               เลือกซื้อจากร้านในมหาวิทยาลัย
             </h1>
@@ -125,20 +135,25 @@ export function StorefrontLanding() {
                 </div>
               </dl>
             ) : null}
-          </div>
+            </div>
 
-          <div className={styles.heroScene} aria-hidden="true">
-            <BrandIllustration
-              variant="market"
-              className={styles.heroSceneIllustration}
-              decorative
-            />
-          </div>
+            <div className={styles.heroScene} aria-hidden="true">
+              <BrandIllustration
+                variant="market"
+                className={styles.heroSceneIllustration}
+                decorative
+              />
+            </div>
 
-        </section>
+          </section>
+        ) : null}
 
-        <aside className={styles.heroGuide} aria-labelledby="storefront-guide-heading">
-          <h2 className={styles.heroGuideTitle} id="storefront-guide-heading">
+        {!catalogOnly ? (
+          <aside
+            className={styles.heroGuide}
+            aria-labelledby="storefront-guide-heading"
+          >
+            <h2 className={styles.heroGuideTitle} id="storefront-guide-heading">
             ซื้อและติดตามในที่เดียว
           </h2>
           <ol className={styles.heroGuideList}>
@@ -154,10 +169,13 @@ export function StorefrontLanding() {
               <strong>ติดตามหลังสั่งซื้อ</strong>
               <span>ดูสถานะคำสั่งซื้อ การชำระเงิน และการรับสินค้าในบัญชีของคุณ</span>
             </li>
-          </ol>
-        </aside>
+            </ol>
+          </aside>
+        ) : null}
 
-        {state.status === "success" && discoveryStores.length > 0 ? (
+        {!catalogOnly &&
+        state.status === "success" &&
+        discoveryStores.length > 0 ? (
           <section
             className={styles.discovery}
             aria-labelledby="storefront-discovery-heading"
@@ -326,4 +344,8 @@ export function StorefrontLanding() {
       </main>
     </div>
   );
+}
+
+export function StorefrontCatalog() {
+  return <StorefrontLanding catalogOnly />;
 }

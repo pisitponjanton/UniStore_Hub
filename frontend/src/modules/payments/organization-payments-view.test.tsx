@@ -121,9 +121,8 @@ describe("OrganizationPaymentsView", () => {
 
     await screen.findByText("Payment payment-1");
 
-    fireEvent.change(screen.getByLabelText("สถานะ Payment"), {
-      target: { value: "PENDING_REVIEW" },
-    });
+    fireEvent.click(screen.getByRole("combobox", { name: "สถานะ Payment" }));
+    fireEvent.click(screen.getByRole("option", { name: "รอตรวจสอบ" }));
     fireEvent.click(
       screen.getByRole("button", { name: "ใช้ตัวกรอง" }),
     );

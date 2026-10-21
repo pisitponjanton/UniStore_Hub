@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
 
 import {
@@ -27,9 +26,7 @@ import {
 } from "@/types";
 import { formatIsoDateTime, formatSatang } from "@/utils";
 
-import {
-  organizationOrderHref,
-} from "./organization-order-helpers";
+import { OrganizationOrderDetailView } from "./organization-order-detail-view";
 import styles from "./organization-orders.module.css";
 import { orderService } from "./order-service";
 import {
@@ -83,6 +80,7 @@ export function OrganizationOrdersView({
   const [loadingMore, setLoadingMore] = useState(false);
   const [inlineError, setInlineError] = useState<string | null>(null);
   const [listFeedback, setListFeedback] = useState<string | null>(null);
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -526,16 +524,14 @@ export function OrganizationOrdersView({
                     <span className={styles.total} data-numeric>
                       {formatSatang(order.total)}
                     </span>
-                    <Link
+                    <Button
+                      variant="secondary"
                       className={styles.detailLink}
-                      href={organizationOrderHref(
-                        organizationId,
-                        order.orderId,
-                      )}
+                      onClick={() => setSelectedOrderId(order.orderId)}
                       aria-label={`ดูรายละเอียดคำสั่งซื้อ ${order.orderId}`}
                     >
                       ดูรายละเอียด
-                    </Link>
+                    </Button>
                   </div>
                 </article>
               ))}
@@ -557,6 +553,29 @@ export function OrganizationOrdersView({
             </div>
           ) : null}
         </section>
+        {selectedOrderId ? (
+          <OrganizationOrderDetailView
+            key={selectedOrderId}
+            organizationId={organizationId}
+            orderId={selectedOrderId}
+            presentation="dialog"
+            onClose={() => setSelectedOrderId(null)}
+            onOrderUpdated={(updatedOrder) => {
+              setState((current) =>
+                current.status === "success"
+                  ? {
+                      ...current,
+                      orders: current.orders.map((currentOrder) =>
+                        currentOrder.orderId === updatedOrder.orderId
+                          ? updatedOrder
+                          : currentOrder,
+                      ),
+                    }
+                  : current,
+              );
+            }}
+          />
+        ) : null}
       </main>
     </div>
   );

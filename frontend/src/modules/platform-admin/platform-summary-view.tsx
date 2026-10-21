@@ -105,6 +105,7 @@ export function PlatformSummaryView() {
         <main className={styles.stateWrap}>
           {state.status === "loading" ? (
             <LoadingState
+              layout="metrics"
               title="กำลังโหลดภาพรวม Platform"
               description="กำลังสรุปสถานะหน่วยงานและผู้ใช้"
             />

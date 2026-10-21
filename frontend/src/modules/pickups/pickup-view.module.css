@@ -404,3 +404,75 @@
     min-height: 88px;
   }
 }
+
+/* Phase 4 — formal customer pickup workflow */
+.header {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: none;
+  padding: clamp(1.25rem, 3vw, 2rem);
+}
+
+.header::before,
+.header::after {
+  content: none;
+}
+
+.title {
+  color: var(--ink);
+  font-size: clamp(1.875rem, 4vw, 2.75rem);
+  line-height: 1.12;
+}
+
+.description {
+  color: var(--ink-secondary);
+}
+
+.pickupCredential {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: none;
+}
+
+.pickupCredential[data-received="true"] {
+  background: var(--surface-muted);
+}
+
+.credentialHint {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-muted);
+}
+
+.qrColumn,
+.tokenColumn {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: none;
+}
+
+.qrImage,
+.qrLoading {
+  border-radius: var(--radius-card);
+  box-shadow: none;
+}
+
+.token {
+  font-size: clamp(1.5rem, 5vw, 2.5rem);
+  box-shadow: none;
+}
+
+.pickupFacts > div {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: none;
+}
+
+.receivedNote {
+  border: 1px solid color-mix(in srgb, var(--success) 28%, var(--line));
+  box-shadow: none;
+}
+
+.backLink:hover {
+  transform: none;
+}

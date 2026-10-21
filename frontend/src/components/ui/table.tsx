@@ -6,6 +6,7 @@ import type {
 } from "react";
 
 import styles from "./primitives.module.css";
+import tableStyles from "./table.module.css";
 
 export interface TableProps extends TableHTMLAttributes<HTMLTableElement> {
   caption?: string;
@@ -29,7 +30,7 @@ export function Table({
 
   return (
     <div
-      className={styles.tableFrame}
+      className={`${styles.tableFrame} ${tableStyles.frame} scrollbarOnHover`}
       role="region"
       aria-label={
         caption

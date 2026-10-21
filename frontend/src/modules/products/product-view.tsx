@@ -6,6 +6,7 @@ import {
   Badge,
   Button,
   ConfirmDialog,
+  Dialog,
   EmptyState,
   ErrorState,
   ErrorSummary,
@@ -86,6 +87,7 @@ export function ProductManagementView({
   const [createStoreId, setCreateStoreId] = useState("");
   const [createName, setCreateName] = useState("");
   const [createDescription, setCreateDescription] = useState("");
+  const [createOpen, setCreateOpen] = useState(false);
   const [createStoreError, setCreateStoreError] = useState<
     string | undefined
   >();
@@ -282,6 +284,7 @@ export function ProductManagementView({
       setCreateName("");
       setCreateDescription("");
       setNotice(`สร้างสินค้า ${created.name} แล้ว`);
+      setCreateOpen(false);
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();
@@ -531,6 +534,7 @@ export function ProductManagementView({
                   เลือกสินค้าเพื่อแก้ไขข้อมูล รูป และตัวเลือกด้านล่าง
                 </p>
               </div>
+              <Button onClick={() => setCreateOpen(true)}>เพิ่มสินค้า</Button>
             </div>
 
             <div className={styles.toolbar}>
@@ -579,7 +583,7 @@ export function ProductManagementView({
                 description={
                   filterStoreId
                     ? "ร้านค้านี้ยังไม่มีสินค้า"
-                    : "สร้างสินค้าแรกจากแบบฟอร์มด้านข้าง"
+                    : "เลือกเพิ่มสินค้าเพื่อสร้างรายการสินค้าแรก"
                 }
               />
             ) : (
@@ -708,6 +712,7 @@ export function ProductManagementView({
             ) : null}
           </section>
 
+          <Dialog open={createOpen} onOpenChange={setCreateOpen} title="สร้างสินค้าใหม่" description="เลือกหน้าร้านและเพิ่มข้อมูลพื้นฐานของสินค้า" size="wide">
           <aside className={styles.panel}>
             <div className={styles.panelHeading}>
               <h2 className={styles.sectionTitle}>สร้างสินค้าใหม่</h2>
@@ -819,8 +824,18 @@ export function ProductManagementView({
               </Button>
             </form>
           </aside>
+          </Dialog>
         </div>
 
+        <Dialog
+          open={selectedProduct !== null}
+          onOpenChange={(open) => {
+            if (!open) setSelectedProduct(null);
+          }}
+          title={selectedProduct ? `จัดการ ${selectedProduct.name}` : "จัดการสินค้า"}
+          description="แก้ไขข้อมูลสินค้า รูปภาพ และตัวเลือกสินค้า"
+          size="wide"
+        >
         {selectedProduct ? (
           <section
             className={styles.editor}
@@ -990,6 +1005,7 @@ export function ProductManagementView({
             />
           </section>
         ) : null}
+        </Dialog>
       </main>
     </div>
   );

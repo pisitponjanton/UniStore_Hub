@@ -196,6 +196,7 @@ export function OrganizationSettingsView({
         <main className={styles.stateWrap}>
           {state.status === "loading" ? (
             <LoadingState
+              layout="details"
               title="กำลังโหลดข้อมูลหน่วยงาน"
               description="กำลังดึงข้อมูลล่าสุดก่อนเปิดการตั้งค่า"
             />

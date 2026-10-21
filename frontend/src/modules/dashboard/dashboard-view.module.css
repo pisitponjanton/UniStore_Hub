@@ -574,3 +574,95 @@
     margin-left: calc(var(--space-2) * -1);
   }
 }
+
+/* Phase 5: operations-ledger hierarchy */
+.header {
+  border: 1px solid var(--ops-line);
+  background: linear-gradient(112deg, var(--ops-header) 0 78%, var(--brand-soft) 78% 100%);
+  box-shadow: var(--shadow-subtle);
+}
+
+.header::before,
+.header::after {
+  content: none;
+}
+
+.title {
+  color: var(--ink);
+}
+
+.description {
+  color: var(--ink-secondary);
+}
+
+.headerActions {
+  border-color: var(--ops-line);
+  background: var(--ops-surface);
+  box-shadow: var(--shadow-subtle);
+}
+
+.headerLink {
+  border-color: var(--ops-line);
+  background: var(--ops-surface);
+  color: var(--ink);
+}
+
+.actionMetric,
+.actionMetric:first-child,
+.actionMetric:nth-child(2),
+.resourceStrip > div,
+.resourceStrip > div:first-child,
+.resourceStrip > div:nth-child(2) {
+  border: 1px solid var(--ops-line-soft);
+  background: var(--ops-surface);
+  box-shadow: none;
+}
+
+.actionMetric[data-attention="true"] {
+  border-color: var(--ops-line);
+  background: var(--ops-attention);
+  box-shadow: var(--shadow-subtle);
+}
+
+.actionMetric[data-attention="true"]::after {
+  content: none;
+}
+
+.revenueMetric {
+  border: 1px solid var(--ops-line-soft);
+  background: var(--brand-soft);
+  box-shadow: none;
+}
+
+.reportScope {
+  border-color: var(--ops-line);
+  box-shadow: var(--shadow-subtle);
+}
+
+.scopeSummary span {
+  border: 1px solid var(--ops-line-soft);
+  border-radius: var(--radius-md);
+  background: var(--ops-surface-muted);
+  color: var(--ink-secondary);
+}
+
+.statusPanel,
+.statusPanel:nth-child(1),
+.statusPanel:nth-child(2) {
+  border: 1px solid var(--ops-line-soft);
+  background: var(--ops-surface);
+  box-shadow: none;
+}
+
+.statusRow {
+  min-height: 48px;
+}
+
+.header {
+  padding: 0 0 var(--space-5);
+  border: 0;
+  border-bottom: 1px solid var(--line-soft);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}

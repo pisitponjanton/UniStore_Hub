@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { ApplicationShell, LoadingState } from "@/components";
 
 import { buildNavigationGroups, getActiveMembership } from "./navigation";
+import { restoreActiveOrganizationId } from "./access";
 import { authSession } from "./session";
 import { useAuthSession } from "./use-auth-session";
 
@@ -22,6 +23,7 @@ export function AuthenticatedShell({
   if (auth.status === "loading") {
     return (
       <LoadingState
+        layout="compact"
         headingLevel={1}
         title="กำลังเตรียมพื้นที่ใช้งาน"
         description="กำลังตรวจสอบบัญชีและเมนูที่คุณสามารถเข้าถึงได้"
@@ -33,15 +35,17 @@ export function AuthenticatedShell({
     return children;
   }
 
+  const resolvedOrganizationId =
+    organizationId ?? restoreActiveOrganizationId(auth.memberships);
   const membership = getActiveMembership(
     auth.memberships,
-    organizationId,
+    resolvedOrganizationId,
   );
 
   const groups = buildNavigationGroups({
     user: auth.user,
     memberships: auth.memberships,
-    organizationId,
+    organizationId: resolvedOrganizationId,
   });
 
   return (

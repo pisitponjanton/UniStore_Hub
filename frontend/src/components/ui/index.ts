@@ -5,6 +5,8 @@ export * from "./dialog";
 export * from "./fields";
 export * from "./media";
 export * from "./operational";
+export * from "./pagination";
 export * from "./state-panel";
 export * from "./table";
+export * from "./use-pagination";
 export * from "./use-error-summary-focus";

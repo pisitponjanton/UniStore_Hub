@@ -6,6 +6,7 @@ import {
   test,
   type QaDiagnosticEvent,
 } from "./support/qa-fixture";
+import { createSeedPendingOrder } from "./support/customer-commerce-fixtures";
 import {
   establishSeedRoleSession,
   getSeedRoleToken,
@@ -46,39 +47,8 @@ const apiBaseUrl = (
 
 async function createPendingOrder(
   request: Parameters<typeof getSeedRoleToken>[0],
-): Promise<string> {
-  const token = await getSeedRoleToken(request, "customer");
-  const response = await request.post(
-    `${apiBaseUrl}/organizations/${LOCAL_SEED_ENTITY_IDS.organizationId}/orders`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      data: {
-        campaignId: LOCAL_SEED_ENTITY_IDS.campaignId,
-        items: [
-          {
-            productId: LOCAL_SEED_ENTITY_IDS.productId,
-            variantId: LOCAL_SEED_ENTITY_IDS.variantId,
-            quantity: 1,
-          },
-        ],
-      },
-    },
-  );
-
-  if (!response.ok()) {
-    throw new Error(
-      `Unable to create disposable inventory order: ${response.status()} ${await response.text()}`,
-    );
-  }
-
-  const payload = (await response.json()) as {
-    success: true;
-    data: { orderId: string };
-  };
-
-  return payload.data.orderId;
+): Promise<{ orderId: string; campaignId: string }> {
+  return createSeedPendingOrder(request);
 }
 
 async function cancelPendingOrder(
@@ -172,13 +142,12 @@ test("inventory every user-facing route and role surface", async ({
   request,
 }) => {
   test.setTimeout(55_000);
-  const orderId = await createPendingOrder(request);
+  const { orderId, campaignId } = await createPendingOrder(request);
   const {
     organizationId,
     storeId,
     productId,
     variantId,
-    campaignId,
   } = LOCAL_SEED_ENTITY_IDS;
 
   const routes: RouteCase[] = [

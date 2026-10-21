@@ -14,6 +14,8 @@ import { ApplicationShell } from "./application-shell";
 describe("ApplicationShell accessibility", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    window.localStorage.clear();
+    window.sessionStorage.clear();
     mocks.usePathname.mockReturnValue("/org/orders/");
   });
 
@@ -44,6 +46,117 @@ describe("ApplicationShell accessibility", () => {
 
     const mainContent = document.getElementById("main-content");
     expect(mainContent).toHaveAttribute("tabindex", "-1");
+  });
+
+  it("toggles and remembers the desktop sidebar from the logo control", () => {
+    const { container } = render(
+      <ApplicationShell
+        groups={[
+          {
+            label: "งานของหน่วยงาน",
+            items: [{ label: "คำสั่งซื้อ", href: "/org/orders/" }],
+          },
+        ]}
+        userName="Staff User"
+        userEmail="staff@example.com"
+        onLogout={vi.fn()}
+      >
+        <p>เนื้อหาหลัก</p>
+      </ApplicationShell>,
+    );
+
+    const shell = container.firstElementChild;
+    const collapseButton = screen.getByRole("button", {
+      name: "ย่อแถบนำทาง",
+    });
+
+    fireEvent.click(collapseButton);
+
+    expect(shell).toHaveAttribute("data-sidebar-collapsed", "true");
+    expect(
+      screen.getByRole("button", { name: "ขยายแถบนำทาง" }),
+    ).toHaveAttribute("aria-expanded", "false");
+    expect(window.localStorage.getItem("unistoreHub.sidebarCollapsed")).toBe(
+      "true",
+    );
+    expect(screen.getByRole("link", { name: "คำสั่งซื้อ" })).toHaveAttribute(
+      "title",
+      "คำสั่งซื้อ",
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "ขยายแถบนำทาง" }),
+    );
+
+    expect(shell).not.toHaveAttribute("data-sidebar-collapsed");
+  });
+
+  it("restores the sidebar position after a lower menu item changes the page", () => {
+    const groups = [
+      {
+        label: "Workspace",
+        items: [
+          { label: "Orders", href: "/org/orders/" },
+          { label: "Audit", href: "/org/audit/" },
+        ],
+      },
+    ];
+    const shell = (content: string) => (
+      <ApplicationShell
+        groups={groups}
+        userName="Staff User"
+        userEmail="staff@example.com"
+        onLogout={vi.fn()}
+      >
+        <p>{content}</p>
+      </ApplicationShell>
+    );
+
+    const { unmount } = render(shell("Orders page"));
+    const navigation = screen.getByRole("navigation", { name: "เมนูหลัก" });
+    navigation.scrollTop = 240;
+    fireEvent.scroll(navigation);
+    const auditLink = screen.getByRole("link", { name: "Audit" });
+    auditLink.addEventListener("click", (event) => event.preventDefault());
+    fireEvent.click(auditLink);
+    expect(window.sessionStorage.getItem("unistoreHub.sidebarScrollTop")).toBe(
+      "240",
+    );
+
+    unmount();
+    mocks.usePathname.mockReturnValue("/org/audit/");
+    render(shell("Audit page"));
+
+    expect(screen.getByRole("navigation", { name: "เมนูหลัก" }).scrollTop).toBe(
+      240,
+    );
+  });
+
+  it("opens the mobile navigation when the logo is pressed", () => {
+    render(
+      <ApplicationShell
+        groups={[
+          {
+            label: "งานของหน่วยงาน",
+            items: [{ label: "คำสั่งซื้อ", href: "/org/orders/" }],
+          },
+        ]}
+        userName="Staff User"
+        userEmail="staff@example.com"
+        onLogout={vi.fn()}
+      >
+        <p>เนื้อหาหลัก</p>
+      </ApplicationShell>,
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "เปิดเมนูผ่านโลโก้" }),
+    );
+
+    expect(screen.getByRole("dialog", { name: "เมนูหลัก" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "ปิดเมนูผ่านโลโก้" }),
+    ).toHaveAttribute("aria-expanded", "true");
   });
 
   it("returns focus to the mobile menu trigger when Escape closes the disclosure", () => {

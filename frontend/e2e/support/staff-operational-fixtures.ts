@@ -2,6 +2,7 @@ import type { APIRequestContext } from "@playwright/test";
 
 import {
   apiJson,
+  createSeedOpenCampaign,
   registerDisposableCustomer,
   tinyPng,
 } from "./customer-commerce-fixtures";
@@ -11,6 +12,7 @@ export interface StaffOrderFixture {
   customerId: string;
   customerToken: string;
   orderId: string;
+  campaignId: string;
 }
 
 export interface StaffPaymentReviewFixture
@@ -33,6 +35,7 @@ export async function createStaffPendingOrderFixture(
     token: customer.token,
     expectedStatus: 200,
   });
+  const campaign = await createSeedOpenCampaign(request, runId);
 
   const order = await apiJson<{
     orderId: string;
@@ -43,7 +46,7 @@ export async function createStaffPendingOrderFixture(
       method: "POST",
       token: customer.token,
       data: {
-        campaignId: LOCAL_SEED_ENTITY_IDS.campaignId,
+        campaignId: campaign.campaignId,
         items: [
           {
             productId: LOCAL_SEED_ENTITY_IDS.productId,
@@ -60,6 +63,7 @@ export async function createStaffPendingOrderFixture(
     customerId: me.user.userId,
     customerToken: customer.token,
     orderId: order.orderId,
+    campaignId: campaign.campaignId,
   };
 }
 

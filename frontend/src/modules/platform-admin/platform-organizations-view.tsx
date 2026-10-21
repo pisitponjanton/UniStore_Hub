@@ -11,7 +11,11 @@ import {
   ForbiddenState,
   LoadingState,
   Notice,
+  PaginationControls,
+  SelectField,
+  TextField,
   UnauthorizedState,
+  usePagination,
 } from "@/components";
 import {
   authSession,
@@ -69,6 +73,24 @@ export function PlatformOrganizationsView() {
     null,
   );
   const [notice, setNotice] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ALL");
+  const filteredOrganizations =
+    state.status === "success"
+      ? [...state.organizations].sort(
+          (left, right) =>
+            Number(right.status === "PENDING") -
+            Number(left.status === "PENDING"),
+        ).filter((organization) => {
+          const query = searchQuery.trim().toLocaleLowerCase();
+          const matchesSearch =
+            !query ||
+            organization.name.toLocaleLowerCase().includes(query) ||
+            organization.organizationId.toLocaleLowerCase().includes(query);
+          return matchesSearch && (statusFilter === "ALL" || organization.status === statusFilter);
+        })
+      : [];
+  const organizationPagination = usePagination(filteredOrganizations, 10);
 
   async function refreshOrganizations() {
     const result = await platformAdminService.listOrganizations();
@@ -245,11 +267,6 @@ export function PlatformOrganizationsView() {
   const suspendedCount = state.organizations.filter(
     (organization) => organization.status === "SUSPENDED",
   ).length;
-  const prioritizedOrganizations = [...state.organizations].sort(
-    (left, right) =>
-      Number(right.status === "PENDING") -
-      Number(left.status === "PENDING"),
-  );
 
   return (
     <div className={styles.page}>
@@ -279,6 +296,12 @@ export function PlatformOrganizationsView() {
             </div>
           </div>
         </header>
+
+        <a className={styles.governanceShortcut} href="#platform-organizations-title" aria-label={`งานที่ต้องตัดสินใจ ${pendingCount.toLocaleString("th-TH")} หน่วยงานรออนุมัติ ไปยังรายการ`}>
+          <span className={styles.governanceShortcutLabel}>งานที่ต้องตัดสินใจ</span>
+          <strong>{pendingCount.toLocaleString("th-TH")}</strong>
+          <span className={styles.governanceShortcutHint}>หน่วยงานรออนุมัติ · ไปยังรายการ</span>
+        </a>
 
         <section
           className={styles.priorityStrip}
@@ -350,17 +373,49 @@ export function PlatformOrganizationsView() {
             </div>
           </div>
 
+          <div className={styles.organizationFilters} role="search" aria-label="ค้นหาหน่วยงาน Platform">
+            <TextField
+              id="platform-organization-search"
+              label="ค้นหาหน่วยงาน"
+              placeholder="ชื่อหน่วยงานหรือ Organization ID"
+              value={searchQuery}
+              onChange={(event) => {
+                setSearchQuery(event.target.value);
+                organizationPagination.onPageChange(1);
+              }}
+            />
+            <SelectField
+              id="platform-organization-status"
+              label="สถานะ"
+              value={statusFilter}
+              onChange={(event) => {
+                setStatusFilter(event.target.value);
+                organizationPagination.onPageChange(1);
+              }}
+            >
+              <option value="ALL">ทุกสถานะ</option>
+              <option value="PENDING">รออนุมัติ</option>
+              <option value="ACTIVE">ใช้งาน</option>
+              <option value="SUSPENDED">ระงับ</option>
+            </SelectField>
+          </div>
+
           {state.organizations.length === 0 ? (
             <EmptyState
               title="ยังไม่มีหน่วยงาน"
               description="Platform ยังไม่มี Organization ในระบบ"
+            />
+          ) : organizationPagination.totalItems === 0 ? (
+            <EmptyState
+              title="ไม่พบหน่วยงานที่ตรงกัน"
+              description="ลองเปลี่ยนคำค้นหาหรือสถานะ แล้วค้นหาอีกครั้ง"
             />
           ) : (
             <div
               className={styles.organizationList}
               aria-label="รายการหน่วยงานทั้งหมด"
             >
-              {prioritizedOrganizations.map((organization) => {
+              {organizationPagination.items.map((organization) => {
                 const isPending =
                   pending?.organizationId ===
                   organization.organizationId;
@@ -513,6 +568,7 @@ export function PlatformOrganizationsView() {
               })}
             </div>
           )}
+          <PaginationControls {...organizationPagination} label="แบ่งหน้าหน่วยงาน Platform" />
         </section>
       </main>
     </div>

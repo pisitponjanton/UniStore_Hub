@@ -174,6 +174,7 @@ export function MyOrderView() {
         <main className={styles.stateWrap}>
           {state.status === "loading" ? (
             <LoadingState
+              layout="details"
               title="กำลังโหลดรายละเอียดคำสั่งซื้อ"
               description="กำลังดึงสถานะและยอดล่าสุดของคำสั่งซื้อ"
             />

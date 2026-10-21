@@ -86,6 +86,7 @@ describe("CampaignManagementView", () => {
 
     await screen.findByText("Faculty Shirt Pre-order");
 
+    fireEvent.click(screen.getByRole("button", { name: "เพิ่มแคมเปญ" }));
     fireEvent.click(
       screen.getByRole("button", { name: "สร้างแคมเปญ" }),
     );
@@ -113,9 +114,8 @@ describe("CampaignManagementView", () => {
 
     await screen.findByText("Faculty Shirt Pre-order");
 
-    fireEvent.change(screen.getByLabelText("สถานะ"), {
-      target: { value: "OPEN" },
-    });
+    fireEvent.click(screen.getByRole("combobox", { name: "สถานะ" }));
+    fireEvent.click(screen.getByRole("option", { name: "เปิดรับคำสั่งซื้อ" }));
 
     expect(
       await screen.findByText(
@@ -138,6 +138,7 @@ describe("CampaignManagementView", () => {
     render(<CampaignManagementView organizationId="org-1" />);
 
     await screen.findByText("Faculty Shirt Pre-order");
+    fireEvent.click(screen.getByRole("button", { name: "เพิ่มแคมเปญ" }));
 
     fireEvent.change(
       screen.getByLabelText(/ชื่อแคมเปญ/, {

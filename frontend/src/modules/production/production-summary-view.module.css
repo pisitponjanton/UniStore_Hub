@@ -505,3 +505,65 @@
     transform: none;
   }
 }
+
+/* Phase 5: calm operational ledger */
+.header {
+  border-color: var(--ops-line);
+  background: linear-gradient(112deg, var(--ops-surface) 0%, var(--ops-surface) 62%, var(--brand-soft) 100%);
+  box-shadow: var(--shadow-subtle);
+}
+
+.header::after { content: none; }
+
+.campaignPanel,
+.productGroup,
+.productHeader,
+.variantRow {
+  border-color: var(--ops-line);
+  background: var(--ops-surface);
+  box-shadow: none;
+}
+
+.summaryStrip {
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid var(--ops-line);
+  border-radius: var(--radius-lg);
+  background: var(--ops-surface);
+}
+
+.summaryStrip > div,
+.summaryStrip > div:first-child,
+.summaryStrip > div:nth-child(2),
+.summaryStrip > div:last-child {
+  padding: var(--space-4) var(--space-5);
+  border: 0;
+  border-right: 1px solid var(--ops-line-soft);
+  border-radius: 0;
+  background: transparent;
+}
+
+.summaryStrip > div:last-child { border-right: 0; }
+.quantity { background: var(--ops-surface-muted); }
+
+.header {
+  padding: 0 0 var(--space-5);
+  border: 0;
+  border-bottom: 1px solid var(--line-soft);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+@media (max-width: 620px) {
+  .summaryStrip > div,
+  .summaryStrip > div:first-child,
+  .summaryStrip > div:nth-child(2),
+  .summaryStrip > div:last-child {
+    border: 0;
+    border-bottom: 1px solid var(--ops-line-soft);
+    border-radius: 0;
+  }
+
+  .summaryStrip > div:last-child { border-bottom: 0; }
+}

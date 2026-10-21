@@ -10,6 +10,7 @@ import type { OrderDTO } from "@/types";
 
 const mocks = vi.hoisted(() => ({
   listOrganizationOrders: vi.fn(),
+  getOrganizationOrder: vi.fn(),
   logout: vi.fn(),
 }));
 
@@ -17,12 +18,32 @@ vi.mock("@/modules/auth", () => ({
   authSession: {
     logout: mocks.logout,
   },
+  useAuthSession: () => ({
+    status: "authenticated",
+    user: {
+      userId: "staff-1",
+      email: "staff@example.com",
+      name: "Staff",
+      status: "ACTIVE",
+      platformRole: null,
+    },
+    memberships: [
+      {
+        organizationId: "org-1",
+        role: "STAFF",
+        status: "ACTIVE",
+      },
+    ],
+  }),
+  getActiveMembership: (memberships: Array<{ organizationId: string }>, organizationId: string) =>
+    memberships.find((membership) => membership.organizationId === organizationId),
   isDefinitiveSessionFailure: () => false,
 }));
 
 vi.mock("./order-service", () => ({
   orderService: {
     listOrganizationOrders: mocks.listOrganizationOrders,
+    getOrganizationOrder: mocks.getOrganizationOrder,
   },
 }));
 
@@ -48,9 +69,10 @@ describe("OrganizationOrdersView", () => {
       items: [order],
       nextCursor: null,
     });
+    mocks.getOrganizationOrder.mockResolvedValue(order);
   });
 
-  it("loads Staff/Admin organization Orders and links to query-based detail", async () => {
+  it("opens the order detail in a dialog without navigating away", async () => {
     render(
       <OrganizationOrdersView organizationId="org-1" />,
     );
@@ -58,13 +80,16 @@ describe("OrganizationOrdersView", () => {
     expect(
       await screen.findByText("Order order-1"),
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", {
+    fireEvent.click(
+      screen.getByRole("button", {
         name: "ดูรายละเอียดคำสั่งซื้อ order-1",
       }),
-    ).toHaveAttribute(
-      "href",
-      "/org/orders/view?organizationId=org-1&orderId=order-1",
+    );
+    expect(await screen.findByRole("dialog")).toBeInTheDocument();
+    expect(mocks.getOrganizationOrder).toHaveBeenCalledWith(
+      "org-1",
+      "order-1",
+      { signal: expect.any(AbortSignal) },
     );
     expect(mocks.listOrganizationOrders).toHaveBeenCalledWith(
       "org-1",
@@ -87,9 +112,10 @@ describe("OrganizationOrdersView", () => {
     fireEvent.change(screen.getByLabelText("Customer ID"), {
       target: { value: "  customer-2  " },
     });
-    fireEvent.change(screen.getByLabelText("สถานะ Order"), {
-      target: { value: "PAYMENT_REJECTED" },
-    });
+    fireEvent.click(screen.getByRole("combobox", { name: "สถานะ Order" }));
+    fireEvent.click(
+      screen.getByRole("option", { name: "การชำระเงินถูกปฏิเสธ" }),
+    );
     fireEvent.click(
       screen.getByRole("button", { name: "ใช้ตัวกรอง" }),
     );

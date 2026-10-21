@@ -7,6 +7,7 @@ import {
 import {
   apiJson,
   createReadyForPickupFixture,
+  createSeedOpenCampaign,
   createSeedPendingOrder,
   establishTokenSession,
   registerDisposableCustomer,
@@ -43,11 +44,11 @@ test("Customer can select a product, validate quantity, create an Order, and upl
     "customer",
   );
 
-  const {
-    organizationId,
-    productId,
-    campaignId,
-  } = LOCAL_SEED_ENTITY_IDS;
+  const { organizationId, productId } = LOCAL_SEED_ENTITY_IDS;
+  const { campaignId } = await createSeedOpenCampaign(
+    request,
+    `customer-order-${Date.now()}`,
+  );
 
   await page.goto(
     `/products/view/?organizationId=${organizationId}&productId=${productId}&campaignId=${campaignId}`,
@@ -61,11 +62,9 @@ test("Customer can select a product, validate quantity, create an Order, and upl
   ).toBeVisible();
 
   await expect(
-    page.getByLabel("ตัวเลือกสินค้า"),
-  ).not.toHaveValue("");
-  await expect(page.getByLabel("แคมเปญ")).toHaveValue(
-    campaignId,
-  );
+    page.getByRole("combobox", { name: "ตัวเลือกสินค้า" }),
+  ).toBeVisible();
+  await expect(page.locator("#product-campaign-native")).toHaveValue(campaignId);
 
   await page.getByLabel("จำนวน").fill("2");
   await expect(page.locator("output[data-numeric]")).not.toHaveText(

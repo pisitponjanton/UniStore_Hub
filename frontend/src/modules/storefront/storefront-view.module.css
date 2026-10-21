@@ -7,23 +7,24 @@
   position: sticky;
   z-index: var(--z-navigation);
   top: 0;
-  padding: 10px var(--page-gutter) 0;
-  background: transparent;
+  padding: 0 var(--page-gutter);
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
 }
 
 .topbarInner {
   width: min(100%, var(--content-visual));
-  min-height: 62px;
+  min-height: 64px;
   margin-inline: auto;
   padding: 0 var(--space-3) 0 var(--space-4);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-5);
-  border: 1px solid var(--line-soft);
-  border-radius: var(--radius-card);
-  background: color-mix(in srgb, var(--surface) 96%, var(--canvas));
-  box-shadow: var(--shadow-raised);
+  border: 0;
+  border-radius: 0;
+  background: var(--surface);
+  box-shadow: none;
 }
 
 .brand {
@@ -41,44 +42,11 @@
 }
 
 .brandMark {
-  position: relative;
   width: 38px;
   height: 38px;
   flex: 0 0 auto;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-  border-radius: 13px;
-  background: var(--brand);
-  box-shadow: var(--shadow-subtle);
-}
-
-.brandMark::before,
-.brandMark::after,
-.brandMark span {
-  content: "";
-  position: absolute;
-  width: 4px;
-  border-radius: var(--radius-pill);
-  background: var(--brand-on);
-}
-
-.brandMark::before {
-  height: 11px;
-  left: 9px;
-  bottom: 9px;
-}
-
-.brandMark span {
-  height: 18px;
-  left: 17px;
-  bottom: 9px;
-}
-
-.brandMark::after {
-  height: 8px;
-  right: 9px;
-  bottom: 9px;
+  display: block;
+  object-fit: contain;
 }
 
 .brandCopy {
@@ -105,8 +73,8 @@
   align-items: center;
   gap: 4px;
   padding: 4px;
-  border-radius: var(--radius-control);
-  background: var(--surface-muted);
+  border-radius: var(--radius-sm);
+  background: transparent;
 }
 
 .topbarHome,
@@ -118,7 +86,7 @@
   align-items: center;
   justify-content: center;
   padding-inline: var(--space-3);
-  border-radius: 11px;
+  border-radius: var(--radius-sm);
   font-size: var(--text-body-sm);
   font-weight: 650;
   white-space: nowrap;
@@ -128,54 +96,47 @@
 .topbarLink {
   color: var(--ink-secondary);
   transition:
-    transform var(--motion-standard) var(--motion-ease-out),
     background-color var(--motion-standard) var(--motion-ease-out),
     color var(--motion-standard) var(--motion-ease-out);
 }
 
 .topbarHome:hover,
 .topbarLink:hover {
-  transform: translateY(-1px);
-  background: var(--surface);
+  background: var(--surface-hover);
   color: var(--ink);
   text-decoration: none;
 }
 
 .topbarHome:active,
 .topbarLink:active {
-  transform: translateY(0) scale(0.99);
   background: var(--surface-selected);
 }
 
 .topbarLinkActive {
-  background: var(--surface);
+  background: var(--brand-soft);
   color: var(--brand-strong);
-  box-shadow:
-    var(--shadow-subtle),
-    inset 0 -2px 0 var(--brand);
+  box-shadow: none;
   font-weight: 750;
 }
 
 .topbarPrimary {
   margin-left: var(--space-1);
-  background: var(--brand);
-  color: var(--brand-on);
+  background: var(--action-primary);
+  color: var(--action-primary-on);
   box-shadow: var(--shadow-action);
   transition:
-    transform var(--motion-standard) var(--motion-ease-out),
     background-color var(--motion-standard) var(--motion-ease-out),
     box-shadow var(--motion-standard) var(--motion-ease-out);
 }
 
 .topbarPrimary:hover {
-  transform: translateY(-1px);
-  background: var(--brand-hover);
+  background: var(--action-primary-hover);
   box-shadow: var(--shadow-action-hover);
   text-decoration: none;
 }
 
 .topbarPrimary:active {
-  transform: translateY(0) scale(0.985);
+  transform: scale(0.985);
 }
 
 .topbarSessionStatus {
@@ -617,7 +578,7 @@
 .campaignCard:hover,
 .productCard:hover {
   transform: translateY(-4px);
-  border-color: color-mix(in srgb, var(--brand) 18%, var(--line));
+  border-color: var(--line-strong);
   box-shadow: var(--shadow-feature);
   text-decoration: none;
 }
@@ -1131,8 +1092,8 @@
 }
 
 .primaryAction {
-  background: var(--brand);
-  color: var(--brand-on);
+  background: var(--action-primary);
+  color: var(--action-primary-on);
   box-shadow: var(--shadow-action);
   transition:
     transform var(--motion-standard) var(--motion-ease-out),
@@ -1142,7 +1103,7 @@
 
 .primaryAction:hover {
   transform: translateY(-2px);
-  background: var(--brand-hover);
+  background: var(--action-primary-hover);
   box-shadow: var(--shadow-action-hover);
   text-decoration: none;
 }
@@ -1409,5 +1370,136 @@
   .productCard:hover,
   .primaryAction:hover {
     transform: none !important;
+  }
+}
+
+/* Phase 4: minimal formal store, campaign, and product surfaces */
+.hero,
+.storeHero,
+.campaignHero {
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.42fr);
+  padding: clamp(24px, 3.5vw, 40px);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: none;
+}
+
+.storeHero::after,
+.campaignHero::after,
+.storeHeroVisual,
+.campaignVisual {
+  display: none;
+}
+
+.storeHero:has(.storeHeroVisual) {
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 0.36fr);
+}
+
+.title {
+  max-width: 24ch;
+  font-size: clamp(2rem, 3.7vw, 3rem);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+}
+
+.campaignHero .title {
+  color: var(--ink);
+}
+
+.campaignHero .description {
+  color: var(--ink-secondary);
+}
+
+.campaignHero .contextLine,
+.contextLine {
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--brand-soft);
+  color: var(--brand-strong);
+  box-shadow: none;
+}
+
+.campaignStatusPanel,
+.heroMeta > div,
+.campaignFacts > div {
+  border: 1px solid var(--line);
+  background: var(--surface-muted);
+  box-shadow: none;
+}
+
+.heroMeta > div:nth-child(2) {
+  background: var(--surface-muted);
+}
+
+.campaignCard,
+.productCard {
+  border-color: var(--line);
+  border-radius: var(--radius-card);
+  box-shadow: none;
+}
+
+.campaignCard {
+  grid-template-rows: auto 1fr auto;
+  padding: var(--space-5);
+}
+
+.campaignCard:hover,
+.productCard:hover {
+  transform: none;
+  border-color: var(--control-line);
+  background: var(--surface-hover);
+  box-shadow: none;
+}
+
+.campaignCard:active,
+.productCard:active {
+  transform: scale(0.995);
+  box-shadow: none;
+}
+
+.productMedia,
+.productDetailMedia {
+  border: 1px solid var(--line-soft);
+  background: var(--surface-muted);
+  box-shadow: none;
+}
+
+.productDetail {
+  align-items: start;
+  padding: clamp(20px, 3vw, 32px);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: none;
+}
+
+.productFacts > div,
+.selectionPanel,
+.estimatePanel,
+.campaignContext,
+.emptyBox {
+  border: 1px solid var(--line);
+  background: var(--surface-muted);
+  box-shadow: none;
+}
+
+.selectionStep {
+  border-radius: var(--radius-sm);
+}
+
+.primaryAction {
+  box-shadow: none;
+}
+
+.primaryAction:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+@media (max-width: 900px) {
+  .hero,
+  .storeHero,
+  .campaignHero,
+  .storeHero:has(.storeHeroVisual) {
+    grid-template-columns: 1fr;
   }
 }
