@@ -470,3 +470,6 @@
  .row,.panel,.editPanel { padding: 14px; }
 }
 @media(max-width:380px) { .summaryLabel { font-size: .67rem; } }
+
+/* Campus Commerce A / Phase 13 */
+.main{width:min(100%,2600px);min-width:0;padding-inline:clamp(14px,2.2vw,44px)}.header,.section,.panel,.list,.row{min-width:0}@media(max-width:620px){.main{padding-inline:14px}}.grid{min-width:0;grid-template-columns:minmax(0,1fr) minmax(315px,660px);gap:clamp(14px,1.7vw,28px)}@media(max-width:1050px){.grid{grid-template-columns:minmax(0,1fr)}.panel{position:static}}.row:focus-within{border-color:var(--brand-line)}.rowSelected,.rowSelected:hover{color:var(--ink);background:var(--brand-soft);border-color:var(--brand-line)}.cardTitle,.meta{overflow-wrap:anywhere}.main a:focus-visible,.main button:focus-visible{outline:3px solid var(--focus);outline-offset:3px}

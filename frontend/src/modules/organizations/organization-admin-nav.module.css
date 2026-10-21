@@ -48,3 +48,6 @@ a.tab:hover { color: var(--ink); background: var(--surface-muted); text-decorati
   .tabs { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .switch { width: auto; min-width: 0; min-height: 41px; margin: 0; padding: 8px 2px; font-size: .7rem; text-align: center; line-height: 1.25; text-decoration: none; }
 }
+
+/* Campus Commerce A / Phase 13 */
+.root,.tabs{min-width:0}.caption{color:var(--ink-secondary)}.tab,.switch{display:inline-flex;align-items:center;justify-content:center;min-height:44px;line-height:1.4}.tab:hover:not([data-selected]),.switch:hover{background:var(--surface-hover);color:var(--ink);text-decoration:none}@media(max-width:760px){.tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}.switch{grid-column:1/-1;margin:0}}

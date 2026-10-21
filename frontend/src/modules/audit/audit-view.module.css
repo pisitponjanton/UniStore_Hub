@@ -573,3 +573,6 @@
   white-space:nowrap; border:0;
  }
 }
+
+/* Campus Commerce A / Phase 13 */
+.main{width:min(100%,2600px);min-width:0;padding-inline:clamp(14px,2.2vw,44px)}.header,.section,.panel,.list,.row{min-width:0}@media(max-width:620px){.main{padding-inline:14px}}.filters{grid-template-columns:repeat(4,minmax(0,1fr))}.filters>*{min-width:0}.metadata{overflow-wrap:anywhere}.metadataDetails summary{min-height:44px}@media(max-width:1080px){.filters{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:760px){.filters{grid-template-columns:1fr}}.main a:focus-visible,.main button:focus-visible{outline:3px solid var(--focus);outline-offset:3px}

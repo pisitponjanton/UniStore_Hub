@@ -1,5 +1,7 @@
 "use client";
 
+import { AppIcon } from "@/components/ui/app-icon";
+
 import Link from "next/link";
 import { OrganizationOperationsNav } from "@/modules/operations/organization-operations-nav";
 
@@ -336,7 +338,7 @@ export function ProductionSummaryView({
                 ระบุรหัสรอบขายที่ต้องการดูยอดผลิต หรือไปที่หน้ารอบขายเพื่อเลือกรายการก่อน
               </p>
               <Link className={styles.campaignDirectoryLink} href={"/org/campaigns/?" + new URLSearchParams({ organizationId }).toString()}>
-                เปิดรายการรอบขายเพื่อดูรหัสที่ต้องการ <span aria-hidden="true">↗</span>
+                เปิดรายการรอบขายเพื่อดูรหัสที่ต้องการ <AppIcon name="arrow-up-right" size={17} />
               </Link>
             </div>
             {loadedCampaignId ? (

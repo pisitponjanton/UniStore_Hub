@@ -950,3 +950,24 @@
  .cardActions { justify-items: stretch; }
  .cardActions button { width: 100%; }
 }
+
+/* Campus Commerce A / Phase 12 — safe pickup verification desk */
+.main{width:min(100%,2600px);min-width:0;padding-inline:clamp(14px,2.4vw,40px);gap:clamp(14px,2vw,23px)}
+.layout{min-width:0;grid-template-columns:minmax(0,1.15fr) minmax(340px,.85fr);gap:clamp(14px,1.7vw,28px);align-items:start}
+.header,.filterPanel,.section,.list,.row,.rowMain,.detailPanel,.detailCopy,.tokenPanel,.orderPanel,.verificationGuide{min-width:0}
+.row{grid-template-columns:minmax(0,1fr) auto;gap:12px}
+.rowSelected,.rowSelected[data-attention="true"]{background:var(--brand-soft);border-color:var(--brand-line)}
+.rowSelected:hover{background:var(--brand-soft);color:var(--ink)}
+.row:focus-within{border-color:var(--brand-line)}
+.cardTitle{white-space:normal;text-overflow:clip;overflow-wrap:anywhere}
+.token,.tokenValue,.meta,.detailTitle{overflow-wrap:anywhere}
+.filters{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.filters>*{min-width:0}
+.cardActions button,.detailActions button{min-height:44px}
+.cardActions button:focus-visible,.detailActions button:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+@media(max-width:1180px){.layout{grid-template-columns:minmax(0,1fr)}.detailPanel{width:100%}}
+@media(max-width:900px){.filters{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.main{padding-inline:14px}.filters{grid-template-columns:minmax(0,1fr)}.row{grid-template-columns:minmax(0,1fr)}.cardActions button{width:100%}.header,.detailPanel{padding:14px}}
+
+@media(min-width:1181px){.layout{grid-template-columns:minmax(0,1fr) minmax(340px,720px)}}
+.rowMain{max-width:95ch}

@@ -465,3 +465,13 @@
   .pickupCredential { padding: 14px; }
   .qrTokenGrid { gap: 10px; }
 }
+
+
+/* Campus Commerce A / Phase 11 — pickup credential safely sized */
+.page{background:var(--canvas)}
+.main{min-width:0;width:min(100%,1760px);padding-inline:clamp(16px,2.1vw,44px);gap:clamp(16px,2.2vw,26px)}
+.header{min-width:0;gap:16px}
+.pickupCredential,.qrTokenGrid,.qrColumn,.tokenColumn{min-width:0}
+.token{display:block;min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:break-word}
+.backLink:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+@media(max-width:620px){.main{padding-inline:14px}.header{padding:16px}.qrTokenGrid{grid-template-columns:minmax(0,1fr)}}

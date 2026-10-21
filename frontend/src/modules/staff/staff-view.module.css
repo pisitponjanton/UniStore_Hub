@@ -467,3 +467,6 @@
   .summaryStrip > div, .summaryStrip > div:nth-child(n) { min-height: 72px; padding: 11px; }
   .memberCard, .panel { padding: 13px; }
 }
+
+/* Campus Commerce A / Phase 13 */
+.main{width:min(100%,2600px);min-width:0;padding-inline:clamp(14px,2.2vw,44px)}.header,.section,.panel,.list,.row{min-width:0}@media(max-width:620px){.main{padding-inline:14px}}.grid{min-width:0;grid-template-columns:minmax(0,1fr) minmax(315px,640px);gap:clamp(14px,1.7vw,28px)}@media(max-width:1050px){.grid{grid-template-columns:minmax(0,1fr)}.panel{position:static}}.memberName,.memberEmail{overflow-wrap:anywhere}.memberActions button{min-height:44px}.memberCard:focus-within{border-color:var(--brand-line)}.main a:focus-visible,.main button:focus-visible{outline:3px solid var(--focus);outline-offset:3px}

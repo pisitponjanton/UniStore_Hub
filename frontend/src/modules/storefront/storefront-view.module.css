@@ -12,7 +12,7 @@
 }
 
 .topbarInner {
-  width: min(100%, var(--content-visual));
+  width: min(100%, var(--content-marketplace));
   min-height: 62px;
   margin-inline: auto;
   padding: 0 var(--space-3) 0 var(--space-4);
@@ -40,47 +40,6 @@
   text-decoration: none;
 }
 
-.brandMark {
-  position: relative;
-  width: 38px;
-  height: 38px;
-  flex: 0 0 auto;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-  border-radius: 13px;
-  background: var(--brand);
-  box-shadow: var(--shadow-subtle);
-}
-
-.brandMark::before,
-.brandMark::after,
-.brandMark span {
-  content: "";
-  position: absolute;
-  width: 4px;
-  border-radius: var(--radius-pill);
-  background: var(--brand-on);
-}
-
-.brandMark::before {
-  height: 11px;
-  left: 9px;
-  bottom: 9px;
-}
-
-.brandMark span {
-  height: 18px;
-  left: 17px;
-  bottom: 9px;
-}
-
-.brandMark::after {
-  height: 8px;
-  right: 9px;
-  bottom: 9px;
-}
-
 .brandCopy {
   min-width: 0;
   display: grid;
@@ -92,11 +51,6 @@
   font-size: var(--text-title-sm);
   font-weight: 750;
   line-height: 1.15;
-}
-
-.brandCopy span {
-  color: var(--ink-tertiary);
-  font-size: var(--text-caption);
 }
 
 .topbarNav {
@@ -1191,15 +1145,6 @@
     border-radius: var(--radius-control);
   }
 
-  .brandCopy span {
-    display: none;
-  }
-
-  .brandMark {
-    width: 32px;
-    height: 32px;
-  }
-
   .topbarNav {
     gap: 0;
     padding: 2px;
@@ -1284,13 +1229,24 @@
     gap: var(--space-2);
   }
 
+  .topbarInner {
+    flex-wrap: wrap;
+    padding-block: var(--space-2);
+  }
+
+  .brand {
+    flex: 0 0 100%;
+    min-height: 32px;
+  }
+
   .brandCopy {
-    display: none;
+    display: grid;
   }
 
   .topbarNav {
-    flex: 1 1 auto;
-    justify-content: flex-end;
+    width: 100%;
+    flex: 1 1 100%;
+    justify-content: flex-start;
   }
 
   .topbarLink,
@@ -1307,12 +1263,6 @@
 
   .topbarInner {
     padding-inline: var(--space-2);
-  }
-
-  .brandMark {
-    width: 30px;
-    height: 30px;
-    border-radius: 11px;
   }
 
   .topbarLink,
@@ -1616,16 +1566,11 @@
   .selectionPanel { padding: var(--space-4); }
 }
 
-.brandMark::before,
-.brandMark::after { content: none; }
-.brandMark { box-shadow: none; }
-.brandMark svg { color: var(--brand-on); }
-
 
 /* Editorial commerce detail system — shared with three real API-backed views.
    Clear identities, truthful stock/availability, and purchase information first. */
 .main {
-  width: min(100%, 1360px);
+  width: min(100%, var(--content-detail));
   gap: clamp(20px, 3vw, 36px);
   padding-top: clamp(15px, 2vw, 27px);
 }
@@ -1965,4 +1910,78 @@
   .productDetail[data-has-image="false"] .productDetailMedia { height: 90px; }
   .productFacts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .productFacts > div:last-child { grid-column: auto; }
+}
+
+
+/* Campus Commerce A — Phase 8 / guest catalog controls and clear purchase hierarchy.
+   Deliberately source-backed: no product artwork, availability or pricing invented. */
+.detailToolbar {
+  display: flex; min-width: 0; flex-wrap: wrap; align-items: end;
+  justify-content: space-between; gap: var(--space-3); padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line); border-radius: 12px; background: var(--surface);
+}
+.detailToolbarCount { flex: 1 1 150px; margin: 0; color: var(--ink-secondary); font-size: .86rem; line-height: 1.5; }
+.detailToolbarField { display: grid; min-width: min(100%, 260px); flex: 0 1 300px; gap: 6px; color: var(--ink-secondary); font-size: .75rem; font-weight: 740; }
+.detailToolbarField input, .detailToolbarField select {
+  display: block; width: 100%; min-width: 0; min-height: 44px; border: 1px solid var(--control-line);
+  border-radius: 9px; padding: 0 var(--space-3); background: var(--surface-inset);
+  color: var(--ink); color-scheme: var(--control-native-scheme); font: inherit; font-size: .87rem;
+}
+.detailToolbarField input::placeholder { color: var(--ink-tertiary); }
+.detailToolbarField select option { background: var(--control-option-bg); color: var(--control-option-ink); }
+.detailToolbarField input:hover, .detailToolbarField select:hover { background: var(--surface); border-color: var(--control-line-hover); }
+.detailToolbarField input:focus-visible, .detailToolbarField select:focus-visible,
+.detailReset:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.detailReset {
+  display: inline-flex; width: fit-content; align-items: center; justify-content: center;
+  min-height: 44px; border: 1px solid var(--brand-line); padding: 0 var(--space-4);
+  border-radius: 9px; font: inherit; font-size: .84rem; font-weight: 760;
+  color: var(--brand-strong); background: var(--brand-soft); cursor: pointer;
+}
+.detailReset:hover { color: var(--brand-strong); background: var(--brand-soft-strong); }
+.purchaseSteps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+.purchaseSteps li {
+  display: flex; min-width: 0; align-items: center; gap: var(--space-2);
+  padding: var(--space-3); border: 1px solid var(--line-soft); border-radius: 9px;
+  background: var(--surface-muted); color: var(--ink-secondary); font-size: .76rem; line-height: 1.4; font-weight: 690;
+}
+.purchaseSteps li span { display: grid; place-items: center; flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; color: var(--brand-strong); background: var(--brand-soft); font-size: .8rem; font-weight: 780; }
+.estimateBreakdown { grid-column: 1 / -1; margin: 0; color: var(--ink-secondary); font-size: .82rem; overflow-wrap: anywhere; }
+.campaignStatusPanel {
+  background: var(--surface-raised); color: var(--ink); border: 1px solid var(--line);
+}
+.campaignStatusPanel .metaLabel, .campaignStatusDescription, .deadlineSpotlight span { color: var(--ink-secondary); }
+.deadlineSpotlight { border-block-color: var(--line); }
+.deadlineSpotlight strong, .campaignStatusPanel .campaignFacts dd { color: var(--ink); }
+.campaignStatusPanel .campaignFacts > div { background: var(--surface-muted); }
+.campaignShopAction { min-height: 48px; }
+.productOpeningSummary strong { font-variant-numeric: tabular-nums; }
+.storeQuickLinkPrimary, .storeQuickLinkSecondary { min-height: 44px; }
+.campaignCard:focus-visible, .productCard:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+@media (min-width: 2100px) {
+  .cardGrid { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+  .campaignCard, .productCard { grid-column: span 2; }
+}
+@media (min-width: 1500px) and (max-width: 2099px) {
+  .campaignCard, .productCard { grid-column: span 3; }
+}
+@media (max-width: 800px) {
+  .purchaseSteps { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 640px) {
+  .detailToolbar { padding: var(--space-3); }
+  .detailToolbarField { min-width: 100%; flex-basis: 100%; }
+  .detailToolbarCount { flex-basis: 100%; }
+}
+
+
+/* Detail action density on narrow viewports: no giant blank-photo art and
+   keep the three purchase steps on one compact, readable strip. */
+@media (max-width: 800px) {
+  .purchaseSteps { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .purchaseSteps li { min-height: 82px; flex-direction: column; align-items: flex-start; gap: 6px; padding: 9px; font-size: .69rem; line-height: 1.35; }
+  .purchaseSteps li span { width: 22px; height: 22px; }
+}
+@media (max-width: 700px) {
+  .productDetail[data-has-image="false"] .productDetailMedia { height: 156px; }
 }

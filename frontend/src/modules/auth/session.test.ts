@@ -186,4 +186,35 @@ describe("AuthSessionStore", () => {
 
     expect(session.getSnapshot().status).toBe("authenticated");
   });
+  it("ignores a late expired token response after signing in with a new token", async () => {
+    const storage = createStorage("old-token");
+    let rejectOld: (reason: Error) => void = () => {};
+    const old = new Promise<CurrentUserSessionDTO>((_, reject) => { rejectOld = reject; });
+    const api: SessionApi = { get: vi.fn().mockReturnValueOnce(old).mockResolvedValueOnce(currentUser) };
+    const session = new AuthSessionStore(api, storage.storage);
+    const pending = session.restore();
+    const authenticated = session.establish("fresh-token");
+    expect(api.get).toHaveBeenCalledTimes(2);
+    expect((await authenticated).status).toBe("authenticated");
+    rejectOld(new ApiClientError({ status: 401, code: "TOKEN_EXPIRED", kind: "unauthorized" }));
+    await pending;
+    expect(storage.token).toBe("fresh-token");
+    expect(storage.storage.clear).not.toHaveBeenCalled();
+    expect(session.getSnapshot()).toEqual({ status: "authenticated", ...currentUser });
+  });
+
+  it("keeps logout anonymous despite a late successful restore", async () => {
+    const storage = createStorage("token");
+    let finish: (value: CurrentUserSessionDTO) => void = () => {};
+    const pending = new Promise<CurrentUserSessionDTO>(resolve => { finish = resolve; });
+    const session = new AuthSessionStore({ get: vi.fn().mockReturnValue(pending) }, storage.storage);
+    const restoring = session.restore();
+    session.logout();
+    finish(currentUser);
+    await restoring;
+    expect(storage.token).toBeNull();
+    expect(session.getSnapshot()).toEqual({ status: "anonymous" });
+  });
+
+
 });

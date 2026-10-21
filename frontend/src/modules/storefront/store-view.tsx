@@ -46,6 +46,8 @@ type StoreViewState =
 
 export function StoreView() {
   const [state, setState] = useState<StoreViewState>({ status: "loading" });
+  const [productQuery, setProductQuery] = useState("");
+  const [campaignFilter, setCampaignFilter] = useState<"all" | "open">("all");
 
   const [retryAttempt, setRetryAttempt] = useState(0);
   const retryFocusRequested = useRef(false);
@@ -159,6 +161,9 @@ export function StoreView() {
     ...openCampaigns,
     ...campaigns.filter((campaign) => campaign.status !== "OPEN"),
   ];
+  const matchingCampaigns = orderedCampaigns.filter(campaign => campaignFilter === "all" || campaign.status === "OPEN");
+  const normalizedQuery = productQuery.trim().normalize("NFKC").toLocaleLowerCase();
+  const matchingProducts = products.filter(product => !normalizedQuery || (product.name + " " + (product.description ?? "")).normalize("NFKC").toLocaleLowerCase().includes(normalizedQuery));
 
   return (
     <div className={styles.page}>
@@ -229,14 +234,26 @@ export function StoreView() {
           </div>
 
           {campaigns.length > 0 ? (
-            <div className={styles.cardGrid}>
-              {orderedCampaigns.map((campaign) => (
+            <>
+              <div className={styles.detailToolbar}>
+                <p className={styles.detailToolbarCount} role="status">แสดง {matchingCampaigns.length} จาก {campaigns.length} รอบขาย</p>
+                <label className={styles.detailToolbarField} htmlFor="store-campaign-filter">
+                  สถานะรอบขาย
+                  <select id="store-campaign-filter" value={campaignFilter} onChange={event => setCampaignFilter(event.target.value as "all" | "open")}>
+                    <option value="all">ทุกรอบขาย</option>
+                    <option value="open">เฉพาะรอบที่เปิดรับ</option>
+                  </select>
+                </label>
+              </div>
+              {matchingCampaigns.length > 0 ? <div className={styles.cardGrid}>
+              {matchingCampaigns.map((campaign) => (
                 <CampaignCard
                   campaign={campaign}
                   key={campaign.campaignId}
                 />
               ))}
-            </div>
+            </div> : <div className={styles.emptyBox}>ไม่มีรอบที่เปิดรับคำสั่งซื้อในขณะนี้ <button type="button" className={styles.detailReset} onClick={() => setCampaignFilter("all")}>ดูรอบขายทั้งหมด</button></div>}
+            </>
           ) : (
             <div className={styles.emptyBox}>
               ร้านนี้ยังไม่มีแคมเปญที่เปิดให้ลูกค้าเข้าชม
@@ -258,15 +275,24 @@ export function StoreView() {
           </div>
 
           {products.length > 0 ? (
-            <div className={styles.cardGrid}>
-              {products.map((product) => (
+            <>
+              <div className={styles.detailToolbar}>
+                <p className={styles.detailToolbarCount} role="status">แสดง {matchingProducts.length} จาก {products.length} สินค้า</p>
+                <label className={styles.detailToolbarField} htmlFor="store-product-search">
+                  ค้นหาสินค้าในร้าน
+                  <input id="store-product-search" type="search" value={productQuery} placeholder="ชื่อสินค้าหรือคำอธิบาย" onChange={event => setProductQuery(event.target.value)} />
+                </label>
+              </div>
+              {matchingProducts.length > 0 ? <div className={styles.cardGrid}>
+              {matchingProducts.map((product) => (
                 <ProductCard
                   key={product.productId}
                   organizationId={store.organizationId}
                   product={product}
                 />
               ))}
-            </div>
+            </div> : <div className={styles.emptyBox}>ไม่พบสินค้าที่ตรงกับการค้นหา <button type="button" className={styles.detailReset} onClick={() => { setProductQuery(""); document.getElementById("store-product-search")?.focus(); }}>ล้างคำค้นหา</button></div>}
+            </>
           ) : (
             <div className={styles.emptyBox}>
               ร้านนี้ยังไม่มีสินค้าที่เปิดให้เข้าชม

@@ -1,914 +1,264 @@
-# UniStore Hub Interface System
+# UniStore Hub — Campus Commerce A Interface System
 
-## Status
+> **Status: Approved, Phase 2 foundation (2026-10-19).**
+> This is the **single canonical visual authority** for `frontend/**`, superseding the historical "Playful Campus Commerce v3" purple/3D language. Git history preserves the previous document.
+> UX direction chosen by the project owner: **A — Campus Commerce**. Implementation phases are tracked in BDXA `task_b1d40dc3-4d57-4dcd-8df2-e5e61a143fae`. Frontend's semantic CSS token source remains `src/app/globals.css`; never introduce a parallel palette/theme.
 
-Canonical visual authority for **UniStore Playful Campus Commerce Redesign v3**.
+## Product goal and domain
 
-Approved direction: **Playful Campus Commerce v3**.
+UniStore Hub is a campus marketplace and pre-order tool for faculty groups, clubs and university units. People first need to **find a real store and product**, inspect an open pre-order campaign, then **order, pay and collect**. Staff review queues and payment slips, Organization Admins manage products and campaigns, and Platform Admins handle governance.
 
-This file is the single visual authority for the frontend. Research evidence lives in `.interface-design/visual-reference-brief.md` and `ux-ui-audit.md`. When research notes and this file differ, **this file wins**.
+Campus Commerce A must look like a dependable **real shopping service**, not an anonymous SaaS dashboard or a decorated pitch deck. Product/content clarity wins over visual effects.
 
-All implementation must use one semantic token source in `src/app/globals.css` and shared primitives. Do not create a parallel theme, page-local token framework, or second component language.
+### Identity — explicit user directive
 
-## Product model
+1. The only **visible brand** in every public, authenticated, mobile, sidebar, auth and footer shell is the wordmark **`UniStore Hub` as selectable text**.
+2. **No brand symbol, badge, square U, monogram, illustrative store logo, pictogram before/after the wordmark, or substitute graphic mark.** Keep the brand focusable as the existing accessible home link where applicable.
+3. Functional icons (orders, staff, search, notification, arrow, pickup) are allowed **when they identify actual actions**. A separate icon-system phase will standardize their family; do not substitute arbitrary Unicode arrows or stickers for the brand.
+4. Store media, partner logos owned by third parties, and the first letter of a real store name in a neutral product placeholder are **not UniStore branding**; do not conflate these with forbidden brand-mark treatments.
+5. Brand text must render clearly at 320px width, 200% zoom, with Thai + English font metrics and no reliance on hidden image alternatives.
 
-UniStore Hub has four expression levels inside one product:
+## Colors and semantics
 
-1. **Marketplace discovery** — customers browse organizations, stores, campaigns, and products.
-2. **Customer transactions** — customers place orders, pay, track state, and present pickup information.
-3. **Organization operations** — Staff and Organization Admin users process queues and manage catalog/configuration.
-4. **Platform governance** — Platform Admin users approve/suspend organizations and inspect platform-level state.
+Design intent: **soft daylight, botanical green/teal, credible warm neutrals, highly legible text**, with a muted dark companion rather than a harsh black-mode inversion.
 
-These modes must feel related but not visually identical.
+All live semantic variables reside in `src/app/globals.css`.
 
-## North star
+| Semantic property | Light | Dark | Use |
+|---|---|---|---|
+| Canvas `--canvas` | `#F7F8F4` | `#111D1A` | Whole-page environment |
+| Surface `--surface` | `#FFFFFF` | `#1D2D29` | Cards/inputs/panels |
+| Muted `--surface-muted` | `#EEF3EE` | `#283D35` | Low-emphasis groups |
+| Hover `--surface-hover` | `#E9F3ED` | `#2D473E` | Interactive surface **with paired foreground** |
+| Selected `--surface-selected` | `#D9EEE3` | `#315549` | Selected row/tab |
+| Ink `--ink` | `#193630` | `#F2F8F3` | Primary text |
+| Secondary `--ink-secondary` | `#455F55` | `#CCDED2` | Descriptions/labels |
+| Brand `--brand` | `#126357` | `#93DDBD` | Primary action |
+| Brand hover `--brand-hover` | `#0C4F45` | `#B5EDCE` | Hover on primary action |
+| On-brand `--brand-on` | `#FFFFFF` | `#133025` | Text on brand |
+| Brand soft `--brand-soft` | `#E3F2E9` | `#254639` | Soft calls to action |
+| Focus `--focus` | High-contrast teal | Bright mint | Visible keyboard focus |
 
-**A contemporary campus marketplace with the visual confidence of consumer commerce and the task clarity of modern operations software.**
+`--on-surface`, `--on-surface-secondary`, `--on-hover`, and `--on-selected` alias the theme-appropriate ink family. **Never set a pale hover background with inherited dark theme pale text.** Respect 4.5:1 WCAG AA for regular text and 3:1 for sufficiently large text. Focus indicator must be visible against both adjoining surfaces.
 
-The interface should feel current, playful but trustworthy, premium but approachable, Thai-first, product-led on customer surfaces, and task-led on operational surfaces.
+### Token decision rules
 
-It must not return to a flat legacy-admin appearance or a generic dashboard template.
+- Use `--canvas`, `--surface`, `--surface-muted`, `--surface-hover`, `--ink`, `--ink-secondary`, `--brand`, `--brand-strong`, `--brand-on`, `--line` and role-specific status tokens instead of hardcoded per-page colors. Any new status tokens belong in global CSS first.
+- Borders/controls must remain readable across themes: `--line`, `--line-strong`, `--control-line`, `--focus`, and explicit disabled/validation semantics.
+- Green is the shopping/identity color; don't equate `--brand` with semantic payment success. Preserve `--success`, `--warning`, `--danger`, `--info`.
+- Avoid purple v3 gradients, clay blobs, pictogram logos, multicolor cards with hard-to-read labels and fake product imagery. Warm ivory and light tan may accent **real categories**, not compromise contrast.
+- Light-first does **not** mean disabling dark mode. Both `prefers-color-scheme` themes remain first-class; test actual hovered/focused text in the browser.
+- Use `color-mix()` thoughtfully where paired foreground readability is measurable; do not assume percentages guarantee WCAG AA.
 
-## Expression spectrum
+## Type and spatial scale
 
-| Surface | Expression | Density | Visual behavior |
-| --- | ---: | ---: | --- |
-| Landing / discovery | 9/10 | 4/10 | vibrant blocks, bento, dimensional media |
-| Store / product browsing | 8/10 | 5/10 | image-first commerce cards |
-| Product detail | 7/10 | 5/10 | premium media stage + purchase hierarchy |
-| Login / register | 7/10 | 4/10 | branded environment + calm form |
-| Order creation | 6/10 | 6/10 | branded but stable task frame |
-| Order/payment/pickup | 5–6/10 | 6/10 | state + next action first |
-| Org select/dashboard/settings | 5/10 | 7/10 | grouped surfaces + selective bento |
-| Catalog/staff/campaign management | 4–5/10 | 8/10 | compact modern workspaces |
-| Orders/payments/pickups queues | 3–4/10 | 8/10 | dense task-first resource lists |
-| Audit / platform users | 2–3/10 | 8/10 | restrained read-only data |
-| Platform governance | 3–4/10 | 8/10 | authority and pending work first |
+- Primary face: **Noto Sans Thai** with readable English metrics. Keep existing declared fallback order; no decorative Latin font that breaks Thai.
+- Reading body **16px**, secondary **14px minimum where practical**. Scale clearly from labels to headings; use weight plus color before gratuitous font-size changes. Body line height 1.5–1.7; large headlines 1.1–1.25.
+- Existing `--space-1/2/3/4/5/6/8/10/12/...` are canonical 4px multiples. Avoid random negative margins and stacking contradictory end-of-file CSS patches.
+- Product cards should foreground store/product identity, real price and state, next action, then small metadata. Do not put internal organization IDs or fixture jargon on public-facing cards.
+- Controls maintain >=40px basic height and comfortable 44px touch zones; focus rings are visible, errors associated with input labels and action names.
+- Card geometry: ~8–14px practical corners; larger feature cards may use existing hero radius. Shadows mark elevation only, not every row.
 
-Motion target: **3/10**.
+## Interaction semantics — Phase 4 implemented
 
-## Core visual signatures
+Shared components use paired text and background tokens rather than fading entire disabled controls:
 
-### Ambient commerce canvas
+- **Buttons:** primary/secondary/quiet/danger states use theme-aware surfaces; disabled and pending actions use `--control-disabled-bg`, `--control-disabled-ink`, `--control-disabled-line`, no whole-element opacity reduction, preserving readable labels; focus-visible gets an explicit 3px outline.
+- **Inputs and dropdowns:** `--control-native-scheme` (light/dark) follows the active browser theme. Field, select option, selected option, hovered input, disabled field and validation styles have explicit foreground/background pairs. Storefront finder no longer hardcodes a light select inside dark mode.
+- **Rows/cards:** shared table hover and keyboard focus-within use `--interactive-row-bg`/`--interactive-row-ink`, selected row uses `--interactive-selected-bg`/`--interactive-selected-ink`, while storefront cards and rows use semantic foreground/background colors.
+- **Dialogs:** Radix dialog focus and Escape-to-close/focus restoration behavior is checked in unit tests; explicit focus-visible outline is provided on its Close control. Full real-browser modal clickthrough across all roles remains in later QA phases.
+- **Sizing:** shared control-height small/medium/large uses 40/44/48px, with shared minimum/comfortable targets 44/48px.
 
-Customer pages use a soft visual environment instead of a flat document.
+Verified 2026-10-19 in Chromium: 14 semantic foreground/background token combinations exceeded 4.5:1 in Light and Dark. In-context Storefront hover text measured 11.48:1 (Light) and 9.36:1 (Dark); native select measured 12.66:1 / 14.95:1. Evidence is stored in `frontend/quality-audit/.evidence/campus-a-phase4/` and the Phase 4 review document.
 
-Allowed:
-- warm off-white foundations,
-- pale lavender / sky / mint environment fields,
-- large colored section blocks,
-- occasional dark-indigo premium sections,
-- controlled gradients behind hero/media zones.
+The static inventory scans 38 CSS files, 237 interactive selector rules, and flags 68 cases where a rule changes background without explicitly changing text color. These are **review candidates, not proven WCAG violations**, and the remaining role/state permutations are NOT_TESTED until the later comprehensive cross-role interaction audit.
 
-Do not wrap every section in a bordered card.
+## Functional icon system — Phase 5 implemented
 
-### Block + bento rhythm
+**Approved dependency:** `lucide-react@0.468.0` pinned in `frontend/package.json` and lockfile. `frontend/src/components/ui/app-icon.tsx` is the **single icon vocabulary**; `frontend/src/components/layout/workspace-icon.tsx` is a compatibility re-export for existing route navigation. Do not add custom stroke SVGs, Unicode navigation arrows, or a second icon package.
 
-Bento creates hierarchy; it is not a mandatory template.
+- All functional icons are **line SVGs** with an optical default 18px, absolute 1.8px stroke, matching caps/joins and theme-inherited `currentColor`. Small arrows can use 15–17px, menu icons 18–20px. Icons are noninteractive decorations inside named links/buttons and always `aria-hidden=true` / `focusable=false`.
+- Navigation roles are mapped to coherent symbols for store, orders, payment, pickup, notifications, dashboard, organization, staff, products, campaigns, production, settings, audit, users and platform. Symbols now come from Lucide, not handmade paths. Action links use `arrow-up-right` or `arrow-right`; step chevrons use `chevron`.
+- Both the visible brand wordmark and responsive/authenticated brand links remain **text-only `UniStore Hub`** — no U monogram, square, brand logo or pictogram is added. Illustrations formerly rendering `U`/`!`/`฿`/`✓` now use contextual Lucide symbols; no-image fallbacks use the neutral `image-off` icon.
+- The **store's own initial letter** in a real store-name preview or an account initial is not a UniStore logo. Do not erase legitimate content while removing brand art.
+- The local Next.js development status badge is disabled (`devIndicators:false`) so that it does not overlay screenshot/UI reviews. This setting does not change application navigation.
+- Git-locked vendored `braces` tarball is copied before `npm ci` in **`frontend/Dockerfile.dev` only**, ensuring the local frontend Docker image can be rebuilt reproducibly. Never make this a production/database change.
 
-Wide-screen examples:
-- compact tile: 1×1,
-- feature tile: 2×1,
-- media tile: 1×2,
-- visual anchor: 2×2.
+**Evidence:** Unit tests `frontend/src/components/ui/app-icon.test.tsx` and the existing media suite; read-only Chromium role/browser checks `frontend/e2e/quality-audit/campus-a-phase5-icons.spec.ts` across Guest, Customer, Staff, Organization Admin and Platform Admin in Light/Dark, with captured screenshots under `frontend/quality-audit/.evidence/campus-a-phase5/`. Source inventory confirms zero banned Unicode arrow/emoji navigation glyphs and zero remaining `styles.brandMark` usages in `frontend/src/**/*.tsx`. Arithmetic multiplication `×` in prices is intentionally kept as math, not iconography.
 
-Customer discovery may use irregular spans. Operational pages should preserve predictable reading order.
+Deferred: screen-specific UI icon density, tooltips and touch targets will be revisited with actual content and all state permutations during role redesign Phases 6–15. Do not equate a read-only icon smoke test with verified behavior of all 257 action IDs.
 
-### Soft dimensional media
+## Responsive intent by task
 
-Use soft 3D/clay-inspired objects, product cutouts, abstract commerce/campus objects, soft cast shadows, and simple material lighting.
+**Phase 3 implemented (2026-10-19):** Replaced unintended common 1240/1360/1440px caps with task-sized fluid containers while retaining bounded reading/form widths. The visible organization directory is an interim multi-column layout; **a store-first card grid and QA fixture visibility remain Phase 6–7**, not Phase 3.
 
-Default implementation priority:
-1. optimized static WebP/PNG/SVG,
-2. CSS layering,
-3. interactive 3D only when a concrete product need justifies it.
+### Implemented content width tiers
 
-### Product-first commerce cards
+| Variable / surface | Maximum | Explanation |
+|---|---:|---|
+| `--content-marketplace` | 3360px | Storefront hero, finder, directory and footer; aligned gutters |
+| `--content-visual` | 2920px | Wide visual panels |
+| `--content-wide` | 3000px | Platform Admin |
+| `--content-operations` | 2880px | Staff/organization order queues |
+| `--content-max` | 2680px | Administration/reporting page shells |
+| `--content-detail` | 2480px | Store, product and campaign views |
+| `--content-customer` | 1960px | Customer transactions and order tracking |
+| `--content-narrow` / `--content-reading` | 900px / 720px | Intentionally bounded prose/status |
+| Auth shell | 2048px | Balanced split form; Phase 9 handles full auth redesign |
 
-Where real media exists, hierarchy is:
-1. media,
-2. identity,
-3. authoritative price/state,
-4. concise metadata,
-5. primary next action.
+Gutters use `--page-gutter: clamp(16px, 2.4vw, 72px)` with 24/20/16/12px compact viewport overrides. Shared spacing remains a 4px/8px system.
 
-### Rounded but structured geometry
+Measured local browser: Storefront hero increased from **1360px (~35%)** to **3360px (87.5%)** at a 3840px CSS viewport. Storefront hero, finder and catalog align. A temporary organization-first directory grid shows 1/2/3/4 columns at 1440/1920/2560/3840px. Customer/Staff/Organization Admin/Platform Admin main content at 3840px measures **1960/2880/2680/3000px**, with no tested horizontal overflow.
 
-Use visibly larger radii than v2, but vary them by role. Controls must remain ergonomic and should not become pill-shaped by default.
+All eight viewport tiers were checked in Light/Dark under reduced motion. Additional **synthetic 200% root-font text scaling** checks passed for public/auth screens, but are **not native browser zoom**. Formal zoom and assistive-technology certification remain Phase 15.
 
-### Purposeful soft depth
+The UI must preserve task-specific readable prose widths and does not need every card or form to fill the 4K display.
 
-Depth communicates elevation, overlap, selected/focused hierarchy, overlay priority, and premium media framing. Do not shadow every operational row.
-
-### Low-chrome navigation
-
-Navigation should be quieter than product/media content. Customer navigation is light and compact; operational navigation is predictable and scope-aware.
-
-### Strong Thai hierarchy
-
-Use type scale, weight, line length, spacing, and color to create character. Do not introduce a Latin-only display family that causes Thai fallback mismatch.
-
-## Color system
-
-The final semantic palette defined here must be implemented in `src/app/globals.css` during the foundation phase.
-
-### Light foundation
-
-- canvas: `#F7F5FF`
-- surface: `#FFFFFF`
-- raised: `#FCFBFF`
-- muted: `#F1EEF8`
-- inset: `#ECE8F5`
-- strong neutral: `#E4DEEE`
-- line: `#D8D0E8`
-- ink: `#1F1B2D`
-- ink-secondary: `#5B5668`
-- ink-tertiary: `#736D7F`
-
-### Brand identity
-
-- brand: `#6D3AE0`
-- brand-hover: `#5930C3`
-- brand-strong: `#3B1B78`
-- brand-soft: `#EEE7FF`
-- brand-soft-strong: `#DED2FF`
-- on-brand: `#FFFFFF`
-
-Purple/indigo represents UniStore identity, not semantic success.
-
-Measured reference contrast:
-- brand / white: **6.30:1**
-- brand-hover / white: **7.97:1**
-- ink / canvas: **15.53:1**
-- secondary ink / canvas: **6.54:1**
-
-### Expressive support families
-
-These are visual accents, not semantic states.
-
-- lavender: `#EDE7FF`
-- sky: `#DFF3FF`
-- sky-strong: `#73C8F2`
-- mint: `#DFF7EC`
-- teal-soft: `#DDF4F1`
-- coral: `#FFE2D6`
-- coral-strong: `#E66A3D`
-- yellow: `#FFF1BA`
-
-Use for hero/media backdrops, category blocks, campaign features, illustration stages, and discovery bento composition.
-
-### Semantic states
-
-- success: `#16794A`
-- success-soft: `#E4F5EB`
-- warning: `#8A4B00`
-- warning-soft: `#FFF0CF`
-- danger: `#B7353D`
-- danger-soft: `#FDE8EA`
-- info: `#1769AA`
-- info-soft: `#E4F2FF`
-
-Measured text-on-soft contrast:
-- success: **4.80:1**
-- warning: **6.03:1**
-- danger: **4.99:1**
-- info: **5.07:1**
-
-State always includes text/semantics. Color is reinforcement only.
-
-### Dark mode
-
-- canvas: `#151220`
-- surface: `#1B1727`
-- raised: `#211C30`
-- muted: `#282239`
-- inset: `#100D18`
-- line: `#3C3450`
-- ink: `#F5F1FF`
-- ink-secondary: `#C8C1D8`
-- ink-tertiary: `#A39BAD`
-- brand: `#B39CFF`
-- brand-hover: `#C2B0FF`
-- on-brand: `#17101F`
-- success: `#73D8A4`
-- success-soft: `#173527`
-- warning: `#F7C15B`
-- warning-soft: `#3A2A12`
-- danger: `#FF9AA0`
-- danger-soft: `#442026`
-- info: `#8CCBFF`
-- info-soft: `#17304A`
-Measured reference contrast:
-- dark ink / canvas: **16.60:1**
-- dark secondary / canvas: **10.60:1**
-- dark brand / on-brand: **8.06:1**
-
-Dark mode preserves hierarchy; it does not literally invert every pastel.
-
-## Gradient policy
-
-Gradients are allowed as **major visual-zone treatments**, not generic component backgrounds.
-
-Recommended families:
-
-- hero: `linear-gradient(135deg, #6D3AE0 0%, #8B6EF5 48%, #73C8F2 100%)`
-- soft ambient: `linear-gradient(135deg, #F4EDFF 0%, #EAF7FF 52%, #EAF8F0 100%)`
-- warm discovery: `linear-gradient(135deg, #FFF1BA 0%, #FFE2D6 52%, #EDE7FF 100%)`
-- dark premium: `linear-gradient(135deg, #21143F 0%, #352064 55%, #19344D 100%)`
-
-Allowed:
-- marketplace hero,
-- large campaign/category feature,
-- illustration stage,
-- ambient section transition,
-- premium dark field,
-- media placeholder.
-
-Avoid on fields, tables, queue rows, routine badges, error states, and ordinary operational surfaces.
-
-## Typography
-
-Primary family: `Noto Sans Thai`
-
-Fallback: `"Leelawadee UI", Tahoma, sans-serif`
-
-Technical identifiers may use monospace only when genuinely machine/reference-oriented.
-
-### Weight
-- 400 body,
-- 500 labels/navigation/controls,
-- 600 card and section titles,
-- 700 major display/total/brand moments.
-
-### Desktop scale
-- caption: 12/18,
-- body small: 14/21,
-- body: 16/25,
-- comfortable body: 17/27,
-- card title: 20/28,
-- section title: 28/36,
-- operational page title: 32/40,
-- customer display: 52/60,
-- large hero: 60/68 when layout permits.
-
-### Mobile scale
-- caption: 12–13px,
-- body small: 14px,
-- body: 16px,
-- card title: 18px,
-- section title: 24–28px,
-- page title: 28–32px,
-- display: 36–42px.
-
-Use responsive `clamp()` where useful.
-
-## Spacing
-
-Base unit: **4px**
-
-Canonical scale:
-`4, 8, 12, 16, 20, 24, 32, 40, 48, 64, 80, 96, 120`
-
-Customer:
-- section gap 64–96px desktop,
-- card gap 16–24px,
-- hero padding 40–72px.
+- **Store discovery:** use card grid, meaningful category/store filters and available width; favor 3–6 columns when readable, depending on actual viewport and content. Avoid a single stretched 4K directory row.
+- **Auth:** carefully centered bounded form with legible content; on wide screens, a split composition is acceptable only when both sides remain in usable balance. The dedicated form-layout redesign belongs to Phase 9.
+- **Customer workflow:** clear breadcrumb/task state and purchase summary rather than fancy empty space.
+- **Staff:** density and rapid queue scanning take priority, with deliberate row/column widths.
+- **Org Admin/Platform Admin:** information-rich yet calm workspaces with scope-aware nav and authorization clarity.
+- Test widths **320, 390, 768, 1024, 1440, 1920, 2560, 3840 CSS px**, 200% zoom and keyboard use. Physical 4K pixel density is not equivalent to CSS 3840 viewport and should be documented separately.
 
-Operations:
-- section gap 24–40px,
-- row gap 8–12px,
-- control groups 8–16px,
-- compact card padding 16–20px.
+### Phase 6 implemented — Store-first campus marketplace
 
-## Radius
+**The previous organization-row directory and duplicated featured-store links have been retired.** The home page now shows a compact task-first Hero, accessible Search, the existing Store Availability selector, and a new Organization selector driven by real public API organization IDs. Under the filters the primary result is a **card per active store**, linked with both organization and store ID. No-store organizations are listed separately as non-store articles. No fake store is created.
 
-Canonical:
-- xs: 8px,
-- sm: 12px,
-- control: 14px,
-- card: 20px,
-- feature: 28px,
-- hero: 32px,
-- pill: 999px only for chip/status/category semantics.
+- New isolated card styles: `frontend/src/modules/storefront/storefront-grid.module.css`. Card variants have clear name, organization, description, truthful `ACTIVE` / **เปิดให้เข้าชม** label, and whole-card focusable click target.
+- Layout columns under source data with enough entries: **1 at <=640px**, **2 up to 820px**, **3 up to 1100px**, **4 up to 1499px**, **5 from 1500–2099px**, **6 from 2100px upward**. Capped at 6 even on 4K; card copy stays readable.
+- Public Storefront Store DTO includes only `storeId`, `organizationId`, `name`, `description`, `status`. **No media URL, product category, or current pre-order campaign status exists in this aggregate DTO.** Use an honest neutral no-store-image surface and do not infer that an ACTIVE store has an open campaign. A real category filter or actual cover image requires an explicit legitimate data contract in a future scoped phase; the current Organization selector is the grounded filter.
+- Preserve 12 entries/page across store and no-store results, with all active store entries sorted before empty organizations as in the existing directory helper. Search is full dataset before pagination, Thai/English name matching, and both status and organization filters reset to Page 1. Do not treat featured/recommended duplication as more distinct stores.
+- Cross-theme deterministic Playwright verified **26 stores and 2 empty organizations** across 3 pages, filtering, clearing, full dataset search, link parameters, 8 viewport column counts, no horizontal overflow, and neutral media fallback. These are browser-mocked GET responses, **not data created in DB**. Actual local data visibility and fixture filtering are separately Phase 7.
 
-Typical use:
-- button/field: 12–14px,
-- routine card/panel: 20px,
-- feature/media card: 24–28px,
-- hero/environment block: 28–32px.
+Details: `docs/design/CAMPUS_COMMERCE_A_PHASE6_STOREFRONT_GRID_REVIEW.md` and `frontend/quality-audit/.evidence/campus-a-phase6/`.
 
-## Borders
+### Phase 7 implemented — QA fixture visibility and truthful guest states
 
-Borders are structural helpers, not the main visual language.
+- The local development aggregate contains **317 active organizations**, all corresponding to deliberate Dev Seed or test generator records in this observed snapshot (**272 QA stores, 45 QA organizations with no store**). This is a read-only observation, not new seed data.
+- A normal **development** visitor now sees only organizations not matching strict recognition criteria. The deterministic local seed is recognized by exact organization ID; generated E2E records require paired generator-style organization name AND exact known QA description. Broad matches such as `QA`, `Demo`, `Tenant Org B` or `E2E` alone must never hide a potentially legitimate record.
+- An explicit **development-only** `แสดงข้อมูล E2E/QA` control reveals recognized records without altering the API payload, and all shown QA store/no-store cards are labelled `ข้อมูลทดสอบ QA`. A clear banner distinguishes QA inspection mode from the visitor marketplace. Toggling off resets hidden organization selection and result pagination.
+- A truly empty API response uses the existing generic Empty State; an API failure uses Error + Retry; an API containing only identified dev fixtures uses a different **no ordinary shops available** explanation, not a misleading search-only empty state.
+- Because the API contains **no immutable `fixture` flag**, production **does not silently hide** records based on test-like naming. High-confidence recognized records may be explicitly labelled as test records if returned. Fully trustworthy production-side separation requires an authoritative backend provenance field and separately approved API migration; this visual review is not a security/access-control boundary.
+- Counts, Search, Organization/Availability filters, Pagination and no-store sections are derived from the currently presented data, preventing hidden fixture counts or names from leaking into ordinary recommendations and filter options. Real-shop names containing `QA` or `Demo` are intentionally preserved.
+- Existing Phase 2–4 visual hover/grid tests now use a deterministic read-only intercepted GET ordinary-store preview, not fragile real Dev Seed records. Phase 7 independently verifies the actual live local fixture default and explicit QA toggle.
 
-Use for inputs, tabular separation when needed, selected/active emphasis, dense operational boundaries, and overlays that need definition.
+Evidence: `docs/design/CAMPUS_COMMERCE_A_PHASE7_FIXTURE_VISIBILITY_REVIEW.md`, `frontend/quality-audit/.evidence/campus-a-phase7/`, and E2E suite `frontend/e2e/quality-audit/campus-a-phase7-qa-visibility.spec.ts`.
 
-Default separation order:
-1. surface color,
-2. spacing,
-3. elevation,
-4. border only where needed.
+### Phase 8 implemented — Store, Product, Campaign guest commerce details
 
-Avoid a thin grey outline around every customer card.
+**Store Detail** now offers real client-side name/description Search within the loaded store's product list, and an OPEN-only campaign filter. Filter counts reflect the actual loaded list, with explicit filter-empty states and reset controls; store-level totals and links remain unchanged. OPEN campaigns sort first. Direct focus-aware in-page links and the scoped organization/store URLs continue to work.
 
-## Elevation
+**Product Detail** includes a compact three-step purchase guide and a selected-variant unit price × chosen quantity breakdown adjacent to the derived estimate, before redirecting to the existing authenticated order entry path. Only ACTIVE product variants from the authoritative existing service are selectable. A campaign must be OPEN, the quantity must be a positive integer, and the auth gate must pass for a purchase CTA; the backend order creation contract, selection IDs, returnTo login target and existing status guards remain unchanged. No quantity is falsely promised to be persisted through the existing link (it is chosen again in order entry if required).
 
-Canonical scale:
-- base: none,
-- raised: `0 6px 18px rgb(43 28 77 / 10%)`,
-- feature: `0 16px 40px rgb(43 28 77 / 14%)`,
-- overlay: `0 28px 70px rgb(20 14 36 / 24%)`.
+**Campaign Detail** retains the authoritative status badge, exact dates/timeline and product link campaign context. The hero CTA is present only when the campaign is OPEN **and at least one product is available for viewing**; otherwise the text explains why it cannot proceed. Critically, the existing service returns the **store product catalog** rather than proven campaign-product membership, so the section labels products as store catalog and instructs customers to check actual eligibility on Product Detail. Do not claim all store products are orderable in that campaign.
 
-Use shadow to communicate hierarchy, not as decoration on every row.
+**Visual implementation:** one semantic Light/Dark token system, clear keyboard-focus styling, consistent media fallbacks, fit-for-purpose desktop/4K card grids, bounded readable detail copy and compact 3-step guide with Mobile no-image fallback. No generated or invented catalog images; real product media continues to display only when the API provides it.
 
-## Layout widths
+**Evidence:** `docs/design/CAMPUS_COMMERCE_A_PHASE8_PUBLIC_COMMERCE_REVIEW.md`, `frontend/e2e/quality-audit/campus-a-phase8-public-commerce.spec.ts`, `frontend/quality-audit/.evidence/campus-a-phase8/`. Phase 9 owns Login/Register redesign; Phase 10 owns detailed post-login returnTo recovery.
 
-- prose/focused form: 720px,
-- transaction narrow: 900px,
-- customer default: 1280px,
-- customer wide visual: 1360px,
-- application default: 1240px,
-- operational wide: 1440px.
+### Phase 9 implemented — Intentional Login/Register design
 
-Horizontal gutters:
-- 320–374: 16px,
-- 375–767: 20px,
-- 768–1023: 24px,
-- 1024+: 32–40px by archetype.
+- **Layout:** Single-source `frontend/src/modules/auth/auth-form.module.css` replaces ~915 lines of repeatedly overridden auth CSS with one bounded, coherent split-screen login/register layout, a form card max width of 542px (560px on 4K), and an overall readable 1880px max canvas. On Mobile <=850px, the editorial introduction becomes a compact header and the account form occupies readable available width, not a narrow 4K sliver or a viewport-wide input line. Long register forms can scroll naturally.
+- **Brand:** Text-only **UniStore Hub** on both auth routes, never a fake U badge, image logo or emoji. Rich introduction remains truthful: campus shops, orders, payments and pickup are accessible only according to account permissions.
+- **UI:** Consistent semantic token-based Light/Dark panels, labels, controls, hover/focus, full-width 50px primary submit CTA, 44px interactive password visibility/secondary navigation targets, responsive 320–3840px and 200%-text scaling. Already-authenticated action cards reuse this same system without role/policy changes.
+- **Behavior preserved:** Forms still use existing `auth-validation` rules, required labels, field-linked ErrorSummary with focus, server Error Notice, loading/disabled state (now also `aria-busy` on form), password-show button with `aria-pressed`, autocomplete hints and `useAuthNavigationContext` direct/returnTo links. No modifications to `auth-service`, auth token/session management or `return-route`. Login/register success still delegates existing navigation behavior. Detailed protected-route returnTo/RBAC incident belongs to Phase 10.
+- **QA:** `frontend/e2e/quality-audit/campus-a-phase9-auth-layout.spec.ts` verifies both direct routes and returnTo-context forms with **intercepted GET /me and synthetic POST login/register failures** to prevent credential transmission or account creation. Covers 320–3840 widths, desktop/mobile, 200%-text scaling, error summary, reveal-password, busy/disabled and recovery links. Screenshots and metrics: `frontend/quality-audit/.evidence/campus-a-phase9/`. Report: `docs/design/CAMPUS_COMMERCE_A_PHASE9_AUTH_LAYOUT_REVIEW.md`.
+- No commit, push or deploy; no backend/API, DB, AWS or tenant changes. Native zoom, manual screen readers, full actual authenticated order continuation and real signup/login against seeded accounts are outside this scoped visual phase.
 
-## Bento grid
+### Phase 10 implemented — Authentication returnTo and protected order recovery
 
-Desktop: 12 columns.
-Tablet: 6 columns.
-Mobile: 1 column by default.
+- A guest visiting a properly formed `/orders/new/?organizationId=...&campaignId=...&productId=...&variantId=...` sees a compact, accessible state with `UniStore Hub` text-only wordmark, an explicit sign-in action that preserves the full original query in `returnTo`, and a **back-to-product** action that goes to the public product instead of looping through the protected order gate.
+- `getUnauthenticatedExit` is deliberately separate from the **successful** sign-in `returnTo`. It constructs public `/products/view/?organizationId=...&productId=...&campaignId=...` only for valid UUIDs; for incomplete/invalid order parameters or other protected routes it links to the public storefront. Normal successful login/register still returns to the exact sanitized original order URL including `variantId`, subject to subsequent authorization/stock validation.
+- `AuthenticatedBoundary recoveryKind="order"` is enabled on `/orders/new` only. It prioritizes session hydration before anonymous/forbidden UI, with grounded loading, login, unauthorized and forbidden recovery actions. Generic Org/Platform/RBAC boundaries remain untouched.
+- `AuthSessionStore` now versions in-flight `/me` restorations. Calling `establish(newToken)` invalidates pending old-token responses; a late old `TOKEN_EXPIRED` response cannot clear a newly obtained token. Logout also invalidates pending restorations. Parallel calls for the **same** token/session generation are still deduplicated. Access is still determined from authoritative `/me` identity/memberships, not from client-supplied role data.
+- In `OrderCreateView`, a definitive invalid token on contextual product fetch logs out and returns to the guarded sign-in recovery rather than being stranded on a generic fetch error. A genuine API 403 displays an explicit no-permission state with safe store/order-list recovery. No RBAC checks, payment state, order payload, prices, or business rules were relaxed.
+- Regression sources: `frontend/src/modules/auth/return-route-recovery.test.ts`, extended `session.test.ts`, `frontend/e2e/quality-audit/campus-a-phase10-return-to-order.spec.ts`. Browser responses are fully intercepted; **no real user login, order write, payment, or test tenant creation** is performed. Screenshots and results are in `frontend/quality-audit/.evidence/campus-a-phase10/`.
+- The presentation of the order-creation form and visual overlap concerns discovered in its existing wide-screen layout are separately Phase 11 Customer Journey scope, not claimed as fixed here. This phase focuses on reaching the correct, authorized step without loops.
 
-A safe 2-column mobile grid is allowed only for genuinely compact content at 375px+.
 
-Requirements:
-- no clipping,
-- no fixed tile height when Thai copy can wrap,
-- no decorative overflow causing page scroll,
-- feature content appears before minor utility content,
-- primary CTA remains reachable.
+### Phase 11 implemented — Customer journeys and account workspace
 
-## Media and illustration
+- **Scope:** Signed-in customer Checkout, My Orders/Order Detail, Payment proof upload, Pickup token/QR and Notifications. Read status, ownership and valid transitions only from existing backend and application helpers. No backend/API modifications, invoice/payment amount overrides, new permission shortcuts or real DB writes.
+- **Checkout:** The previous 4:3 image fallback with `min-height:250px` plus intrinsic aspect sizing could exceed its grid track and overlap product title/description at 1440px. `order-create.module.css` now uses bounded 220px media and `min-height:0`, a balanced zero-min-content two-column product Grid, safer wrapping and a compact 82px image on Mobile. Estimated price, positive quantity validation, OPEN campaign gating and `confirm` submission remain unchanged.
+- **Order list/detail:** Uniform light/dark neutral surfaces, readable 4K content max width, bounded responsive columns, high-contrast active filter controls, useful 44px+ order actions, overflow-proof long order IDs and visible keyboard focus. Existing actionable-first status grouping, cancel confirmation and conflict-to-refresh behavior are preserved.
+- **Payment:** The original proof upload / server-authoritative total and state are untouched. Responsive amount header, narrow-width file picker constraints, safe text wrapping and high-contrast focus/selected feedback. Direct presigned PUT, submission and review status logic unchanged.
+- **Pickup:** Guarded token and QR view remains visible only when the existing backend order state permits it; not-ready flow continues to suppress QR creation. Narrow layouts stack token/QR, wrap long tokens and preserve a usable alternative when local QR generation fails.
+- **Notifications:** Action-first grid stacks at tablet widths; long text no longer forces horizontal overflow; unread/read/filter/refresh controls preserve accurate state, and inline mark-read uses the existing route without changing business contracts.
+- **Verification:** `frontend/e2e/quality-audit/campus-a-phase11-customer-workspace.spec.ts` uses only API-shaped mocked GET responses and an explicitly intercepted PATCH mark-read; it blocks all unmocked mutations. Covers six customer route families in both themes, 390/768/1024/1440/3840 CSS widths, text/media non-overlap, filtered order rows, cancel-dialog dismissal, upload-required validation, pickup token, notifications mark-read, network Error → Retry, no-notifications Empty and not-ready Pickup. Screenshots/metrics: `frontend/quality-audit/.evidence/campus-a-phase11/`; review: `docs/design/CAMPUS_COMMERCE_A_PHASE11_CUSTOMER_WORKSPACE_REVIEW.md`.
+- **Not covered:** Real order creation/cancellation, actual upload to storage, payment approval and pickup confirmation, physical 4K display calibration, browser/assistive tech manual checks or every possible backend failure state. High-risk mutations remain intercepted.
 
-### Brand-environment assets
 
-Examples:
-- parcel,
-- shopping bag,
-- campus merchandise object,
-- payment/pickup metaphor,
-- abstract rounded geometry.
+### Phase 12 implemented — Staff operations task-first workspace
 
-Use in landing hero, discovery bento, auth brand panel, and major empty states.
+- **Scope:** Organization Staff operational routes: Orders queue/detail, Payments review, Pickups handover. A shared read-only Production Summary is styled consistently but its route is **Organization Admin only**; Staff access remains forbidden by `OrganizationBoundary` and is browser-tested. No backend endpoints, RBAC, tenant filtering, order/payment/pickup state rules, or stored records were changed.
+- **Navigation and filters:** `staff-operation-nav.module.css` and `queue-priority-controls.module.css` use 44px+ focusable targets, readable active states, unselected-state hover contrast under Light and Dark themes, and a fully visible two-column responsive filter group instead of inaccessible horizontal clipping. Counts still refer **only to loaded records**, not total system records.
+- **Orders:** `organization-orders.module.css` now bounds the 4K operational canvas to 2600px, uses min-content-safe queue rows and labels, keeps next-task links 44px+, and adapts three server-backed filter fields from 3 → 2 → 1 columns without overflowing. Staff can inspect Order details; admin-only cancellation still requires existing authorization and confirmation.
+- **Payments:** `organization-payments.module.css` adjusts Queue/Review detail from a minimum 370px right column to proportional, readable widths; below 1180px columns stack in flow without hidden detail. Selected row, 2-column authoritative payment/order facts, approval/rejection trigger focus and filters are legible. **The existing confirm/reject dialogs and authoritative server recheck remain unchanged.**
+- **Pickup:** `organization-pickups.module.css` makes Token/Order detail readable, selected row distinguishable, and confirmation actions accessible. Workbench stacks below 1180px; filters adapt 4 → 2 → 1 columns. **No pickup handover is ever confirmed by browser QA.**
+- **Production Report:** `production-summary-view.module.css` bounds the read-only organization-admin report, keeps quantity table/variant cards readable and prevents overflow for long identifiers on Mobile. Staff remains denied.
+- **Browser QA:** `frontend/e2e/quality-audit/campus-a-phase12-staff-operations.spec.ts` uses synthetic membership and intercepted API-shaped read responses. Exercises Staff Orders, Order Detail, Payment selection and approval modal Escape, Pickup selection and confirm modal Escape, Staff denial on production and cross-tenant access, and authorized Org Admin report. Covers Light/Dark and 320–3840 widths without horizontal overflow; screenshots/metrics in `frontend/quality-audit/.evidence/campus-a-phase12/`. Every unexpected POST/PATCH is blocked; no real writes.
+- **Not tested:** Live approval/rejection/confirmation, source-backed production report at the customer’s actual data scale, every filter-pagination combination, OS-native zoom/screen-reader testing, non-Chromium browser parity. Testing simulated UI flows **does not authorize data mutation**. Report: `docs/design/CAMPUS_COMMERCE_A_PHASE12_STAFF_WORKSPACE_REVIEW.md`.
 
-### Product/store media
 
-Real backend media is authoritative.
+### Phase 13 implemented — Organization Admin and tenant-scoped management
 
-Reserve aspect ratio, use object-fit intentionally, and do not recolor real product imagery for brand consistency.
+- **Scope:** Authorized Organization Admin routes `/org/select`, `/org/dashboard`, `/org/settings`, `/org/staff`, `/org/stores`, `/org/products`, `/org/campaigns`, `/org/audit` plus shared `/org/orders`, `/org/payments`, `/org/pickups`, `/org/production` reviewed in Phase 12. Changes are **frontend-only CSS**; no backend/DB/RBAC/session/business rules were changed.
+- **Desktop/4K:** Admin canvas bounded at 2600px (retains Phase 3's greater-than-2300px dashboard requirement on 3840 CSS px). Main task views use proportional queue/summary with editor/side panel maximum 640–720px, and naturally stack into a single column at tablet widths. Long IDs, prices and names wrap; important links/buttons expose 44px+ targets and visible keyboard-focus outlines.
+- **Tenant context:** Existing `OrganizationAdminNav` route links retain the **same** verified `organizationId` across dashboard, staff and settings; switching organizations explicitly returns to `/org/select/`. The active tenant name remains displayed by the existing workspace header/shell, not fabricated or read from untrusted route labels.
+- **Concrete screenshot fix:** `Settings` previously rendered “ข้อมูลที่แสดง” one character per line around 1440px because its `sectionHeading` occupied too little of the CSS Grid. Scope the edit-section heading to **one full-width row** and cap form editor at 760px, with a 1100px max panel and a proportionally constrained explanatory side panel. Browser regression asserts minimum 145px heading width.
+- **Theme and states:** Light/Dark hover on selected rows preserves `--ink` and `--brand-soft` contrast; focus styling and minimum target sizes are applied to settings, staff, stores, product/variant, campaign, audit and navigation modules. Date, status, membership and campaign lifecycle values still come from existing API DTOs.
+- **Read-only QA:** `frontend/e2e/quality-audit/campus-a-phase13-organization-admin.spec.ts` intercepts API GETs with synthetic active Org Admin membership/records. It samples 8 routes × 8 widths (320–3840px) × 2 themes, captures Mobile/Desktop/4K screenshots, validates overflow, same-tenant admin navigation, settings field validation without actual PATCH, last-admin removal guard, audit visibility and denied STAFF/other-tenant access. Every unexpected POST/PATCH/DELETE is blocked.
+- **Evidence:** `frontend/quality-audit/.evidence/campus-a-phase13/`, review `docs/design/CAMPUS_COMMERCE_A_PHASE13_ORG_ADMIN_REVIEW.md`.
+- **Limits:** Does not certify every mutation/modal state, actual membership additions/removals or settings PATCH, backend data correctness, mobile browser/native zoom/screen reader, or role/action permutations. Comprehensive cross-role QA remains Phase 15.
 
-### Fallback media
 
-Use generic category-aware visual treatment. Never imply a specific nonexistent product or inventory item.
+### Phase 14 implemented — Platform Admin and shared role edges
 
-### Accessibility
+- Platform overview, organization review and read-only user directory use Campus Commerce A's **text-only UniStore Hub** identity and semantic Light/Dark tokens. The admin canvas expands to up to 3040 CSS px on 4K; compact metrics remain within 2600px, organization cards use two columns above 2100px while preserving PENDING-first DOM ordering, and metadata/action slots remain individually bounded and readable. Narrow viewports use stacked review cards and a semantic user row-card table.
+- Platform workspace nav/filter chips have readable default, hover, active, keyboard focus and pressed states with >=44px click targets; theme-safe ink/background pairings are `--ink`, `--ink-secondary`, `--surface-hover`, `--brand-soft`, `--brand-strong`, `--brand-on`, `--focus`. The existing `ConfirmDialog` remains the only path to approval/suspension.
+- Existing Platform Users API is GET-only; no fake user status mutation UI has been added. Non-platform roles (anonymous/Customer/Staff/Organization Admin) remain rejected by `PlatformAdminBoundary`, and organization workflows remain subject to their existing service/state-transition semantics. Platform is never inferred from a tenant organization role.
+- `frontend/e2e/quality-audit/campus-a-phase14-platform-admin.spec.ts` performs 3 routes × 8 viewports × 2 themes geometry, 4 non-platform roles × 3 routes × 2 themes forbidden controls, empty/error states, filter/search, dialog Escape and simulated approval. **Every browser API write is blocked except a narrowly intercepted test-only POST that returns a synthetic DTO; no real mutation or DB traffic is permitted.**
+- Artifacts and test limits: `docs/design/CAMPUS_COMMERCE_A_PHASE14_PLATFORM_ADMIN_REVIEW.md`, `frontend/quality-audit/.evidence/campus-a-phase14/`. Exhaustive browser/action inventory, WCAG AA contrast matrix, all popup states and cross-browser verification remain Phase 15.
 
-Informative media has meaningful alt derived from real entity context.
 
-Decorative media:
-- empty alt or presentational,
-- not focusable,
-- `pointer-events: none`,
-- never obscures controls/text.
+### Phase 15 audited — comprehensive responsive, theme and interaction evidence
 
-### Performance
+- Phase 15 browser route verification: **28 canonical routes × 8 CSS widths (320–3840) × Light/Dark = 448/448** direct visual geometry observations, 168 screenshot files at 390/1440/3840; zero reported horizontal overflow, clipped focusables, broken images, page errors or axe A/AA findings in the loaded snapshots. This covers one primary authorized role per route, not all role/state combinations.
+- Additional authorized route/role cases: **11 combinations × 5 widths = 55 checks**, no reported overflow, image error, page error, axe finding or intercepted business writes.
+- Modal interaction: **24 direct nonmutating Customer/Staff dialog cases** at four widths × two themes, with focus trap, Escape, focus return and bounded geometry; separate Platform Admin modal checks. No real approval, rejection, cancellation or pickup confirmation.
+- Text scaling: 7 representative route surfaces × 2 themes × 2 widths at CSS root font-size 200% = **28/28** no overflow/clipped controls; NOT a claim of native 200% browser zoom or physical screen reader testing.
+- Action proof inventory: **257 stable IDs**; **23** had a direct current-run PASS for one named state and **234** have no current-run direct action proof (NOT_TESTED). **0** are certified across every declared state. Neither screenshots nor normal route loads imply an action pass.
+- Link to authoritative scope/evidence and unresolved limits: `docs/design/CAMPUS_COMMERCE_A_PHASE15_COMPREHENSIVE_AUDIT.md`, `frontend/quality-audit/.evidence/campus-a-phase15/`. Existing local fixture display provenance is heuristic in the presentation layer, not immutable backend proof. Firefox/WebKit, native browser zoom, release/security checks and integration mutation tests remain Phase 16.
 
-Prefer responsive WebP/PNG/SVG, explicit dimensions/aspect ratio, lazy loading below fold, and mobile-sized variants when practical.
 
-Do not add real-time 3D runtime merely for visual polish.
+## Component and state contract
 
-### Implemented media primitives
+Base components: Primary/Secondary/Quiet/Danger buttons; Links; Inputs/Selects/Search; Cards; Tabs/Sidebar; Dialog/Drawer; Tables/Queues; Toast/Notice; Status; Loading/Empty/Error/Unauthorized/Forbidden.
 
-- `BrandIllustration` is the shared lightweight clay/dimensional environment system. Supported variants are `market`, `parcel`, `product`, `payment`, `pickup`, and `notification`.
-- Brand illustrations are CSS/token driven rather than copied reference art or runtime 3D. They inherit light/dark design tokens, reserve their own aspect ratio, and never fetch remote art.
-- Decorative `BrandIllustration` is hidden from assistive technology and never captures pointer input. Set `decorative={false}` only with a real `label` when the illustration itself communicates information.
-- `MediaFallback` combines a generic decorative illustration with visible fallback copy such as `ยังไม่มีรูปสินค้า`. It must never suggest a specific nonexistent item, seller, brand, or inventory state.
-- Real backend product imagery always wins over fallback media. Listing images stay lazy-loaded; above-fold detail imagery may load normally. Existing backend URLs and object ownership rules are unchanged.
-- `EmptyState.media` is optional and should be used only for major customer-facing empty states where a small visual improves orientation. Dense operational/admin empty states stay quieter unless the illustration materially helps the task.
-- Page-specific hero/auth scenes should compose these shared primitives instead of duplicating bespoke decorative object CSS.
+Each component requires **default, hover, focus-visible, active, selected, disabled, pending, success and failure** states where relevant. Screen reader names, contrast, pointer and keyboard interactions should be consistently supported in all authorized roles. Keep a separate operational style density but shared semantics.
 
-## Icons
+### Areas of work / progression
 
-Use one project-local vector language with `currentColor` and consistent 16/20/24px sizing.
+| Phase | Boundary |
+|---|---|
+| 2 (completed) | Single authority, semantic light/dark colors, *text-only wordmark* in all global shells, regression snapshots |
+| 3 (implemented) | Responsive 4K/grid-container widths and spacing calibration |
+| 4 (implemented) | Shared primitive interactive states, contrast and guarded keyboard/overlay checks; broader cross-role permutations remain Phase 15 |
+| 5 (implemented) | Lucide functional icon set, Unicode arrow clean-up, and removal of legacy U-shaped brand illustrations |
+| 6 (implemented) | Real store-first grid, organization/store filters, honest media fallback and mobile–4K pagination/visibility |
+| 7 (implemented) | Development-only strict fixture isolation; explicit QA mode, counts, filters, and real loading/empty/error states |
+| 8 | Public store/product/campaign detail |
+| 9–10 | Auth UX and verified protected-route returnTo |
+| 11–14 | Customer, Staff, Org Admin, Platform Admin route families |
+| 15–17 | 28-route/5-role responsive and interaction QA, cross-browser tests, final diff review |
 
-No emoji structural controls. Icon-only controls require accessible names. Decorative icons beside visible text are hidden from assistive technology.
+## Safety and evidence
 
-## Motion
+- Do not change backend access decisions, tenant isolation, business transitions, API payloads, payment or pickup semantics for a visual rewrite.
+- Local QA/demo tenant data should not be deleted or blurred into consumer products; review explicit safe provenance before any filtering.
+- Every phase must record before/after browser screenshots and test its own claims. A rendered route does not mean all its controls, roles, auth states and modals have been verified.
+- Only mutate workspace files on user request. No Git commit, push, deploy or production access under the current phase-by-phase implementation authorization.
+- Known prior development-only `braces` audit exception remains recorded as a local, time-bounded risk; visual work must not alter or conceal it.
 
-Motion target: **3/10**
-
-Tokens:
-- fast: 120ms,
-- standard: 180ms,
-- expressive: 240ms,
-- standard easing: `cubic-bezier(.2, .8, .2, 1)`.
-
-Allowed:
-- 1–3px hover lift,
-- subtle image scale,
-- slight press compression,
-- drawer/dialog transitions,
-- short reveal/fade,
-- state completion feedback.
-
-Avoid continuous floating, mouse-follow, scroll-jacking, multi-layer parallax, exaggerated bounce, and animation on dense operational rows.
-
-Respect `prefers-reduced-motion`.
-
-## Controls
-
-Target heights:
-- compact desktop: 36px,
-- standard desktop: 40px,
-- comfortable/form: 44px,
-- mobile standard: 44px,
-- mobile comfortable: 48px.
-
-Controls require hover where relevant, pressed, focus-visible, disabled, pending, and an accessible name.
-
-Adjacent touch controls should normally have at least 8px separation.
-
-## Buttons
-
-Primary uses brand fill. Secondary uses neutral or brand-soft surface. Destructive uses danger semantics.
-
-One dominant primary action per local task context.
-
-Do not use pill buttons by default. Pending actions prevent duplicate submission.
-
-## Forms
-
-Keep the v2 accessibility/recovery architecture:
-- visible labels,
-- placeholder is not label,
-- semantic hint/error association,
-- on-blur validation for most fields,
-- clear recovery text,
-- read-only differs from disabled,
-- pending submit prevents duplicate action,
-- password manager/paste/autofill remains available.
-
-Failed submit:
-- simple form: focus first invalid field,
-- complex form: focusable error summary + linked invalid fields + inline errors.
-
-Visual treatment:
-- soft inset surface,
-- clear boundary,
-- brand focus ring,
-- 12–14px radius.
-
-No glassy or gradient form fields.
-
-## Navigation
-
-Navigation authority remains `src/modules/auth/navigation.ts`.
-
-### Customer desktop
-- compact top nav,
-- brand left,
-- marketplace destinations center/left,
-- account/actions right,
-- header visually quieter than hero/product media.
-
-### Operational desktop
-- persistent sidebar allowed,
-- current organization/platform scope obvious,
-- predictable grouping,
-- selected state by shape + text weight, not color alone.
-
-### Mobile
-- compact top bar,
-- drawer/sheet for many destinations,
-- bottom navigation only when a route group genuinely has 3–5 primary destinations,
-- route choice closes the menu,
-- current area remains understandable with menu closed.
-
-### Implemented shell pattern
-
-- public/storefront navigation uses a low-chrome floating rounded header with selected destinations shown as a contained surface rather than a heavy app bar,
-- authenticated organization/customer/platform areas use one persistent desktop sidebar with a raised brand block, explicit current scope, grouped navigation, and account/context actions at the bottom,
-- active destinations use text weight + a filled state dot + an inset accent edge so the current page is not communicated by color alone,
-- organization switching remains an explicit route action rather than a hidden context menu,
-- platform scope reuses the same geometry with the semantic info accent so governance feels authoritative without becoming a separate design system,
-- at 900px and below the sidebar becomes a modal drawer with scroll lock, inert background content, focus trapping, Escape close, focus return, safe-area footer spacing, and the current destination visible in the compact top bar.
-
-### Implemented public landing pattern
-
-- lead with one focused branded commerce hero rather than a stack of same-weight marketing sections,
-- keep the purchase journey outside the hero as a compact pastel block strip,
-- use actual loaded stores for the first discovery bento; never imply popularity or ranking unless backend data explicitly supports it,
-- desktop discovery may use one large feature tile plus asymmetric supporting tiles, but mobile must collapse to a clear single reading order,
-- keep the complete organization/store list after the expressive discovery layer so discovery never replaces authoritative navigation,
-- loading states should reserve the approximate discovery footprint with shared skeletons before data arrives,
-- error states should provide an in-place retry when the same safe GET operation can be repeated.
-
-### Implemented authentication pattern
-
-- login/register use one branded split environment: a premium dark identity panel on the left and a calm raised form surface on an ambient background on the right,
-- the brand panel may use CSS-only clay/dimensional account, parcel, orb, and ticket shapes; all decorative objects are hidden from assistive technology and never imply real inventory or account state,
-- login/register introductory copy remains product/task copy rather than promotional social proof,
-- the account journey is visible as three compact supporting blocks on tablet/desktop and is removed on narrow mobile to keep the form close to the top of the reading order,
-- the form itself remains visually quieter than the brand side: labels, native text fields, password visibility, focused error summary, server error notice, primary submit action, account switch, and return path,
-- password fields retain password-manager-friendly autocomplete values (`current-password` for login and `new-password` for registration), paste remains unrestricted, and email/name autocomplete remains intact,
-- no field receives automatic initial focus; failed submit moves focus only to the focusable error summary while inline errors remain associated with fields,
-- authenticated entry state reuses the same form panel and shows real user identity plus only destinations permitted by existing membership/session state,
-- mobile auth keeps the dimensional brand cue but removes the supporting journey blocks; all visible interactive controls remain at least 40px tall in rendered checks and primary controls follow the shared 44px+ target.
-
-## Cards
-
-Use role-specific card patterns.
-
-### Commerce card
-Image-led, 20–28px radius, light elevation, concise metadata, strong price/state/action hierarchy.
-
-### Implemented store/campaign/product pattern
-
-- store detail uses a branded commerce hero with a decorative clay shopping object plus real campaign/product counts; decorative shapes are hidden from assistive technology,
-- campaign detail uses a dark premium hero only for campaign context/state, with the authoritative status panel remaining a readable surface above the decorative background,
-- campaign cards use abstract dimensional visual zones but only real campaign name, status, and schedule data,
-- product cards reserve a 4:3 media stage, contain real backend product imagery without recoloring/cropping it, and keep starting price + active option count visible near the action,
-- product cards stay uniform within listing grids; asymmetry is reserved for discovery surfaces where it improves hierarchy instead of creating empty card height,
-- product detail uses a large contain-fit media stage, starting-price/variant/campaign facts, then one purchase configuration surface,
-- product media may create internal decorative visual overflow, but route containers must clip that paint overflow without turning the section into a scroll container or breaking desktop sticky media,
-- campaign schedule is shown as four semantic pastel milestone blocks using the real backend dates,
-- no rating, review count, popularity, stock claim, seller badge, or fabricated product imagery is introduced.
-
-### Discovery tile
-Bento-compatible, expressive color field, minimal copy, optional dimensional object.
-
-### Transaction card
-Calmer surface, status/totals first, lower decoration.
-
-### Operational resource row/card
-Compact, low/no elevation, clear state/reference/time/action alignment.
-
-### Summary block
-Only actionable or decision-useful information. No generic KPI wall.
-
-## Lists and tables
-
-Use table semantics only for actual tabular comparison.
-
-Use resource-list rows when users are finding and acting on objects.
-
-Operational priority:
-1. state,
-2. identifier,
-3. entity/customer,
-4. amount/count,
-5. time,
-6. next valid action.
-
-Mobile tables use a scroll container or task-appropriate card/list alternative.
-
-## Filters and search
-
-Customer filters/search integrate with discovery and may be prominent when discovery is the primary task.
-
-Operational filters stay close to data, compact, show active filters, and provide a clear reset.
-
-Async filter changes provide one contextual result announcement, not competing live regions.
-
-## Status and next action
-
-Transaction/operations hierarchy:
-1. authoritative state,
-2. human meaning,
-3. valid next action,
-4. required references,
-5. supporting history.
-
-Never invent a next step unsupported by Backend state. Color is never the only status signal.
-
-## Loading, empty, error, forbidden
-
-Keep orientation visible.
-
-Every state should explain:
-- what is happening,
-- whether the user can act,
-- what to do next.
-
-Customer empty states may use small brand illustrations. Operational empty states remain concise and task-focused.
-
-## Page archetypes
-
-### Marketplace landing
-`low-chrome nav -> expressive hero -> discovery/search bridge -> bento/category/store/campaign discovery -> real marketplace content`
-
-### Store / campaign listing
-`identity/context -> discovery/filter -> image-led cards -> pagination/state`
-
-### Product detail
-`media stage | title/variant/state/price/action -> supporting facts -> store/campaign context`
-
-### Authentication
-`brand environment | calm form surface`
-
-### Implemented order-creation pattern
-
-- checkout uses a premium dark transaction header for orientation, then a calm two-column review + confirmation layout,
-- the left review surface shows the real store, product image/description, selected variant, campaign state, unit price, close time, and payment deadline,
-- backend product imagery stays contain-fit inside a reserved 4:3 commerce media stage; missing imagery uses the shared brand-aware placeholder treatment,
-- the confirmation surface is sticky only on wide desktop and becomes normal flow below 1024px,
-- estimated total is explicitly labeled as an estimate and displays the real unit-price × quantity breakdown; backend remains authoritative for the persisted total,
-- quantity validation retains the focusable ErrorSummary and linked inline error; invalid quantity never calls createOrder,
-- recoverable context-loading failures provide an in-place retry without changing query identifiers or API contracts,
-- on narrow mobile the final confirmation action becomes a safe-area-aware sticky action area inside the form so the primary submit remains reachable,
-- successful creation switches immediately to authoritative backend order status/total, next-action guidance, payment CTA where applicable, and order-detail/product links,
-- no client-side discount, inventory, shipping, fee, tax, or unsupported pricing calculation is introduced.
-
-### Implemented customer order-tracking pattern
-
-- `/my/orders/` begins with one dark premium customer-order hero, followed by a compact bento overview for actionable count, loaded-count, and explanatory guidance,
-- order rows are independent raised commerce surfaces rather than a ledger table; actionable orders receive stronger brand emphasis and an explicit continuation action without changing backend ordering,
-- list rows always keep authoritative status, backend total, created/updated timestamps, order identifier, and server-derived next-action guidance visible,
-- recoverable initial-load failures retry in place; pagination failure remains local to the load-more action and does not discard already loaded orders,
-- `/my/order/` uses a premium order hero with backend total and last-updated time, then shared TaskStatus for the authoritative current state and next action,
-- the canonical four-step journey remains payment -> confirmation -> production -> pickup; cancelled orders do not fabricate a journey,
-- journey state is expressed through text, number, surface, and tone rather than color alone; current/done/upcoming semantics and `aria-current="step"` remain intact,
-- recorded order items stay a dense read-only list with quantity, unit price, and recorded line total; mobile converts columns into labeled rows rather than horizontal overflow,
-- subtotal/total presentation is visually prominent but never recalculated on the client,
-- customer cancellation remains visible only for the existing cancellable states, requires confirmation, and refreshes authoritative order state after success or a conflict,
-- a cancellation conflict keeps the last known order visible, reports the conflict, then attempts to refresh the backend state before deciding which actions remain available,
-- payment/pickup shortcuts continue to derive exclusively from existing customer guidance and order status.
-
-### Implemented payment / pickup / notification pattern
-
-- `/my/payment/` uses the transaction hero language with the persisted backend total prominent, followed by authoritative payment state and three real payment facts,
-- payment proof upload remains a single-task raised surface with accepted file types, selected-file feedback, visible multi-stage progress, announced failure/success feedback, and a mobile-safe sticky submit area,
-- payment upload contract remains presign -> direct PUT without application JWT -> persist the backend-issued objectKey -> refresh authoritative order/payment state; client-generated file URLs or totals are never substituted,
-- recoverable payment-context failures retry in place; an expired direct-upload URL is recovered by starting the existing submit flow again so a fresh presign is requested,
-- `/my/pickup/` treats the QR/token pair as a presentation credential only: the QR is generated locally from the backend pickup token and the token remains visible/selectable as the fallback,
-- QR generation failure must never hide the backend token; long token text must wrap without horizontal overflow,
-- not-ready pickup state rechecks authoritative order state in place rather than requiring a full page reload, while pickup data is not requested before the order status allows it,
-- customer pickup surfaces never expose a confirmation mutation; Staff/Admin confirmation remains the only authoritative receive action,
-- `/notifications/` uses event cards with unread emphasis, real loaded/unread counts, filter controls, manual refresh, local mark-read feedback, and paginated continuation,
-- notifications remain event signals rather than authoritative order/payment/pickup state; the UI states this explicitly and does not infer current state from an old notification,
-- notification filters wrap/collapse without clipping; read/unread state is communicated with text plus visual treatment, not color alone.
-
-### Implemented organization home / settings pattern
-
-- `/org/select/` uses a branded operational hero with an authoritative accessible-organization count, then separates existing memberships from the create-organization task,
-- accessible organizations are presented as raised workspace cards with backend organization status, membership role, description, identifier, and one explicit enter action; membership joining/filtering rules remain unchanged,
-- creating an organization remains a separate sticky task on wide layouts and moves into normal flow on constrained layouts; validation retains labeled fields, blur feedback, focusable ErrorSummary, and backend-driven post-create membership refresh,
-- recoverable organization-list failures retry in place without clearing authentication or changing remembered-organization semantics,
-- `/org/dashboard/` uses one restrained operational hero followed by an asymmetric action board rather than a generic equal metric-card wall,
-- dashboard visual priority is: pending payment reviews -> paid orders -> paid revenue -> store/product resource shortcuts -> report scope -> status breakdowns,
-- all dashboard counts, revenue, campaign/order status buckets, and filter results remain backend report values; the client only formats and arranges them,
-- report filters remain campaignId/storeId only, are trimmed before request, announce the applied scope, preserve a clear reset, and do not change organization authorization context,
-- `/org/settings/` separates editable display fields from immutable governance facts; status, membership authority, and transaction authority are visibly outside this form's scope,
-- organization settings keep only name/description editable, retain save success/error feedback and focusable validation summary, and never expose Platform Admin status controls,
-- organization reference metadata uses real id/createdAt/updatedAt values and wraps safely at narrow widths,
-- operational responsive collapse happens early enough for the authenticated shell: organization workspace/settings collapse by 1100px and the dashboard action/resource board by 1180px so 1024px does not produce narrow unusable columns.
-
-### Customer transaction
-`product/order summary -> authoritative state -> next action -> totals -> references/history`
-
-### Organization dashboard
-`scope -> attention/workload -> actionable grouped summaries -> supporting shortcuts`
-
-### Operational resource page
-`task header -> filters/search -> resource list/table -> selected detail/action`
-
-### Management workspace
-`scope -> entities/config -> editor/create task -> supporting state`
-
-### Audit / read-only ledger
-`scope -> filter/search -> dense read-only records -> metadata inspection`
-
-### Platform governance
-`platform scope -> pending/attention work -> organizations/actions -> read-only supporting data`
-
-## Customer vs operations
-
-Customer surfaces favor whitespace, imagery, color fields, concise copy, and an obvious primary CTA.
-
-Transactions reduce decoration and prioritize state, total, and next action.
-
-Organization operations favor dense scanability, compact filters, selected state, one primary action, destructive separation, and quieter metadata.
-
-Platform Admin surfaces emphasize Platform scope, authority, pending decisions, and calm read-only data.
-
-## Responsive contract
-
-Support **320px and above**.
-
-Mandatory review widths:
-- 320,
-- 375,
-- 768,
-- 1024,
-- 1440.
-
-Invariants:
-- no unintended page horizontal overflow,
-- no clipped primary action,
-- no unreachable control,
-- focus is not hidden under sticky/fixed UI,
-- long identifiers wrap safely,
-- dialogs keep title/actions reachable,
-- action groups recompose instead of shrink,
-- bento spans collapse intentionally,
-- decorative media scales/repositions/disappears rather than covering content,
-- true tables use containment or alternate mobile composition,
-- mobile navigation remains discoverable,
-- desktop split views become explicit list → detail flow.
-
-Implemented responsive/motion safeguards:
-- semantic layout containers and form controls use `min-width: 0` so grid/flex children can shrink instead of forcing page overflow,
-- long headings/copy/labels may wrap with `overflow-wrap: anywhere` only when normal wrapping cannot contain the content,
-- <=620px uses 44–48px control targets; <=360px tightens gutters/padding without shrinking interactive targets,
-- coarse-pointer controls keep minimum touch height and adjacent mobile controls should retain an 8px gap where they form a control group,
-- hover-only transforms are suppressed on non-hover devices; no required action or state is hover-dependent,
-- true tables retain a bounded, keyboard-focusable horizontal scroll container with touch panning rather than widening the page,
-- reduced motion globally collapses transition/animation duration and page-specific rules must still remove transform-based hover movement where needed.
-
-## Accessibility baseline
-
-Required:
-- semantic HTML first,
-- logical headings,
-- keyboard operability,
-- visible focus,
-- focus not obscured,
-- labels and accessible names,
-- non-color-only status,
-- reduced motion,
-- predictable dialog focus return,
-- password-manager/paste-compatible auth,
-- pointer targets respected,
-- alternatives for drag/swipe if introduced,
-- contextual live updates rather than many live regions.
-Rendered contrast must be checked after implementation because gradients/compositing can change effective contrast.
-
-Phase 23 measured contrast anchors:
-- light `ink / surface`: **16.76:1**; `ink-secondary / surface`: **7.06:1**; `ink-tertiary / surface`: **4.97:1**,
-- light `brand-on / brand`: **6.30:1**; `focus / surface`: **6.30:1**; `focus / canvas`: **5.84:1**,
-- dark `ink / surface`: **15.78:1**; `ink-secondary / surface`: **10.08:1**; `ink-tertiary / surface`: **6.55:1**; `focus / surface`: **7.61:1**,
-- semantic pairs remain at or above 4.8:1 for success/warning/danger/info text on their soft surfaces,
-- `--on-dark-tertiary` is 76% white so normal-size tertiary text remains at least **4.63:1** against the lightest `#236188` endpoint used by the canonical dark hero gradient.
-Decorative media never interferes with reading/focus order.
-
-
-## Z-index
-
-- base: 0,
-- content overlap: 10,
-- sticky: 20,
-- navigation: 40,
-- overlay/backdrop: 50,
-- dialog: 60,
-- toast: 80,
-- skip link: 100.
-
-Decorative media normally stays below interactive content.
-
-## Project contract guardrails
-
-Visual redesign must not change:
-- API routes,
-- DTO meanings,
-- role names,
-- membership/tenant authority,
-- Backend-authoritative authentication/authorization,
-- Platform Admin authority from persisted `user.platformRole`,
-- 403 handling semantics,
-- query-parameter entity routing,
-- static export,
-- Campaign lifecycle,
-- Order lifecycle/cancellation rules,
-- Payment review authority,
-- Pickup authority,
-- customer pickup presentation-only behavior,
-- direct S3 presign -> direct PUT without JWT -> persist Backend-issued key,
-- integer-satang price semantics,
-- opaque cursors,
-- notification events as signals rather than current-resource authority.
-
-`organizationId` in query/navigation remains context only, never authorization proof.
-
-## Shared implementation rule
-
-There is one design system.
-
-Shared primitives own buttons, fields, notices, badges, dialogs, error summaries, table/resource patterns, state treatments, loading/empty/error states, common media shells, and focus behavior.
-
-Page-specific CSS is for composition, not recreating generic controls or semantics.
-
-## Explicit anti-patterns
-
-Reject:
-- flat grey legacy-admin appearance,
-- thin grey outline around every block,
-- automatic equal-card rows,
-- decorative eyebrow/kicker on every section,
-- giant operational hero headings,
-- one radius everywhere,
-- one shadow everywhere,
-- gradient on every component,
-- full-page glassmorphism,
-- random category colors,
-- ornamental 3D on every screen,
-- exact copying of source references,
-- fake ratings/reviews/sales/user counts/social proof,
-- invented product imagery,
-- hover-only essential controls,
-- mouse-follow,
-- continuous parallax,
-- scroll-jacking,
-- inaccessible drag-only interaction,
-- shrinking touch targets for compactness,
-- hiding state/action clarity for aesthetics,
-- playful bento that breaks operational scan order,
-- illustration blocks above urgent queues,
-- meaningless KPI walls.
-
-## v2 behavior retained
-
-v3 replaces the restrained v2 visual language, not the successful behavioral UX.
-
-Keep:
-- task/next-action clarity,
-- backend-authoritative state,
-- semantic timestamps,
-- numeric presentation,
-- complex-form error summaries,
-- inline validation,
-- focus recovery,
-- confirmation for risky actions,
-- contextual live status,
-- direct-upload behavior,
-- permission/scope clarity,
-- responsive overflow protection,
-- static-export architecture.
-
-## Reference use rule
-
-Before implementing a major archetype:
-1. read this file,
-2. re-open the relevant canonical URLs in `.interface-design/visual-reference-brief.md`,
-3. run focused `ui-ux-pro-max` search when useful,
-4. use the reference brief as evidence,
-5. implement according to this system,
-6. record reusable deviations here.
-
-Reference emphasis:
-- landing/discovery: R5 + R3 + R4,
-- listing: R2 + R4,
-- product detail: R2 + R1,
-- auth: R1 + R4,
-- transaction: R1 + R4,
-- org dashboard/catalog: R4 + restrained R3,
-- operations queues: material language only, task clarity first,
-- platform governance: restrained R1/R4.
-
-## Implementation sequence
-
-1. prototype representative archetypes,
-2. rebuild global foundations,
-3. shared primitives,
-4. shell/navigation,
-5. customer discovery,
-6. customer transactions,
-7. organization management,
-8. organization operations,
-9. platform governance,
-10. illustration/media system,
-11. responsive/motion polish,
-12. accessibility/performance/design audit,
-13. regression/static-export verification,
-14. final diff review.
-
-## v3 decision checklist
-
-Implementation is aligned only if:
-- purple/indigo is the brand anchor, not success,
-- customer pages use vibrant block-based commerce selectively,
-- bento is selective and intentional,
-- soft 3D/clay is primarily media/brand language,
-- real-time 3D is not the default,
-- gradients are major-zone treatments,
-- Noto Sans Thai remains canonical,
-- discovery is expressive,
-- transactions are calmer,
-- operations stay dense and task-first,
-- platform governance is restrained and scope-explicit,
-- semantic colors remain separate,
-- accessibility behavior from v2 remains,
-- no fabricated marketplace content is introduced,
-- backend/API/security/static-export contracts remain unchanged.
+**Historical note:** Old Playful Campus Commerce v3 and purple/3D recommendations are superseded, not to be reintroduced into CSS modules. This file replaces that authority rather than introducing a second design system.

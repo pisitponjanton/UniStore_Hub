@@ -199,12 +199,9 @@ export function ApplicationShell({
       <aside className={styles.sidebar} aria-label="พื้นที่นำทาง">
         <div className={styles.sidebarTop}>
           <Link href="/" className={styles.brand} onClick={closeMenu}>
-            <span className={styles.brandMark} aria-hidden="true">
-              <WorkspaceIcon name="store" size={21} />
-            </span>
+
             <span className={styles.brandCopy}>
               <strong>UniStore Hub</strong>
-              <span>ร้านค้าและพรีออเดอร์ในมหาวิทยาลัย</span>
             </span>
           </Link>
 

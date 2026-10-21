@@ -581,3 +581,15 @@
  .header,.campaignPanel { padding: 15px; }
  .productHeader,.variantRow { padding: 12px; }
 }
+
+/* Campus Commerce A / Phase 12 — readable staff production report */
+.main{width:min(100%,2600px);min-width:0;padding-inline:clamp(14px,2.4vw,40px);gap:clamp(14px,2vw,23px)}
+.header,.campaignPanel,.campaignForm,.summaryStrip,.productGroup,.productHeader,.variantRow{min-width:0}
+.productCopy,.variantCopy{min-width:0;overflow-wrap:anywhere}
+.productId,.variantId{overflow-wrap:anywhere}
+.productTotal,.quantity{flex-shrink:0}
+.campaignDirectoryLink:hover{background:var(--brand-soft-strong);color:var(--brand-strong)}
+@media(max-width:760px){.main{padding-inline:14px}.campaignPanel{grid-template-columns:minmax(0,1fr)}.summaryStrip{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:420px){.summaryStrip{grid-template-columns:minmax(0,1fr)}.productHeader,.variantRow{gap:10px;flex-wrap:wrap}}
+
+.productList{max-width:1950px}

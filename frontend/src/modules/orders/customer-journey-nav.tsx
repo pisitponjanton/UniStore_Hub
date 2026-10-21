@@ -1,3 +1,4 @@
+import { AppIcon } from "@/components/ui/app-icon";
 import Link from "next/link";
 
 import styles from "./customer-journey-nav.module.css";
@@ -47,7 +48,7 @@ export function CustomerJourneyNav({ current, orderId }: CustomerJourneyNavProps
       </div>
       {relevantOrderHref && current !== "detail" ? (
         <Link className={styles.contextLink} href={relevantOrderHref}>
-          กลับคำสั่งซื้อนี้ <span aria-hidden="true">↗</span>
+          กลับคำสั่งซื้อนี้ <AppIcon name="arrow-up-right" size={17} />
         </Link>
       ) : null}
     </nav>

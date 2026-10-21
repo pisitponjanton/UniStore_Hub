@@ -239,3 +239,6 @@
     width: 100%;
   }
 }
+
+/* Campus Commerce A / Phase 13 */
+.root,.currentState,.lifecycleRail,.actionArea{min-width:0}.lifecycleStep,.stateBlock,.actionCopy{min-width:0;overflow-wrap:anywhere}.actions button{min-height:44px}@media(max-width:620px){.currentState{grid-template-columns:minmax(0,1fr)}}

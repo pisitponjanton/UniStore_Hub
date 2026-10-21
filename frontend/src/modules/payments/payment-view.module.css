@@ -669,3 +669,15 @@
   .headerAmount { padding: 13px; }
   .paymentFacts { gap: 6px; }
 }
+
+
+/* Campus Commerce A / Phase 11 — payment and proof readable across sizes */
+.page{background:var(--canvas)}
+.main{min-width:0;width:min(100%,1760px);padding-inline:clamp(16px,2.1vw,44px);gap:clamp(16px,2.2vw,26px)}
+.header{min-width:0;grid-template-columns:minmax(0,1fr) minmax(230px,.32fr);align-items:center;gap:clamp(16px,2.1vw,28px)}
+.headerCopy,.headerAmount,.uploadSection,.uploadForm,.reviewSummary{min-width:0}
+.paymentFacts>div{min-width:0;overflow-wrap:anywhere}
+.uploadForm input[type="file"]:focus-visible,.backLink:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+.selectedFileName,.paymentId,.orderCode{overflow-wrap:anywhere}
+@media(max-width:960px){.header{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:620px){.main{padding-inline:14px}.header{padding:16px}.uploadSection{padding:14px}}

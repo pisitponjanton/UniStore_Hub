@@ -20,7 +20,7 @@ import {
   validateLoginFields,
   type AuthFieldErrors,
 } from "./auth-validation";
-import { describeAuthReturnDestination, getAuthReturnPath } from "./return-route";
+import { describeAuthReturnDestination, getAuthReturnPath, getUnauthenticatedExit } from "./return-route";
 import { authSession } from "./session";
 import { useAuthNavigationContext } from "./use-auth-navigation-context";
 
@@ -104,7 +104,7 @@ export function LoginForm() {
         </div>
       ) : null}
 
-      <form className={styles.form} onSubmit={handleSubmit} noValidate>
+      <form className={styles.form} onSubmit={handleSubmit} aria-busy={pending} noValidate>
         <ErrorSummary
           id="login-error-summary"
           items={[
@@ -183,10 +183,8 @@ export function LoginForm() {
           </Link>
         </p>
 
-        <Link href={navigation.returnPath} className={styles.backLink}>
-          {navigation.hasReturnContext
-            ? "กลับไปหน้าที่กำลังใช้งาน"
-            : "กลับหน้าร้านค้า"}
+        <Link href={getUnauthenticatedExit(navigation.returnPath).href} className={styles.backLink}>
+          {getUnauthenticatedExit(navigation.returnPath).label}
         </Link>
       </div>
     </div>

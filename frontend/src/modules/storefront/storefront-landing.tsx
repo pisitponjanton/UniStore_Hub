@@ -1,5 +1,7 @@
 "use client";
 
+import { AppIcon } from "@/components/ui/app-icon";
+
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
@@ -10,13 +12,13 @@ import {
   buildDirectoryEntries,
   DIRECTORY_PAGE_SIZE,
   filterDirectoryEntries,
-  groupDirectoryPage,
   separateAutomationFixtures,
   type DirectoryFilter,
 } from "./storefront-directory";
 import { StorefrontHeader } from "./storefront-header";
 import { storefrontService, type StorefrontLandingOrganization } from "./storefront-service";
 import styles from "./storefront-landing.module.css";
+import gridStyles from "./storefront-grid.module.css";
 
 type LandingState =
   | { status: "loading" }
@@ -35,6 +37,7 @@ export function StorefrontLanding() {
   const [loadAttempt, setLoadAttempt] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [availabilityFilter, setAvailabilityFilter] = useState<DirectoryFilter>("all");
+  const [selectedOrganizationId, setSelectedOrganizationId] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [showAutomationFixtures, setShowAutomationFixtures] = useState(false);
   const localQaDirectory = process.env.NODE_ENV === "development";
@@ -56,44 +59,58 @@ export function StorefrontLanding() {
     return () => controller.abort();
   }, [loadAttempt]);
 
+  const fixturePartition = useMemo(
+    () => state.status === "success" ? separateAutomationFixtures(state.data) : { regular: [], fixtures: [] },
+    [state],
+  );
   const directoryData = useMemo(() => {
     if (state.status !== "success") return [];
     if (!localQaDirectory) return state.data;
-    const { regular, fixtures } = separateAutomationFixtures(state.data);
-    return showAutomationFixtures ? [...regular, ...fixtures] : regular;
-  }, [state, localQaDirectory, showAutomationFixtures]);
+    return showAutomationFixtures ? [...fixturePartition.regular, ...fixturePartition.fixtures] : fixturePartition.regular;
+  }, [state, localQaDirectory, showAutomationFixtures, fixturePartition]);
 
-  const fixtureCount = useMemo(() => {
-    if (!localQaDirectory || state.status !== "success") return 0;
-    return separateAutomationFixtures(state.data).fixtures.length;
-  }, [state, localQaDirectory]);
+  const fixtureCount = localQaDirectory ? fixturePartition.fixtures.length : 0;
+  const qaOrganizationIds = useMemo(
+    () => new Set(fixturePartition.fixtures.map((item) => item.organization.organizationId)),
+    [fixturePartition],
+  );
+  const noOrdinaryStoresYet = localQaDirectory &&
+    state.status === "success" &&
+    fixturePartition.regular.length === 0 && fixturePartition.fixtures.length > 0 &&
+    !showAutomationFixtures;
 
+  const organizationOptions = useMemo(
+    () => directoryData.map(({ organization }) => ({ value: organization.organizationId, label: organization.name }))
+      .sort((a, b) => a.label.localeCompare(b.label, "th")),
+    [directoryData],
+  );
   const directoryEntries = useMemo(() => buildDirectoryEntries(directoryData), [directoryData]);
   const availableStores = useMemo(
     () => directoryEntries.filter((entry) => entry.store !== null),
     [directoryEntries],
   );
-  const featured = availableStores[0];
-  const recommendedStores = availableStores.slice(1, 4);
   const summary = state.status === "success"
     ? { organizations: directoryData.length, stores: availableStores.length }
     : null;
 
   const filteredEntries = useMemo(
-    () => filterDirectoryEntries(directoryEntries, searchQuery, availabilityFilter),
-    [directoryEntries, searchQuery, availabilityFilter],
+    () => filterDirectoryEntries(directoryEntries, searchQuery, availabilityFilter)
+      .filter(({ organization }) => !selectedOrganizationId || organization.organizationId === selectedOrganizationId),
+    [directoryEntries, searchQuery, availabilityFilter, selectedOrganizationId],
   );
   const pageCount = Math.max(1, Math.ceil(filteredEntries.length / DIRECTORY_PAGE_SIZE));
   const start = (currentPage - 1) * DIRECTORY_PAGE_SIZE;
   const visibleEntries = filteredEntries.slice(start, start + DIRECTORY_PAGE_SIZE);
-  const directoryGroups = groupDirectoryPage(visibleEntries);
+  const visibleStores = visibleEntries.filter((entry) => entry.store !== null);
+  const visibleEmptyOrganizations = visibleEntries.filter((entry) => entry.store === null);
   const resultStoreCount = filteredEntries.filter((entry) => entry.store !== null).length;
   const resultEmptyOrganizationCount = filteredEntries.length - resultStoreCount;
-  const hasActiveFilters = searchQuery.trim().length > 0 || availabilityFilter !== "all";
+  const hasActiveFilters = searchQuery.trim().length > 0 || availabilityFilter !== "all" || selectedOrganizationId !== "";
 
   function clearFilters() {
     setSearchQuery("");
     setAvailabilityFilter("all");
+    setSelectedOrganizationId("");
     setCurrentPage(1);
     document.getElementById("storefront-search")?.focus();
   }
@@ -114,7 +131,7 @@ export function StorefrontLanding() {
           <div className={styles.heroMain}>
             <span className={styles.heroEyebrow}>UNISTORE HUB / CAMPUS MARKETPLACE</span>
             <h1 className={styles.heroTitle} id="storefront-intro-heading">
-              ร้านค้าและพรีออเดอร์<br />ในมหาวิทยาลัย
+              ร้านค้าและพรีออเดอร์ในมหาวิทยาลัย
             </h1>
             <p className={styles.heroDescription}>
               เลือกซื้อสินค้าจากร้านของหน่วยงานและชมรม ดูรอบพรีออเดอร์
@@ -122,7 +139,7 @@ export function StorefrontLanding() {
             </p>
             <div className={styles.heroActions}>
               <a className={styles.heroPrimaryAction} href="#storefront-heading">
-                เลือกดูร้านค้า <span aria-hidden="true">↗</span>
+                เลือกดูร้านค้า <AppIcon name="arrow-up-right" size={17} />
               </a>
               {auth.status === "loading" ? (
                 <span className={styles.heroSecondaryActionPending} role="status" aria-live="polite">
@@ -130,7 +147,7 @@ export function StorefrontLanding() {
                 </span>
               ) : (
                 <Link className={styles.heroSecondaryAction} href={orderTrackingPath}>
-                  ติดตามคำสั่งซื้อ <span aria-hidden="true">→</span>
+                  ติดตามคำสั่งซื้อ <AppIcon name="arrow-right" size={17} />
                 </Link>
               )}
             </div>
@@ -139,33 +156,7 @@ export function StorefrontLanding() {
               ร้านค้าและรอบขายขึ้นอยู่กับแต่ละหน่วยงาน ตรวจสอบรายละเอียดก่อนสั่งทุกครั้ง
             </div>
           </div>
-          {featured?.store ? (
-            <Link
-              className={styles.heroSpotlight}
-              href={storeHref(featured.organization.organizationId, featured.store.storeId)}
-              aria-label={"เข้าร้าน " + featured.store.name}
-            >
-              <span className={styles.heroSpotlightEyebrow}>พบร้านค้าที่เปิดให้เข้าชม</span>
-              <span className={styles.heroSpotlightMonogram} aria-hidden="true">
-                {featured.store.name.trim().slice(0, 1)}
-              </span>
-              <span className={styles.heroSpotlightOrganization}>{featured.organization.name}</span>
-              <strong className={styles.heroSpotlightName}>{featured.store.name}</strong>
-              <span className={styles.heroSpotlightDescription}>
-                {featured.store.description || "เลือกดูสินค้าและรอบพรีออเดอร์ของร้านนี้"}
-              </span>
-              <span className={styles.heroSpotlightAction}>เข้าชมหน้าร้าน <span aria-hidden="true">↗</span></span>
-            </Link>
-          ) : (
-            <div className={styles.heroAside} aria-label="วิธีใช้ UniStore Hub">
-              <span className={styles.heroAsideLabel}>HOW IT WORKS</span>
-              <ol className={styles.heroAsideSteps}>
-                <li><span>01</span><strong>เลือกร้านค้า</strong><small>ดูร้านและสินค้าที่เปิดให้เข้าชม</small></li>
-                <li><span>02</span><strong>สั่งพรีออเดอร์</strong><small>ตรวจราคาและช่วงเวลารับคำสั่งซื้อ</small></li>
-                <li><span>03</span><strong>ติดตามและรับสินค้า</strong><small>ดูสถานะจากบัญชีของคุณ</small></li>
-              </ol>
-            </div>
-          )}
+
         </section>
 
         <section className={styles.finder} aria-label="ค้นหาและกรองร้านค้า">
@@ -210,7 +201,23 @@ export function StorefrontLanding() {
                 <option value="without-stores">หน่วยงานที่ยังไม่มีร้าน</option>
               </select>
             </div>
-            <button className={styles.searchJump} type="submit">ดูผลลัพธ์ <span aria-hidden="true">↗</span></button>
+            <div className={styles.organizationFilter}>
+              <label htmlFor="storefront-organization">หน่วยงาน</label>
+              <select
+                id="storefront-organization"
+                value={selectedOrganizationId}
+                onChange={(event) => {
+                  setSelectedOrganizationId(event.target.value);
+                  setCurrentPage(1);
+                }}
+              >
+                <option value="">ทุกหน่วยงาน</option>
+                {organizationOptions.map(({ value, label }) => (
+                  <option key={value} value={value}>{label}</option>
+                ))}
+              </select>
+            </div>
+            <button className={styles.searchJump} type="submit">ดูผลลัพธ์ <AppIcon name="arrow-up-right" size={17} /></button>
           </form>
           {summary ? (
             <p className={styles.finderSummary} role="status">
@@ -220,46 +227,15 @@ export function StorefrontLanding() {
           ) : null}
         </section>
 
-        {state.status === "success" && !hasActiveFilters && recommendedStores.length > 0 ? (
-          <section className={styles.discovery} aria-labelledby="storefront-discovery-heading">
-            <div className={styles.discoveryHeader}>
-              <div>
-                <span className={styles.discoveryLabel}>EXPLORE / ร้านค้าเพิ่มเติม</span>
-                <h2 className={styles.discoveryTitle} id="storefront-discovery-heading">ร้านอื่นที่เปิดให้เข้าชม</h2>
-              </div>
-              <a className={styles.discoveryJump} href="#storefront-heading">ดูทุกร้าน <span aria-hidden="true">↗</span></a>
-            </div>
-            <div className={styles.discoveryGrid}>
-              {recommendedStores.map(({ organization, store }, index) => (
-                store ? (
-                  <Link
-                    key={store.storeId}
-                    href={storeHref(organization.organizationId, store.storeId)}
-                    className={styles.discoveryCard}
-                  >
-                    <span className={styles.discoveryCardIndex}>0{index + 2} / STORE</span>
-                    <span className={styles.discoveryOrganization}>{organization.name}</span>
-                    <h3 className={styles.discoveryStoreName}>{store.name}</h3>
-                    <p className={styles.discoveryStoreDescription}>
-                      {store.description || "ดูสินค้าและรอบขายของร้านนี้"}
-                    </p>
-                    <span className={styles.discoveryCardAction}>เปิดหน้าร้าน <span aria-hidden="true">↗</span></span>
-                  </Link>
-                ) : null
-              ))}
-            </div>
-          </section>
-        ) : null}
-
         <section className={styles.catalog} aria-labelledby="storefront-heading">
           <div className={styles.catalogHeader}>
             <div>
-              <span className={styles.catalogEyebrow}>DIRECTORY / ร้านค้าทั้งหมด</span>
+              <span className={styles.catalogEyebrow}>EXPLORE / ร้านค้าในมหาวิทยาลัย</span>
               <h2 className={styles.catalogTitle} id="storefront-heading" tabIndex={-1}>
-                ร้านที่เปิดให้เข้าชม
+                เลือกร้านที่อยากซื้อ
               </h2>
             </div>
-            <p className={styles.catalogDescription}>เลือกร้านเพื่อดูสินค้า ตัวเลือก และรอบขายที่มีอยู่จริง</p>
+            <p className={styles.catalogDescription}>ค้นหาร้านค้าและดูสินค้าหรือรอบพรีออเดอร์ของแต่ละร้านโดยตรง</p>
           </div>
 
           {state.status === "success" ? (
@@ -274,7 +250,7 @@ export function StorefrontLanding() {
                 </p>
                 {fixtureCount > 0 ? (
                   <button className={styles.clearFilters} type="button" aria-pressed={showAutomationFixtures}
-                    onClick={() => { setShowAutomationFixtures((current) => !current); setCurrentPage(1); }}>
+                    onClick={() => { setShowAutomationFixtures((current) => !current); setSelectedOrganizationId(""); setCurrentPage(1); }}>
                     {showAutomationFixtures ? "ซ่อนข้อมูล E2E/QA" : "แสดงข้อมูล E2E/QA (" + fixtureCount + " หน่วยงาน)"}
                   </button>
                 ) : null}
@@ -283,51 +259,67 @@ export function StorefrontLanding() {
                 ) : null}
               </div>
 
+              {showAutomationFixtures && localQaDirectory && fixtureCount > 0 ? (
+                <p className={styles.qaNotice} role="note">โหมดตรวจสอบ QA — ข้อมูลทดสอบไม่ได้หมายถึงร้านที่เปิดขายจริง</p>
+              ) : null}
+
               {filteredEntries.length === 0 ? (
                 <div className={styles.directoryEmpty}>
-                  <h3>ไม่พบร้านค้าหรือหน่วยงานที่ตรงกับการค้นหา</h3>
-                  <p>ลองเปลี่ยนชื่อที่ค้นหา หรือเลือกตัวกรองอื่น</p>
-                  <button className={styles.clearFilters} type="button" onClick={clearFilters}>แสดงรายการทั้งหมด</button>
+                  <h3>{noOrdinaryStoresYet && !hasActiveFilters ? "ยังไม่มีร้านค้าทั่วไปที่เปิดให้เข้าชม" : "ไม่พบร้านค้าหรือหน่วยงานที่ตรงกับการค้นหา"}</h3>
+                  <p>{noOrdinaryStoresYet && !hasActiveFilters ? "ข้อมูลที่ตรวจพบในสภาพแวดล้อมนี้เป็นข้อมูลสำหรับการพัฒนาและทดสอบ ไม่ใช่ร้านค้าสำหรับผู้ใช้ทั่วไป" : "ลองเปลี่ยนชื่อที่ค้นหา หรือเลือกตัวกรองอื่น"}</p>
+                  {hasActiveFilters ? <button className={styles.clearFilters} type="button" onClick={clearFilters}>แสดงรายการทั้งหมด</button> : null}
                 </div>
               ) : (
                 <>
-                  <div className={styles.organizationList} aria-label="ผลการค้นหาร้านค้าและหน่วยงาน">
-                    {directoryGroups.map(({ organization, stores, totalStores }) => (
-                      <section className={styles.organization} key={organization.organizationId}>
-                        <div className={styles.organizationInfo}>
-                          <div className={styles.organizationHeading}>
-                            <h3 className={styles.organizationName}>{organization.name}</h3>
-                            <span className={styles.storeCount} data-numeric>
-                              {stores.length === totalStores
-                                ? totalStores + " ร้าน"
-                                : "แสดง " + stores.length + " จาก " + totalStores + " ร้าน"}
-                            </span>
+
+                  {visibleStores.length > 0 ? (
+                    <div className={gridStyles.storeGrid} aria-label="ผลการค้นหาร้านค้า">
+                      {visibleStores.map(({ organization, store }) => store ? (
+                        <Link
+                          key={store.storeId}
+                          href={storeHref(organization.organizationId, store.storeId)}
+                          className={gridStyles.storeCard}
+                          data-qa-fixture={qaOrganizationIds.has(organization.organizationId) ? "true" : undefined}
+                          aria-label={"เข้าร้าน " + store.name + " ของ " + organization.name}
+                        >
+                          <div className={gridStyles.storeCardMedia} aria-hidden="true">
+                            <AppIcon name="store" size={32} />
+                            <span>ยังไม่มีรูปหน้าร้าน</span>
                           </div>
-                          {organization.description ? (
-                            <p className={styles.organizationDescription}>{organization.description}</p>
-                          ) : null}
-                        </div>
-                        {stores.length > 0 ? (
-                          <div className={styles.storeList}>
-                            {stores.map((store) => (
-                              <Link key={store.storeId} href={storeHref(organization.organizationId, store.storeId)}
-                                className={styles.storeRow}>
-                                <div className={styles.storeRowCopy}>
-                                  <h4 className={styles.storeName}>{store.name}</h4>
-                                  <p className={styles.storeDescription}>
-                                    {store.description || "ดูสินค้าและรอบพรีออเดอร์ของร้านนี้"}
-                                  </p>
-                                </div>
-                                <span className={styles.storeAction}>เข้าร้าน <span aria-hidden="true">↗</span></span>
-                              </Link>
-                            ))}
+                          <div className={gridStyles.storeCardBody}>
+                            <span className={gridStyles.storeCardOrganization}>{organization.name}</span>
+                            {qaOrganizationIds.has(organization.organizationId) ? <span className={gridStyles.qaBadge}>ข้อมูลทดสอบ QA</span> : null}
+                            <h3 className={gridStyles.storeName}>{store.name}</h3>
+                            <p className={gridStyles.storeDescription}>
+                              {store.description || "เข้าชมร้านเพื่อดูสินค้าและรอบขายที่เปิดให้สั่งซื้อ"}
+                            </p>
+                            <div className={gridStyles.storeCardFooter}>
+                              <span className={gridStyles.storeStatus}>เปิดให้เข้าชม</span>
+                              <span className={gridStyles.storeAction}>ดูหน้าร้าน <AppIcon name="arrow-up-right" size={17} /></span>
+                            </div>
                           </div>
-                        ) : (
-                          <div className={styles.noStores}>หน่วยงานนี้ยังไม่มีร้านค้าที่เปิดให้เข้าชม</div>
-                        )}
-                      </section>
-                    ))}
-                  </div>
+                        </Link>
+                      ) : null)}
+                    </div>
+                  ) : null}
+                  {visibleEmptyOrganizations.length > 0 ? (
+                    <section className={gridStyles.noStoreSection} aria-labelledby="storefront-no-stores-heading">
+                      <div className={gridStyles.noStoreHeading}>
+                        <h3 id="storefront-no-stores-heading">หน่วยงานที่ยังไม่มีร้านค้า</h3>
+                        <p>หน่วยงานเหล่านี้ยังไม่มีร้านที่เปิดให้เข้าชม</p>
+                      </div>
+                      <div className={gridStyles.emptyOrganizationGrid}>
+                        {visibleEmptyOrganizations.map(({ organization }) => (
+                          <article className={gridStyles.emptyOrganization} key={organization.organizationId}>
+                            <strong>{organization.name}</strong>
+                            {qaOrganizationIds.has(organization.organizationId) ? <span className={gridStyles.qaBadge}>ข้อมูลทดสอบ QA</span> : null}
+                            {organization.description ? <p>{organization.description}</p> : null}
+                            <span>ยังไม่เปิดร้านค้า</span>
+                          </article>
+                        ))}
+                      </div>
+                    </section>
+                  ) : null}
                   {pageCount > 1 ? (
                     <nav className={styles.directoryPagination} aria-label="การแบ่งหน้ารายการร้านค้า">
                       <button className={styles.pageButton} type="button"
@@ -376,7 +368,7 @@ export function StorefrontLanding() {
         <footer className={styles.footer}>
           <strong>UniStore Hub</strong>
           <span>เลือกร้าน สั่งพรีออเดอร์ และติดตามการรับสินค้าในมหาวิทยาลัย</span>
-          <Link href={orderTrackingPath}>คำสั่งซื้อของฉัน <span aria-hidden="true">↗</span></Link>
+          <Link href={orderTrackingPath}>คำสั่งซื้อของฉัน <AppIcon name="arrow-up-right" size={17} /></Link>
         </footer>
       </main>
     </div>

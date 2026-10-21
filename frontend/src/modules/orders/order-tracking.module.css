@@ -1421,3 +1421,23 @@
   .orderRow { padding: 13px; }
   .detailAmount { min-height: 0; padding: 12px; }
 }
+
+
+/* Campus Commerce A / Phase 11 — bounded customer orders and safe actions */
+.page{background:var(--canvas)}
+.main{min-width:0;width:min(100%,1760px);padding-inline:clamp(16px,2.1vw,44px);gap:clamp(16px,2.2vw,26px)}
+.header,.detailHero{min-width:0;gap:clamp(12px,2vw,26px)}
+.orderRows,.orderLedger,.orderOverview{min-width:0}
+.orderRow{grid-template-columns:minmax(0,1fr) minmax(138px,.26fr) minmax(156px,.27fr);align-items:center;gap:18px}
+.orderPrimary,.orderIdentity{min-width:0}.orderGuidance{max-width:74ch;overflow-wrap:anywhere}
+.orderRowActions{justify-items:stretch}
+.orderRowActions .detailLink,.orderRowActions .detailLinkPrimary{min-height:44px;white-space:normal}
+.customerOrderFilter:hover:not([data-active="true"]){background:var(--surface-hover);border-color:var(--brand-line);color:var(--ink)}
+.detailHero{grid-template-columns:minmax(0,1fr) minmax(220px,.4fr)}
+.detailHeroCopy,.detailAmount{min-width:0}
+.orderCode,.orderId,.orderFacts dd,.itemName{overflow-wrap:anywhere}
+.journeyStep{min-width:0}
+.detailLink:focus-visible,.detailLinkPrimary:focus-visible,.headerAction:focus-visible,.primaryActionLink:focus-visible,.secondaryActionLink:focus-visible,.backLink:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+@media(max-width:970px){.orderRow{grid-template-columns:minmax(0,1fr) minmax(125px,.3fr)}.orderRowActions{grid-column:1/-1;display:flex;justify-content:flex-start;width:100%}.detailHero{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:620px){.main{padding-inline:14px}.orderRow{grid-template-columns:minmax(0,1fr);gap:10px}.orderRowActions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.orderOverview{gap:6px}.header,.detailHero{padding:16px}}
+@media(max-width:360px){.orderRowActions{grid-template-columns:1fr}}

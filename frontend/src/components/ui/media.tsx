@@ -4,6 +4,8 @@ import type {
   ReactNode,
 } from "react";
 
+import { AppIcon } from "./app-icon";
+import type { AppIconName } from "./app-icon";
 import styles from "./primitives.module.css";
 
 type MediaTone = "brand" | "warm" | "cool" | "neutral";
@@ -53,6 +55,15 @@ export function MediaShell({
   );
 }
 
+const illustrationIcons: Record<BrandIllustrationVariant, AppIconName> = {
+  market: "store",
+  parcel: "products",
+  product: "products",
+  payment: "payment",
+  pickup: "pickup",
+  notification: "notifications",
+};
+
 export interface BrandIllustrationProps
   extends Omit<HTMLAttributes<HTMLSpanElement>, "children"> {
   variant?: BrandIllustrationVariant;
@@ -82,7 +93,7 @@ export function BrandIllustration({
       aria-label={hidden ? undefined : label}
     >
       <span className={styles.illustrationSymbol} aria-hidden="true">
-        {variant === "notification" ? "!" : variant === "payment" ? "฿" : variant === "pickup" ? "✓" : "U"}
+        <AppIcon name={illustrationIcons[variant]} size={36} />
       </span>
     </span>
   );
@@ -106,7 +117,9 @@ export function MediaFallback({
 
   return (
     <div {...props} className={classes}>
-      <span className={styles.mediaFallbackGlyph} data-fallback-variant={variant} aria-hidden="true">—</span>
+      <span className={styles.mediaFallbackGlyph} data-fallback-variant={variant} aria-hidden="true">
+          <AppIcon name="image-off" size={24} />
+        </span>
       <span className={styles.mediaFallbackLabel}>{label}</span>
     </div>
   );

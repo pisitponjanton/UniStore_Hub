@@ -1,5 +1,7 @@
 "use client";
 
+import { AppIcon } from "@/components/ui/app-icon";
+
 import { PageLoadingRows, PageStateHeading, RecoveryActions } from "@/components/ui/async-page";
 
 import Link from "next/link";
@@ -170,13 +172,15 @@ export function CampaignView() {
             <span className={styles.contextLine}>PRE-ORDER / {store.name}</span>
             <h1 tabIndex={-1} className={styles.title}>{campaign.name}</h1>
             <p className={styles.description}>{campaignGuidance[campaign.status]}</p>
-            {campaign.status === "OPEN" ? (
+            {campaign.status === "OPEN" && products.length > 0 ? (
               <a className={styles.campaignShopAction} href="#campaign-products">
-                เลือกสินค้าที่สั่งได้ <span aria-hidden="true">↗</span>
+                ดูสินค้าและตรวจสอบตัวเลือก <AppIcon name="arrow-up-right" size={17} />
               </a>
             ) : (
-              <p className={styles.campaignClosedHint}>
-                รอบนี้ยังสั่งซื้อเพิ่มไม่ได้ แต่ยังดูรายละเอียดและสินค้าได้
+              <p className={styles.campaignClosedHint} role="status">
+                {campaign.status === "OPEN"
+                  ? "รอบนี้เปิดรับคำสั่งซื้อแต่ยังไม่มีสินค้าให้เลือก โปรดกลับมาตรวจสอบภายหลัง"
+                  : "รอบนี้ยังสั่งซื้อเพิ่มไม่ได้ แต่ยังดูรายละเอียดและสินค้าได้"}
               </p>
             )}
           </div>
@@ -191,8 +195,10 @@ export function CampaignView() {
             </div>
             <p className={styles.campaignStatusDescription}>
               {campaign.status === "OPEN"
-                ? "เปิดให้เลือกสินค้าจากรอบนี้ได้ในตอนนี้"
-                : "โปรดตรวจสอบสถานะรอบขายก่อนดำเนินการ"}
+                ? products.length > 0
+                  ? "รอบนี้เปิดรับคำสั่งซื้อ ตรวจสอบสินค้าและตัวเลือกก่อนดำเนินการ"
+                  : "เปิดรับคำสั่งซื้อ แต่ยังไม่มีสินค้าในรายการที่เข้าชมได้"
+                : campaignGuidance[campaign.status]}
             </p>
             <div className={styles.deadlineSpotlight}>
               <span>ปิดรับคำสั่งซื้อ</span>
@@ -255,13 +261,13 @@ export function CampaignView() {
         <section className={styles.section} aria-labelledby="campaign-products">
           <div className={styles.sectionHeader}>
             <div>
-              <span className={styles.sectionKicker}>AVAILABLE ITEMS / สินค้าในรอบนี้</span>
+              <span className={styles.sectionKicker}>STORE CATALOG / สินค้าของร้าน</span>
               <h2 className={styles.sectionTitle} id="campaign-products" tabIndex={-1}>
-                เลือกสินค้าที่ต้องการ
+                สินค้าที่เปิดให้เข้าชม
               </h2>
             </div>
             <p className={styles.sectionDescription}>
-              เปิดสินค้าเพื่อดูตัวเลือก ราคา และตรวจสอบว่าสถานะปัจจุบันสามารถเริ่มสั่งซื้อได้หรือไม่
+              รายการนี้เป็นสินค้าของร้าน กรุณาเปิดสินค้าเพื่อตรวจสอบตัวเลือก ราคา และรอบขายที่ใช้สั่งซื้อได้
             </p>
           </div>
 
@@ -278,7 +284,7 @@ export function CampaignView() {
             </div>
           ) : (
             <div className={styles.emptyBox}>
-              ยังไม่มีสินค้าที่เปิดให้เข้าชมในแคมเปญนี้
+              ร้านนี้ยังไม่มีสินค้าที่เปิดให้เข้าชม
             </div>
           )}
         </section>

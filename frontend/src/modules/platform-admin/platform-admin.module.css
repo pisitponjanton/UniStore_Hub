@@ -887,3 +887,32 @@
  .platformUsersTable .timeValue { white-space:normal; }
 }
 @media(max-width:380px) { .platformUsersTable tbody td { grid-template-columns:70px minmax(0,1fr); gap:5px; } }
+
+/* Campus Commerce A / Phase 14 — accessible, width-aware governance layout */
+.main{width:min(100%,3040px);min-width:0;padding-inline:clamp(14px,2.2vw,52px);gap:clamp(14px,2vw,24px)}
+.header,.headerCopy,.headerAside,.priorityStrip,.priorityItem,.section,.sectionHeading,.statusLedger,.statusRow,.organizationList,.organizationRow,.organizationMain,.organizationCopy,.organizationHeading,.organizationActions,.metaGrid,.metaItem{min-width:0}
+.header{grid-template-columns:minmax(0,1fr) auto;align-items:center}
+.scopeContext{max-width:410px}.scopeContext>span:last-child,.priorityValue,.organizationName,.metaValue,.userIdentity,.statusCopy{overflow-wrap:anywhere}
+.priorityStrip{grid-template-columns:repeat(3,minmax(0,1fr));max-width:2600px}
+.priorityItem,.priorityItem:last-child{min-height:126px}
+.statusLedger{max-width:2600px;grid-template-columns:repeat(3,minmax(0,1fr))}
+.sectionHeading{grid-template-columns:minmax(0,1fr);align-items:start;gap:8px}
+.sectionHeading>div,.sectionTitle,.sectionDescription{min-width:0}
+.organizationList{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+.organizationRow{grid-template-columns:minmax(0,1fr) minmax(220px,285px);gap:clamp(12px,1.4vw,22px);align-items:start;border-color:var(--line)}
+.organizationRow:hover{background:var(--surface-hover);color:var(--ink);border-color:var(--brand-line)}
+.organizationRow[data-attention="true"],.organizationRow[data-attention="true"]:hover{background:var(--surface);border-color:var(--brand-line);box-shadow:inset 4px 0 0 var(--brand)}
+.organizationRow:focus-within{outline:2px solid var(--focus);outline-offset:2px}
+.organizationHeading{grid-template-columns:minmax(0,1fr) auto;gap:12px}
+.metaGrid{grid-template-columns:repeat(3,minmax(0,1fr))}.metaItem{overflow-wrap:anywhere}
+.organizationActions{width:100%;min-width:0;justify-items:stretch;text-align:start}
+.actions{display:flex;justify-content:stretch;gap:8px}.actions button{min-height:44px;flex:1 1 90px;white-space:normal}
+.noAction{max-width:none;text-align:left}
+.platformUsersTable{width:100%;max-width:2700px;min-width:0}.platformUsersTable tbody tr:hover{background:var(--surface-hover);color:var(--ink)}
+.platformUsersTable tbody tr:focus-within{outline:2px solid var(--focus);outline-offset:-2px}
+.platformShortcuts a{min-height:44px}.platformShortcuts a:hover{color:var(--brand-strong);background:var(--brand-soft);border-color:var(--brand-line)}
+.platformShortcuts a:focus-visible,.actions button:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+@media(min-width:2100px){.organizationList{grid-template-columns:repeat(2,minmax(0,1fr))}.organizationRow{grid-template-columns:minmax(0,1fr);align-content:start}.organizationActions{max-width:none}.organizationMain{align-content:start}}
+@media(max-width:1050px){.header{grid-template-columns:minmax(0,1fr)}.headerAside{justify-items:start;grid-template-columns:repeat(2,minmax(0,max-content))}.priorityStrip,.statusLedger{grid-template-columns:repeat(2,minmax(0,1fr))}.organizationRow{grid-template-columns:minmax(0,1fr)}.organizationActions{justify-items:stretch}}
+@media(max-width:760px){.main{padding-inline:14px}.headerAside{grid-template-columns:minmax(0,1fr)}.priorityStrip{grid-template-columns:repeat(2,minmax(0,1fr))}.priorityItem:first-child{grid-column:1/-1}.statusLedger{grid-template-columns:minmax(0,1fr)}.organizationHeading{grid-template-columns:minmax(0,1fr)}.organizationActions{width:100%}.actions button{min-height:44px}.platformUsersTable tbody tr:hover{background:var(--surface-hover)}}
+@media(max-width:380px){.actions{display:grid;grid-template-columns:minmax(0,1fr)}.priorityStrip{gap:7px}}

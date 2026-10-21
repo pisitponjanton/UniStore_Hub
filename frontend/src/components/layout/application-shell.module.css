@@ -58,47 +58,6 @@
   text-decoration: none;
 }
 
-.brandMark {
-  position: relative;
-  width: 38px;
-  height: 38px;
-  flex: 0 0 auto;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-  border-radius: 13px;
-  background: var(--shell-accent);
-  box-shadow: var(--shadow-subtle);
-}
-
-.brandMark::before,
-.brandMark::after,
-.brandMark span {
-  content: "";
-  position: absolute;
-  width: 4px;
-  border-radius: var(--radius-pill);
-  background: var(--brand-on);
-}
-
-.brandMark::before {
-  height: 11px;
-  left: 9px;
-  bottom: 9px;
-}
-
-.brandMark span {
-  height: 18px;
-  left: 17px;
-  bottom: 9px;
-}
-
-.brandMark::after {
-  height: 8px;
-  right: 9px;
-  bottom: 9px;
-}
-
 .brandCopy {
   min-width: 0;
   display: grid;
@@ -113,12 +72,6 @@
   line-height: 1.18;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.brandCopy span {
-  color: var(--ink-tertiary);
-  font-size: var(--text-caption);
-  line-height: 1.25;
 }
 
 .desktopScope {
@@ -517,12 +470,6 @@
     box-shadow: none;
   }
 
-  .brandMark {
-    width: 34px;
-    height: 34px;
-    border-radius: 12px;
-  }
-
   .brandCopy strong {
     font-size: var(--text-body-lg);
   }
@@ -866,25 +813,10 @@
   background: transparent;
   box-shadow: none;
 }
-.brandMark {
-  border-radius: 13px;
-  background: #e3b984;
-  color: #142c31;
-  box-shadow: none;
-}
-.brandMark::before,
-.brandMark::after {
-  content: none;
-}
 .brandCopy strong {
   color: #f8faf7;
   font-size: 1.13rem;
   letter-spacing: -0.035em;
-}
-.brandCopy span {
-  color: #bfd5d0;
-  font-size: 0.685rem;
-  letter-spacing: 0.015em;
 }
 .desktopScope {
   min-height: 24px;

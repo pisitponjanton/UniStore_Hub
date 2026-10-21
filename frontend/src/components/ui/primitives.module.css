@@ -29,10 +29,19 @@
   transform: translateY(0) scale(0.985);
 }
 
+.button:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
 .button:disabled {
   cursor: not-allowed;
-  opacity: 0.48;
+  opacity: 1;
   box-shadow: none;
+  background: var(--control-disabled-bg);
+  color: var(--control-disabled-ink);
+  border-color: var(--control-disabled-line);
+  transform: none;
 }
 
 .buttonPrimary {
@@ -141,6 +150,7 @@
 .fieldControl:hover:not(:disabled):not(:read-only) {
   border-color: var(--control-line-hover);
   background: var(--surface);
+  color: var(--ink);
 }
 
 .fieldControl:focus-visible {
@@ -149,6 +159,7 @@
   outline: 3px solid var(--focus);
   outline-offset: 2px;
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--focus) 12%, transparent);
+  color: var(--ink);
 }
 
 .fieldControl:disabled {
@@ -169,6 +180,19 @@
 .selectControl {
   padding-right: var(--space-10);
   cursor: pointer;
+  color-scheme: var(--control-native-scheme);
+  background-color: var(--surface-inset);
+  color: var(--ink);
+}
+
+.selectControl option {
+  background-color: var(--control-option-bg);
+  color: var(--control-option-ink);
+}
+
+.selectControl option:checked {
+  background-color: var(--interactive-selected-bg);
+  color: var(--interactive-selected-ink);
 }
 
 .selectControl:disabled {
@@ -612,9 +636,17 @@
   transform: translateY(0) scale(0.96);
 }
 
+.dialogClose:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
 .dialogClose:disabled {
   cursor: not-allowed;
-  opacity: 0.45;
+  opacity: 1;
+  background: var(--control-disabled-bg);
+  color: var(--control-disabled-ink);
+  border-color: var(--control-disabled-line);
 }
 
 .dialogCloseSymbol {
@@ -706,15 +738,18 @@
     box-shadow var(--motion-standard) var(--motion-ease-out);
 }
 
-.tableBodyRow:hover {
-  background: var(--surface-hover);
+.tableBodyRow:hover,
+.tableBodyRow:focus-within {
+  background: var(--interactive-row-bg);
+  color: var(--interactive-row-ink);
 }
 
 .tableBodyRow[data-selected="true"] {
-  background: var(--brand-soft);
+  background: var(--interactive-selected-bg);
   box-shadow:
     inset 3px 0 0 var(--brand),
     inset 0 0 0 1px color-mix(in srgb, var(--brand) 14%, transparent);
+  color: var(--interactive-selected-ink);
 }
 
 .tableBodyRow[data-selected="true"] .tableCell:first-child {
@@ -1162,7 +1197,11 @@
   border-color: var(--brand-line);
 }
 .button:disabled {
-  opacity: .65;
+  opacity: 1;
+  background: var(--control-disabled-bg);
+  color: var(--control-disabled-ink);
+  border-color: var(--control-disabled-line);
+  transform: none;
 }
 .fieldControl {
   border-radius: 11px;

@@ -115,6 +115,38 @@ describe("StoreView mobile shopping hierarchy", () => {
     expect(screen.getByText("ร้านนี้ยังไม่มีสินค้าที่เปิดให้เข้าชม")).toBeInTheDocument();
   });
 
+  it("filters store products by name or description without changing the original catalog", async () => {
+    mocks.getStoreView.mockResolvedValue(dataWithCatalog());
+    render(<StoreView />);
+    await screen.findByRole("heading", { name: "Local Demo Store" });
+    const search = screen.getByRole("searchbox", { name: "ค้นหาสินค้าในร้าน" });
+    fireEvent.change(search, { target: { value: "ไม่พบ" } });
+    expect(screen.getByText("ไม่พบสินค้าที่ตรงกับการค้นหา")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Local Demo Product/ })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "ล้างคำค้นหา" }));
+    expect(search).toHaveValue("");
+    expect(screen.getByRole("link", { name: /Local Demo Product/ })).toHaveAttribute(
+      "href", `/products/view?organizationId=${organizationId}&productId=product-1`,
+    );
+  });
+
+  it("shows only OPEN campaigns when filtered and keeps the back-to-all control", async () => {
+    const data = dataWithCatalog();
+    mocks.getStoreView.mockResolvedValue({
+      ...data,
+      campaigns: data.campaigns.map(c => ({ ...c, status: "CLOSED" as const })),
+    });
+    render(<StoreView />);
+    await screen.findByRole("heading", { name: "Local Demo Store" });
+    const filter = screen.getByRole("combobox", { name: "สถานะรอบขาย" });
+    fireEvent.change(filter, { target: { value: "open" } });
+    expect(screen.getByText(/ไม่มีรอบที่เปิดรับคำสั่งซื้อในขณะนี้/)).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Local Demo Campaign/ })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "ดูรอบขายทั้งหมด" }));
+    expect(filter).toHaveValue("all");
+    expect(screen.getByRole("link", { name: /Local Demo Campaign/ })).toBeInTheDocument();
+  });
+
   it("jumps to store sections with keyboard focus without corrupting browser history", async () => {
     mocks.getStoreView.mockResolvedValue(dataWithCatalog());
     render(<StoreView />);

@@ -47,7 +47,7 @@ test("five representative routes in dark theme and 200% root text scale", async 
           images: [...document.images].filter(x => x.complete && !x.naturalWidth).length,
           rootFont: getComputedStyle(document.documentElement).fontSize,
         }));
-        await page.screenshot({ path: join(dir, c.name+"-"+mode+".png"), animations: "disabled" });
+        await page.screenshot({ path: join(dir, c.name+"-"+mode+".png"), animations: "disabled", caret: "initial" });
         let axeViolations: Array<{id: string; nodes: number; evidence: Array<{targets: string[]; summary: string}>}> = [];
         if (mode === "normal") {
           await page.addScriptTag({ content: axe.source });

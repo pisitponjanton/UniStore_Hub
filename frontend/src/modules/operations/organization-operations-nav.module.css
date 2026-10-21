@@ -8,3 +8,6 @@ a.link:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 @media(max-width:760px) { .root { padding: 4px; gap: 3px; } .eyebrow { display:none; } .links { flex: 1 1 100%; gap: 2px; } .link { font-size: .72rem; min-height: 40px; padding: 8px 3px; } }
 @media(max-width:340px) { .link { font-size: .67rem; } }
 @media(prefers-reduced-motion:reduce) { a.link { transition:none; } }
+
+/* Campus Commerce A / Phase 13 */
+.root,.links{min-width:0}.link{display:inline-flex;align-items:center;min-height:44px;line-height:1.4;overflow-wrap:anywhere}.link[data-active]{background:var(--brand-soft);color:var(--brand-strong)}.link:hover:not([data-active]){background:var(--surface-hover);color:var(--ink)}.link:focus-visible{outline:3px solid var(--focus);outline-offset:3px}@media(max-width:640px){.links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}}

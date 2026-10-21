@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function NewOrderPage() {
   return (
-    <AuthenticatedBoundary>
+    <AuthenticatedBoundary recoveryKind="order">
       <OrderCreateView />
     </AuthenticatedBoundary>
   );

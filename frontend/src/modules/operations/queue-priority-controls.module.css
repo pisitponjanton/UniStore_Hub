@@ -79,3 +79,16 @@
   cursor: pointer;
 }
 .zero button:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+/* Campus Commerce A / Phase 12 — task-first queue filtering */
+.controls{min-width:0;gap:9px;align-items:center}
+.primary,.secondary{min-height:44px;border-color:var(--line);line-height:1.4;overflow-wrap:anywhere}
+.primary:hover{background:var(--brand-soft-strong);color:var(--brand-strong)}
+.secondary:hover{background:var(--surface-hover);color:var(--ink)}
+.filters{min-width:0;max-width:100%;gap:4px}
+.filters button{min-height:44px;min-width:0;overflow-wrap:anywhere}
+.filters button:hover:not([aria-pressed="true"]){background:var(--surface-hover);color:var(--ink)}
+.filters button[aria-pressed="true"]{background:var(--brand);color:var(--brand-on)}
+.caption{color:var(--ink-secondary);max-width:50ch}
+.zero button:hover{background:var(--brand-soft-strong);color:var(--brand-strong)}
+@media(max-width:620px){.controls{grid-template-columns:minmax(0,1fr);gap:8px}.primary{grid-column:1}.filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}.secondary{width:100%}}

@@ -59,6 +59,7 @@ type OrderCreateState =
   | { status: "loading" }
   | { status: "invalid" }
   | { status: "notFound" }
+  | { status: "forbidden" }
   | { status: "error" }
   | {
       status: "ready";
@@ -189,11 +190,20 @@ export function OrderCreateView() {
           return;
         }
 
+        // An expired token invalidates the protected order gate, rather
+        // than leaving a stranded fetch-error page after reauthentication.
+        if (isDefinitiveSessionFailure(error)) {
+          authSession.logout();
+          return;
+        }
+
         setState({
           status:
             error instanceof ApiClientError && error.kind === "notFound"
               ? "notFound"
-              : "error",
+              : error instanceof ApiClientError && error.kind === "forbidden"
+                ? "forbidden"
+                : "error",
         });
       }
     }
@@ -298,6 +308,7 @@ export function OrderCreateView() {
     state.status === "loading" ||
     state.status === "invalid" ||
     state.status === "notFound" ||
+    state.status === "forbidden" ||
     state.status === "error"
   ) {
     return (
@@ -324,6 +335,18 @@ export function OrderCreateView() {
               title="ไม่พบข้อมูลสำหรับสร้างคำสั่งซื้อ"
               description="สินค้า ตัวเลือกสินค้า หรือรอบพรีออเดอร์อาจไม่เปิดให้ใช้งานแล้ว"
               actions={<Link href="/">กลับหน้าร้าน</Link>}
+            />
+          ) : null}
+          {state.status === "forbidden" ? (
+            <ErrorState
+              title="ไม่มีสิทธิ์เปิดรายการนี้"
+              description="บัญชีนี้ไม่สามารถเข้าถึงสินค้า หรือรอบพรีออเดอร์ที่เลือกได้ กรุณาตรวจสอบข้อมูลอีกครั้ง"
+              actions={
+                <>
+                  <Link href="/">ดูร้านค้าทั้งหมด</Link>
+                  <Link href="/my/orders/">คำสั่งซื้อของฉัน</Link>
+                </>
+              }
             />
           ) : null}
           {state.status === "error" ? (

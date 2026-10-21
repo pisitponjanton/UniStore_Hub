@@ -72,3 +72,40 @@ export function describeAuthReturnDestination(path: string): string {
   if (pathname.startsWith("/platform/")) return "กลับไปพื้นที่ผู้ดูแลระบบ";
   return "กลับไปทำรายการต่อ";
 }
+
+/** This is an exit from the auth form, not a successful-login returnTo.
+ * Never send an anonymous visitor back into a protected route/login loop.
+ * For an order continuation, recover the public product context when its
+ * source IDs are valid; otherwise offer the storefront.
+ */
+export function getUnauthenticatedExit(returnPath: string): {
+  href: string;
+  label: string;
+} {
+  const safe = sanitizeAuthReturnPath(returnPath);
+  const question = safe.indexOf("?");
+  const pathname = (question === -1 ? safe : safe.slice(0, question)).replace(/\/+$/, "") || "/";
+
+  if (pathname === "/orders/new") {
+    const query = new URLSearchParams(question === -1 ? "" : safe.slice(question + 1));
+    const organizationId = query.get("organizationId");
+    const productId = query.get("productId");
+    const campaignId = query.get("campaignId");
+    const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (organizationId && productId && uuid.test(organizationId) && uuid.test(productId)) {
+      const params = new URLSearchParams({ organizationId, productId });
+      if (campaignId && uuid.test(campaignId)) params.set("campaignId", campaignId);
+      return { href: "/products/view/?" + params.toString(), label: "กลับไปดูสินค้า" };
+    }
+    return { href: "/", label: "กลับหน้าร้านค้า" };
+  }
+
+  if (/^\/(?:my|org|platform|notifications)(?:\/|$)/.test(pathname)) {
+    return { href: "/", label: "กลับหน้าร้านค้า" };
+  }
+
+  return {
+    href: safe,
+    label: safe === "/" ? "กลับหน้าร้านค้า" : "กลับไปหน้าที่กำลังใช้งาน",
+  };
+}

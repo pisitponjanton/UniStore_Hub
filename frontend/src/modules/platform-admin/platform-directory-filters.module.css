@@ -9,3 +9,7 @@
 .filters button:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 .filters button span { font-size: var(--text-caption); font-variant-numeric: tabular-nums; }
 @media(max-width:620px) { .filters { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); } .filters button { min-width: 0; justify-content: center; padding-inline: var(--space-1); } }
+
+
+/* Campus Commerce A / Phase 14 */
+.filters{min-width:0;gap:8px}.filters button{min-width:0;min-height:44px;line-height:1.45;overflow-wrap:anywhere}.filters button:hover:not([aria-pressed="true"]){background:var(--surface-hover);color:var(--ink);border-color:var(--brand-line)}.filters button[aria-pressed="true"],.filters button[aria-pressed="true"]:hover{color:var(--brand-on);background:var(--brand);border-color:var(--brand)}.filters button:focus-visible{outline:3px solid var(--focus);outline-offset:3px}@media(max-width:620px){.filters{grid-template-columns:repeat(2,minmax(0,1fr))}.filters button{justify-content:center;white-space:normal;text-align:center}}

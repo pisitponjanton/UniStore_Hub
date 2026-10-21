@@ -613,3 +613,16 @@
   .listSummary p { font-size: .75rem; line-height: 1.5; }
   .row { padding: 14px; }
 }
+
+
+/* Campus Commerce A / Phase 11 — action-first notifications */
+.page{background:var(--canvas)}
+.main{min-width:0;width:min(100%,1760px);padding-inline:clamp(16px,2.1vw,44px);gap:clamp(16px,2.2vw,26px)}
+.header,.controlPanel,.controlBar,.list,.row{min-width:0}
+.row{grid-template-columns:minmax(0,1fr) minmax(160px,.25fr);gap:clamp(10px,1.8vw,24px)}
+.content,.rowTitle,.message{min-width:0;overflow-wrap:anywhere}
+.actions{align-content:center}
+.filterButton:hover:not(.filterButtonActive){background:var(--surface-hover);color:var(--ink);border-color:var(--brand-line)}
+.filterButton:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+@media(max-width:860px){.row{grid-template-columns:minmax(0,1fr)}.actions{justify-items:stretch}}
+@media(max-width:620px){.main{padding-inline:14px}.header{padding:16px}.row{padding:14px}}

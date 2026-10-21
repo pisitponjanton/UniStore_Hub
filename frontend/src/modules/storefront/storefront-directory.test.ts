@@ -5,8 +5,7 @@ import {
   buildDirectoryEntries,
   DIRECTORY_PAGE_SIZE,
   filterDirectoryEntries,
-  groupDirectoryPage,
-  isExplicitAutomationFixture,
+  isRecognizedQaOrganization,
   separateAutomationFixtures,
 } from "./storefront-directory";
 
@@ -31,27 +30,34 @@ const organizations: StorefrontLandingOrganization[] = [
 ];
 
 describe("public storefront directory", () => {
-  it("separates explicitly marked E2E fixtures without discarding ambiguous real tenants", () => {
-    expect(isExplicitAutomationFixture("Reject E2E Organization")).toBe(true);
-    expect(isExplicitAutomationFixture("E2E Organization")).toBe(true);
-    expect(isExplicitAutomationFixture("QA Fixture Store")).toBe(true);
-    expect(isExplicitAutomationFixture("Tenant Org B")).toBe(false);
-    expect(isExplicitAutomationFixture("Tenant Org B harness-phase5-1721")).toBe(true);
-    expect(isExplicitAutomationFixture("QA Commerce Org staff-normal-123-0")).toBe(true);
-    expect(isExplicitAutomationFixture("QA Admin Org product-123-0")).toBe(true);
-    expect(isExplicitAutomationFixture("Golden Org golden-123-0")).toBe(true);
-    expect(isExplicitAutomationFixture("IT Club Store")).toBe(false);
-    const dataset = [
-      ...organizations,
-      {
-        organization: { organizationId: "fixture-1", name: "E2E Organization", description: "", status: "ACTIVE" as const },
-        stores: [],
-      },
+  it("recognizes only exact seed IDs or verified test-generator name+description pairs", () => {
+    const fixture = (name: string, description: string, organizationId = "normal-id"): StorefrontLandingOrganization => ({
+      organization: { organizationId, name, description, status: "ACTIVE" },
+      stores: [],
+    });
+    const recognized = [
+      fixture("UniStore Local Demo", "Deterministic local/demo organization", "55555555-5555-4555-8555-555555555555"),
+      fixture("E2E Organization harness-phase5-1790760715", "Disposable E2E core-flow organization"),
+      fixture("Tenant Org B harness-phase5-rerun-1790760796", "Disposable tenant B"),
+      fixture("QA Commerce Org staff-normal-1791136125571-3", "Disposable frontend Customer commerce fixture"),
+      fixture("QA Admin Org settings-1791183981422-0 Updated", "Updated by Organization Admin browser journey"),
+      fixture("Golden Org golden-1791186729518-0", "Disposable cross-role golden journey Organization"),
     ];
-    const partition = separateAutomationFixtures(dataset);
-    expect(partition.regular).toHaveLength(3);
-    expect(partition.fixtures.map(x => x.organization.organizationId)).toEqual(["fixture-1"]);
-    expect([...partition.regular, ...partition.fixtures]).toHaveLength(4);
+    for (const org of recognized) expect(isRecognizedQaOrganization(org)).toBe(true);
+    const lookalikes = [
+      fixture("UniStore Local Demo", "A legitimate shop called UniStore Local Demo"),
+      fixture("E2E Organization harness-phase5-1790760715", "Real university exchange organization"),
+      fixture("QA Commerce Org staff-normal-1791136125571-3", "Ordinary customer"),
+      fixture("QA Commerce Org bookstore", "Disposable frontend Customer commerce fixture"),
+      fixture("QA Admin Org settings-1791183981422-0 Updated", "Legitimate club"),
+      fixture("IT Club", "Disposable frontend Customer commerce fixture"),
+      fixture("Tenant Org B", "Disposable tenant B"),
+      fixture("Super Demo Store", "Real campus shopping"),
+    ];
+    for (const org of lookalikes) expect(isRecognizedQaOrganization(org)).toBe(false);
+    const partition = separateAutomationFixtures([...organizations, ...recognized, ...lookalikes]);
+    expect(partition.regular).toHaveLength(organizations.length + lookalikes.length);
+    expect(partition.fixtures).toHaveLength(recognized.length);
   });
 
   it("preserves all active stores and keeps empty organizations reachable", () => {
@@ -72,13 +78,6 @@ describe("public storefront directory", () => {
     expect(filterDirectoryEntries(entries, "ชมรมถ่ายภาพ", "all")).toHaveLength(1);
     expect(filterDirectoryEntries(entries, "ไม่มีอยู่จริง", "all")).toEqual([]);
     expect(filterDirectoryEntries(entries, "เสื้อ", "without-stores")).toEqual([]);
-  });
-
-  it("groups a page without misreporting an organization's total number of stores", () => {
-    const page = groupDirectoryPage(buildDirectoryEntries(organizations).slice(0, 1));
-    expect(page).toHaveLength(1);
-    expect(page[0].stores.map((store) => store.storeId)).toEqual(["a"]);
-    expect(page[0].totalStores).toBe(2);
   });
 
   it("uses a bounded page size for long catalogs", () => {

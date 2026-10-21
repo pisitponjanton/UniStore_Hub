@@ -48,3 +48,13 @@ export function useCurrentLoginHref(): string {
 
   return buildAuthPagePath("/login/", returnPath);
 }
+
+
+/** Hydration-safe current path, including full query values for returnTo. */
+export function useCurrentReturnPath(): string {
+  return useSyncExternalStore(
+    subscribeToLocation,
+    getLocationSnapshot,
+    getServerLocationSnapshot,
+  );
+}

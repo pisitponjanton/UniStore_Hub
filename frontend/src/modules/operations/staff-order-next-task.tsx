@@ -1,3 +1,4 @@
+import { AppIcon } from "@/components/ui/app-icon";
 import Link from "next/link";
 
 import type { OrderStatus } from "@/types";
@@ -65,7 +66,7 @@ export function StaffOrderNextTask({ organizationId, status }: { organizationId:
       {task.queue ? (
         <Link className={styles.link} href={path + "?" + new URLSearchParams({ organizationId }).toString()}>
           {task.queue === "payments" ? "เปิดคิวตรวจชำระเงิน" : "เปิดคิวรับสินค้า"}
-          <span aria-hidden="true">↗</span>
+          <AppIcon name="arrow-up-right" size={17} />
         </Link>
       ) : null}
     </aside>

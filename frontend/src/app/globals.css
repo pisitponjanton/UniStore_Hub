@@ -2,20 +2,35 @@
   color-scheme: light;
 
   /* Editorial commerce — restrained semantic surfaces and status tokens */
-  --canvas: #f7f7f3;
+  --canvas: #f7f8f4;
   --surface: #ffffff;
   --surface-raised: #ffffff;
-  --surface-muted: #f1f3ef;
-  --surface-inset: #fafaf8;
-  --surface-strong: #dce5df;
-  --surface-hover: #f0f5f1;
-  --surface-selected: #e0f1ed;
+  --surface-muted: #eef3ee;
+  --surface-inset: #fbfcfa;
+  --surface-strong: #dce9e0;
+  --surface-hover: #e9f3ed;
+  --surface-selected: #d9eee3;
+  --focus-ring-offset-bg: var(--surface);
+  --interactive-selected-ink: var(--ink);
+  --interactive-selected-bg: var(--surface-selected);
+  --interactive-row-ink: var(--ink);
+  --interactive-row-bg: var(--surface-hover);
+  --control-option-ink: var(--ink);
+  --control-option-bg: var(--surface-raised);
+  --control-native-scheme: light;
+  --control-disabled-line: var(--line-strong);
+  --control-disabled-ink: var(--ink-secondary);
+  --control-disabled-bg: var(--surface-strong);
+  --on-surface: var(--ink);
+  --on-surface-secondary: var(--ink-secondary);
+  --on-hover: var(--ink);
+  --on-selected: var(--ink);
 
   /* Text */
-  --ink: #152c30;
-  --ink-secondary: #475c5e;
-  --ink-tertiary: #556b6d;
-  --ink-muted: #64787b;
+  --ink: #193630;
+  --ink-secondary: #455f55;
+  --ink-tertiary: #547368;
+  --ink-muted: #58776c;
   --ink-inverse: #ffffff;
 
   /* Structure */
@@ -26,13 +41,13 @@
   --control-line-hover: rgb(31 27 45 / 60%);
 
   /* Brand */
-  --brand: #145e63;
-  --brand-hover: #0d484d;
-  --brand-strong: #0a4045;
-  --brand-soft: #e2f1ed;
-  --brand-soft-strong: #cce8e1;
+  --brand: #126357;
+  --brand-hover: #0c4f45;
+  --brand-strong: #0b4c42;
+  --brand-soft: #e3f2e9;
+  --brand-soft-strong: #cce7d8;
   --brand-on: #ffffff;
-  --brand-line: #9acac0;
+  --brand-line: #91c5ad;
 
   /* Compatibility aliases while route-level v3 rollout is in progress. */
   --campus: var(--brand);
@@ -43,14 +58,14 @@
   --campus-line: var(--brand-line);
 
   /* Expressive support palette — never semantic by itself. */
-  --accent-lavender: #ede7ff;
-  --accent-sky: #dff3ff;
-  --accent-sky-strong: #73c8f2;
-  --accent-mint: #dff7ec;
-  --accent-teal-soft: #ddf4f1;
-  --accent-coral: #ffe2d6;
-  --accent-coral-strong: #e66a3d;
-  --accent-yellow: #fff1ba;
+  --accent-lavender: #e8eee6;
+  --accent-sky: #e3f0eb;
+  --accent-sky-strong: #5d9b91;
+  --accent-mint: #dcf0e5;
+  --accent-teal-soft: #e2f2ec;
+  --accent-coral: #f5e5d5;
+  --accent-coral-strong: #b66e4d;
+  --accent-yellow: #f6edcd;
   --accent-yellow-ink: #49331b;
 
   /* Semantic state */
@@ -69,8 +84,8 @@
 
   /* Interaction */
   --focus: #147a84;
-  --selection: #cae9e2;
-  --overlay-scrim: rgb(20 14 36 / 58%);
+  --selection: #d1eadc;
+  --overlay-scrim: rgb(9 28 22 / 58%);
   --media-paper: #ffffff;
   --media-paper-line: rgb(31 27 45 / 12%);
   --media-paper-ink: #1f1b2d;
@@ -87,34 +102,28 @@
   --on-dark-surface-hover: rgb(255 255 255 / 16%);
 
   /* Controlled gradient families */
-  --gradient-hero: linear-gradient(128deg, #10282b 0%, #164a4f 100%);
-  --gradient-ambient: linear-gradient(135deg, #f4edff 0%, #eaf7ff 52%, #eaf8f0 100%);
-  --gradient-warm: linear-gradient(135deg, #fff1ba 0%, #ffe2d6 52%, #ede7ff 100%);
-  --gradient-premium: linear-gradient(130deg, #171421 0%, #30243e 100%);
-  --gradient-brand-soft: linear-gradient(135deg, #ecf4f0 0%, #f7f7f3 100%);
+  --gradient-hero: linear-gradient(130deg, #123f39 0%, #1b6256 100%);
+  --gradient-ambient: linear-gradient(135deg, #f1f7f1 0%, #e7f4ec 52%, #f7f6ee 100%);
+  --gradient-warm: linear-gradient(135deg, #faf1d8 0%, #f6e5d6 52%, #e5f1e8 100%);
+  --gradient-premium: linear-gradient(130deg, #122f2d 0%, #1d5149 100%);
+  --gradient-brand-soft: linear-gradient(135deg, #e8f3ed 0%, #f7f8f4 100%);
   --gradient-product-panel:
-    linear-gradient(
-      135deg,
-      rgb(238 231 255 / 88%) 0%,
-      rgb(223 243 255 / 82%) 52%,
-      rgb(255 241 186 / 64%) 100%
-    );
+    linear-gradient(135deg, #ecf5ed 0%, #e9f2e7 55%, #f5edda 100%);
   --gradient-product-stage:
-    radial-gradient(circle at 70% 22%, rgb(255 255 255 / 82%), transparent 23%),
-    linear-gradient(145deg, #fff1ba 0%, #ffe2d6 45%, #ded2ff 100%);
+    linear-gradient(145deg, #edf4ea 0%, #f5edd7 52%, #d8ece2 100%);
 
-  --gradient-brand-orb: linear-gradient(145deg, #c5b1ff, #6d3ae0);
+  --gradient-brand-orb: linear-gradient(145deg, #91d1b5, #24766a);
   --gradient-surface-subtle: linear-gradient(135deg, #ffffff 0%, #fafaf9 100%);
   --gradient-attention-row: linear-gradient(90deg, #fff7df 0%, #ffffff 72%);
   --gradient-ops-canvas:
-    linear-gradient(180deg, #eef4f1 0, #f7f8f4 230px, #f7f7f3 100%);
+    linear-gradient(180deg, #edf4ed 0, #f6f8f4 230px, #f7f8f4 100%);
   --canvas-customer-ambient:
     var(--canvas);
 
   /* Decorative glow/material helpers */
-  --hero-glow-brand: rgb(179 156 255 / 18%);
+  --hero-glow-brand: rgb(25 124 100 / 15%);
   --hero-glow-sky: rgb(115 200 242 / 16%);
-  --brand-glow-soft: rgb(109 58 224 / 13%);
+  --brand-glow-soft: rgb(18 99 87 / 13%);
 
   /* Spacing — 4px base */
   --space-1: 4px;
@@ -169,11 +178,15 @@
   /* Layout */
   --content-reading: 720px;
   --content-narrow: 900px;
-  --content-max: 1240px;
-  --content-customer: 1280px;
-  --content-visual: 1360px;
-  --content-wide: 1440px;
-  --page-gutter: clamp(20px, 3vw, 40px);
+  --content-max: 2680px;
+  --content-customer: 1960px;
+  --content-visual: 2920px;
+  --content-wide: 3000px;
+  /* Wide layouts: let marketplaces and operational grids use desktop/4K space. */
+  --content-marketplace: 3360px;
+  --content-detail: 2480px;
+  --content-operations: 2880px;
+  --page-gutter: clamp(16px, 2.4vw, 72px);
   --page-gutter-compact: 16px;
   --page-block-start: 32px;
   --page-block-end: 72px;
@@ -185,11 +198,11 @@
   --density-operational: 0.84;
 
   /* Controls */
-  --control-height-sm: 36px;
-  --control-height: 40px;
-  --control-height-lg: 44px;
-  --target-min: 40px;
-  --target-comfortable: 44px;
+  --control-height-sm: 40px;
+  --control-height: 44px;
+  --control-height-lg: 48px;
+  --target-min: 44px;
+  --target-comfortable: 48px;
 
   /* Icons */
   --icon-sm: 16px;
@@ -233,19 +246,30 @@
   :root {
     color-scheme: dark;
 
-    --canvas: #101e23;
-    --surface: #1c2c31;
-    --surface-raised: #24363b;
-    --surface-muted: #263d42;
-    --surface-inset: #13282e;
-    --surface-strong: #354c51;
-    --surface-hover: #263d42;
-    --surface-selected: #224c4d;
+    --canvas: #111d1a;
+    --surface: #1d2d29;
+    --surface-raised: #263a34;
+    --surface-muted: #283d35;
+    --surface-inset: #15241f;
+    --surface-strong: #365047;
+    --surface-hover: #2d473e;
+    --surface-selected: #315549;
+    --focus-ring-offset-bg: var(--surface);
+    --interactive-selected-ink: var(--ink);
+    --interactive-selected-bg: var(--surface-selected);
+    --interactive-row-ink: var(--ink);
+    --interactive-row-bg: var(--surface-hover);
+    --control-option-ink: var(--ink);
+    --control-option-bg: var(--surface-raised);
+    --control-native-scheme: dark;
+    --control-disabled-line: var(--line-strong);
+    --control-disabled-ink: var(--ink-secondary);
+    --control-disabled-bg: var(--surface-strong);
 
-    --ink: #f4f8f6;
-    --ink-secondary: #c4d8d4;
-    --ink-tertiary: #aecbc5;
-    --ink-muted: #93b4ae;
+    --ink: #f2f8f3;
+    --ink-secondary: #ccded2;
+    --ink-tertiary: #b6d0bf;
+    --ink-muted: #a6c8b3;
     --ink-inverse: #17101f;
 
     --line: rgb(245 241 255 / 14%);
@@ -254,22 +278,22 @@
     --control-line: rgb(245 241 255 / 38%);
     --control-line-hover: rgb(245 241 255 / 58%);
 
-    --brand: #8cdbce;
-    --brand-hover: #b1ede0;
-    --brand-strong: #d0f6ed;
-    --brand-soft: #234348;
-    --brand-soft-strong: #2c5c60;
-    --brand-on: #10272c;
-    --brand-line: #508780;
+    --brand: #93ddbd;
+    --brand-hover: #b5edce;
+    --brand-strong: #c4f1d8;
+    --brand-soft: #254639;
+    --brand-soft-strong: #305c48;
+    --brand-on: #133025;
+    --brand-line: #538d72;
 
-    --accent-lavender: #33264a;
-    --accent-sky: #19344d;
-    --accent-sky-strong: #6dbbe7;
-    --accent-mint: #19382c;
-    --accent-teal-soft: #173835;
-    --accent-coral: #472a22;
-    --accent-coral-strong: #ff9a72;
-    --accent-yellow: #4a3a18;
+    --accent-lavender: #2c3a34;
+    --accent-sky: #263e3a;
+    --accent-sky-strong: #91c9bd;
+    --accent-mint: #224136;
+    --accent-teal-soft: #233e35;
+    --accent-coral: #503b2d;
+    --accent-coral-strong: #f3aa85;
+    --accent-yellow: #493b24;
     --accent-yellow-ink: #fff0b0;
 
     --success: #73d8a4;
@@ -285,39 +309,31 @@
     --info-soft: #17304a;
 
     --focus: #92eadb;
-    --selection: #2c5c60;
-    --overlay-scrim: rgb(7 5 13 / 72%);
+    --selection: #335a47;
+    --overlay-scrim: rgb(5 18 13 / 74%);
     --media-paper: #f8f6fc;
     --media-paper-line: rgb(0 0 0 / 14%);
     --media-paper-ink: #1f1b2d;
 
-    --gradient-ambient: linear-gradient(135deg, #211c30 0%, #19344d 52%, #19382c 100%);
-    --gradient-warm: linear-gradient(135deg, #4a3a18 0%, #472a22 52%, #33264a 100%);
-    --gradient-premium: linear-gradient(135deg, #171020 0%, #352064 55%, #19344d 100%);
-    --gradient-brand-soft: linear-gradient(135deg, #33264a 0%, #19344d 100%);
+    --gradient-ambient: linear-gradient(135deg, #1d322b 0%, #244238 58%, #263a30 100%);
+    --gradient-warm: linear-gradient(135deg, #3f3829 0%, #473a2f 52%, #283b31 100%);
+    --gradient-premium: linear-gradient(130deg, #102723 0%, #245146 100%);
+    --gradient-brand-soft: linear-gradient(135deg, #244238 0%, #1d332c 100%);
     --gradient-product-panel:
-      linear-gradient(
-        135deg,
-        rgb(51 38 74 / 92%) 0%,
-        rgb(25 52 77 / 88%) 52%,
-        rgb(74 58 24 / 74%) 100%
-      );
+      linear-gradient(135deg, #2b473a 0%, #253f36 55%, #453b2c 100%);
     --gradient-product-stage:
-      radial-gradient(circle at 70% 22%, rgb(245 241 255 / 12%), transparent 23%),
-      linear-gradient(145deg, #4a3a18 0%, #472a22 45%, #33264a 100%);
+      linear-gradient(145deg, #294a3e 0%, #4a4431 52%, #244b3c 100%);
 
-    --gradient-surface-subtle: linear-gradient(135deg, #1b1727 0%, #211c30 100%);
-    --gradient-attention-row: linear-gradient(90deg, #342814 0%, #1b1727 72%);
+    --gradient-surface-subtle: linear-gradient(135deg, #1c2e27 0%, #233830 100%);
+    --gradient-attention-row: linear-gradient(90deg, #423821 0%, #1d2d29 72%);
     --gradient-ops-canvas:
-      linear-gradient(180deg, #111f24 0, #172a2f 250px, #101e23 100%);
+      linear-gradient(180deg, #162821 0, #1d332b 250px, #111d1a 100%);
     --canvas-customer-ambient:
-      radial-gradient(circle at 12% 12%, rgb(25 52 77 / 42%), transparent 30%),
-      radial-gradient(circle at 86% 24%, rgb(53 32 100 / 42%), transparent 32%),
       var(--canvas);
 
-    --hero-glow-brand: rgb(179 156 255 / 14%);
+    --hero-glow-brand: rgb(147 221 189 / 13%);
     --hero-glow-sky: rgb(115 200 242 / 12%);
-    --brand-glow-soft: rgb(179 156 255 / 13%);
+    --brand-glow-soft: rgb(147 221 189 / 12%);
 
     --shadow-subtle: 0 3px 10px rgb(0 0 0 / 18%);
     --shadow-raised: 0 6px 18px rgb(0 0 0 / 26%);

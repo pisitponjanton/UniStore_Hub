@@ -226,3 +226,6 @@
 .row:hover { transform: none; border-color: var(--brand-line); }
 .rowEditing { border-color: var(--brand-line); box-shadow: inset 3px 0 0 var(--brand); }
 @media(max-width:640px) { .root { padding: 12px; } .row,.rowEditing { padding: 12px; } }
+
+/* Campus Commerce A / Phase 13 */
+.root,.layout,.variantList,.row,.rowMain,.editForm,.createForm{min-width:0}.name,.price{overflow-wrap:anywhere}.rowEditing,.rowEditing:hover{background:var(--brand-soft);border-color:var(--brand-line);color:var(--ink)}.actions button,.editActions button,.createForm button{min-height:44px}@media(max-width:640px){.row{grid-template-columns:minmax(0,1fr)}}

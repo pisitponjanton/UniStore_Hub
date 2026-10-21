@@ -6,42 +6,67 @@ import type {
 
 export const DIRECTORY_PAGE_SIZE = 12;
 
-/**
- * Local QA display-only heuristic. Never delete tenants or apply it on the
- * Backend; legitimate organizations remain discoverable via the toggle.
- * Avoid broad matching of generic names such as "Tenant Org B".
+/** Development seed organization ID and store ID are fixed by backend/scripts/dev-seed.js.
+ * This exact ID is safer than using "Local Demo" in a fuzzy name filter.
  */
-export function isExplicitAutomationFixture(name: string): boolean {
-  return (
-    /(?:^|[\s_(-])(?:e2e|qa fixture|test fixture|automated test)(?:$|[\s_)-])/i.test(name) ||
-    /^(?:QA (?:Admin|Commerce) Org\b|Golden Org golden-)/i.test(name) ||
-    /\bharness-phase\d+(?:-|$)/i.test(name)
-  );
+const DEV_SEED_ORGANIZATION_ID = "55555555-5555-4555-8555-555555555555";
+
+const HARNESS_DESCRIPTIONS = new Map([
+  ["Reject E2E Organization", "Disposable payment rejection E2E organization"],
+  ["E2E Organization", "Disposable E2E core-flow organization"],
+  ["Tenant Org A", "Disposable tenant A"],
+  ["Tenant Org B", "Disposable tenant B"],
+  ["Notify Org", "Disposable notification E2E organization"],
+]);
+
+/**
+ * Strong local fixture fingerprint. No generic /qa|demo|e2e/ name matching:
+ * organization name AND exact test-created description must agree, or the
+ * record must have the deterministic development seed ID.
+ *
+ * The directory API does not expose immutable fixture provenance. This
+ * presentation-only fingerprint therefore errs toward SHOWING ambiguous
+ * records and must not be used to remove tenants or enforce API access.
+ */
+export function isRecognizedQaOrganization(item: StorefrontLandingOrganization): boolean {
+  const { organization } = item;
+  if (organization.organizationId === DEV_SEED_ORGANIZATION_ID) return true;
+  const name = organization.name.trim();
+  const description = organization.description.trim();
+
+  const harness = /^(Reject E2E Organization|E2E Organization|Tenant Org [AB]|Notify Org) harness-phase\d+(?:-rerun)?-\d{9,}$/.exec(name);
+  if (harness) return HARNESS_DESCRIPTIONS.get(harness[1]) === description;
+
+  if (/^QA Commerce Org [a-z][a-z0-9-]*-\d{10,}-\d+$/.test(name)) {
+    return description === "Disposable frontend Customer commerce fixture";
+  }
+  if (/^QA Admin Org [a-z][a-z0-9-]*-\d{10,}-\d+(?: Updated)?$/.test(name)) {
+    return description === "Disposable Organization Admin audit fixture" ||
+      description === "Updated by Organization Admin browser journey";
+  }
+  if (/^Golden Org golden-\d{10,}-\d+$/.test(name)) {
+    return description === "Disposable cross-role golden journey Organization";
+  }
+  return false;
 }
 
+/** Partition without deleting, rewriting, or mutating the public API payload. */
 export function separateAutomationFixtures(
   data: StorefrontLandingOrganization[],
 ): { regular: StorefrontLandingOrganization[]; fixtures: StorefrontLandingOrganization[] } {
   const regular: StorefrontLandingOrganization[] = [];
   const fixtures: StorefrontLandingOrganization[] = [];
   for (const item of data) {
-    (isExplicitAutomationFixture(item.organization.name) ? fixtures : regular).push(item);
+    (isRecognizedQaOrganization(item) ? fixtures : regular).push(item);
   }
   return { regular, fixtures };
 }
-
 
 export type DirectoryFilter = "all" | "with-stores" | "without-stores";
 
 export interface DirectoryEntry {
   organization: StorefrontOrganizationDTO;
   store: StorefrontStoreDTO | null;
-  totalStores: number;
-}
-
-export interface DirectoryGroup {
-  organization: StorefrontOrganizationDTO;
-  stores: StorefrontStoreDTO[];
   totalStores: number;
 }
 
@@ -95,20 +120,4 @@ export function filterDirectoryEntries(
       (store !== null && normalizeSearch(store.name).includes(needle))
     );
   });
-}
-
-export function groupDirectoryPage(entries: DirectoryEntry[]): DirectoryGroup[] {
-  const groups = new Map<string, DirectoryGroup>();
-
-  for (const { organization, store, totalStores } of entries) {
-    let group = groups.get(organization.organizationId);
-    if (!group) {
-      group = { organization, stores: [], totalStores };
-      groups.set(organization.organizationId, group);
-    }
-
-    if (store) group.stores.push(store);
-  }
-
-  return [...groups.values()];
 }

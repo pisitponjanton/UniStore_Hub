@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { WorkspaceIcon } from "@/components/layout/workspace-icon";
 import type { ReactNode } from "react";
 
 import styles from "./auth-form.module.css";
@@ -17,12 +16,9 @@ export function AuthPageFrame({
     <main className={styles.page}>
       <section className={styles.intro} aria-label="UniStore Hub">
         <Link href="/" className={styles.brand} aria-label="UniStore Hub หน้าร้าน">
-          <span className={styles.brandMark} aria-hidden="true">
-            <WorkspaceIcon name="store" size={21} />
-          </span>
+
           <span className={styles.brandCopy}>
             <strong>UniStore Hub</strong>
-            <span>ร้านค้าและพรีออเดอร์ในมหาวิทยาลัย</span>
           </span>
         </Link>
 

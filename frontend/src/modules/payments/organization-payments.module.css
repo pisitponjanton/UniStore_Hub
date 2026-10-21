@@ -1185,3 +1185,27 @@
  .cardActions { justify-items: stretch; }
  .cardActions button { width: 100%; }
 }
+
+/* Campus Commerce A / Phase 12 — bounded payment review desk */
+.main{width:min(100%,2600px);min-width:0;padding-inline:clamp(14px,2.4vw,40px);gap:clamp(14px,2vw,23px)}
+.layout{min-width:0;grid-template-columns:minmax(0,1.18fr) minmax(340px,.82fr);gap:clamp(14px,1.7vw,28px);align-items:start}
+.header,.filterPanel,.section,.list,.detailPanel,.detailCopy,.row,.rowMain,.reviewSnapshot,.slipPanel,.decisionPanel{min-width:0}
+.row{grid-template-columns:minmax(0,1fr) auto;gap:12px}
+.rowSelected,.rowSelected[data-attention="true"]{background:var(--brand-soft);border-color:var(--brand-line)}
+.rowSelected:hover{background:var(--brand-soft);color:var(--ink)}
+.row:focus-within{border-color:var(--brand-line)}
+.cardTitle{white-space:normal;text-overflow:clip;overflow-wrap:anywhere}
+.cardActions button,.reviewActions button,.dialogActions button{min-height:44px}
+.cardActions button:focus-visible,.reviewActions button:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+.filters{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.filters>*{min-width:0}
+.detailCode,.meta,.snapshotValue{overflow-wrap:anywhere}
+.reviewSnapshot{grid-template-columns:repeat(2,minmax(0,1fr))}
+.reviewSnapshot>div{min-width:0}
+@media(max-width:1180px){.layout{grid-template-columns:minmax(0,1fr)}.detailPanel{width:100%}}
+@media(max-width:800px){.filters{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.main{padding-inline:14px}.filters{grid-template-columns:minmax(0,1fr)}.row{grid-template-columns:minmax(0,1fr)}.cardActions{justify-items:stretch}.cardActions button{width:100%}.reviewSnapshot{grid-template-columns:minmax(0,1fr)}.header,.detailPanel{padding:14px}}
+
+/* Expanded 4K workbench: bounded reviewer detail column. */
+@media(min-width:1181px){.layout{grid-template-columns:minmax(0,1fr) minmax(340px,720px)}}
+.rowMain{max-width:95ch}

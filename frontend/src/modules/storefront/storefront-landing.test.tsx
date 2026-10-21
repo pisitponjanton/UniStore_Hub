@@ -80,7 +80,7 @@ describe("StorefrontLanding", () => {
     expect(
       await screen.findByRole("heading", {
         level: 2,
-        name: "ร้านที่เปิดให้เข้าชม",
+        name: "เลือกร้านที่อยากซื้อ",
       }),
     ).toBeInTheDocument();
 
@@ -88,19 +88,15 @@ describe("StorefrontLanding", () => {
     expect(screen.queryByRole("heading", { name: "ร้านค้าอื่นที่น่าสนใจ" }))
       .not.toBeInTheDocument();
     const storeLinks = screen.getAllByRole("link", { name: /ร้านชมรม/ });
-    expect(storeLinks).toHaveLength(2);
+    expect(storeLinks).toHaveLength(1);
     expect(storeLinks[0]).toHaveAttribute(
       "href",
       "/stores/view?organizationId=org-1&storeId=store-1",
     );
-    const spotlight = document.querySelector('a[class*="heroSpotlight"]');
-    expect(spotlight).toHaveTextContent("ร้านชมรม");
-    expect(spotlight).toHaveAttribute(
-      "href",
-      "/stores/view?organizationId=org-1&storeId=store-1",
-    );
+    expect(document.querySelectorAll('a[class*="storeCard"]')).toHaveLength(1);
+    expect(screen.getByText("ยังไม่มีรูปหน้าร้าน")).toBeInTheDocument();
     expect(screen.getByText("มีร้านค้า", { exact: false })).toBeInTheDocument();
-    expect(screen.getByText("1 ร้าน")).toBeInTheDocument();
+    expect(screen.getByText(/พบ 1 ร้าน/)).toBeInTheDocument();
   });
 
   it("keeps explicit QA fixtures opt-in only in Dev and restores them on request", async () => {
@@ -117,8 +113,8 @@ describe("StorefrontLanding", () => {
       },
       {
         organization: {
-          organizationId: "test-org", name: "QA Commerce Org phase5-123-1",
-          description: "", status: "ACTIVE",
+          organizationId: "test-org", name: "QA Commerce Org phase5-1791131669701-2",
+          description: "Disposable frontend Customer commerce fixture", status: "ACTIVE",
         },
         stores: [{
           storeId: "test-store", organizationId: "test-org",
@@ -133,10 +129,71 @@ describe("StorefrontLanding", () => {
     expect(show).toHaveAttribute("aria-pressed", "false");
     fireEvent.click(show);
     expect(screen.getAllByText("Temporary Shop").length).toBeGreaterThan(0);
+    expect(screen.getByText(/โหมดตรวจสอบ QA/)).toBeInTheDocument();
+    expect(screen.getAllByText("ข้อมูลทดสอบ QA").length).toBeGreaterThan(0);
     const hide = screen.getByRole("button", { name: "ซ่อนข้อมูล E2E/QA" });
     expect(hide).toHaveAttribute("aria-pressed", "true");
     fireEvent.click(hide);
     expect(screen.queryByText("Temporary Shop")).not.toBeInTheDocument();
+  });
+
+  it("shows an honest ordinary-store empty state when only development fixtures exist", async () => {
+    vi.stubEnv("NODE_ENV", "development");
+    mocks.getLanding.mockResolvedValue([{
+      organization: {
+        organizationId: "55555555-5555-4555-8555-555555555555",
+        name: "UniStore Local Demo", description: "Deterministic local/demo organization", status: "ACTIVE",
+      },
+      stores: [{
+        storeId: "66666666-6666-4666-8666-666666666666",
+        organizationId: "55555555-5555-4555-8555-555555555555",
+        name: "Local Demo Store", description: "Store for local development and E2E", status: "ACTIVE",
+      }],
+    }]);
+    render(<StorefrontLanding />);
+    expect(await screen.findByRole("heading", { name: "ยังไม่มีร้านค้าทั่วไปที่เปิดให้เข้าชม" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Local Demo Store" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "แสดงรายการทั้งหมด" })).not.toBeInTheDocument();
+    const show = screen.getByRole("button", { name: /แสดงข้อมูล E2E\/QA/ });
+    fireEvent.click(show);
+    expect(screen.getByRole("heading", { name: "Local Demo Store" })).toBeInTheDocument();
+    expect(screen.getByText("ข้อมูลทดสอบ QA")).toBeInTheDocument();
+  });
+
+  it("does not silently filter ambiguously named tenant records", async () => {
+    vi.stubEnv("NODE_ENV", "development");
+    mocks.getLanding.mockResolvedValue([{
+      organization: {
+        organizationId: "real-org", name: "Demo QA Student Club",
+        description: "ชมรมของนักศึกษาจริง", status: "ACTIVE",
+      },
+      stores: [{
+        storeId: "real-store", organizationId: "real-org",
+        name: "E2E Outfit Store", description: "เสื้อชมรม", status: "ACTIVE",
+      }],
+    }]);
+    render(<StorefrontLanding />);
+    expect(await screen.findByRole("heading", { name: "E2E Outfit Store" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /ข้อมูล E2E\/QA/ })).not.toBeInTheDocument();
+  });
+
+  it("labels strong fixture fingerprints but never hides them in production", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    mocks.getLanding.mockResolvedValue([{
+      organization: {
+        organizationId: "qa-01",
+        name: "QA Admin Org product-1791183993439-1",
+        description: "Disposable Organization Admin audit fixture", status: "ACTIVE",
+      },
+      stores: [{
+        storeId: "test-store", organizationId: "qa-01",
+        name: "Internal Test Store", description: "", status: "ACTIVE",
+      }],
+    }]);
+    render(<StorefrontLanding />);
+    expect(await screen.findByRole("heading", { name: "Internal Test Store" })).toBeInTheDocument();
+    expect(screen.getByText("ข้อมูลทดสอบ QA")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /ข้อมูล E2E\/QA/ })).not.toBeInTheDocument();
   });
 
   it("sends an authenticated customer straight to their own order history", async () => {
@@ -220,8 +277,8 @@ describe("StorefrontLanding", () => {
 
     render(<StorefrontLanding />);
     expect(await screen.findByText("หน้า 1 จาก 3")).toBeInTheDocument();
-    // Twelve paged directory rows plus a real-store hero and three distinct discovery cards.
-    expect(screen.getAllByRole("link", { name: /ร้าน-\d+/ })).toHaveLength(16);
+    // Every store is one card; do not repeat featured stores above the results grid.
+    expect(screen.getAllByRole("link", { name: /ร้าน-\d+/ })).toHaveLength(12);
     fireEvent.click(screen.getByRole("button", { name: "ถัดไป" }));
     expect(screen.getByText("หน้า 2 จาก 3")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "ร้าน-12" })).toBeInTheDocument();
@@ -258,7 +315,7 @@ describe("StorefrontLanding", () => {
     fireEvent.change(screen.getByRole("combobox", { name: "แสดงรายการ" }), {
       target: { value: "without-stores" },
     });
-    expect(screen.getByRole("heading", { name: "ชมรมถ่ายภาพ" })).toBeInTheDocument();
+    expect(screen.getByText("ชมรมถ่ายภาพ", { selector: "article strong" })).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "IT Shop" })).not.toBeInTheDocument();
   });
 

@@ -1,3 +1,4 @@
+import { AppIcon } from "@/components/ui/app-icon";
 import Link from "next/link";
 
 import styles from "./commerce-management-nav.module.css";
@@ -22,7 +23,7 @@ export function CommerceManagementNav({
     <nav className={styles.root} aria-label="จัดการการขายของหน่วยงาน">
       <div className={styles.heading}>
         <span>พื้นที่การขาย</span>
-        <strong>จัดร้านค้า → เพิ่มสินค้า → เปิดรอบขาย</strong>
+        <strong>จัดร้านค้า <AppIcon name="arrow-right" size={15} /> เพิ่มสินค้า <AppIcon name="arrow-right" size={15} /> เปิดรอบขาย</strong>
       </div>
       <div className={styles.links}>
         {destinations.map(destination =>

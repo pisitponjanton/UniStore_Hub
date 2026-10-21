@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { WorkspaceIcon } from "@/components/layout/workspace-icon";
 import { usePathname } from "next/navigation";
 
 import { useAuthSession } from "@/modules/auth";
@@ -28,12 +27,9 @@ export function StorefrontHeader() {
     <header className={styles.topbar}>
       <div className={styles.topbarInner}>
         <Link href="/" className={styles.brand} aria-label="UniStore Hub หน้าร้าน">
-          <span className={styles.brandMark} aria-hidden="true">
-            <WorkspaceIcon name="store" size={21} />
-          </span>
+
           <span className={styles.brandCopy}>
             <strong>UniStore Hub</strong>
-            <span>ร้านค้าและพรีออเดอร์ในมหาวิทยาลัย</span>
           </span>
         </Link>
 

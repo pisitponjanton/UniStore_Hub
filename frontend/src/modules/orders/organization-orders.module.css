@@ -4,7 +4,7 @@
 }
 
 .main {
-  width: min(100%, 1440px);
+  width: min(100%, var(--content-operations));
   margin-inline: auto;
   padding: clamp(28px, 4vw, 48px) var(--page-gutter) var(--page-block-end);
   display: grid;
@@ -909,3 +909,25 @@
  .summaryStrip { gap: 6px; }
  .summaryStrip > div, .summaryStrip > div:nth-child(n) { min-height: 0; padding: 10px; }
 }
+
+/* Campus Commerce A / Phase 12 — staff order queue + detail, bounded desktop */
+.main{width:min(100%,2600px);min-width:0;padding-inline:clamp(14px,2.4vw,40px);gap:clamp(14px,2vw,23px)}
+.header,.section,.filterPanel,.list,.row,.rowMain,.rowAside,.detailHero,.itemsPanel{min-width:0}
+.row{grid-template-columns:minmax(0,1fr) minmax(155px,.23fr);gap:clamp(10px,1.5vw,22px);align-items:center}
+.rowAside{justify-items:stretch;min-width:0}
+.detailLink{min-height:44px;width:100%;display:inline-flex;align-items:center;justify-content:center;white-space:normal}
+.detailLink:hover,.row[data-attention="true"] .detailLink:hover{background:var(--brand-hover);color:var(--brand-on)}
+.row[data-attention="true"] .detailLink:hover{border-color:var(--brand-hover)}
+.filters{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.filters>*{min-width:0}
+.filterHeading,.sectionHeading{min-width:0}
+.filterActions button{min-height:44px}
+.row:focus-within{border-color:var(--brand-line)}
+.detailLink:focus-visible,.backLink:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+.summaryGrid,.summaryCell,.itemCard{min-width:0}
+.orderCode,.summaryValue,.itemName{overflow-wrap:anywhere}
+@media(max-width:1000px){.filters{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.main{padding-inline:14px}.filters{grid-template-columns:minmax(0,1fr)}.row{grid-template-columns:minmax(0,1fr)}.rowAside{grid-column:1}.detailHero,.header{padding:16px}}
+
+/* Keep densely packed 4K order rows comfortably scannable. */
+.section{max-width:1900px}.rowMain{max-width:100ch}.filterPanel{max-width:1950px}

@@ -51,6 +51,8 @@ export class AuthSessionStore {
   private state: AuthState = LOADING_STATE;
   private readonly listeners = new Set<() => void>();
   private restorePromise: Promise<AuthState> | null = null;
+  private restoreVersion = -1;
+  private sessionVersion = 0;
 
   constructor(
     private readonly api: SessionApi = apiClient,
@@ -75,21 +77,29 @@ export class AuthSessionStore {
   }
 
   async restore(): Promise<AuthState> {
-    if (this.restorePromise) {
+    const version = this.sessionVersion;
+    if (this.restorePromise && this.restoreVersion === version) {
       return this.restorePromise;
     }
 
-    this.restorePromise = this.performRestore();
+    // A new sign-in must not reuse a previous token's in-flight /me.
+    const restore = this.performRestore(version);
+    this.restorePromise = restore;
+    this.restoreVersion = version;
 
     try {
-      return await this.restorePromise;
+      return await restore;
     } finally {
-      this.restorePromise = null;
+      if (this.restorePromise === restore) {
+        this.restorePromise = null;
+        this.restoreVersion = -1;
+      }
     }
   }
 
-  private async performRestore(): Promise<AuthState> {
+  private async performRestore(version: number): Promise<AuthState> {
     const token = this.storage.read();
+    if (version !== this.sessionVersion) return this.state;
 
     if (!token) {
       this.setState(ANONYMOUS_STATE);
@@ -103,12 +113,18 @@ export class AuthSessionStore {
         authenticated: true,
       });
 
+      // Ignore a late result from a previous login or logout, including
+      // an expired old token that would otherwise clear the new token.
+      if (version !== this.sessionVersion) return this.state;
+
       this.setState({
         status: "authenticated",
         user: session.user,
         memberships: session.memberships,
       });
     } catch (error) {
+      if (version !== this.sessionVersion) return this.state;
+
       if (isDefinitiveInvalidTokenError(error)) {
         this.storage.clear();
         this.storage.clearOrganization();
@@ -121,11 +137,13 @@ export class AuthSessionStore {
   }
 
   async establish(token: string): Promise<AuthState> {
+    this.sessionVersion += 1;
     this.storage.write(token);
     return this.restore();
   }
 
   logout(): void {
+    this.sessionVersion += 1;
     this.storage.clear();
     this.storage.clearOrganization();
     this.setState(ANONYMOUS_STATE);

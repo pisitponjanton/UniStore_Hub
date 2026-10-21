@@ -1,989 +1,278 @@
+/* Campus Commerce A — Phase 9. Single-source auth presentation.
+   Dedicated light/dark theme tokens and a bounded, responsive task-first form.
+   No logo graphics or fabricated background imagery. */
+
 .page {
-  min-height: 100dvh;
   display: grid;
-  grid-template-columns: minmax(0, 1.08fr) minmax(430px, 0.92fr);
-  gap: clamp(14px, 1.6vw, 24px);
-  padding: clamp(12px, 1.8vw, 24px);
-  background: var(--canvas-customer-ambient);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: clamp(14px, 1.6vw, 26px);
+  width: min(100%, 1880px);
+  min-height: 100dvh;
+  margin-inline: auto;
+  padding: clamp(14px, 2.6vw, 44px);
+  background: var(--canvas);
 }
-
 .intro {
-  position: relative;
-  isolation: isolate;
-  min-width: 0;
-  min-height: calc(100dvh - clamp(24px, 3.6vw, 48px));
-  overflow: hidden;
   display: flex;
+  min-width: 0;
+  min-height: min(850px, calc(100dvh - 88px));
   flex-direction: column;
-  gap: clamp(28px, 4vw, 52px);
-  padding:
-    clamp(24px, 3.8vw, 52px)
-    clamp(24px, 4.8vw, 68px)
-    clamp(28px, 4.5vw, 62px);
-  border-radius: var(--radius-hero);
-  background: var(--gradient-premium);
-  box-shadow: var(--shadow-feature);
+  gap: clamp(30px, 5vw, 68px);
+  overflow: hidden;
+  padding: clamp(28px, 3.7vw, 62px);
+  border-radius: 22px;
+  background: #193b39;
+  color: #f7fbf4;
 }
-
-
-
 .brand {
-  position: relative;
-  z-index: 2;
+  display: inline-flex;
   width: fit-content;
   min-height: 48px;
-  display: inline-flex;
   align-items: center;
-  gap: var(--space-3);
-  padding: 6px 10px 6px 7px;
-  margin-left: -7px;
-  border-radius: var(--radius-control);
-  color: var(--on-dark);
-  transition:
-    background-color var(--motion-standard) var(--motion-ease-out),
-    transform var(--motion-standard) var(--motion-ease-out);
-}
-
-.brand:hover {
-  background: var(--on-dark-surface-hover);
-  transform: translateY(-1px);
+  padding: 8px 10px;
+  margin: -8px -10px;
+  border-radius: 9px;
+  color: #f7fbf4;
   text-decoration: none;
+  transition: background-color 160ms ease;
 }
-
-.brandMark {
-  position: relative;
-  width: 38px;
-  height: 38px;
-  flex: 0 0 auto;
-  display: grid;
-  place-items: center;
-  border-radius: 13px;
-  background: var(--on-dark);
-  box-shadow: var(--shadow-media-soft);
-  transform: rotate(-3deg);
-}
-
-.brandMark::before,
-.brandMark::after,
-.brandMark span {
-  content: "";
-  position: absolute;
-}
-
-.brandMark::before {
-  width: 17px;
-  height: 13px;
-  left: 10px;
-  bottom: 9px;
-  border-radius: 4px 4px 6px 6px;
-  background: var(--brand);
-}
-
-.brandMark::after {
-  width: 13px;
-  height: 8px;
-  left: 12px;
-  top: 8px;
-  border: 3px solid var(--brand);
-  border-bottom: 0;
-  border-radius: 999px 999px 0 0;
-}
-
-.brandMark span {
-  width: 5px;
-  height: 5px;
-  left: 16px;
-  top: 19px;
-  border-radius: 50%;
-  background: var(--brand-on);
-}
-
-.brandCopy {
-  min-width: 0;
-  display: grid;
-  gap: 1px;
-}
-
-.brandCopy strong {
-  color: var(--on-dark);
-  font-size: var(--text-title-sm);
-  font-weight: 750;
-  line-height: 1.2;
-}
-
-.brandCopy span {
-  color: var(--on-dark-tertiary);
-  font-size: var(--text-caption);
-  line-height: 1.2;
-}
+.brand:hover { background: rgb(255 255 255 / 11%); text-decoration: none; color: #fff; }
+.brand:focus-visible { outline: 3px solid #b2eedc; outline-offset: 3px; }
+.brandCopy { display: block; min-width: 0; }
+.brandCopy strong { color: inherit; font-size: clamp(1.09rem, 1.2vw, 1.3rem); font-weight: 800; letter-spacing: -.035em; }
 
 .introBody {
-  position: relative;
-  z-index: 1;
-  width: min(100%, 820px);
+  display: flex;
   flex: 1;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(220px, 0.58fr);
-  grid-template-areas:
-    "copy visual"
-    "journey journey";
-  gap: clamp(24px, 4vw, 48px);
-  align-items: center;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: clamp(35px, 5vw, 70px);
 }
-
-.introCopy {
-  grid-area: copy;
-  display: grid;
-  gap: var(--space-4);
-  align-self: center;
-}
-
+.introCopy { display: grid; align-content: start; gap: clamp(12px, 1.4vw, 20px); padding-top: clamp(2px, 4vh, 52px); }
 .introLabel {
+  display: inline-flex;
   width: fit-content;
   min-height: 30px;
-  display: inline-flex;
   align-items: center;
-  padding-inline: var(--space-3);
-  border: 1px solid var(--on-dark-line);
-  border-radius: var(--radius-pill);
-  background: var(--on-dark-surface);
-  color: var(--on-dark-secondary);
-  font-size: var(--text-caption);
-  font-weight: 700;
+  padding: 5px 11px;
+  border: 1px solid rgb(213 239 228 / 22%);
+  border-radius: 7px;
+  background: rgb(255 255 255 / 9%);
+  color: #d3e9dd;
+  font-size: .74rem;
+  font-weight: 750;
+  letter-spacing: .06em;
 }
-
 .introTitle {
-  max-width: 13ch;
-  color: var(--on-dark);
-  font-size: clamp(2.55rem, 5vw, 4.7rem);
-  font-weight: 720;
-  line-height: 0.98;
-  letter-spacing: -0.048em;
-  text-wrap: balance;
-}
-
-.introDescription {
-  max-width: 56ch;
-  color: var(--on-dark-secondary);
-  font-size: clamp(1rem, 1.5vw, 1.12rem);
-  line-height: 1.72;
-}
-
-
-
-.accountJourney {
-  grid-area: journey;
-  display: grid;
-  gap: var(--space-3);
-  align-self: end;
-}
-
-.accountJourneyTitle {
-  color: var(--on-dark-secondary);
-  font-size: var(--text-body-sm);
-  font-weight: 700;
-}
-
-.accountJourneyList {
+  max-width: 15ch;
   margin: 0;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-3);
+  font-size: clamp(2.15rem, 3.45vw, 4rem);
+  font-weight: 790;
+  line-height: 1.12;
+  letter-spacing: -.047em;
+  color: #fffdf7;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
 }
-
+.introDescription {
+  max-width: 53ch;
+  color: #d7e6de;
+  font-size: clamp(.94rem, 1.05vw, 1.07rem);
+  line-height: 1.7;
+}
+.accountJourney { display: grid; align-content: end; gap: 12px; }
+.accountJourneyTitle { color: #bbd5cb; font-size: .83rem; font-weight: 750; }
+.accountJourneyList {
+  display: grid; grid-template-columns: 1fr;
+  gap: 0; margin: 0; padding: 0; list-style: none;
+}
 .accountJourneyItem {
-  min-width: 0;
-  min-height: 118px;
   display: grid;
-  align-content: end;
-  gap: 4px;
-  padding: var(--space-4);
-  border: 1px solid var(--on-dark-line);
-  border-radius: var(--radius-card);
-  background: var(--on-dark-surface);
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: 3px 13px;
+  align-content: center;
+  min-height: 65px;
+  padding: 13px 0;
+  border-top: 1px solid rgb(213 239 228 / 19%);
+  overflow-wrap: anywhere;
 }
-
-.accountJourneyItem:nth-child(1) {
-  background: color-mix(in srgb, var(--accent-lavender) 22%, var(--on-dark-surface));
-}
-
-.accountJourneyItem:nth-child(2) {
-  background: color-mix(in srgb, var(--accent-sky) 18%, var(--on-dark-surface));
-}
-
-.accountJourneyItem:nth-child(3) {
-  background: color-mix(in srgb, var(--accent-mint) 18%, var(--on-dark-surface));
-}
-
-.accountJourneyItem strong {
-  color: var(--on-dark);
-  font-size: var(--text-body);
-  font-weight: 720;
-}
-
-.accountJourneyItem span {
-  color: var(--on-dark-secondary);
-  font-size: var(--text-body-sm);
-  line-height: 1.48;
-}
+.accountJourneyNumber { grid-row: span 2; color: #f1d4ad; font-size: .8rem; font-weight: 790; }
+.accountJourneyItem strong { color: #f8fcf7; font-size: .9rem; line-height: 1.4; }
+.accountJourneyItem span:not(.accountJourneyNumber) { color: #c9e1d7; font-size: .8rem; line-height: 1.4; }
 
 .panel {
-  min-width: 0;
   display: grid;
+  min-width: 0;
   place-items: center;
-  padding: clamp(24px, 4vw, 58px);
-  border-radius: var(--radius-hero);
-  background: var(--gradient-ambient);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--surface) 66%, transparent);
+  padding: clamp(8px, 2vw, 30px);
 }
-
 .panelInner {
-  width: min(100%, 520px);
   display: grid;
-  gap: var(--space-4);
-  padding: clamp(24px, 3.6vw, 42px);
-  border: 1px solid color-mix(in srgb, var(--brand) 10%, var(--line-soft));
-  border-radius: var(--radius-feature);
+  width: min(100%, 542px);
+  min-width: 0;
+  gap: 18px;
+  padding: clamp(22px, 2.8vw, 38px);
+  border: 1px solid var(--line);
+  border-radius: 19px;
   background: var(--surface);
-  box-shadow: var(--shadow-feature);
-}
-
-.panelLabel {
-  width: fit-content;
-  min-height: 30px;
-  display: inline-flex;
-  align-items: center;
-  padding-inline: var(--space-3);
-  border-radius: var(--radius-pill);
-  background: var(--brand-soft);
-  color: var(--brand-strong);
-  font-size: var(--text-caption);
-  font-weight: 750;
-}
-
-.formShell {
-  width: 100%;
-  display: grid;
-  gap: var(--space-6);
-}
-
-.headingGroup {
-  display: grid;
-  gap: var(--space-2);
-}
-
-.title {
-  max-width: 16ch;
-  color: var(--ink);
-  font-size: clamp(1.85rem, 3vw, 2.65rem);
-  font-weight: 750;
-  line-height: 1.08;
-  letter-spacing: -0.035em;
-  text-wrap: balance;
-}
-
-.description {
-  max-width: 54ch;
-  color: var(--ink-secondary);
-  line-height: 1.65;
-}
-
-.form {
-  display: grid;
-  gap: var(--space-5);
-}
-
-.formFields {
-  display: grid;
-  gap: var(--space-4);
-}
-
-.formActions {
-  display: grid;
-  gap: var(--space-3);
-}
-
-.formActions button {
-  width: 100%;
-  box-shadow: var(--shadow-action);
-}
-
-.passwordToggle {
-  width: fit-content;
-  min-height: 44px;
-  display: inline-flex;
-  align-items: center;
-  margin-top: calc(var(--space-2) * -1);
-  padding: 0 var(--space-3);
-  border: 0;
-  border-radius: var(--radius-control);
-  background: var(--brand-soft);
-  color: var(--brand-strong);
-  font: inherit;
-  font-size: var(--text-body-sm);
-  font-weight: 700;
-  cursor: pointer;
-  transition:
-    transform var(--motion-standard) var(--motion-ease-out),
-    background-color var(--motion-standard) var(--motion-ease-out);
-}
-
-.passwordToggle:hover:not(:disabled) {
-  transform: translateY(-1px);
-  background: var(--brand-soft-strong);
-}
-
-.passwordToggle:active:not(:disabled) {
-  transform: translateY(0) scale(0.99);
-}
-
-.passwordToggle:disabled {
-  background: var(--surface-muted);
-  color: var(--ink-muted);
-  cursor: not-allowed;
-}
-
-.formDivider {
-  height: 1px;
-  background: var(--line-soft);
-}
-
-.formFooter {
-  display: grid;
-  justify-items: start;
-  gap: var(--space-3);
-}
-
-.switchText {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2);
-  color: var(--ink-secondary);
-  font-size: var(--text-body);
-}
-
-.switchLink {
-  min-height: 40px;
-  display: inline-flex;
-  align-items: center;
-  margin-block: -8px;
-  padding-inline: 4px;
-  border-radius: var(--radius-sm);
-  color: var(--brand-strong);
-  font-weight: 750;
-}
-
-.switchLink:hover {
-  color: var(--brand);
-  text-decoration-thickness: 2px;
-}
-
-.backLink {
-  width: fit-content;
-  min-height: 44px;
-  display: inline-flex;
-  align-items: center;
-  padding-inline: var(--space-2);
-  margin-left: calc(var(--space-2) * -1);
-  border-radius: var(--radius-control);
-  color: var(--ink-tertiary);
-  font-size: var(--text-body-sm);
-  font-weight: 650;
-}
-
-.backLink::before {
-  content: "";
-  width: 8px;
-  height: 8px;
-  margin-right: var(--space-2);
-  border-left: 2px solid currentColor;
-  border-bottom: 2px solid currentColor;
-  transform: rotate(45deg);
-}
-
-.backLink:hover {
-  background: var(--surface-hover);
-  color: var(--ink);
-  text-decoration: none;
-}
-
-.accountSummary {
-  display: grid;
-  gap: var(--space-4);
-  padding: var(--space-5);
-  border-radius: var(--radius-card);
-  background: var(--gradient-brand-soft);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand) 10%, var(--line-soft));
-}
-
-.accountStatus {
-  width: fit-content;
-  min-height: 30px;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding-inline: var(--space-3);
-  border-radius: var(--radius-pill);
-  background: color-mix(in srgb, var(--success-soft) 70%, var(--surface));
-  color: var(--success);
-  font-size: var(--text-caption);
-  font-weight: 750;
-}
-
-.accountStatusDot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: currentColor;
-}
-
-.accountIdentity {
-  min-width: 0;
-  display: grid;
-  grid-template-columns: 52px minmax(0, 1fr);
-  align-items: center;
-  gap: var(--space-3);
-}
-
-.accountAvatar {
-  width: 52px;
-  height: 52px;
-  display: grid;
-  place-items: center;
-  border-radius: 18px;
-  background: var(--brand);
-  color: var(--brand-on);
-  font-weight: 800;
-  box-shadow: var(--shadow-media-soft);
-  transform: rotate(-2deg);
-}
-
-.accountIdentity > div {
-  min-width: 0;
-  display: grid;
-  gap: 1px;
-}
-
-.accountName {
-  color: var(--ink);
-  font-size: var(--text-title-sm);
-  font-weight: 700;
-  overflow-wrap: anywhere;
-}
-
-.accountEmail {
-  color: var(--ink-tertiary);
-  font-size: var(--text-body-sm);
-  overflow-wrap: anywhere;
-}
-
-.accountActions {
-  display: grid;
-  gap: var(--space-3);
-}
-
-.accountActionPrimary,
-.accountActionSecondary {
-  min-width: 0;
-  min-height: 70px;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-card);
-  transition:
-    transform var(--motion-standard) var(--motion-ease-out),
-    background-color var(--motion-standard) var(--motion-ease-out),
-    box-shadow var(--motion-standard) var(--motion-ease-out);
-}
-
-.accountActionPrimary span:first-child,
-.accountActionSecondary span:first-child {
-  min-width: 0;
-  display: grid;
-  gap: 2px;
-}
-
-.accountActionPrimary strong,
-.accountActionSecondary strong {
-  font-size: var(--text-body);
-}
-
-.accountActionPrimary small,
-.accountActionSecondary small {
-  font-size: var(--text-caption);
-  font-weight: 450;
-  line-height: 1.4;
-}
-
-.accountActionPrimary {
-  background: var(--brand);
-  color: var(--brand-on);
-  box-shadow: var(--shadow-action);
-}
-
-.accountActionPrimary small {
-  color: color-mix(in srgb, var(--brand-on) 80%, transparent);
-}
-
-.accountActionPrimary:hover {
-  transform: translateY(-2px);
-  background: var(--brand-hover);
-  box-shadow: var(--shadow-action-hover);
-  text-decoration: none;
-}
-
-.accountActionSecondary {
-  border: 1px solid var(--line-soft);
-  background: var(--surface-raised);
-  color: var(--ink);
   box-shadow: var(--shadow-subtle);
 }
-
-.accountActionSecondary small {
-  color: var(--ink-tertiary);
-}
-
-.accountActionSecondary:hover {
-  transform: translateY(-2px);
-  background: var(--surface-hover);
-  box-shadow: var(--shadow-raised);
-  text-decoration: none;
-}
-
-.accountActionPrimary:active,
-.accountActionSecondary:active {
-  transform: translateY(0) scale(0.995);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .brand,
-  .passwordToggle,
-  .accountActionPrimary,
-  .accountActionSecondary {
-    transition: none;
-  }
-
-  .brand:hover,
-  .passwordToggle:hover:not(:disabled),
-  .accountActionPrimary:hover,
-  .accountActionSecondary:hover,
-  .accountActionPrimary:active,
-  .accountActionSecondary:active {
-    transform: none;
-  }
-}
-
-@media (max-width: 1080px) {
-  .page {
-    grid-template-columns: minmax(0, 0.94fr) minmax(410px, 1fr);
-  }
-
-  .introBody {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "copy"
-      "visual"
-      "journey";
-  }
-
-
-  .introTitle {
-    max-width: 14ch;
-    font-size: clamp(2.35rem, 5vw, 3.8rem);
-  }
-}
-
-@media (max-width: 860px) {
-  .page {
-    display: block;
-    padding: 0;
-    background: var(--canvas);
-  }
-
-  .intro {
-    min-height: 0;
-    gap: var(--space-3);
-    padding: var(--space-4) var(--page-gutter);
-    border-radius: 0 0 var(--radius-card) var(--radius-card);
-    box-shadow: none;
-  }
-
-  .introBody {
-    display: block;
-    width: 100%;
-  }
-
-  .introCopy {
-    gap: var(--space-2);
-  }
-
-  .introLabel,
-  .accountJourney {
-    display: none;
-  }
-
-  .introTitle {
-    max-width: none;
-    font-size: clamp(1.5rem, 4.3vw, 2.25rem);
-    line-height: 1.12;
-    letter-spacing: -0.025em;
-  }
-
-  .introDescription {
-    max-width: 65ch;
-    font-size: var(--text-body-sm);
-    line-height: 1.5;
-  }
-
-  .panel {
-    place-items: start center;
-    padding: var(--space-3) var(--page-gutter) var(--space-8);
-    border-radius: 0;
-    background: var(--canvas);
-    box-shadow: none;
-  }
-
-  .panelInner {
-    width: min(100%, 580px);
-    gap: var(--space-3);
-    padding: var(--space-5);
-  }
-
-  .formShell {
-    gap: var(--space-4);
-  }
-
-  .headingGroup {
-    gap: var(--space-1);
-  }
-
-  .title {
-    font-size: clamp(1.65rem, 5vw, 2.25rem);
-  }
-
-  .description {
-    line-height: 1.55;
-  }
-}
-
-@media (max-width: 620px) {
-  .intro,
-  .panel {
-    padding-inline: var(--page-gutter-compact);
-  }
-
-  .intro {
-    padding-block: var(--space-3);
-  }
-
-  .brand {
-    min-height: 44px;
-  }
-
-  .brandMark {
-    width: 34px;
-    height: 34px;
-  }
-
-  .brandCopy span {
-    display: none;
-  }
-
-  .introTitle {
-    font-size: clamp(1.45rem, 5.4vw, 1.85rem);
-  }
-
-  .panelInner {
-    padding: var(--space-4);
-  }
-
-  .formShell {
-    gap: var(--space-3);
-  }
-
-  .accountActionPrimary,
-  .accountActionSecondary {
-    min-height: 68px;
-  }
-}
-
-@media (max-width: 360px) {
-  .intro,
-  .panel {
-    padding-inline: var(--space-3);
-  }
-}
-
-@media (min-width: 861px) {
-  .formShell {
-    min-height: 560px;
-    align-content: start;
-  }
-}
-
-/* Auth is an editorial introduction plus one quiet form, not a 3D product mockup. */
-.page { gap: 0; padding: 0; background: var(--canvas); }
-.intro {
-  border-radius: 0;
-  background: var(--gradient-premium);
-  box-shadow: none;
-  padding: clamp(24px, 4vw, 56px);
-}
-.introBody {
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-areas: "copy" "journey";
-  max-width: 640px;
-  gap: clamp(28px, 5vw, 58px);
-}
-.introTitle { max-width: 14ch; font-size: clamp(2.5rem, 4.5vw, 4.6rem); line-height: 1.08; }
-.introDescription { line-height: 1.58; }
-.accountJourneyList { gap: 8px; }
-.accountJourneyItem,
-.accountJourneyItem:nth-child(n) {
-  background: transparent;
-  border-color: var(--on-dark-line);
-  min-height: 96px;
-  border-radius: var(--radius-control);
-}
-.panel { background: var(--canvas); box-shadow: none; border-radius: 0; }
-.panelInner { border: 1px solid var(--line-soft); border-radius: var(--radius-feature); box-shadow: none; }
-@media (max-width: 860px) {
-  .introBody { grid-template-areas: "copy"; }
-}
-@media (max-width: 620px) {
-  .intro { padding: 24px 20px; border-radius: 0 0 var(--radius-card) var(--radius-card); }
-  .panel { padding: 16px; }
-  .panelInner { padding: 20px; }
-}
-
-.brandMark::before,
-.brandMark::after { content: none; }
-.brandMark { transform: none; box-shadow: none; }
-.brandMark svg { color: var(--brand-strong); }
-
-/* Account entry: focused forms, clear role transition, practical journey.
-   Inherits theme tokens; no remote imagery or decorative AI visuals. */
-.page {
-  grid-template-columns: minmax(0, .88fr) minmax(430px, 1.12fr);
-  gap: 0;
-  padding: 0;
-  background: var(--canvas);
-}
-.intro {
-  min-height: 100dvh;
-  gap: 50px;
-  padding: clamp(28px, 4vw, 58px);
-  background: #15343a;
-  border-radius: 0;
-  box-shadow: none;
-}
-.brand { padding: 5px 10px 5px 0; margin-left: 0; border-radius: 10px; }
-.brand:hover { transform: none; background: rgb(255 255 255 / 10%); }
-.brandMark {
-  background: #e9ceaa;
-  border-radius: 11px;
-  box-shadow: none;
-}
-.brandMark svg { color: #173a3d; }
-.brandCopy strong { color: #fafff8; font-size: 1.04rem; letter-spacing: -.035em; }
-.brandCopy span { color: #c4d8d2; font-size: .71rem; }
-.introBody {
-  width: min(100%, 610px);
-  max-width: 100%;
-  grid-template-columns: 1fr;
-  grid-template-areas: "copy" "journey";
-  gap: clamp(24px, 4vw, 42px);
-  align-content: center;
-}
-.introCopy { gap: 15px; }
-.introLabel {
-  min-height: 27px;
-  padding: 5px 10px;
-  font-size: .7rem;
-  letter-spacing: .065em;
-  font-weight: 730;
-  border-radius: 7px;
-  background: #275158;
-  border: 0;
-  color: #d9eee6;
-}
-.introTitle {
-  max-width: 16ch;
-  font-size: clamp(2.15rem, 4.1vw, 3.65rem);
-  line-height: 1.1;
-  color: #f5faf4;
-  font-weight: 780;
-  letter-spacing: -.045em;
-}
-.introDescription { max-width: 49ch; font-size: .97rem; color: #cadbd6; line-height: 1.62; }
-.accountJourney { gap: 15px; align-self: start; }
-.accountJourneyTitle { color: #b9d3cd; font-size: .76rem; font-weight: 740; letter-spacing: .015em; }
-.accountJourneyList { grid-template-columns: 1fr; gap: 0; }
-.accountJourneyItem,
-.accountJourneyItem:nth-child(n) {
-  grid-template-columns: 32px minmax(0, 1fr);
-  min-height: 0;
-  align-items: start;
-  align-content: center;
-  gap: 2px 12px;
-  padding: 13px 0;
-  background: transparent;
-  border: 0;
-  border-top: 1px solid rgb(219 240 233 / 16%);
-  border-radius: 0;
-}
-.accountJourneyNumber {
-  grid-row: span 2;
-  color: #ddc199 !important;
-  font-size: .79rem !important;
-  font-weight: 780;
-  letter-spacing: -.02em;
-}
-.accountJourneyItem strong { color: #f5faf4; font-size: .86rem; line-height: 1.35; }
-.accountJourneyItem span:not(.accountJourneyNumber) { color: #bed5ce; font-size: .77rem; }
-.panel {
-  border-radius: 0;
-  padding: clamp(20px, 4vw, 60px);
-  background: var(--canvas);
-  box-shadow: none;
-}
-.panelInner {
-  width: min(100%, 472px);
-  gap: 16px;
-  padding: clamp(22px, 3vw, 34px);
-  border: 1px solid var(--line);
-  border-radius: 17px;
-  background: var(--surface);
-  box-shadow: 0 7px 30px rgb(14 48 51 / 5%);
-}
 .panelLabel {
-  min-height: 27px;
+  display: inline-flex;
+  width: fit-content;
+  min-height: 28px;
+  align-items: center;
+  padding: 4px 11px;
+  border-radius: 7px;
   background: var(--brand-soft);
   color: var(--brand-strong);
-  border-radius: 7px;
-  font-size: .71rem;
-  letter-spacing: .025em;
+  font-size: .74rem;
+  font-weight: 750;
 }
-.formShell { gap: 18px; }
-.headingGroup { gap: 7px; }
+.formShell { display: grid; min-width: 0; gap: 20px; align-content: start; }
+.headingGroup { display: grid; gap: 10px; }
 .title {
-  max-width: none;
-  font-size: clamp(1.55rem, 2.5vw, 2.08rem);
-  letter-spacing: -.03em;
-  line-height: 1.17;
+  max-width: 28ch;
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(1.72rem, 2vw, 2.24rem);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -.035em;
+  text-wrap: balance;
 }
-.description { max-width: 46ch; font-size: .86rem; line-height: 1.55; }
-.form { gap: 16px; }
-.formFields { gap: 14px; }
-.formActions button { width: 100%; min-height: 47px; border-radius: 10px; box-shadow: none; }
+.description { max-width: 53ch; color: var(--ink-secondary); font-size: .9rem; line-height: 1.65; }
+.form { display: grid; gap: 17px; }
+.formFields { display: grid; gap: 15px; min-width: 0; }
+.formActions { display: grid; gap: 8px; }
+.formActions button { width: 100%; min-height: 50px; border-radius: 10px; font-weight: 770; box-shadow: none; }
+.formActions button:not(:disabled):hover { box-shadow: none; }
 .passwordToggle {
-  min-height: 36px;
-  font-size: .78rem;
-  margin-top: -9px;
-  padding-inline: 8px;
+  display: inline-flex;
+  width: fit-content;
+  min-height: 44px;
+  align-items: center;
+  padding: 0 11px;
+  margin-top: -8px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--brand-strong);
   background: transparent;
+  font: inherit;
+  font-size: .82rem;
+  font-weight: 740;
+  cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 3px;
-  border-radius: 7px;
+  transition: background-color 160ms ease;
 }
-.passwordToggle:hover:not(:disabled) { transform: none; background: var(--brand-soft); }
+.passwordToggle:hover:not(:disabled) { background: var(--brand-soft); color: var(--brand-strong); }
+.passwordToggle:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.passwordToggle:disabled { color: var(--control-disabled-ink); cursor: not-allowed; text-decoration: none; }
+.formDivider { height: 1px; background: var(--line); }
+.formFooter { display: grid; justify-items: start; gap: 4px; }
+.switchText { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; color: var(--ink-secondary); font-size: .9rem; }
+.switchLink, .backLink { display: inline-flex; min-height: 44px; align-items: center; border-radius: 8px; font-weight: 760; }
+.switchLink { color: var(--brand-strong); padding-inline: 4px; }
+.switchLink:hover { color: var(--brand-strong); text-decoration: underline; text-underline-offset: 3px; }
+.backLink { gap: 8px; padding-inline: 8px; margin-left: -8px; color: var(--ink-secondary); font-size: .85rem; text-decoration: none; }
+.backLink::before { content: ""; width: 8px; height: 8px; border-left: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg); }
+.backLink:hover { background: var(--surface-hover); color: var(--ink); text-decoration: none; }
+.switchLink:focus-visible, .backLink:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 .continueContext {
   display: grid;
-  gap: 4px;
-  padding: 12px 14px;
-  border: 1px solid var(--brand-line);
-  border-radius: 10px;
-  background: var(--brand-soft);
-}
-.continueContextLabel { color: var(--ink-secondary); font-size: .69rem; font-weight: 720; }
-.continueContext strong { color: var(--brand-strong); font-size: .9rem; }
-.continueContext small { color: var(--ink-secondary); font-size: .72rem; line-height: 1.45; }
-.formDivider { margin-top: 1px; }
-.formFooter { justify-items: start; gap: 8px; }
-.switchText { font-size: .85rem; gap: 8px; }
-.switchLink { font-weight: 770; }
-.backLink { font-size: .79rem; }
-.accountSummary {
-  gap: 12px;
-  padding: 15px;
+  gap: 5px;
+  padding: 13px 15px;
   border: 1px solid var(--brand-line);
   border-radius: 11px;
   background: var(--brand-soft);
-  box-shadow: none;
 }
-.accountAvatar { border-radius: 11px; transform: none; width: 45px; height: 45px; box-shadow: none; }
-.accountIdentity { grid-template-columns: 45px minmax(0,1fr); }
-.accountName { font-size: .95rem; }
-.accountEmail { color: var(--ink-secondary); font-size: .78rem; }
-.accountActions { gap: 8px; }
-.accountActionPrimary,
-.accountActionSecondary {
-  min-height: 66px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 13px 14px;
-  border-radius: 10px;
-  box-shadow: none;
+.continueContextLabel { color: var(--ink-secondary); font-size: .74rem; font-weight: 730; }
+.continueContext strong { color: var(--brand-strong); font-size: .95rem; line-height: 1.4; overflow-wrap: anywhere; }
+.continueContext small { color: var(--ink-secondary); font-size: .79rem; line-height: 1.5; }
+
+/* Already-authenticated auth entry: user identity, never a fake brand mark. */
+.accountSummary {
+  display: grid; gap: 13px; padding: 18px;
+  border: 1px solid var(--brand-line); border-radius: 12px;
+  background: var(--brand-soft);
 }
-.accountActionPrimary { background: var(--brand); color: var(--brand-on); }
-.accountActionSecondary {
-  border: 1px solid var(--line);
-  background: var(--surface);
-  color: var(--ink);
+.accountStatus {
+  display: inline-flex; width: fit-content; min-height: 28px; align-items: center; gap: 8px;
+  padding: 5px 10px; border-radius: 7px;
+  color: var(--success); background: var(--success-soft); font-size: .78rem; font-weight: 770;
 }
-.accountActionPrimary:hover,.accountActionSecondary:hover { transform: none; box-shadow: none; }
+.accountStatusDot { width: 7px; height: 7px; flex-shrink: 0; border-radius: 50%; background: currentColor; }
+.accountIdentity { display: grid; min-width: 0; grid-template-columns: 48px minmax(0, 1fr); align-items: center; gap: 13px; }
+.accountAvatar { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 12px; background: var(--brand); color: var(--brand-on); font-weight: 780; }
+.accountIdentity > div { display: grid; min-width: 0; gap: 3px; }
+.accountName { color: var(--ink); font-size: 1rem; font-weight: 770; overflow-wrap: anywhere; }
+.accountEmail { color: var(--ink-secondary); font-size: .83rem; overflow-wrap: anywhere; }
+.accountActions { display: grid; gap: 10px; }
+.accountActionPrimary, .accountActionSecondary {
+  display: flex; min-height: 70px; min-width: 0; align-items: center; justify-content: space-between; gap: 14px;
+  padding: 14px 16px; border: 1px solid transparent; border-radius: 11px; text-decoration: none;
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+.accountActionPrimary { color: var(--brand-on); background: var(--brand); }
+.accountActionPrimary:hover { color: var(--brand-on); background: var(--brand-hover); text-decoration: none; }
+.accountActionSecondary { color: var(--ink); background: var(--surface); border-color: var(--line); }
+.accountActionSecondary:hover { color: var(--ink); background: var(--surface-hover); border-color: var(--brand-line); text-decoration: none; }
+.accountActionPrimary > span, .accountActionSecondary > span { display: grid; min-width: 0; gap: 4px; }
+.accountActionPrimary strong, .accountActionSecondary strong { font-size: .93rem; font-weight: 780; }
 .accountActionPrimary small { color: color-mix(in srgb, var(--brand-on) 82%, transparent); }
 .accountActionSecondary small { color: var(--ink-secondary); }
-.accountActionPrimary svg,.accountActionSecondary svg { flex-shrink: 0; }
-@media (max-width: 1080px) and (min-width: 861px) {
-  .page { grid-template-columns: minmax(0,.8fr) minmax(395px,1fr); }
-  .intro { padding: 32px; }
-  .introTitle { font-size: clamp(1.9rem, 3.1vw, 2.8rem); }
+.accountActionPrimary small, .accountActionSecondary small { font-size: .79rem; line-height: 1.45; }
+.accountActionPrimary svg, .accountActionSecondary svg { flex-shrink: 0; }
+.accountActionPrimary:focus-visible, .accountActionSecondary:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+
+@media (max-width: 1050px) {
+  .page { grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); padding: 16px; gap: 12px; }
+  .intro { padding: 28px; gap: 32px; }
+  .introTitle { font-size: clamp(2rem, 3.7vw, 2.9rem); }
+  .panel { padding: 6px; }
+  .panelInner { padding: 25px; }
 }
-@media (max-width: 860px) {
-  .page { display: block; }
+@media (max-width: 850px) {
+  .page { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; padding: 0; }
   .intro {
     min-height: 0;
-    gap: 8px;
-    padding: 16px var(--page-gutter) 13px;
-    border-radius: 0;
+    gap: 11px;
+    padding: 19px var(--page-gutter) 23px;
+    border-radius: 0 0 17px 17px;
   }
-  .introBody { display: block; }
-  .introCopy { gap: 5px; }
-  .introLabel,.accountJourney { display: none; }
-  .introTitle { max-width: none; font-size: clamp(1.42rem, 4vw, 1.9rem); line-height: 1.2; }
-  .introDescription { max-width: 65ch; font-size: .8rem; line-height: 1.43; }
-  .panel { padding: 14px var(--page-gutter) 32px; }
-  .panelInner { width: min(100%, 560px); padding: 21px; }
-  .formShell { min-height: 0; gap: 16px; }
+  .brand { min-height: 44px; margin: -6px -8px; padding: 6px 8px; }
+  .introBody { gap: 10px; }
+  .introCopy { gap: 7px; padding-top: 7px; }
+  .introLabel, .accountJourney { display: none; }
+  .introTitle { max-width: none; font-size: clamp(1.55rem, 4.2vw, 2.13rem); letter-spacing: -.025em; }
+  .introDescription { max-width: 64ch; font-size: .86rem; line-height: 1.5; }
+  .panel { padding: 22px var(--page-gutter) 44px; }
+  .panelInner { width: min(100%, 560px); padding: clamp(22px, 4vw, 32px); }
+  .formShell { gap: 16px; }
 }
-@media (max-width: 620px) {
-  .intro { padding: 12px 17px; }
-  .brand { min-height: 37px; }
-  .brandMark { width: 32px; height: 32px; }
-  .brandCopy strong { font-size: .95rem; }
-  .brandCopy span { display: none; }
-  .introTitle { font-size: 1.4rem; }
-  .introDescription { font-size: .76rem; line-height: 1.35; }
-  .panel { padding: 11px 13px 25px; }
-  .panelInner { padding: 17px; gap: 12px; border-radius: 13px; }
-  .formShell { gap: 14px; }
-  .title { font-size: 1.53rem; }
-  .description { font-size: .79rem; }
-  .accountActionPrimary,.accountActionSecondary { min-height: 63px; }
+@media (max-width: 580px) {
+  .intro { padding: 13px 18px 17px; border-radius: 0 0 13px 13px; }
+  .introTitle { font-size: clamp(1.4rem, 5.8vw, 1.75rem); line-height: 1.25; }
+  .introDescription { font-size: .82rem; line-height: 1.45; }
+  .panel { padding: 15px 13px 32px; }
+  .panelInner { padding: 20px 18px; gap: 14px; border-radius: 14px; }
+  .title { font-size: 1.65rem; }
+  .description { font-size: .86rem; }
+  .form { gap: 14px; }
+  .formFields { gap: 13px; }
 }
 @media (max-width: 360px) {
   .intro { padding-inline: 13px; }
   .panel { padding-inline: 9px; }
-  .panelInner { padding: 14px; }
+  .panelInner { padding: 16px 13px; }
+  .title { font-size: 1.51rem; }
+}
+@media (min-width: 1800px) {
+  .page { grid-template-columns: minmax(0, 1.06fr) minmax(0, .94fr); }
+  .panelInner { width: min(100%, 560px); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .accountActionPrimary,.accountActionSecondary,.passwordToggle { transition: none; }
+  .brand, .passwordToggle, .accountActionPrimary, .accountActionSecondary { transition: none; }
 }

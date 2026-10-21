@@ -6,6 +6,8 @@ ENV NODE_ENV=development
 ENV NEXT_TELEMETRY_DISABLED=1
 
 COPY package.json package-lock.json ./
+# The locked development-only braces dependency uses an in-repository tarball.
+COPY vendor/braces-3.0.3.tgz ./vendor/braces-3.0.3.tgz
 RUN npm ci
 
 COPY . .

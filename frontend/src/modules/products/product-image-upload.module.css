@@ -207,3 +207,6 @@
 .progressStep { border-radius: 9px; }
 .actions button { min-height: 44px; border-radius: 9px; }
 @media(max-width:640px) { .root { padding: 12px; } .progress { padding: 11px; } }
+
+/* Campus Commerce A / Phase 13 */
+.root,.selected,.selectedCopy,.progress,.progressSteps,.currentMedia{min-width:0}.fileName,.meta{overflow-wrap:anywhere}.actions button{min-height:44px}@media(max-width:620px){.header,.progressSteps{grid-template-columns:minmax(0,1fr)}}

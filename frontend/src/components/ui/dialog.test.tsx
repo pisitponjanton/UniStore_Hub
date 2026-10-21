@@ -80,4 +80,14 @@ describe("Dialog accessibility", () => {
     expect(confirm).not.toHaveBeenCalled();
   });
 
+  it("closes a keyboard-accessible dialog with Escape and restores focus", async () => {
+    render(<Dialog trigger={<Button>เปิดหน้าต่าง</Button>} title="รายละเอียด" description="ตรวจสอบข้อมูล" />);
+    const trigger = screen.getByRole("button", { name: "เปิดหน้าต่าง" });
+    fireEvent.click(trigger);
+    expect(await screen.findByRole("dialog", { name: "รายละเอียด" })).toBeInTheDocument();
+    fireEvent.keyDown(document.activeElement ?? document.body, { key: "Escape", code: "Escape" });
+    await waitFor(() => expect(screen.queryByRole("dialog", { name: "รายละเอียด" })).not.toBeInTheDocument());
+    await waitFor(() => expect(trigger).toHaveFocus());
+  });
+
 });

@@ -18,6 +18,7 @@ import {
   resolveOrganizationAccess,
 } from "./access";
 import { authSession } from "./session";
+import { OrderAccessRecovery } from "./auth-recovery";
 import { useAuthSession } from "./use-auth-session";
 import { useCurrentLoginHref } from "./use-auth-navigation-context";
 
@@ -33,52 +34,41 @@ function LoginAction() {
 
 export function AuthenticatedBoundary({
   requestError,
+  recoveryKind,
   children,
 }: {
   requestError?: unknown;
+  recoveryKind?: "order";
   children: ReactNode;
 }) {
   const auth = useAuthSession();
   const apiFailure = classifyApiAccessFailure(requestError);
 
   useEffect(() => {
-    if (isDefinitiveSessionFailure(requestError)) {
-      authSession.logout();
-    }
+    if (isDefinitiveSessionFailure(requestError)) authSession.logout();
   }, [requestError]);
 
-  if (apiFailure === "forbidden") {
-    return <ForbiddenState headingLevel={1} />;
-  }
-
-  if (apiFailure === "unauthorized") {
-    return (
-      <UnauthorizedState
-        headingLevel={1}
-        actions={<LoginAction />}
-      />
-    );
-  }
-
+  // A session still hydrating must not flash anonymous UI.
   if (auth.status === "loading") {
-    return (
+    return recoveryKind === "order" ? (
+      <OrderAccessRecovery state="loading" />
+    ) : (
       <main aria-label="กำลังตรวจสอบบัญชี">
-        <LoadingState
-          headingLevel={1}
-          title="กำลังตรวจสอบบัญชี"
-          description="กำลังตรวจสอบ Session ก่อนเปิดหน้านี้"
-        />
+        <LoadingState headingLevel={1} title="กำลังตรวจสอบบัญชี"
+          description="กำลังตรวจสอบ Session ก่อนเปิดหน้านี้" />
       </main>
     );
   }
 
-  if (auth.status === "anonymous") {
-    return (
-      <UnauthorizedState
-        headingLevel={1}
-        actions={<LoginAction />}
-      />
-    );
+  if (apiFailure === "forbidden") {
+    return recoveryKind === "order" ?
+      <OrderAccessRecovery state="forbidden" /> : <ForbiddenState headingLevel={1} />;
+  }
+
+  if (apiFailure === "unauthorized" || auth.status === "anonymous") {
+    return recoveryKind === "order" ? (
+      <OrderAccessRecovery state="unauthorized" />
+    ) : <UnauthorizedState headingLevel={1} actions={<LoginAction />} />;
   }
 
   return children;

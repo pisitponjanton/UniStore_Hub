@@ -1,5 +1,7 @@
 "use client";
 
+import { AppIcon } from "@/components/ui/app-icon";
+
 import { PageLoadingRows, PageStateHeading, RecoveryActions } from "@/components/ui/async-page";
 
 import Link from "next/link";
@@ -305,7 +307,7 @@ export function ProductView() {
               </div>
               {variants.length > 0 ? (
                 <a className={styles.productJump} href="#product-selection">
-                  เลือกตัวเลือกและคำนวณยอด <span aria-hidden="true">↗</span>
+                  เลือกตัวเลือกและคำนวณยอด <AppIcon name="arrow-up-right" size={17} />
                 </a>
               ) : null}
             </div>
@@ -341,6 +343,12 @@ export function ProductView() {
                   </div>
                   <span className={styles.selectionStep}>ตรวจสอบก่อนสั่ง</span>
                 </div>
+
+                <ol className={styles.purchaseSteps} aria-label="ขั้นตอนการเริ่มสั่งซื้อ">
+                  <li><span aria-hidden="true">1</span> เลือกตัวเลือกสินค้า</li>
+                  <li><span aria-hidden="true">2</span> เลือกรอบที่เปิดรับ</li>
+                  <li><span aria-hidden="true">3</span> ตรวจยอดและดำเนินการต่อ</li>
+                </ol>
 
                 <div className={styles.selectionFields}>
                   <SelectField
@@ -404,6 +412,11 @@ export function ProductView() {
 
                 <div className={styles.estimatePanel}>
                   <span className={styles.metaLabel}>ยอดรวมโดยประมาณ</span>
+                  {selection?.variant ? (
+                    <p className={styles.estimateBreakdown} data-numeric>
+                      {selection.variant.name} · {formatSatang(selection.variant.price)} × {selection.quantity ?? "—"}
+                    </p>
+                  ) : null}
                   <output
                     className={styles.estimateValue}
                     htmlFor="product-variant product-campaign product-quantity"
