@@ -2,6 +2,18 @@
 
 This directory is the design and test brief for rebuilding the **entire** frontend experience across all roles. The baseline is commit `9007ec3`.
 
+## Consolidated design and verification reviews
+
+Historical notes have been **merged by subject**; do not create numbered milestone reports. Read the [mandatory naming policy](../ARTIFACT_NAMING_AND_CONSOLIDATION.md).
+
+| Review | Scope |
+| --- | --- |
+| [Foundation and UI](CAMPUS_COMMERCE_A_FOUNDATION_AND_UI_REVIEW.md) | Baseline, foundation, fluid 4K, interaction, icons |
+| [Storefront](CAMPUS_COMMERCE_A_STOREFRONT_REVIEW.md) | Store grid, QA fixtures, public commerce |
+| [Authentication and customer](CAMPUS_COMMERCE_A_AUTH_AND_CUSTOMER_REVIEW.md) | Login, return to intent, checkout/customer journeys |
+| [Operations](CAMPUS_COMMERCE_A_OPERATIONS_REVIEW.md) | Staff, organization and platform admin |
+| [Quality and security](CAMPUS_COMMERCE_A_QUALITY_AND_SECURITY_REVIEW.md) | End-to-end audit, dependencies, release review |
+
 | File | Use |
 | --- | --- |
 | [FOUNDATION_IMPLEMENTATION.md](FOUNDATION_IMPLEMENTATION.md) | Shared brand, role-aware navigation and browser evidence (Foundation complete) |

@@ -8,7 +8,7 @@ import { localAuditTargets } from "./fixture-guard";
 test("safe customer journey, actionable orders and visual breakpoints", async ({ browser, request }) => {
   test.setTimeout(210_000);
   const { frontend } = localAuditTargets();
-  const evidenceDir = join("test-results", "quality-audit", "uxqa-" + randomUUID(), "phase2");
+  const evidenceDir = join("test-results", "quality-audit", "uxqa-" + randomUUID(), "customer-responsive");
   await mkdir(evidenceDir, { recursive: true });
   const org = "?organizationId=" + ids.organizationId;
   const stages = [

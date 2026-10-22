@@ -15,7 +15,11 @@
     "test:e2e:cross-role": "node scripts/quality/run-cross-role-regression.cjs",
     "test:security:gate": "node --test scripts/security/audit-review.test.cjs",
     "audit:review": "node scripts/security/audit-review.cjs",
-    "test:security:runtime": "node --test scripts/security/verify-runtime-isolation.test.cjs && node scripts/security/verify-runtime-isolation.cjs"
+    "test:security:runtime": "node --test scripts/security/verify-runtime-isolation.test.cjs && node scripts/security/verify-runtime-isolation.cjs",
+    "prebuild": "node ../scripts/quality/check-artifact-names.cjs",
+    "pretest": "node ../scripts/quality/check-artifact-names.cjs",
+    "pretest:e2e": "node ../scripts/quality/check-artifact-names.cjs",
+    "prelint": "node ../scripts/quality/check-artifact-names.cjs"
   },
   "dependencies": {
     "@fontsource/noto-sans-thai": "5.3.0",

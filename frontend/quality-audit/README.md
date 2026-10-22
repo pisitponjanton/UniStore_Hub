@@ -4,6 +4,8 @@ This is the **entry point** for frontend UX/UI test coverage and evidence. Repor
 
 The historical frontend remediation was completed **for scoped non-destructive QA only**. The original exhaustive sign-off is **not** complete: 257 source Action IDs each have at least one narrowly scoped direct PASS, but **0/257 full declared-state matrices** are certified. Real Backend mutations, cross-tab upload idempotency, physical devices/screen readers and visual approval remain separate release risks. Do not silently convert `NOT_TESTED` outcomes to PASS.
 
+**All agents:** artifacts and evidence must use stable feature/topic filenames, not milestone names. Follow [the mandatory naming policy](../../docs/ARTIFACT_NAMING_AND_CONSOLIDATION.md). Run `npm run check:artifact-names` at repository root.
+
 ## Documents by topic
 
 | Topic | Document |

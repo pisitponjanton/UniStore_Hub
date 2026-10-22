@@ -1,5 +1,9 @@
 # Deployment / Tooling Agent Rules
 
+## Mandatory artifact naming policy
+
+Before creating or renaming any report, source file, test, generated artifact or evidence folder, read [the repository naming policy](../docs/ARTIFACT_NAMING_AND_CONSOLIDATION.md). **Do not use `phase` or numbered work milestones in filenames**. Extend existing subject-owned documents/tests instead of splitting them per work iteration. Follow the root `AGENTS.md`; the Integration Agent verifies `npm run check:artifact-names` at handoff. This reminder does not alter subsystem write-ownership boundaries.
+
 ## Ownership
 
 This agent has **write access only inside**:

@@ -262,7 +262,7 @@ test("Payment upload rejects invalid files and double activation does not create
 }, testInfo) => {
   const fixture = await createStaffPendingOrderFixture(
     request,
-    `phase11-upload-${Date.now()}-${testInfo.workerIndex}`,
+    `upload-retry-${Date.now()}-${testInfo.workerIndex}`,
   );
 
   await establishTokenSession(
@@ -335,7 +335,7 @@ test("Payment upload rejects invalid files and double activation does not create
   expect(invalidValue).toBe("");
 
   await fileInput.setInputFiles({
-    name: "phase11-valid-payment.png",
+    name: "valid-payment.png",
     mimeType: "image/png",
     buffer: tinyPng,
   });
@@ -412,7 +412,7 @@ test("keyboard-only mobile navigation and destructive dialog keep focus containe
 }, testInfo) => {
   const fixture = await createStaffPendingOrderFixture(
     request,
-    `phase11-keyboard-${Date.now()}-${testInfo.workerIndex}`,
+    `keyboard-journey-${Date.now()}-${testInfo.workerIndex}`,
   );
 
   await establishTokenSession(
@@ -539,7 +539,7 @@ test("200% reflow-equivalent Customer order layout remains usable at a 640 CSS-p
 }, testInfo) => {
   const fixture = await createStaffPendingOrderFixture(
     request,
-    `phase11-reflow-${Date.now()}-${testInfo.workerIndex}`,
+    `layout-reflow-${Date.now()}-${testInfo.workerIndex}`,
   );
 
   await establishTokenSession(
@@ -581,7 +581,7 @@ test("200% reflow-equivalent Customer order layout remains usable at a 640 CSS-p
 
   if (overflowBy > 1) {
     await testInfo.attach(
-      "finding-phase11-reflow-horizontal-overflow",
+      "finding-layout-reflow-horizontal-overflow",
       {
         body: Buffer.from(
           JSON.stringify(

@@ -356,5 +356,43 @@
     "tests/reports/runtime-phase-02-stress-regression.md": "tests/reports/runtime-stability-verification.md#record-02-runtime-stress-regression",
     "tests/reports/runtime-phase-04-review.md": "tests/reports/runtime-stability-verification.md#record-03-runtime-review",
     "tests/reports/web-quality-audit-phase9-2026-10-10.md": "tests/reports/web-quality-audit-2026-10-10.md"
+  },
+  "latestConsolidation": {
+    "description": "Current follow-up cleanup: same-feature browser suites and topic-owned design reviews with no milestone words in filenames; historic references are metadata only.",
+    "sourceToTopic": {
+      "campus-a-phase2-foundation.spec.ts": "campus-commerce-ui.spec.ts",
+      "campus-a-phase3-responsive.spec.ts": "campus-commerce-ui.spec.ts",
+      "campus-a-phase4-interaction.spec.ts": "campus-commerce-ui.spec.ts",
+      "campus-a-phase5-icons.spec.ts": "campus-commerce-ui.spec.ts",
+      "campus-a-phase6-store-grid.spec.ts": "storefront-shopping.spec.ts",
+      "campus-a-phase7-qa-visibility.spec.ts": "storefront-shopping.spec.ts",
+      "campus-a-phase8-public-commerce.spec.ts": "storefront-shopping.spec.ts",
+      "campus-a-phase9-auth-layout.spec.ts": "authentication-and-return.spec.ts",
+      "campus-a-phase10-return-to-order.spec.ts": "authentication-and-return.spec.ts",
+      "campus-a-phase11-customer-workspace.spec.ts": "customer-order-workspace.spec.ts",
+      "campus-a-phase12-staff-operations.spec.ts": "organization-operations.spec.ts",
+      "campus-a-phase13-organization-admin.spec.ts": "organization-operations.spec.ts",
+      "campus-a-phase14-platform-admin.spec.ts": "platform-governance.spec.ts",
+      "campus-a-phase3-text-scale.spec.ts": "responsive-accessibility.spec.ts",
+      "campus-a-phase15-full-matrix.spec.ts": "responsive-accessibility.spec.ts",
+      "campus-a-phase15-text-200.spec.ts": "responsive-accessibility.spec.ts",
+      "CAMPUS_COMMERCE_A_PHASE1_BASELINE_AUDIT.md": "CAMPUS_COMMERCE_A_FOUNDATION_AND_UI_REVIEW.md",
+      "CAMPUS_COMMERCE_A_PHASE2_FOUNDATION_REVIEW.md": "CAMPUS_COMMERCE_A_FOUNDATION_AND_UI_REVIEW.md",
+      "CAMPUS_COMMERCE_A_PHASE3_RESPONSIVE_REVIEW.md": "CAMPUS_COMMERCE_A_FOUNDATION_AND_UI_REVIEW.md",
+      "CAMPUS_COMMERCE_A_PHASE4_INTERACTION_REVIEW.md": "CAMPUS_COMMERCE_A_FOUNDATION_AND_UI_REVIEW.md",
+      "CAMPUS_COMMERCE_A_PHASE5_ICON_SYSTEM_REVIEW.md": "CAMPUS_COMMERCE_A_FOUNDATION_AND_UI_REVIEW.md",
+      "CAMPUS_COMMERCE_A_PHASE6_STOREFRONT_GRID_REVIEW.md": "CAMPUS_COMMERCE_A_STOREFRONT_REVIEW.md",
+      "CAMPUS_COMMERCE_A_PHASE7_FIXTURE_VISIBILITY_REVIEW.md": "CAMPUS_COMMERCE_A_STOREFRONT_REVIEW.md",
+      "CAMPUS_COMMERCE_A_PHASE8_PUBLIC_COMMERCE_REVIEW.md": "CAMPUS_COMMERCE_A_STOREFRONT_REVIEW.md",
+      "CAMPUS_COMMERCE_A_PHASE9_AUTH_LAYOUT_REVIEW.md": "CAMPUS_COMMERCE_A_AUTH_AND_CUSTOMER_REVIEW.md",
+      "CAMPUS_COMMERCE_A_PHASE10_AUTH_RETURNTO_REVIEW.md": "CAMPUS_COMMERCE_A_AUTH_AND_CUSTOMER_REVIEW.md",
+      "CAMPUS_COMMERCE_A_PHASE11_CUSTOMER_WORKSPACE_REVIEW.md": "CAMPUS_COMMERCE_A_AUTH_AND_CUSTOMER_REVIEW.md",
+      "CAMPUS_COMMERCE_A_PHASE12_STAFF_WORKSPACE_REVIEW.md": "CAMPUS_COMMERCE_A_OPERATIONS_REVIEW.md",
+      "CAMPUS_COMMERCE_A_PHASE13_ORG_ADMIN_REVIEW.md": "CAMPUS_COMMERCE_A_OPERATIONS_REVIEW.md",
+      "CAMPUS_COMMERCE_A_PHASE14_PLATFORM_ADMIN_REVIEW.md": "CAMPUS_COMMERCE_A_OPERATIONS_REVIEW.md",
+      "CAMPUS_COMMERCE_A_PHASE15_COMPREHENSIVE_AUDIT.md": "CAMPUS_COMMERCE_A_QUALITY_AND_SECURITY_REVIEW.md",
+      "CAMPUS_COMMERCE_A_PHASE16_SECURITY_HANDOFF.md": "CAMPUS_COMMERCE_A_QUALITY_AND_SECURITY_REVIEW.md",
+      "CAMPUS_COMMERCE_A_PHASE17_FINAL_DIFF_REVIEW.md": "CAMPUS_COMMERCE_A_QUALITY_AND_SECURITY_REVIEW.md"
+    }
   }
 }

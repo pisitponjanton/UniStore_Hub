@@ -2,6 +2,20 @@
 
 This directory contains focused **Playwright** specifications. Each `*.spec.ts` describes observable behavior rather than a development milestone. Separate files are intentional: they allow targeted regression runs and clear failure ownership, without one monolithic test file.
 
+## Consolidated Campus Commerce A browser suites
+
+| Concern | Test suite |
+| --- | --- |
+| Shared UI, 4K, interaction and icons | `campus-commerce-ui.spec.ts` |
+| Storefront, fixture isolation and public commerce | `storefront-shopping.spec.ts` |
+| Login/register and return-to-intent | `authentication-and-return.spec.ts` |
+| Customer orders, payment, pickup and notifications | `customer-order-workspace.spec.ts` |
+| Staff + Organization Admin | `organization-operations.spec.ts` |
+| Platform governance | `platform-governance.spec.ts` |
+| Viewport/a11y matrix and text scaling | `responsive-accessibility.spec.ts` |
+
+**Required:** Add tests to the existing matching suite rather than generating one file per development milestone. See [artifact naming policy](../../../docs/ARTIFACT_NAMING_AND_CONSOLIDATION.md) and run `npm run check:artifact-names` at the root.
+
 ## Find a test by feature
 
 | Feature | Specification search |

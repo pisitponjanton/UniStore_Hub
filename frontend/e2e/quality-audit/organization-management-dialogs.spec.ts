@@ -24,7 +24,7 @@ test("live Local organization management confirm dialogs open and cancel without
     { name: "stores-status", path: "/org/stores/", label: /^(ปิดใช้งาน|เปิดใช้งาน)$/, modal: /^ยืนยันการ(ปิด|เปิด)ใช้งานร้านค้า$/ },
     { name: "products-status", path: "/org/products/", label: "ปิดใช้งาน", modal: "ยืนยันการปิดใช้งานสินค้า" },
   ] as const;
-  const evidence = join("test-results", "quality-audit", "uxqa-" + randomUUID(), "phase4");
+  const evidence = join("test-results", "quality-audit", "uxqa-" + randomUUID(), "organization-dialogs");
   await mkdir(evidence, { recursive: true });
   const results: Array<{ name: string; result: string; reason?: string }> = [];
   try {

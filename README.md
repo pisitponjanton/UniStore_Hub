@@ -2,6 +2,8 @@
 
 University storefront and order-operations application. This repository contains the application, local development tooling, infrastructure definitions and tests. The source of product requirements is [SPEC.md](SPEC.md); contributor ownership/rules are in [AGENTS.md](AGENTS.md).
 
+**Contributor requirement:** Read the [artifact naming policy](docs/ARTIFACT_NAMING_AND_CONSOLIDATION.md). Tests, docs, reports and screenshots are consolidated by subject, never named after an implementation milestone. Run `npm run check:artifact-names` before handoff or commit.
+
 ## Where to work
 
 | Area | Purpose |

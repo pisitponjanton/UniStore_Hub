@@ -9,7 +9,7 @@ import { localAuditTargets } from "./fixture-guard";
 test("modal keyboard trap, focus return, accessible contrast and light/dark at four viewports", async ({ browser, request }) => {
   test.setTimeout(170_000);
   const { frontend } = localAuditTargets();
-  const dir = join("test-results", "quality-audit", "uxqa-" + randomUUID(), "phase6-modal");
+  const dir = join("test-results", "quality-audit", "uxqa-" + randomUUID(), "accessible-modal");
   await mkdir(dir, { recursive: true });
   const results: Array<Record<string, unknown>> = [];
   for (const scheme of ["light", "dark"] as const) {

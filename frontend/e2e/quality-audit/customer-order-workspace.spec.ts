@@ -1,9 +1,15 @@
+/**
+ * Campus Commerce A — behavior-focused browser regression suite.
+ * Consolidated from historical work-item files; all test cases and mock guards retained.
+ * Add related cases here; never introduce milestone-numbered spec files.
+ */
 import { expect, test, type BrowserContext } from "@playwright/test";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
+test.describe("Customer workspace", () => {
 const base = "http://127.0.0.1:3000";
-const evidence = resolve(process.cwd(), "quality-audit/.evidence/campus-a-phase11");
+const evidence = resolve(process.cwd(), "quality-audit/.evidence/campus-commerce-customer-journeys");
 mkdirSync(evidence, { recursive: true });
 const org = "55555555-5555-4555-8555-555555555555";
 const store = "66666666-6666-4666-8666-666666666666";
@@ -85,7 +91,7 @@ async function install(context: BrowserContext) {
 }
 
 for (const theme of ["light", "dark"] as const) {
-  test("Phase 11 customer workspace action/readability and 4K layout / " + theme, async ({ browser }) => {
+  test("customer workspace action/readability and 4K layout / " + theme, async ({ browser }) => {
     test.setTimeout(160_000);
     const context = await browser.newContext({ colorScheme: theme, viewport: { width: 1440, height: 920 }, reducedMotion: "reduce" });
     await context.addInitScript(() => sessionStorage.setItem("unistoreHub.accessToken", "browser-only-phase11"));
@@ -155,7 +161,7 @@ for (const theme of ["light", "dark"] as const) {
       writeFileSync(resolve(evidence, "customer-flow-" + theme + ".json"), JSON.stringify({ counters, measured }, null, 2) + "\n");
     } finally { await context.close(); }
   });
-  test("Phase 11 customer empty/error/retry and pickup-not-ready states / " + theme, async ({ browser }) => {
+  test("customer empty/error/retry and pickup-not-ready states / " + theme, async ({ browser }) => {
     test.setTimeout(65_000);
     const context = await browser.newContext({ colorScheme: theme, viewport: { width: 390, height: 900 }, reducedMotion: "reduce" });
     await context.addInitScript(() => sessionStorage.setItem("unistoreHub.accessToken", "browser-only-phase11"));
@@ -197,3 +203,4 @@ for (const theme of ["light", "dark"] as const) {
   });
 
 }
+});

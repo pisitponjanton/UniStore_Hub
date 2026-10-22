@@ -1,5 +1,9 @@
 # Frontend Agent Rules
 
+## Required stable artifact naming
+
+Follow the root [Artifact Naming and Consolidation Policy](../docs/ARTIFACT_NAMING_AND_CONSOLIDATION.md): no filenames or folders with `phase`; never create a test or report per iteration. Extend a behavior-specific test suite or topic report, preserve guards, and update references. Verify with `npm run check:artifact-names` at repository root.
+
 ## Ownership
 
 This agent has **write access only inside**:

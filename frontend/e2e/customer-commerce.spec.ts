@@ -178,12 +178,12 @@ test("Customer can select a product, validate quantity, create an Order, and upl
   ).toHaveText("รองรับเฉพาะไฟล์ JPEG, PNG หรือ WebP");
 
   await slip.setInputFiles({
-    name: "phase5-slip.png",
+    name: "customer-slip.png",
     mimeType: "image/png",
     buffer: tinyPng,
   });
   await expect(
-    page.getByText("phase5-slip.png"),
+    page.getByText("customer-slip.png"),
   ).toBeVisible();
 
   await page
@@ -347,7 +347,7 @@ test("Customer can see READY_FOR_PICKUP QR and Token, then filter and mark the m
   test.setTimeout(55_000);
 
   const runId =
-    `phase5-${Date.now()}-${testInfo.workerIndex}`;
+    `customer-scenario-${Date.now()}-${testInfo.workerIndex}`;
   // Isolate notifications and pickup mutations from the shared seed user.
   const pickupCustomer = await registerDisposableCustomer(
     request,

@@ -17,7 +17,7 @@ test("all four My Orders status filters visible and reachable at narrow widths",
     } else await route.continue();
   });
   const results: Array<Record<string, unknown>> = [];
-  const dir = join("test-results", "quality-audit", "uxqa-" + randomUUID(), "phase6-filters");
+  const dir = join("test-results", "quality-audit", "uxqa-" + randomUUID(), "order-filters");
   await mkdir(dir, { recursive: true });
   try {
     const page = await ctx.newPage();

@@ -45,7 +45,7 @@ test("GET-only synthetic PENDING organization allows approval dialog inspection 
     const dialog = page.getByRole("dialog", { name: "อนุมัติ " + org.name + "?" });
     await expect(dialog).toBeVisible();
     await expect(dialog.getByRole("button", { name: "ยืนยันอนุมัติ" })).toBeVisible();
-    const evidenceDir = join("test-results", "quality-audit", "uxqa-" + randomUUID(), "phase5");
+    const evidenceDir = join("test-results", "quality-audit", "uxqa-" + randomUUID(), "platform-approval");
     await mkdir(evidenceDir, { recursive: true });
     await page.screenshot({ path: join(evidenceDir, "synthetic-pending-approval-390.png"), animations: "disabled" });
     await page.keyboard.press("Escape");

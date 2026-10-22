@@ -24,7 +24,7 @@ test("real API denies Staff access to another organization's orders, payments an
 }, testInfo) => {
   const isolatedOrganization = await createApprovedAdminOrganization(
     request,
-    `phase8-isolation-${Date.now()}-${testInfo.workerIndex}`,
+    `tenant-isolation-${Date.now()}-${testInfo.workerIndex}`,
   );
   const staffToken = await getSeedRoleToken(request, "staff");
 
@@ -60,11 +60,11 @@ test("real API rejects another Customer's order, payment and pickup lookups", as
 }, testInfo) => {
   const owned = await createStaffPendingOrderFixture(
     request,
-    `phase8-owner-${Date.now()}-${testInfo.workerIndex}`,
+    `tenant-owner-${Date.now()}-${testInfo.workerIndex}`,
   );
   const stranger = await registerDisposableCustomer(
     request,
-    `phase8-stranger-${Date.now()}-${testInfo.workerIndex}`,
+    `tenant-other-user-${Date.now()}-${testInfo.workerIndex}`,
   );
 
   const ownResponse = await request.get(

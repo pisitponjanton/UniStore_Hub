@@ -60,7 +60,7 @@ test("synthetic GET-only READY pickup can open details and safely cancel modal",
     await trigger.click();
     const dialog = page.getByRole("dialog", { name: "ยืนยันการรับสินค้า" });
     await expect(dialog).toBeVisible();
-    const dir = join("test-results", "quality-audit", "uxqa-" + randomUUID(), "phase3");
+    const dir = join("test-results", "quality-audit", "uxqa-" + randomUUID(), "pickup-dialog");
     await mkdir(dir, { recursive: true });
     await page.screenshot({ path: join(dir, "synthetic-pickup-confirm-modal-390.png"), animations: "disabled" });
     await page.keyboard.press("Escape");

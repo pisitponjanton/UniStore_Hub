@@ -16,6 +16,7 @@
     "dev": "bash scripts/dev.sh",
     "dev:seed": "bash scripts/dev-seed.sh",
     "dev:reset": "bash scripts/dev-reset.sh",
-    "dev:down": "bash scripts/dev-down.sh"
+    "dev:down": "bash scripts/dev-down.sh",
+    "check:artifact-names": "node scripts/quality/check-artifact-names.cjs"
   }
 }

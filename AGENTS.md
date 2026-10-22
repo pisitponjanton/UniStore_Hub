@@ -7,6 +7,10 @@
 
 ---
 
+## Mandatory repository-wide artifact naming policy
+
+**ALL AGENTS MUST READ [Artifact Naming and Consolidation Policy](docs/ARTIFACT_NAMING_AND_CONSOLIDATION.md) before creating files.** Never put `phase` or an iteration number in project deliverable filenames, including tests, reports, screenshots, QA evidence and folders. **Merge related tests and docs by subject** instead of creating one per iteration. Preserve assertions and evidence, update every reference, and run `npm run check:artifact-names` before handoff/commit. Working phase-by-phase is NOT permission to name files by phase. This rule applies to all agent roles, even when an older workflow suggests separate reports.
+
 ## 1. Why This File Exists
 
 UniStore Hub is intentionally split so multiple agents can work in parallel.

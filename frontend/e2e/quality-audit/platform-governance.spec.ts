@@ -1,9 +1,15 @@
+/**
+ * Campus Commerce A — behavior-focused browser regression suite.
+ * Consolidated from historical work-item files; all test cases and mock guards retained.
+ * Add related cases here; never introduce milestone-numbered spec files.
+ */
 import { expect, test, type BrowserContext, type Page } from "@playwright/test";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
+test.describe("Platform admin", () => {
 const base = "http://127.0.0.1:3000";
-const output = resolve(process.cwd(), "quality-audit/.evidence/campus-a-phase14");
+const output = resolve(process.cwd(), "quality-audit/.evidence/campus-commerce-platform-admin");
 mkdirSync(output, { recursive: true });
 const timestamp = "2026-09-30T10:00:00.000Z";
 const pendingId = "11111111-1111-4111-8111-111111111111";
@@ -71,7 +77,7 @@ async function waitForLoaded(page: Page, heading: string) {
 }
 
 for (const theme of ["light", "dark"] as const) {
-  test("Phase 14 responsive Platform Admin, real filters & modal safety — " + theme, async ({ browser }) => {
+  test("responsive Platform Admin, real filters & modal safety — " + theme, async ({ browser }) => {
     test.setTimeout(150_000);
     const context = await browser.newContext({ colorScheme: theme, viewport: { width: 1440, height: 900 }, reducedMotion: "reduce" });
     const stats = await install(context, "platformAdmin");
@@ -135,7 +141,7 @@ for (const theme of ["light", "dark"] as const) {
     } finally { await context.close(); }
   });
 
-  test("Phase 14 non-platform roles cannot access Platform Admin routes — " + theme, async ({ browser }) => {
+  test("non-platform roles cannot access Platform Admin routes — " + theme, async ({ browser }) => {
     test.setTimeout(100_000);
     for (const role of ["guest", "customer", "staff", "orgAdmin"] as const) {
       const context = await browser.newContext({ colorScheme: theme, viewport: { width: 390, height: 900 }, reducedMotion: "reduce" });
@@ -155,7 +161,7 @@ for (const theme of ["light", "dark"] as const) {
     }
   });
 
-  test("Phase 14 empty directory and recoverable API error — " + theme, async ({ browser }) => {
+  test("empty directory and recoverable API error — " + theme, async ({ browser }) => {
     const context = await browser.newContext({ colorScheme: theme, viewport: { width: 390, height: 860 }, reducedMotion: "reduce" });
     const stats = await install(context, "platformAdmin");
     await context.route("**/api/v1/platform/users", route => route.fulfill({
@@ -178,3 +184,4 @@ for (const theme of ["light", "dark"] as const) {
   });
 
 }
+});
