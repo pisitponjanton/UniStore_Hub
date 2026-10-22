@@ -110,7 +110,7 @@ for (const theme of ["light", "dark"] as const) {
       for (const route of routes) {
         await page.goto(base + route.href, { waitUntil: "domcontentloaded" });
         await expect(page.getByRole("heading", { name: route.heading, level: 1 })).toBeVisible({ timeout: 18000 });
-        for (const width of [390, 768, 1024, 1440, 3840]) {
+        for (const width of [320, 390, 768, 1024, 1440, 1920, 2560, 3840]) {
           await page.setViewportSize({ width, height: 920 });
           await page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
           const measure = await page.evaluate(() => {
@@ -129,6 +129,17 @@ for (const theme of ["light", "dark"] as const) {
           }
         }
         await page.setViewportSize({ width: 1440, height: 920 });
+        // Migrated customer headers are surface-first; they must not regress to the old dark hero.
+        const primaryHeading = page.getByRole("heading", { level: 1, name: route.heading });
+        const headerSkin = await primaryHeading.evaluate(el => {
+          const header = el.closest('[class*="header"],[class*="detailHero"]');
+          if (!header) return null;
+          const style = getComputedStyle(header);
+          return { background: style.backgroundColor, image: style.backgroundImage };
+        });
+        expect(headerSkin, "missing customer header /" + route.name).not.toBeNull();
+        expect(headerSkin?.image, theme + " " + route.name + " should use formal surface, not gradient").toBe("none");
+        expect(headerSkin?.background, theme + " " + route.name + " must not use historic teal").not.toBe("rgb(25, 59, 57)");
         if (route.name === "orders") {
           await expect(page.getByRole("link", { name: "ชำระเงิน คำสั่งซื้อ " + orderA })).toBeVisible();
           await page.getByRole("button", { name: /เสร็จสิ้น 1/ }).click();

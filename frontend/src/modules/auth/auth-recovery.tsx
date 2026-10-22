@@ -1,7 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 
+import brandLogo from "@/assets/unistore-hub-logo.webp";
 import { ForbiddenState, LoadingState, UnauthorizedState, Button } from "@/components";
 
 import { getUnauthenticatedExit } from "./return-route";
@@ -17,7 +19,7 @@ export function OrderAccessRecovery({ state }: { state: "loading" | "unauthorize
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <Link href="/" className={styles.brand}>UniStore Hub</Link>
+        <Link href="/" className={styles.brand}><Image src={brandLogo} alt="" aria-hidden="true" width={36} height={36} sizes="36px" className={styles.brandMark} /><span>UniStore Hub</span></Link>
         <Link href="/" className={styles.headerReturn}>ดูร้านค้าทั้งหมด</Link>
       </header>
       <main className={styles.main} aria-label="ทำรายการสั่งซื้อต่อ">

@@ -470,3 +470,24 @@
 
 /* Campus Commerce A / Phase 13 */
 .main{width:min(100%,2600px);min-width:0;padding-inline:clamp(14px,2.2vw,44px)}.header,.section,.panel,.list,.row{min-width:0}@media(max-width:620px){.main{padding-inline:14px}}.grid{min-width:0;grid-template-columns:minmax(0,1fr) minmax(315px,640px);gap:clamp(14px,1.7vw,28px)}@media(max-width:1050px){.grid{grid-template-columns:minmax(0,1fr)}.panel{position:static}}.memberName,.memberEmail{overflow-wrap:anywhere}.memberActions button{min-height:44px}.memberCard:focus-within{border-color:var(--brand-line)}.main a:focus-visible,.main button:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+
+
+/* Organization governance visual migration: membership presentation without role mutation changes. */
+.header { padding: 0 0 var(--space-5); border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent; box-shadow: none; }
+.header::before, .header::after { content: none; }
+.summaryStrip { display: grid; gap: 0; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); }
+.summaryStrip > div, .summaryStrip > div:nth-child(n) { min-width: 0; border: 0; border-right: 1px solid var(--line); border-radius: 0; background: transparent; box-shadow: none; }
+.summaryStrip > div:last-child { border-right: 0; }
+.memberCard, .memberCardInactive, .panel { border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); box-shadow: none; }
+.memberCard:hover { border-color: var(--control-line); background: var(--surface-hover); box-shadow: none; transform: none; }
+.memberCard:focus-within { border-color: var(--brand); }
+.memberActions { border-radius: var(--radius-control); background: var(--surface-muted); }
+.roleHelp { border: 1px solid var(--brand-line); border-radius: var(--radius-control); background: var(--brand-soft); }
+.memberActions button { min-height: 44px; }
+@media (max-width: 620px) {
+  .header { padding: 0 0 var(--space-4); }
+  .summaryStrip { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .summaryStrip > div, .summaryStrip > div:nth-child(n) { border: 0; border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); }
+  .summaryStrip > div:nth-child(2n) { border-right: 0; }
+}
+@media (max-width: 360px) { .summaryStrip { grid-template-columns: minmax(0,1fr); } .summaryStrip > div { border-right: 0 !important; } }

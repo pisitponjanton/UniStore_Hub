@@ -8,7 +8,7 @@
   z-index: var(--z-navigation);
   top: 0;
   padding: 10px var(--page-gutter) 0;
-  background: transparent;
+  background: color-mix(in srgb, var(--canvas) 92%, transparent);
 }
 
 .topbarInner {
@@ -22,7 +22,7 @@
   gap: var(--space-5);
   border: 1px solid var(--line-soft);
   border-radius: var(--radius-card);
-  background: color-mix(in srgb, var(--surface) 96%, var(--canvas));
+  background: var(--surface);
   box-shadow: var(--shadow-raised);
 }
 
@@ -38,6 +38,14 @@
 
 .brand:hover {
   text-decoration: none;
+}
+
+.brandMark {
+  width: 38px;
+  height: 38px;
+  flex: none;
+  border-radius: var(--radius-sm);
+  object-fit: contain;
 }
 
 .brandCopy {
@@ -60,7 +68,7 @@
   gap: 4px;
   padding: 4px;
   border-radius: var(--radius-control);
-  background: var(--surface-muted);
+  background: transparent;
 }
 
 .topbarHome,
@@ -102,7 +110,7 @@
 }
 
 .topbarLinkActive {
-  background: var(--surface);
+  background: var(--brand-soft);
   color: var(--brand-strong);
   box-shadow:
     var(--shadow-subtle),
@@ -112,8 +120,8 @@
 
 .topbarPrimary {
   margin-left: var(--space-1);
-  background: var(--brand);
-  color: var(--brand-on);
+  background: var(--action-primary);
+  color: var(--action-primary-on);
   box-shadow: var(--shadow-action);
   transition:
     transform var(--motion-standard) var(--motion-ease-out),
@@ -123,7 +131,7 @@
 
 .topbarPrimary:hover {
   transform: translateY(-1px);
-  background: var(--brand-hover);
+  background: var(--action-primary-hover);
   box-shadow: var(--shadow-action-hover);
   text-decoration: none;
 }
@@ -153,7 +161,7 @@
   padding-inline: var(--space-3);
   margin-left: calc(var(--space-3) * -1);
   border-radius: var(--radius-md);
-  color: var(--brand);
+  color: var(--brand-strong);
   font-weight: 600;
 }
 
@@ -1032,8 +1040,8 @@
 }
 
 .primaryAction {
-  background: var(--brand);
-  color: var(--brand-on);
+  background: var(--action-primary);
+  color: var(--action-primary-on);
   box-shadow: var(--shadow-action);
   transition:
     transform var(--motion-standard) var(--motion-ease-out),
@@ -1043,13 +1051,13 @@
 
 .primaryAction:hover {
   transform: translateY(-2px);
-  background: var(--brand-hover);
+  background: var(--action-primary-hover);
   box-shadow: var(--shadow-action-hover);
   text-decoration: none;
 }
 
 .primaryAction:focus-visible {
-  outline: 3px solid var(--brand);
+  outline: 3px solid var(--focus);
   outline-offset: 3px;
 }
 
@@ -1632,7 +1640,7 @@
   border-radius: 50%;
   background: var(--ink-muted);
 }
-.readinessDotActive { background: #168a68; }
+.readinessDotActive { background: var(--success); }
 .storeHero .heroMeta {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
@@ -1710,20 +1718,20 @@
 .campaignHero {
   padding: clamp(24px, 3.5vw, 45px);
   align-items: center;
-  border-radius: 19px;
-  background: #17383e;
+  border-radius: var(--radius-hero);
+  background: var(--gradient-hero);
   box-shadow: none;
 }
 .campaignHero::after { content: none; }
 .campaignHero .contextLine {
   border-radius: 7px;
   background: rgb(255 255 255 / 10%);
-  color: #d9ede5;
+  color: var(--on-dark-secondary);
   box-shadow: none;
   padding-inline: 11px;
 }
-.campaignHero .title { font-size: clamp(2rem, 4.1vw, 3.55rem); line-height: 1.1; color: #fff; }
-.campaignHero .description { max-width: 56ch; font-size: .95rem; color: #dbe8e3; line-height: 1.6; }
+.campaignHero .title { font-size: clamp(2rem, 4.1vw, 3.55rem); line-height: 1.1; color: var(--on-dark); }
+.campaignHero .description { max-width: 56ch; font-size: .95rem; color: var(--on-dark-secondary); line-height: 1.6; }
 .campaignShopAction {
   width: fit-content;
   min-height: 45px;
@@ -1732,40 +1740,40 @@
   gap: 15px;
   padding: 0 17px;
   border-radius: 10px;
-  color: #18363b;
-  background: #f0d3aa;
+  color: var(--action-primary-on);
+  background: var(--action-primary);
   font-size: .87rem;
   font-weight: 790;
 }
-.campaignShopAction:hover { color: #18363b; background: #ffe2b9; text-decoration: none; }
-.campaignShopAction:focus-visible { outline: 3px solid #bfeee2; outline-offset: 3px; }
-.campaignClosedHint { color: #e1e9e6; font-size: .85rem; }
+.campaignShopAction:hover { color: var(--action-primary-on); background: var(--action-primary-hover); text-decoration: none; }
+.campaignShopAction:focus-visible { outline: 3px solid var(--on-dark); outline-offset: 3px; }
+.campaignClosedHint { color: var(--on-dark-secondary); font-size: .85rem; }
 .campaignStatusPanel {
   gap: 14px;
   padding: 22px;
-  border: 0;
-  border-radius: 13px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
   box-shadow: none;
-  background: #f2eee5;
-  color: #213c3e;
+  background: var(--surface);
+  color: var(--ink);
 }
-.campaignStatusPanel .metaLabel { color: #455e5c; }
-.campaignStatusDescription { color: #45605c; font-size: .87rem; line-height: 1.5; }
+.campaignStatusPanel .metaLabel { color: var(--ink-secondary); }
+.campaignStatusDescription { color: var(--ink-secondary); font-size: .87rem; line-height: 1.5; }
 .deadlineSpotlight {
   display: grid;
   gap: 6px;
   padding: 15px 0;
-  border-block: 1px solid #cbd8ce;
+  border-block: 1px solid var(--line);
 }
-.deadlineSpotlight span { color: #415d59; font-size: .74rem; font-weight: 720; }
-.deadlineSpotlight strong { color: #17393a; font-size: 1.04rem; line-height: 1.4; }
+.deadlineSpotlight span { color: var(--ink-secondary); font-size: .74rem; font-weight: 720; }
+.deadlineSpotlight strong { color: var(--ink); font-size: 1.04rem; line-height: 1.4; }
 .campaignStatusPanel .campaignFacts { gap: 9px; }
 .campaignStatusPanel .campaignFacts > div {
-  background: #e5ebdf;
+  background: var(--surface-muted);
   border-radius: 8px;
   padding: 11px;
 }
-.campaignStatusPanel .campaignFacts dd { color: #14383a; font-size: .87rem; }
+.campaignStatusPanel .campaignFacts dd { color: var(--ink); font-size: .87rem; }
 .timeline { gap: 10px; }
 .timelineItem,
 .timelineItem:nth-child(n) {
@@ -1924,7 +1932,7 @@
 .detailToolbarField { display: grid; min-width: min(100%, 260px); flex: 0 1 300px; gap: 6px; color: var(--ink-secondary); font-size: .75rem; font-weight: 740; }
 .detailToolbarField input, .detailToolbarField select {
   display: block; width: 100%; min-width: 0; min-height: 44px; border: 1px solid var(--control-line);
-  border-radius: 9px; padding: 0 var(--space-3); background: var(--surface-inset);
+  border-radius: var(--radius-control); padding: 0 var(--space-3); background: var(--surface);
   color: var(--ink); color-scheme: var(--control-native-scheme); font: inherit; font-size: .87rem;
 }
 .detailToolbarField input::placeholder { color: var(--ink-tertiary); }

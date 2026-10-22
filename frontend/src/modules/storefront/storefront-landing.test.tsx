@@ -67,6 +67,10 @@ describe("StorefrontLanding", () => {
     expect(
       screen.getByRole("link", { name: "เลือกดูร้านค้า" }),
     ).toHaveAttribute("href", "#storefront-heading");
+    expect(screen.getByText("เริ่มใช้งานใน 3 ขั้นตอน")).toBeInTheDocument();
+    expect(screen.getByText("ดูสินค้าและรอบขาย")).toBeInTheDocument();
+    expect(screen.getAllByText("ติดตามคำสั่งซื้อ", { exact: true }).length).toBeGreaterThan(1);
+
     const trackingHref = screen
       .getByRole("link", { name: "ติดตามคำสั่งซื้อ" })
       .getAttribute("href");

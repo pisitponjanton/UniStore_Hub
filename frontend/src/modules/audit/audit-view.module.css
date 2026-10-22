@@ -168,7 +168,9 @@
 
 .code,
 .action {
-  overflow-wrap: anywhere;
+  /* Action identifiers must remain intact; the surrounding table scrolls horizontally. */
+  overflow-wrap: normal;
+  white-space: nowrap;
 }
 
 .code {
@@ -576,3 +578,22 @@
 
 /* Campus Commerce A / Phase 13 */
 .main{width:min(100%,2600px);min-width:0;padding-inline:clamp(14px,2.2vw,44px)}.header,.section,.panel,.list,.row{min-width:0}@media(max-width:620px){.main{padding-inline:14px}}.filters{grid-template-columns:repeat(4,minmax(0,1fr))}.filters>*{min-width:0}.metadata{overflow-wrap:anywhere}.metadataDetails summary{min-height:44px}@media(max-width:1080px){.filters{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:760px){.filters{grid-template-columns:1fr}}.main a:focus-visible,.main button:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+
+
+/* Organization governance visual migration: audit remains read-only, query and metadata unchanged. */
+.header { padding: 0 0 var(--space-5); border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent; box-shadow: none; }
+.header::before, .header::after { content: none; }
+.headerCount, .filterPanel { border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); box-shadow: none; }
+.section { border-color: transparent; background: transparent; box-shadow: none; }
+.action, .metadataDetails summary, .metadata { background: var(--surface-muted); color: var(--ink-secondary); }
+.metadataDetails[open] summary { color: var(--ink); }
+.metadata { max-height: min(42vh,360px); overflow: auto; overflow-wrap: anywhere; }
+.auditTable { min-width: 760px; }
+.auditTable thead { background: var(--surface-muted); }
+.auditTable tbody tr:hover { background: var(--surface-hover); }
+@media (max-width: 760px) {
+  .auditTable { min-width: 0; }
+  .auditTable tbody tr { border-color: var(--line); background: var(--surface); }
+  .auditTable tbody tr:hover { border-color: var(--brand-line); background: var(--surface-hover); }
+  .header { padding: 0 0 var(--space-4); }
+}

@@ -171,3 +171,57 @@ A browser fixture initially leaked its own in-memory mock read-at state between 
 **Next phase after final gates:** Phase 12 — Staff Operations Workspace. Do not implement/commit without a new request.
 
 ---
+
+---
+
+## Design-branch visual migration — Authentication & Account Entry
+
+**Active BDXA task:** `task_1febbe60-581b-42d0-8765-506f38b362f0`, current `main` visual migration. Design source was local `design` branch; only presentation was imported selectively, not React auth flows.
+
+### Scope implemented
+
+- `frontend/src/modules/auth/auth-form.module.css`: moved Login/Register/account-entry shared composition from the historical green split card to a formal two-column Orange/Neutral campus style, with surface-colored intro, accessible brand/label colors, aligned form card, native password-toggle focus/disabled behavior, and semantic light/dark tokens. Preserved all existing content, autoComplete fields, validators, pending/error summary handling, return destination and account role actions.
+- `frontend/src/modules/auth/auth-recovery.module.css`: styled the already-existing protected-order recovery header, guidance badge, neutral panel and secondary actions consistently, keeping the current loading/unauthorized/forbidden flow, origin-specific checkout return and link targets.
+- `frontend/e2e/quality-audit/authentication-and-return.spec.ts`: updated one obsolete pre-existing text-only-logo assertion (which failed before this pass, Light and Dark) to verify the approved decorative logo beside accessible UniStore Hub text; added no-teal computed-color checks, screenshot coverage at 320/768, and guarded recovery geometry/overflow and screenshot coverage at 320/390/768/1440/3840. Kept all interception/real-write denial logic.
+
+### Verified tests and evidence
+
+- Playwright Chromium `authentication-and-return.spec.ts` Auth Layout: **4/4 PASS** Light/Dark. Covers Login/Register at 8 responsive widths (320–3840), root-font-size 200% (390/768/960/1920), native password type-toggle, autocomplete, validation/Error Summary focus, submit pending and simulated rejected auth POST.
+- `authentication-and-return.spec.ts` Return to Order: **8/8 PASS**, Light/Dark. Covers anonymous Checkout → Login → same Checkout with variant/query preserved, delayed session, expired-token removal and recovery, forbidden resource guarding, and already-authenticated return.
+- `auth-form-states.spec.ts`: **1/1 PASS** with browser-only synthetic 503/409 auth responses, pending/disabled/error summary/retry and zero unintended backend mutations.
+- `account-role-entry.spec.ts`: **7/7 PASS** across Guest Login/Register and Customer/Staff/Organization Admin/Platform Admin, plus membership-scoped organization selection; all writes blocked.
+- Browser screenshots: `frontend/quality-audit/.evidence/campus-commerce-authentication/{light,dark}-{login,register}-{320,390,768,1440,3840}.png`, error screenshots; `frontend/quality-audit/.evidence/campus-commerce-return-navigation/{light,dark}-expired-recovery-{390,1440}.png`; browser-only controlled state, no real credential use.
+- Final local verification: Frontend Vitest **384/384 PASS across 94 test files**; TypeScript, ESLint, Git diff check and artifact naming guard **PASS**; Next.js static build **31/31 generated routes/assets**.
+
+**Unchanged:** auth service endpoints/payloads, session version and token storage, returnTo sanitization, protected-route recovery, API contracts, RBAC, browser password-manager integration, customer checkout logic. No real signup/login, purchase, payment, or other backend writes in tests. **NOT_TESTED:** Firefox/WebKit, hardware/browser zoom and manual screen-reader assessment, live production auth credentials, complete 28-route/action-state parity, security signoff.
+
+**Handoff:** Auth/Account Entry presentation has been migrated in the local uncommitted `main` worktree. No Commit, Push, Deploy or backend/AWS edits.
+
+---
+
+## Customer Workspaces & Commerce Journey — Design-branch visual migration
+
+**Active BDXA task:** `task_1febbe60-581b-42d0-8765-506f38b362f0`. This is a scoped visual migration on `main` from the **appearance** of local `design`, while `main` remains the authority for customer order creation, order status precedence, guarded payment slip upload, cancel confirmation, pickup token visibility, notification read/unread semantics, filtering, cursor retry and account/session/returnTo behavior. Previous uncommitted phases remain preserved. No merge or cherry-pick from `design`.
+
+### Scoped implementation
+
+- `frontend/src/modules/orders/order-create.module.css`: formal neutral checkout header, accessible Orange/current-step emphasis, bordered product/review/confirmation cards and clear authoritative amount. Kept real variant/quantity summary, product/image collision fixes, mobile confirmation ordering, existing form and dialogs.
+- `frontend/src/modules/orders/order-tracking.module.css`: neutral Orders and Detail headers, row surfaces, clear task-needed Orange accent, restrained lifecycle journey, payment/status amount panels and accessible navigation. Kept action-first order ordering/filter logic and cancellation confirmation.
+- `frontend/src/modules/payments/payment-view.module.css`: cohesive payment header, amount, file input, upload/review and status steps; preserve file selection, server state, rejected slip retry, validation and guarded upload.
+- `frontend/src/modules/pickups/pickup-view.module.css`: neutral proof/QR/token panels, received state and wrapping. No changes to eligibility or token disclosure guard.
+- `frontend/src/modules/notifications/notifications-view.module.css`: editorial no-gradient inbox heading, restrained row/control surfaces, Orange unread indicators and actionable CTA using `--action-primary`. No changes to event ordering, filters, paging, or mark-read API action.
+- `frontend/src/modules/orders/customer-journey-nav.module.css`: shared neutral/orange secondary task tabs, preserving original role-aware destinations and mobile compact layout.
+- `frontend/e2e/quality-audit/customer-order-workspace.spec.ts`: extended existing guarded browser suite to cover all viewport sizes **320/390/768/1024/1440/1920/2560/3840** on six routes in both themes (96 route/width/theme checks), no checkout media/title overlap, and computed surface-vs-gradient regression on customer headings. No new milestone-named files.
+
+### Local verification
+
+- **Targeted Playwright Chromium:** Customer workspace 4/4 PASS (six routes, Light/Dark and empty/error/retry/credential guard), Create Order 1/1, Payment Slip 1/1, Cancel Dialog 1/1, Pickup 1/1, Notification Actions 1/1, My Orders filters/cursors 1/1: **10/10 PASS**. Dark Mode / 200%-text representative suite **1/1 PASS**. All browser tests intercept or deny write requests; the workspace suite simulates one mark-read mutation in a local browser response only. No real API/DB mutation, order confirmation, payment, file upload or pickup handoff occurred.
+- **Unit:** frontend Vitest **384/384 PASS** across 94 suites; TypeScript **PASS**, ESLint **PASS**, Next.js static Build **31/31 routes PASS**, artifact naming **PASS**, Git diff whitespace check **PASS**.
+- Screenshots and measurement JSON stored in `frontend/quality-audit/.evidence/campus-commerce-customer-journeys/`; reviewed actual `light-checkout-1440.png`, `dark-orders-390.png`, `light-notifications-1440.png`. More test-run evidence is in `frontend/test-results/quality-audit/` (ignored).
+- No API, auth/session, backend, DB, infrastructure/AWS or shared contract changes. No Commit, Push or Deploy.
+
+### Explicit limitations
+
+**NOT_TESTED:** real backend checkout/payment/pickup mutation, Safari/Firefox/WebKit and physical device zoom, every modal/state/role permutation, manual assistive-technology verification, production/staging authorization; these remain subsequent QA/release gates. Chromium desktop emulation at 3840 CSS pixels is not proof of a physical 4K display. This pass verifies presentation and safety guards, not live payment or fulfillment correctness.
+
+**Handoff:** Customer visual styling and guarded browser tests complete for this scoped visual phase. Next work belongs to Staff Operations; no automatic continuation.

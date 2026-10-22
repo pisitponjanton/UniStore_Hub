@@ -475,3 +475,19 @@
 .token{display:block;min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:break-word}
 .backLink:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
 @media(max-width:620px){.main{padding-inline:14px}.header{padding:16px}.qrTokenGrid{grid-template-columns:minmax(0,1fr)}}
+
+
+/* Customer visual migration: neutral pickup credentials, without changing token eligibility. */
+.header { border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); box-shadow: none; }
+.header::before, .header::after { content: none; }
+.title { max-width: 22ch; color: var(--ink); font-size: clamp(1.875rem, 3.2vw, 2.75rem); line-height: 1.13; letter-spacing: -.028em; }
+.description { color: var(--ink-secondary); }
+.pickupCredential { border: 1px solid var(--line); background: var(--surface); border-radius: var(--radius-card); box-shadow: none; }
+.pickupCredential[data-received="true"] { background: var(--surface-muted); }
+.credentialHint { border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface-muted); }
+.qrColumn, .tokenColumn { border: 1px solid var(--line); background: var(--surface); border-radius: var(--radius-card); box-shadow: none; }
+.qrImage, .qrLoading { box-shadow: none; }
+.token { min-width: 0; max-width: 100%; border-color: var(--line); background: var(--surface-muted); color: var(--brand-strong); box-shadow: none; overflow-wrap: anywhere; user-select: all; }
+.pickupFacts > div { border: 1px solid var(--line); background: var(--surface); box-shadow: none; }
+.receivedNote { border: 1px solid color-mix(in srgb, var(--success) 28%, var(--line)); box-shadow: none; }
+@media (max-width: 620px) { .header { padding: 16px; } .pickupCredential { padding: 14px; } }

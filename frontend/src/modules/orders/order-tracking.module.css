@@ -1441,3 +1441,34 @@
 @media(max-width:970px){.orderRow{grid-template-columns:minmax(0,1fr) minmax(125px,.3fr)}.orderRowActions{grid-column:1/-1;display:flex;justify-content:flex-start;width:100%}.detailHero{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:620px){.main{padding-inline:14px}.orderRow{grid-template-columns:minmax(0,1fr);gap:10px}.orderRowActions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.orderOverview{gap:6px}.header,.detailHero{padding:16px}}
 @media(max-width:360px){.orderRowActions{grid-template-columns:1fr}}
+
+
+/* Customer visual migration: Orange/Neutral status-led order lists and detail surfaces. */
+.header, .detailHero {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  box-shadow: none;
+}
+.header::before, .header::after, .detailHero::before, .detailHero::after,
+.overviewPrimary::after, .orderRow::before { content: none; }
+.title, .detailHero .title { max-width: 22ch; color: var(--ink); font-size: clamp(1.875rem, 3.2vw, 2.75rem); line-height: 1.13; letter-spacing: -.028em; }
+.description { color: var(--ink-secondary); }
+.headerAction { color: var(--ink); background: var(--surface); border-color: var(--line); box-shadow: none; }
+.overviewPrimary, .overviewDescription, .overviewLoaded { border: 1px solid var(--line); background: var(--surface); box-shadow: none; }
+.orderRow { background: var(--surface); border-color: var(--line); border-radius: var(--radius-card); box-shadow: none; }
+.orderRow[data-needs-action="true"] { border-color: var(--brand-line); background: var(--brand-soft); box-shadow: inset 3px 0 0 var(--brand); }
+.orderRow:hover { border-color: var(--control-line); background: var(--surface-hover); box-shadow: none; }
+.orderRow[data-needs-action="true"]:hover { border-color: var(--brand); background: var(--brand-soft); box-shadow: inset 3px 0 0 var(--brand); }
+.detailAmount { min-height: 0; background: var(--surface-muted); border: 1px solid var(--line); box-shadow: none; }
+.detailAmount .totalValue { color: var(--brand-strong); font-variant-numeric: tabular-nums; }
+.journeyStep, .journeyStep:nth-child(1), .journeyStep:nth-child(2),
+.journeyStep:nth-child(3), .journeyStep:nth-child(4) { border: 1px solid var(--line); background: var(--surface-muted); box-shadow: none; }
+.journeyStep[data-state="current"] { border-color: var(--brand-line); background: var(--brand-soft); box-shadow: none; transform: none; }
+.orderContext, .orderFacts > div, .itemList, .totalPanel, .orderTools { border: 1px solid var(--line); background: var(--surface); box-shadow: none; }
+.totalPanel { background: var(--surface-muted); }
+.detailLinkPrimary, .primaryActionLink { box-shadow: none; }
+@media (max-width: 620px) {
+  .header, .detailHero { padding: 16px; }
+  .orderRow { padding: 13px; }
+}

@@ -593,3 +593,22 @@
 @media(max-width:420px){.summaryStrip{grid-template-columns:minmax(0,1fr)}.productHeader,.variantRow{gap:10px;flex-wrap:wrap}}
 
 .productList{max-width:1950px}
+
+
+/* Staff visual migration — production remains a read-only authoritative quantity report. */
+.header { padding: 0 0 var(--space-5); border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent; box-shadow: none; }
+.header::before, .header::after { content: none; }
+.campaignPanel, .productGroup { border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); box-shadow: none; }
+.productHeader, .variantRow { border-color: var(--line); background: var(--surface); }
+.summaryStrip { gap: 0; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); }
+.summaryStrip > div, .summaryStrip > div:nth-child(n) { min-width: 0; min-height: 80px; border: 0; border-right: 1px solid var(--line); border-radius: 0; background: transparent; box-shadow: none; }
+.summaryStrip > div:last-child { border-right: 0; box-shadow: inset 0 -3px 0 var(--brand); }
+.productTotal { border: 1px solid var(--brand-line); border-radius: var(--radius-control); background: var(--brand-soft); }
+.quantity { border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--surface-muted); font-variant-numeric: tabular-nums; }
+.campaignDirectoryLink:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+@media (max-width: 620px) {
+  .header { padding: 0 0 var(--space-4); }
+  .summaryStrip { display: grid; grid-template-columns: minmax(0,1fr); }
+  .summaryStrip > div, .summaryStrip > div:nth-child(n) { border: 0; border-bottom: 1px solid var(--line); }
+  .summaryStrip > div:last-child { border-bottom: 0; box-shadow: inset 0 -3px 0 var(--brand); }
+}

@@ -36,6 +36,18 @@ describe("StorefrontHeader navigation", () => {
     );
   });
 
+  it("shows the approved image logo without changing the home link name or destination", () => {
+    render(<StorefrontHeader />);
+    const home = screen.getByRole("link", { name: "UniStore Hub หน้าร้าน" });
+    expect(home).toHaveAttribute("href", "/");
+    expect(home).toHaveTextContent("UniStore Hub");
+    const logo = home.querySelector("img");
+    expect(logo).toBeInTheDocument();
+    expect(logo).toHaveAttribute("alt", "");
+    expect(logo).toHaveAttribute("aria-hidden", "true");
+    expect(logo?.getAttribute("src")).toContain("unistore-hub-logo");
+  });
+
   it("uses current-page semantics for authenticated order navigation", () => {
     mocks.usePathname.mockReturnValue("/my/payment/");
     mocks.useAuthSession.mockReturnValue({ status: "authenticated" });

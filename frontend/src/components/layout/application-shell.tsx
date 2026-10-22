@@ -1,9 +1,11 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
+import brandLogo from "@/assets/unistore-hub-logo.webp";
 import { Button } from "@/components/ui";
 import {
   isNavigationItemActive,
@@ -199,7 +201,16 @@ export function ApplicationShell({
       <aside className={styles.sidebar} aria-label="พื้นที่นำทาง">
         <div className={styles.sidebarTop}>
           <Link href="/" className={styles.brand} onClick={closeMenu}>
-
+            <Image
+              src={brandLogo}
+              alt=""
+              aria-hidden="true"
+              width={38}
+              height={38}
+              sizes="38px"
+              priority
+              className={styles.brandMark}
+            />
             <span className={styles.brandCopy}>
               <strong>UniStore Hub</strong>
             </span>

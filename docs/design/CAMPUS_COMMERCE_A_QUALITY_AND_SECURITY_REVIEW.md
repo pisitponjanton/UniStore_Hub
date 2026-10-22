@@ -208,3 +208,165 @@ No new actionable in-scope code or scope-drift blocker was substantiated in this
 **No Commit / Push / Deploy performed.** The worktree intentionally remains uncommitted for owner inspection. Do not auto-start new production work.
 
 ---
+
+---
+
+## Current design migration — Visual Parity & Accessibility Browser Audit
+
+**Task:** `task_1febbe60-581b-42d0-8765-506f38b362f0`, Active Plan test scope 12 on local `main`. Date: 2026-10-22. `design` is the visual reference (Orange/Neutral, light-first), `main` remains the UX/API/security authority. No branch merge, source replacement, Commit, Push or Deploy.
+
+### Executed scope, reproducible evidence
+
+| Check | Directly executed result | Evidence / limitation |
+|---|---|---|
+| Canonical primary role matrix | **PASS: 10/10 scoped Chromium test cases**, **448/448 viewport observations** from 28 canonical routes × 8 widths (320,390,768,1024,1440,1920,2560,3840) × 2 schemes (Light/Dark). All 5 role categories covered: Guest 6, Customer 6, Staff 5, Organization Admin 8, Platform Admin 3 canonical primary routes. | `frontend/e2e/quality-audit/responsive-accessibility.spec.ts` Full matrix, now separated into five role-specific cases per theme to fit remote-run time limits. Reports: `frontend/quality-audit/.evidence/campus-commerce-comprehensive-audit/{light,dark}/{light,dark}-{guest,customer,staff,organizationAdmin,platformAdmin}-viewport-audit.json`. Counted programmatically: total 448 PASS, 0 final FAIL, 0 blocked browser writes. |
+| Per-route accessibility automation | **PASS for measured Axe 2/2.1/2.2 A/AA tag set on 56 route × theme scans** at 390 CSS px; no remaining reported violations after two real link contrast fixes. Also checked broken images, page errors, missing H1, horizontal document overflow, focusable clipping. | Test includes detailed Axe node/target evidence in any failure, not only a generic violation ID. Automated Axe is a subset of a manual WCAG 2.2 AA audit, **not full conformance certification**. |
+| Visual screenshots | **168 current-browser screenshots**: 28 routes × Light/Dark × 390/1440/3840. **30 additional UX-frozen `main` representative role snapshots**: 5 roles × Light/Dark × 390/1440/3840. | `campus-commerce-comprehensive-audit/{light,dark}/route-NN-WIDTH.png` and `visual-migration-baseline/{light,dark}/ROLE-SCHEME-WIDTH.png`. Reviewed screenshots for public Product, Customer Order Detail, Staff Order Detail, Organization Audit and Platform Organizations; Orange/Neutral visual direction and legible responsive layout are observed. **NOT_TESTED:** exact pixel/image diff against a simultaneously rendered `design` branch; intentional design light-only and `main` 4K UX differences prevent assuming pixel-perfect parity. |
+| Other authorized route-role combinations | **PASS: 1/1 E2E**, **55/55 viewport checks** (11 additional authorized route-role combinations × 5 widths, read-only), with Axe A/AA tags at 390px. | `authorized-route-role-coverage.spec.ts`, `frontend/quality-audit/.evidence/design-quality/secondary-roles-*/secondary-route-role-matrix.json`. Roles are not all 5 roles on every URL; only explicitly authorized pairs were tested. |
+| Text scale + reduced motion | **PASS: 2/2 tests.** Public storefront/Login/Register CSS root-text 200% at 390/768/960/1920, Light/Dark: 24 observations; seven representative cross-role surfaces at 390/768 in Light/Dark: 28 observations. | `responsive-accessibility.spec.ts` Text scale/Text 200. This uses simulated root font size 200%, **not browser-native zoom**. Reduced motion context used. |
+| Modals + focus/hover | **PASS: 4/4 modal accessibility tests** (1 general modal keyboard trap/Escape/focus return at four viewports across themes, 3 customer/staff no-write dialogs). **PASS: 4/4 shared Hover/Focus/Navigation tests** in Light/Dark. **PASS: 3/3 role shell keyboard navigation tests.** | `modal-accessibility.spec.ts`, `multi-role-modal-accessibility.spec.ts`, `campus-commerce-ui.spec.ts`, `role-shell-actions.spec.ts`. Scoped representative states only. |
+| Action probes | **PASS: 1/1 safe E2E execution** providing a signed action ledger. All 257 baseline action IDs remain explicitly **NOT_TESTED for full declared state coverage**; a subset has separate narrow PASS observations. | `cross-role-action-coverage.spec.ts`. Browser POST/PATCH/unsafe writes blocked/intercepted, no actual production/business mutations. |
+| Theme tokens | **PASS: 2/2 tests** verifying semantic KMITL Orange token system, Light/Dark text/focus contrast on five representative role shells, reduced-motion and 4K widths. | `responsive-accessibility.spec.ts` KMITL Orange semantic theme. |
+
+### Problems found and resolved during this audit
+
+1. **FAIL → FIXED → PASS: public Product Detail**, Light Mode, `/products/view/`, 390px. `inlineLink` for “ดูรายละเอียดแคมเปญ” had foreground `#e35205` against `#f7f7f7` (Axe contrast **3.58:1**, below 4.5:1). Updated only the scoped Product Detail `.backLink, .inlineLink` text to `--brand-strong`. Re-ran Guest Light/Dark primary matrix **2/2 PASS**.
+2. **FAIL → FIXED → PASS: Staff Order Detail**, Light Mode, `/org/orders/view/`, 390px. `.backLink` used the same low-contrast Orange token. Updated link text to `--brand-strong`. Re-ran Staff Light/Dark primary matrix **2/2 PASS**.
+3. **Initial audit FAIL → clarified scrollability → PASS with explicit keyboard evidence:** Organization Audit `/org/audit/` at 768/1024 Light/Dark. Original generic clipping heuristic counted 24 offscreen table summaries, despite existing `role="region"`, `tabIndex=0`, `overflow-x:auto` scrolling. Updated the audit heuristic to exempt only controls inside an in-viewport, keyboard-focusable, actually scrollable region. Added keyboard ArrowRight scroll assertion and validated that the last `summary` becomes focused and fully visible after horizontal scrolling. Restored window/table scroll positions before screenshots. Re-ran Organization Admin Light/Dark primary matrix **2/2 PASS**. The scope **does not** exempt focusables clipped without a reachable scroll region.
+4. **Visual correction:** Audit `Action` identifiers were breaking in the middle of an ID on narrow table columns. Scoped action chips now retain whole codes using `white-space:nowrap` while the surrounding table remains horizontally scrollable. Re-ran Organization matrix; reviewed corrected top-of-page Audit screenshot.
+
+### Actual edits in this audit
+
+- `frontend/e2e/quality-audit/responsive-accessibility.spec.ts`: split long test by role without reducing coverage, added detailed Axe failure reporting, reachable-scroll validation, trustworthy screenshot scroll reset. Kept all fixture/writes guards and 8-width/Axe assertions.
+- `frontend/src/modules/storefront/storefront-view.module.css`, `frontend/src/modules/orders/organization-orders.module.css`: two scoped link contrast fixes.
+- `frontend/src/modules/audit/audit-view.module.css`: whole Action IDs in responsive scrollable table.
+- This review archive updated only for evidence and limitations; no API, backend, database, infrastructure, auth or production mutation.
+
+### Final local source quality gates
+
+- **PASS:** `git diff --check`, `npm run check:artifact-names` (923 paths), frontend `tsc --noEmit`, ESLint.
+- **PASS:** frontend Vitest **384/384 tests across 94 files**.
+- **PASS:** frontend Next.js build **31/31 generated static routes/assets**. No code/content changes outside frontend CSS, the topic-owned existing E2E audit suite and this review file were necessary for this test phase.
+- Only files modified in this round were `responsive-accessibility.spec.ts`, scoped `storefront-view.module.css`, `organization-orders.module.css`, `audit-view.module.css` and this QA review; worktree still also contains the earlier deliberately uncommitted visual migration files.
+
+### PASS / FAIL / NOT_TESTED interpretation
+
+- **PASS** means an actual explicitly named local/browser assertion ran successfully against a locally hosted test workspace, synthetic/seeded fixtures, no unauthorized writes; this report does not convert untouched baseline action/state cells into PASS.
+- **FAIL** during the first audit is retained above with root cause. **Outstanding reproduced blocking FAIL in the enumerated completed tests: none** after targeted correction and rerun. Final full suite success refers to the role-group reruns, not to the initially failing attempts.
+- **NOT_TESTED:** all 257 actions in **every declared state**, remaining modal/error/pending/disabled combinations across all pages/roles, independent pixel-by-pixel design-branch diff, native browser zoom and physical devices, full manual screen-reader/keyboard audit, Firefox/WebKit, live real backend write transactions, authorization/security audit and release gate. These remain the separate subsequent regression/security phases; they must not be marked green on the basis of this visual audit.
+
+**Handoff:** The scoped 28-route primary visual/responsive/automated Axe QA is complete with recorded fixes and limitations. No Commit / Push / Deploy. Continue only upon next user request.
+
+
+---
+
+## Current design migration — UX Regression, Security & Release Gate
+
+**Task:** `task_1febbe60-581b-42d0-8765-506f38b362f0`, local BDXA `UniStore_Hub`, active `main`, scoped plan Phase 13. **Date: 2026-10-22.** Retain original UX/API/RBAC and previous uncommitted work. This section records executed local results; **it is not a production release approval**.
+
+### Decision
+
+- **LOCAL REGRESSION GATES: PASS** for the directly executed scoped suites below, with no outstanding reproduced test failure in those runs. Existing worktree source was not changed for this phase, aside from this existing QA topic-owned report.
+- **PRODUCTION RELEASE GATE: BLOCKED / MANUAL_SECURITY_REVIEW_REQUIRED (exit 2)**. `npm run audit:review` returned the five known high-severity upstream `braces@3.0.3` advisory package nodes in development-only ESLint dependency paths (`GHSA-vfj7-8cjw-p6xm`). Production `npm audit --omit=dev --audit-level=low` returned **0 vulnerabilities**. The workspace-only, time-limited user acceptance in `docs/design/WORKSPACE_SECURITY_EXCEPTION.md` permits only local development/review, ending at most **2026-11-18** (or earlier for material changes/deployment). **Independent Security/code-owner sign-off is not present. Do not commit/push/deploy or override exit 2.**
+- **Action/state completeness: NOT_TESTED** for all 257 action IDs in every possible state; the current baseline generator confirmed 28 routes / 207 route actions / 50 shell actions, but current tests cover selected journeys and intercepted states only. Firefox/WebKit coverage is **selected** smoke/regression flows, not a full 28-route cross-browser matrix.
+
+### Executed cross-browser test matrix — current workspace
+
+`frontend/playwright.config.ts` remains Chromium-only by default; Firefox/WebKit were enabled for these explicit runs with `E2E_ENABLE_CROSS_BROWSER=1` and targeted `--project` selectors. Browser binaries were actually invoked; results must not be confused with listing registered test projects.
+
+| Guarded flow, each in Light/Dark | Chromium | Firefox | WebKit |
+|---|---:|---:|---:|
+| Storefront store-first grid, search/filters, pagination and responsive presentation | 2/2 PASS | 2/2 PASS | 2/2 PASS |
+| Anonymous checkout → login → same checkout with original query/`returnTo` preserved | 2/2 PASS | 2/2 PASS | 2/2 PASS |
+| Staff Orders / Payment Review / Pickup detail, safe confirmation and 4K shell | 2/2 PASS | 2/2 PASS | 2/2 PASS |
+| Organization Admin route layouts and tenant-safe controls | 2/2 PASS | 2/2 PASS | 2/2 PASS |
+| Platform Admin directory, filters, modal/approval safety and responsive states | 2/2 PASS | 2/2 PASS | 2/2 PASS |
+| **Total actually executed** | **10/10 PASS** | **10/10 PASS** | **10/10 PASS** |
+
+**Cross-browser selected suite: 30/30 PASS.** Paths: `frontend/e2e/quality-audit/storefront-shopping.spec.ts`, `authentication-and-return.spec.ts`, `organization-operations.spec.ts`, `platform-governance.spec.ts`. Runs selected five named flows by `--grep`, Light/Dark, in three engines; not 30 unique user journeys or full frontend coverage. One exploratory multi-suite remote command returned an internal tool error without test outcome; each selected suite was rerun separately with explicit results and **is not** counted as a failing Playwright assertion.
+
+### Chromium supplemental high-risk / RBAC / fixture regression
+
+All tests were executed against loopback local UI with Playwright controlled/intercepted test responses and/or abort guards, without real order/payment/pickup/platform business mutations:
+
+- Customer payment slip selection/PUT 403/409/retry: **1/1 PASS** (`customer-payment-upload-actions.spec.ts`).
+- Customer order cancel/confirmation/pending/409/retry: **1/1 PASS** (`customer-order-cancel-actions.spec.ts`).
+- Staff payment approve/reject, pending/stale 409/focus: **1/1 PASS** (`payment-review-decision-matrix.spec.ts`).
+- Pickup selection/confirmation/pending/409/retry: **1/1 PASS** (`pickup-confirm-safe-actions.spec.ts`).
+- Platform approval pending/409/500/success, browser-only: **1/1 PASS** (`platform-transition-states.spec.ts`).
+- Staff queues search, all/action filters, cursor, empty/503 and focus: **1/1 PASS** (`staff-queue-filters.spec.ts`).
+- Auth Login/Register validation, pending/503/conflict, retry: **1/1 PASS** (`auth-form-states.spec.ts`).
+- Platform organization confirmation/cancel/pending lock/409: **1/1 PASS** (`platform-organization-actions.spec.ts`).
+- Account role entry, organization membership context and authorized destinations: **7/7 PASS** (`account-role-entry.spec.ts`).
+- Organization management confirmation opens/cancels without write: **1/1 PASS** (`organization-management-dialogs.spec.ts`).
+- Public fixture isolation, legitimate lookalikes, loading/network retry and authoritative empty state in Light/Dark: **4/4 PASS** (scoped `storefront-shopping.spec.ts`).
+
+**Supplemental Chromium regression: 20/20 PASS; combined selected browser tests: 50/50 PASS** (30 across engines plus 20 additional Chromium), with no claim of full 257-action/state verification. All related earlier Phase 12 448/448 responsive observations, 56 Axe scans and 55 authorized secondary role/width observations are retained as separately scoped evidence, not rerun in this Phase.
+
+### Security verification (fresh results)
+
+| Gate | Result |
+|---|---|
+| `npm audit --omit=dev --audit-level=low` | **PASS, 0 production vulnerabilities** |
+| `npm run audit:review` | **Exit 2: MANUAL_SECURITY_REVIEW_REQUIRED**, full audit **5 High development-only** on `braces` advisory chain; **not clean** |
+| `npm run test:security:braces` | **PASS**, installed patched source fingerprint, micromatch resolution and pathological pattern guard checked |
+| `npm run test:security:gate` | **9/9 PASS** (fail-closed audit policy unit tests) |
+| `npm run test:security:runtime` | **6/6 PASS**; **77 built static assets** scanned to confirm dev-only patch code absent from static export |
+| `node e2e/quality-audit/generate-baseline.mjs --verify` | **PASS**, 28 routes / 207 route actions / 50 shell actions |
+| `npm run check:artifact-names` | **PASS**, 923 paths |
+| Frontend `tsc --noEmit`, ESLint | **PASS** |
+| Frontend Vitest | **384/384 PASS** across **94** test files |
+| Next.js static build | **31/31 PASS** |
+| `git diff --check` | **PASS** |
+
+Current machine-readable audit evidence: `frontend/quality-audit/.evidence/security-upgrade/audit-review-gate.json`, generated on **2026-10-22** with `production.total=0`, `full.high=5`, `patchedLocally=true`, `formallyApproved=false`. The policy continues to fail closed for any new/different advisory or fingerprint.
+
+### Source/scope and explicit release limitations
+
+- Verified current `main` branch, staged diff **empty**, `git diff --check` **PASS**, and **no diff** in `backend`, `infra`/`infrastructure` or deployment scripts. Other frontend/docs changes in the worktree are deliberate uncommitted work from earlier migration phases; they were preserved, not reset or committed.
+- **NOT_TESTED:** live Backend mutation and DB transaction concurrency, production cloud/AWS IAM/CDN, complete cross-browser 28×8×2 matrix, full 257-action × every state/role permutations, Firefox/WebKit manual screen-reader/native device zoom, physical 4K hardware, independent platform security audit, media/licensing and public storefront trusted QA-fixture provenance. The browser use of synthetic responses cannot certify real financial settlement or pickup.
+- **Release blockers:** `GHSA-vfj7-8cjw-p6xm` unresolved upstream/only locally mitigated; independent code-owner Security approval absent. Trusted fixture provenance and ownership, end-to-end integration and remaining action-state coverage need release-scoped decisions/validation. No blanket production/security PASS is possible with the current policy.
+- No code/UI/UX behavioral edits were required in this Phase 13 run; **no Commit, Push or Deploy**. The next plan phase is **Review diff**, which independently inspects the cumulative task diff and must carry release-blocking findings through without suppressing them.
+
+**Disposition:** Phase 13 test execution can be marked complete for its **local, scoped** requirements, with **Production Release Gate BLOCKED** and specific manual-review/NOT_TESTED items retained for final diff review.
+
+
+---
+
+## Current design migration — Final cumulative diff review
+
+**2026-10-22 | BDXA task `task_1febbe60-581b-42d0-8765-506f38b362f0` | Active Plan Review diff (14/14).**
+**Branch:** `main`; `design` is a read-only visual reference. **Outcome: PASS for the scoped local visual-migration task; Production Release: BLOCKED.** A passing local code/visual review is not a deployment/security authorization. User request excludes Commit, Push and Deploy.
+
+### Cumulative file/scope review
+
+- `git status --porcelain=v1 --untracked-files=all`: **59 paths**: 57 previously tracked modified paths and 2 new untracked image assets. Grouped by ownership: **34 CSS**, **5 application TSX**, **7 existing Playwright/E2E suites**, **4 existing unit test files**, **6 existing `docs/design` files**, **1 existing frontend interface-design documentation file**, and **2 design-reference assets**.
+- All 59 paths are under `frontend/` or `docs/design/`. `git diff --name-only -- backend infra infrastructure aws scripts package.json frontend/package.json frontend/package-lock.json` is empty. No new route/component service/API calls, RBAC decisions, session-cookie changes, database or infrastructure changes were found in the reviewed TSX source diff. Functional TSX edits are limited to approved logo image rendering (application shell, public storefront header, auth entry and order access recovery) and a **static** three-step informational Storefront hero guide. This does not add commerce logic or a new purchase route.
+- **Visual assets:** untracked `frontend/src/app/icon.png` and `frontend/src/assets/unistore-hub-logo.webp` both have **identical git object hashes to their corresponding `design` branch files**. Approved logo is decorative `alt=""` with visible accessible `UniStore Hub` name; Next.js Image processing/build succeeded. No other newly introduced remote images, packages or binary artifacts were found. Original artwork ownership/licensing remains **NOT_VERIFIED** externally.
+- **Theme/component review:** compared consolidated Orange/Neutral light/dark tokens, shared form/button/native select, state panels, Dialog, responsive shell, Storefront/Customer/Staff/Organization/Platform cards/tables, selected/hover/focus and no-imagery fallback. 34 changed CSS files referenced **no undeclared CSS custom properties** in a source-level scan across tracked frontend stylesheets. The earlier broad teal override was consolidated rather than stacking another UI behavior implementation. No `design` portal Select, sidebar persistence, `/stores` route, design-only pagination or API transition was copied.
+- **Unnecessary files/duplication:** existing topical QA/design documents and tests were updated instead of creating milestone files; the two new images are referenced/required for the brand/favicon. No new redundant spec/test artifact was identified. One pre-existing `.secondaryLink` CSS class in Organization view may be unreferenced in tracked TSX; this is a low-priority cleanup candidate only (not a new artifact or verified runtime blocker), left intact rather than deleting legacy CSS on incomplete reachability evidence.
+- **Sensitive-diff inspection:** no new credential literal, authorization token or secret was found in the added application/test source; a string match for `token:string` was only a local CSS-token getter parameter in the QA suite. This is bounded pattern inspection, **not** an exhaustive independent secrets/security audit.
+- Staged diff is **empty**; `git diff --check` **PASS**. No Commit/Push/Deploy performed and all prior local uncommitted work preserved.
+
+### Verification against acceptance criteria
+
+| Review gate | Current review result | Scope note |
+|---|---|---|
+| KMITL Orange / neutral visual family + authorized logo | **PASS (scoped)** | Semantic Light/Dark style tokens and matched `design` logo hashes; **NOT_TESTED** simultaneous image/pixel-diff against `design` for all 28 routes |
+| Main UX contract and API compatibility | **PASS in reviewed TSX/source diff and selected synthetic flows** | Store search/filter/paging/fixture classification, auth `returnTo`, order/payment/pickup, staff queue priority, org/platform RBAC preserved in reviewed code and completed guarded regression; not a real server-write integration proof |
+| Responsive, Dark and automated accessibility | **PASS for executed measurements** | Phase 12 **448/448** canonical primary route/viewport/theme observations, **56** Axe route/theme scans at 390px, **55/55** secondary authorized route/width checks; modal/focus/200%-root-font checks separately scoped |
+| Cross-browser selected behavior | **PASS: 30/30** | Phase 13 Chromium/Firefox/WebKit **10 each**, selected five guarded Light/Dark flows. Remaining complete cross-browser route/action matrix **NOT_TESTED** |
+| Additional high-risk intercepted regression | **PASS: 20/20** | Phase 13 Chromium Login validation, blocked fixture writes, cancellation, payment, pickup, platform, staff filters and account roles; no real business writes |
+| Frontend quality gates, fresh review | **PASS** | Unit **384/384** (94 files), TypeScript, ESLint, Next.js static build **31/31**, artifact naming **923** paths, baseline generator **28/207/50**, `git diff --check` |
+| Production dependency/security gate | **BLOCKED** | `npm audit --omit=dev --audit-level=low`: **0 findings**; full `npm run audit:review`: **exit 2 / MANUAL_SECURITY_REVIEW_REQUIRED**, exactly five High package nodes on upstream `GHSA-vfj7-8cjw-p6xm`, development-only braces chain |
+| Existing local braces mitigation | **PASS for bounded checks, not production approval** | Phase 13 installed patched source, 9/9 fail-closed policy tests, 6/6 runtime isolation tests and 77 built assets, with unchanged lock/vendor fingerprints |
+| Strict 257 action/state matrix, native device zoom, live backend | **NOT_TESTED** | 257 baseline action IDs are not certified in every state; no real backend approval/payment/pickup mutation, full independent WCAG audit, physical 4K, Firefox/WebKit full route matrix or real AWS check |
+
+### Release blockers / residual risks retained — DO NOT suppress
+
+1. **R-SEC-01 (BLOCKING for Production):** exactly five High findings on upstream development-only `braces@3.0.3` advisory chain; local patch does not clear the full npm advisory. Independent Security/code-owner sign-off and explicit release authorization **remain missing**. Workspace-only user-accepted risk is valid only until **2026-11-18** at latest and ends earlier on material changes or a deployment request. See `docs/design/WORKSPACE_SECURITY_EXCEPTION.md`; **do not force audit exit 0**.
+2. **R-QA-02 (Release evidence gap):** not all 257 actions have been verified in all UI/role/disabled/pending/error states; guarded browser coverage is selective. Browser-only simulated API responses do not establish live transactional integrity.
+3. **R-DATA-03 (Release product/data decision):** trusted backend provenance for QA fixtures and real seller media licensing/ownership not independently verified. No fixtures were hidden, deleted or mutated to manufacture a clean screenshot.
+4. **R-A11Y-04 (Independent follow-up):** native browser zoom, actual iOS/Safari/Firefox assistive technologies, complete screen-reader audit and visual pixel parity with live `design` are NOT_TESTED. Existing automated Axe passes are not a full WCAG 2.2 AA certification.
+
+**Disposition:** No outstanding **demonstrated in-scope blocking regression** after scoped fixes and reruns. **Local visual-migration review may PASS**, with the Production Release Blockers and NOT_TESTED evidence explicitly retained. Finish BDXA Review Diff as a **local task only**; do not authorize Commit, Push, Deploy or mark Production Gate approved.

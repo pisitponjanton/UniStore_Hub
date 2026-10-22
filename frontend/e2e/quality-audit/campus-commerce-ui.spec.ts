@@ -13,6 +13,27 @@ import { resolve } from "node:path";
 test.describe("Foundation", () => {
 const { frontend, api } = localAuditTargets();
 
+  test("the approved PNG favicon is discoverable without changing the storefront route", async ({ browser }) => {
+    const context = await browser.newContext();
+    try {
+      await context.route("**/*", async route => {
+        if (blockBrowserApiWrites(api)(route.request().url(), route.request().method()))
+          await route.abort("blockedbyclient");
+        else await route.continue();
+      });
+      const page = await context.newPage();
+      await page.goto(frontend + "/", { waitUntil: "domcontentloaded" });
+      const href = await page.locator('link[rel="icon"]').first().getAttribute("href");
+      expect(href).toContain("/icon.png");
+      const response = await context.request.get(new URL(href!, frontend).toString());
+      expect(response.ok()).toBe(true);
+      expect(response.headers()["content-type"]).toContain("image/png");
+    } finally {
+      await context.close();
+    }
+  });
+
+
 function rgb(value: string): number[] {
   const numbers = value.match(/[0-9.]+/g)?.slice(0, 3).map(Number);
   if (!numbers || numbers.length !== 3) throw new Error("Unrecognized rgb: " + value);
@@ -31,7 +52,7 @@ function contrast(a: string, b: string): number {
 }
 
 for (const scheme of ["light", "dark"] as const) {
-  test("Campus A text-only brand & readable store row in " + scheme, async ({ browser }) => {
+  test("Campus brand image, accessible wordmark & readable store row in " + scheme, async ({ browser }) => {
     const ctx = await browser.newContext({ colorScheme: scheme, viewport: { width: 1440, height: 900 } });
     await ctx.route("**/*", async (route) => {
       if (blockBrowserApiWrites(api)(route.request().url(), route.request().method()))
@@ -46,7 +67,9 @@ for (const scheme of ["light", "dark"] as const) {
         const brand = page.getByRole("link", { name: "UniStore Hub หน้าร้าน" });
         await expect(brand).toBeVisible();
         await expect(brand).toHaveText("UniStore Hub");
-        expect(await brand.locator("svg, img, [class*='brandMark']").count()).toBe(0);
+        await expect(brand.locator("img[class*='brandMark']")).toHaveCount(1);
+        expect(await brand.locator("img").getAttribute("alt")).toBe("");
+        await expect.poll(async () => brand.locator("img").evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0)).toBe(true);
       }
       await page.goto(frontend + "/", { waitUntil: "domcontentloaded" });
       const row = page.locator("a[class*='storeCard']").first();
@@ -67,7 +90,7 @@ for (const scheme of ["light", "dark"] as const) {
     } finally { await ctx.close(); }
   });
 
-  test("Campus A text-only app shell for every authenticated role in " + scheme, async ({ browser, request }) => {
+  test("Campus brand image and accessible shell for every authenticated role in " + scheme, async ({ browser, request }) => {
     const org = LOCAL_SEED_ENTITY_IDS.organizationId;
     for (const [role, path] of [
       ["customer", "/my/orders/"],
@@ -88,7 +111,9 @@ for (const scheme of ["light", "dark"] as const) {
         const brand = page.getByRole("link", { name: "UniStore Hub", exact: true }).first();
         await expect(brand, role).toBeVisible({ timeout: 15000 });
         await expect(brand).toHaveText("UniStore Hub");
-        expect(await brand.locator("svg, img, [class*='brandMark']").count()).toBe(0);
+        await expect(brand.locator("img[class*='brandMark']")).toHaveCount(1);
+        expect(await brand.locator("img").getAttribute("alt")).toBe("");
+        await expect.poll(async () => brand.locator("img").evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0)).toBe(true);
       } finally { await context.close(); }
     }
   });
@@ -157,7 +182,7 @@ for (const scheme of ["light", "dark"] as const) {
         if (width === 3840) expect(metrics.heroWidth).toBeGreaterThan(3100);
         if (width === 3840) expect(metrics.columns, "wide organization layout columns").toBeGreaterThanOrEqual(3);
         observations.push({ scheme, scope: "marketplace", width, ...metrics });
-        if ([390, 1440, 2560, 3840].includes(width)) {
+        if ([320, 390, 768, 1440, 2560, 3840].includes(width)) {
           await page.screenshot({ path: resolve(evidenceDir, "marketplace-" + scheme + "-" + width + ".png") });
         }
       }
@@ -242,8 +267,25 @@ for (const theme of ["light", "dark"] as const) {
       const page = await context.newPage();
       await installOrdinaryStorePreview(page);
       await page.goto(frontend + "/", { waitUntil: "domcontentloaded" });
+      const hero = page.locator('main section[class*="hero"]').first();
+      const heroSkin = await hero.evaluate(el => ({
+        gradient: getComputedStyle(el).backgroundImage,
+        radius: getComputedStyle(el).borderRadius,
+      }));
+      expect(heroSkin.gradient, theme + " campus hero gradient").toContain("linear-gradient");
+      expect(heroSkin.gradient, theme + " hero must not retain the old teal skin").not.toContain("rgb(23, 54, 58)");
+      records.push({ element: "storefront hero", ...heroSkin });
+
       const row = page.locator('a[class*="storeCard"]').first();
       await expect(row).toBeVisible({ timeout: 16000 });
+      const media = row.locator('[class*="storeCardMedia"]');
+      await expect(media).toContainText("ยังไม่มีรูปหน้าร้าน");
+      const mediaSkin = await media.evaluate(el => ({
+        image: getComputedStyle(el).backgroundImage,
+        text: getComputedStyle(el).color,
+      }));
+      expect(mediaSkin.image, theme + " neutral media fallback").toContain("linear-gradient");
+      records.push({ element: "store card without invented image", ...mediaSkin });
       await row.hover();
       await page.waitForTimeout(200);
       const rowColors = await row.evaluate(el => ({
@@ -300,6 +342,21 @@ for (const theme of ["light", "dark"] as const) {
       expect(field.outline).not.toBe("none");
       expect(contrast(field.color, field.background), theme + " login email input").toBeGreaterThanOrEqual(4.5);
       records.push({ element: "login input:focus-visible", ...field });
+
+      // Shared Button still uses the main's native button semantics; only its visual tokens change.
+      const primary = page.locator('form button[type="submit"]').first();
+      await expect(primary).toBeEnabled();
+      const primaryColors = await primary.evaluate(el => ({
+        background: getComputedStyle(el).backgroundColor,
+        foreground: getComputedStyle(el).color,
+        radius: getComputedStyle(el).borderRadius,
+        minHeight: el.getBoundingClientRect().height,
+      }));
+      expect(primaryColors.background).toBe(theme === "light" ? "rgb(184, 64, 0)" : "rgb(255, 180, 127)");
+      expect(contrast(primaryColors.foreground, primaryColors.background), theme + " primary action").toBeGreaterThanOrEqual(4.5);
+      expect(primaryColors.minHeight).toBeGreaterThanOrEqual(44);
+      records.push({ element: "shared Button primary", ...primaryColors, contrast: contrast(primaryColors.foreground, primaryColors.background) });
+
       await page.screenshot({ path: resolve(dir, theme + "-login-field-focused.png") });
 
       report.measurements = records;
@@ -323,7 +380,7 @@ async function readonly(context: import("@playwright/test").BrowserContext) {
 }
 
 for (const theme of ["light", "dark"] as const) {
-  test("text-only public wordmark and real Lucide CTA arrows / " + theme, async ({ browser }) => {
+  test("public logo plus text wordmark and Lucide CTA arrows / " + theme, async ({ browser }) => {
     test.setTimeout(75000);
     const context = await browser.newContext({ colorScheme: theme, viewport: { width: 1440, height: 900 } });
     await readonly(context);
@@ -335,7 +392,9 @@ for (const theme of ["light", "dark"] as const) {
         const brand = page.getByRole("link", { name: "UniStore Hub หน้าร้าน" });
         await expect(brand).toBeVisible();
         await expect(brand).toHaveText("UniStore Hub");
-        expect(await brand.locator("svg, img").count()).toBe(0);
+        await expect(brand.locator("img[class*='brandMark']")).toHaveCount(1);
+        expect(await brand.locator("img").getAttribute("alt")).toBe("");
+        await expect.poll(async () => brand.locator("img").evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0)).toBe(true);
 
         const action = page.getByRole("link", { name: /เลือกดูร้านค้า/ }).first();
         await expect(action).toBeVisible();
@@ -353,7 +412,7 @@ for (const theme of ["light", "dark"] as const) {
     } finally { await context.close(); }
   });
 
-  test("text-only authenticated wordmark and unified navigation glyphs / " + theme, async ({ browser, request }) => {
+  test("authenticated logo and unified navigation glyphs / " + theme, async ({ browser, request }) => {
     test.setTimeout(150000);
     const org = LOCAL_SEED_ENTITY_IDS.organizationId;
     const roles: Array<{ role: SeedRole; url: string }> = [
@@ -372,7 +431,9 @@ for (const theme of ["light", "dark"] as const) {
         const brand = page.getByRole("link", { name: "UniStore Hub", exact: true }).first();
         await expect(brand).toBeVisible({ timeout: 15000 });
         await expect(brand).toHaveText("UniStore Hub");
-        expect(await brand.locator("svg, img").count()).toBe(0);
+        await expect(brand.locator("img[class*='brandMark']")).toHaveCount(1);
+        expect(await brand.locator("img").getAttribute("alt")).toBe("");
+        await expect.poll(async () => brand.locator("img").evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0)).toBe(true);
         const navigationIcons = page.locator('nav svg.lucide');
         await expect(navigationIcons.first()).toBeVisible({ timeout: 15000 });
         const count = await navigationIcons.count();
@@ -387,4 +448,83 @@ for (const theme of ["light", "dark"] as const) {
     }
   });
 }
+});
+
+
+test.describe("Shared navigation visual migration", () => {
+  const { frontend, api } = localAuditTargets();
+  const org = LOCAL_SEED_ENTITY_IDS.organizationId;
+  const roles: Array<{role: SeedRole; path: string}> = [
+    {role:"customer",path:"/my/orders/"},
+    {role:"staff",path:"/org/orders/?organizationId="+org},
+    {role:"organizationAdmin",path:"/org/dashboard/?organizationId="+org},
+    {role:"platformAdmin",path:"/platform/organizations/"},
+  ];
+  for (const theme of ["light","dark"] as const) {
+    test("neutral/Orange shell keeps main navigation and modal focus in "+theme, async ({browser,request}) => {
+      test.setTimeout(260000);
+      const dir=resolve(process.cwd(),"quality-audit/.evidence/shared-navigation-skin",theme);
+      mkdirSync(dir,{recursive:true});
+      const results: Array<Record<string,unknown>>=[];
+      for (const {role,path} of roles) {
+        const context=await browser.newContext({colorScheme:theme,reducedMotion:"reduce",viewport:{width:390,height:844}});
+        await establishSeedRoleSession(context,request,role);
+        await context.route("**/*",async route => {
+          if (blockBrowserApiWrites(api)(route.request().url(),route.request().method()))
+            return route.abort("blockedbyclient");
+          return route.continue();
+        });
+        try {
+          const page=await context.newPage();
+          const errors:string[]=[];
+          page.on("pageerror",e=>errors.push(e.message));
+          await page.goto(frontend+path,{waitUntil:"domcontentloaded",timeout:20000});
+          await expect(page.locator('aside[aria-label="พื้นที่นำทาง"]')).toBeVisible({timeout:15000});
+          for(const width of [390,1440,3840]){
+            await page.setViewportSize({width,height:width===390?844:900});
+            await page.evaluate(()=>document.fonts.ready);
+            const data=await page.evaluate(()=>{
+              const sidebar=document.querySelector('aside[aria-label="พื้นที่นำทาง"]')!;
+              const helper=document.createElement("div");
+              helper.style.backgroundColor="var(--surface)";
+              document.body.appendChild(helper);
+              const expected=getComputedStyle(helper).backgroundColor;
+              helper.remove();
+              return {
+                sidebar:getComputedStyle(sidebar).backgroundColor,expected,
+                activeCount:document.querySelectorAll('nav[aria-label="เมนูหลัก"] a[aria-current="page"]').length,
+                overflow:Math.max(0,document.documentElement.scrollWidth-innerWidth),
+                hasCollapseStorage:!!document.querySelector('[data-sidebar-collapsed]'),
+                brandText:sidebar.querySelector('a[href="/"]')?.textContent?.trim()??""
+              };
+            });
+            expect(data.sidebar).toBe(data.expected);
+            expect(data.activeCount).toBeGreaterThanOrEqual(1);
+            expect(data.overflow).toBeLessThanOrEqual(1);
+            expect(data.hasCollapseStorage).toBe(false);
+            expect(data.brandText).toBe("UniStore Hub");
+            const image=role+"-"+theme+"-"+width+".png";
+            await page.screenshot({path:resolve(dir,image),animations:"disabled",caret:"initial"});
+            if(width===390){
+              const opener=page.getByRole("button",{name:"เปิดเมนูหลัก"});
+              await opener.click();
+              const panel=page.getByRole("dialog",{name:"เมนูหลัก"});
+              await expect(panel).toBeVisible();
+              await expect(page.locator("#main-content")).toHaveAttribute("inert","");
+              await page.screenshot({path:resolve(dir,role+"-"+theme+"-drawer.png"),animations:"disabled",caret:"initial"});
+              await page.keyboard.press("Escape");
+              await expect(panel).toHaveCount(0);
+              await expect.poll(async () => opener.evaluate(el => document.activeElement === el)).toBe(true);
+              await expect(page.locator("#main-content")).not.toHaveAttribute("inert","");
+            }
+            results.push({role,width,theme,image,...data});
+          }
+          expect(errors).toEqual([]);
+          await page.close();
+        } finally {await context.close();}
+      }
+      writeFileSync(resolve(dir,"navigation-skin-check.json"),JSON.stringify({theme,results},null,2)+"\n");
+      expect(results).toHaveLength(12);
+    });
+  }
 });

@@ -8,7 +8,7 @@ Historical notes have been **merged by subject**; do not create numbered milesto
 
 | Review | Scope |
 | --- | --- |
-| [Foundation and UI](CAMPUS_COMMERCE_A_FOUNDATION_AND_UI_REVIEW.md) | Baseline, foundation, fluid 4K, interaction, icons |
+| [Foundation and UI](CAMPUS_COMMERCE_A_FOUNDATION_AND_UI_REVIEW.md) | Baseline, original foundation, 4K, interaction, icons, **current design→main visual migration and UX freeze** |
 | [Storefront](CAMPUS_COMMERCE_A_STOREFRONT_REVIEW.md) | Store grid, QA fixtures, public commerce |
 | [Authentication and customer](CAMPUS_COMMERCE_A_AUTH_AND_CUSTOMER_REVIEW.md) | Login, return to intent, checkout/customer journeys |
 | [Operations](CAMPUS_COMMERCE_A_OPERATIONS_REVIEW.md) | Staff, organization and platform admin |

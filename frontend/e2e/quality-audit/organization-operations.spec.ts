@@ -90,6 +90,14 @@ for (const theme of ["light", "dark"] as const) {
       for (const r of routes) {
         await page.goto(root + r.url, { waitUntil: "domcontentloaded" });
         await expect(page.getByRole("heading", { level: 1, name: r.heading })).toBeVisible({ timeout: 18000 });
+        // Staff workbenches use the formal neutral header skin, retaining all existing queue controls.
+        const headerSkin = await page.locator("main").locator('[class*="header"], [class*="detailHero"]').first().evaluate(el => ({
+          backgroundImage: getComputedStyle(el).backgroundImage,
+          backgroundColor: getComputedStyle(el).backgroundColor,
+        }));
+        expect(headerSkin.backgroundImage, theme + " / " + r.name + " should not inherit decorative gradients").toBe("none");
+        expect(headerSkin.backgroundColor, theme + " / " + r.name + " should not retain historical teal").not.toBe("rgb(25, 59, 57)");
+
         for (const width of [320, 390, 768, 1024, 1440, 2560, 3840]) {
           await page.setViewportSize({ width, height: 900 });
           await page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
@@ -158,6 +166,12 @@ for (const theme of ["light", "dark"] as const) {
     try {
       await page.goto(root + "/org/production/?organizationId=" + org + "&campaignId=" + campaignId, { waitUntil: "domcontentloaded" });
       await expect(page.getByRole("heading", { name: "สรุปงานผลิต", level: 1 })).toBeVisible({ timeout: 18000 });
+      const productionSkin = await page.locator("main").locator('[class*="header"]').first().evaluate(el => ({
+        backgroundImage: getComputedStyle(el).backgroundImage,
+        backgroundColor: getComputedStyle(el).backgroundColor,
+      }));
+      expect(productionSkin.backgroundImage, theme + " production header").toBe("none");
+
       await expect(page.getByText("เสื้อชมรม").first()).toBeVisible();
       await expect(page.getByText("Size M").first()).toBeVisible();
       for (const width of [320, 390, 768, 1440, 3840]) {
@@ -250,13 +264,18 @@ for (const theme of ["light", "dark"] as const) {
       for (const route of routes) {
         await page.goto(host + route.path, { waitUntil: "domcontentloaded" });
         await expect(page.locator("main").first()).toBeVisible({ timeout: 15000 });
-        await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible({ timeout: 15000 });
+        const routeHeading = page.getByRole("heading", { level: 1 }).first();
+        await expect(routeHeading).toBeVisible({ timeout: 15000 });
+        await expect(routeHeading).not.toHaveText(/กำลังตรวจสอบบัญชี|กำลังโหลด/, { timeout: 15000 });
+        const settledTitle = await routeHeading.innerText();
         await expect(page.locator("main")).toBeVisible({ timeout: 15000 });
         await expect(page.getByText("ห้ามเห็นหน่วยงานนี้")).toHaveCount(0);
         for (const width of [320, 390, 768, 1024, 1440, 1920, 2560, 3840]) {
           await page.setViewportSize({ width, height: 920 });
           await page.evaluate(() => new Promise<void>(done => requestAnimationFrame(() => requestAnimationFrame(() => done()))));
           await expect(page.locator("main")).toBeVisible({ timeout: 15000 });
+          // Do not capture a transient session-check/loading screen during responsive resizing.
+          await expect(page.getByRole("heading", { level: 1 }).first()).toHaveText(settledTitle, { timeout: 15000 });
           let m = { width: 0, overflow: 0 };
           await expect.poll(async () => {
             try {

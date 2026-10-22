@@ -286,3 +286,192 @@ A static heuristic reviewed **38 CSS files and 237 interaction rules**. It flagg
 **Phase 5 scope result:** Unified iconography and text-only brand across tested screens, dependency/build reproducibility restored for local frontend, source and guarded browser regression passed. Ready for **Phase 6 — Storefront Landing and true store-first marketplace grid** on next user instruction.
 
 ---
+
+## Visual migration baseline — main behavior frozen, design branch as visual reference
+
+**Purpose:** Active design migration task `task_1febbe60-581b-42d0-8765-506f38b362f0`. Only the *appearance* of `design` may be brought into `main`. This is a reference inventory, not a claim that visual parity is already achieved.
+
+### Current branch and source controls
+
+- Baseline before work: clean `main` at `f69af2e`; read-only `design` at `08c97c6`. Common ancestor `0f7f826`.
+- Direct `git diff main design`: 452 changed paths including backend/test/docs. Do **not** blindly merge/cherry-pick; the visual crosswalk below identifies selected frontend-owned work.
+- Source authority for behavior: `main` routes and components, `frontend/quality-audit/coverage-baseline.json` = **28 routes, 207 route actions + 50 shell actions = 257 declared actions**.
+- Visual reference: `git show design:frontend/.interface-design/system.md`, `git show design:frontend/.interface-design/role-journeys.md`, and design-side CSS/brand assets. No `design` branch working-tree checkout required.
+- The implementation suite is appended to existing behavior-owned `frontend/e2e/quality-audit/responsive-accessibility.spec.ts`; evidence saved only under ignored `frontend/quality-audit/.evidence/visual-migration-baseline/`.
+
+### Source-verified visual token map
+
+| Element | `main` before migration | `design` target | Freeze / exception |
+| --- | --- | --- | --- |
+| `--brand` | `#126357` green | `#E35205` KMITL orange | Preserve readable on-brand text and semantic status color |
+| `--brand-hover` / `--brand-strong` | `#0C4F45` / `#0B4C42` | `#C94700` / `#9B3200` | Paired hover and keyboard focus states |
+| `--brand-soft` | `#E3F2E9` | `#FFF0E8` | Preserve accessible selected/active colors |
+| `--canvas` / `--ink` | `#F7F8F4` / `#193630` | `#F7F7F7` / black | No Dark Mode removal |
+| `--radius-card` | `14px` | `10px` | Preserve 44px interactive targets |
+| `--content-max` / `--content-wide` | `2680px` / `3000px` | `1240px` / `1440px` | **Keep main 4K expansion**, use design card density within |
+| Brand image/favicon | Selectable text-only UniStore Hub | `frontend/src/assets/unistore-hub-logo.webp` and `src/app/icon.png` in `design` | Owner's new visual direction replaces the old text-only branding restriction; retain accessible brand name and link |
+| Theme mode | Light + `prefers-color-scheme: dark` | Light-only | Build accessible KMITL Orange Dark variants; no disabling existing theme behavior |
+
+Design has a compact neutral-orange campus noticeboard, whereas current main has teal/cream storefront, wider layouts and dark companion. The targets above are **source-derived**, not pixel-by-pixel screenshots of the `design` runtime.
+
+### UX freeze and migration owner matrix
+
+| Surface / source | Port only visual treatment | Behavior frozen from `main` | Later verification |
+| --- | --- | --- | --- |
+| `src/app/globals.css`, all CSS modules | Orange tokens, typography, neutral backgrounds, spacing, radius, role emphasis | Semantic statuses, contrast/focus, reduced motion, wide viewport containers, Light/Dark | 320–3840, hover/focus/disabled |
+| `components/layout/application-shell.*`, brand | Orange sidebar, header, logos, card/summary appearance | Role-aware nav, workspace switch, Escape/focus trap, scroll lock and contextual location. **No unrequested design collapse/localStorage/sessionStorage sidebar behavior** | 5 roles, desktop/mobile |
+| `components/ui/fields.tsx`, primitives, dialog, table | Form fields, buttons, tabs, dialog and table skin | Form validation, errors, native/select keyboard semantics, error-summary focus, pending state and API. **Do not transplant portal custom Select or new pagination hooks** | Keyboard/focus, selection, errors |
+| `modules/storefront`, stores/products/campaign details | Noticeboard hero, showcase, product cards and images | Existing store search, organization/status filters, pagination, true store records, local QA visibility switch and price/variant state. **Do not replace with design `/stores` catalog flow** | Guest/Customer, real/empty/filtered |
+| `modules/auth`, login/register | Visual panel split, orange CTAs, logo | Session, protected auth `returnTo`, error recovery, role routing, pending/validation | Protected order return, retries |
+| `modules/orders`, `payments`, `pickups`, notifications | Journey card/hierarchy, status and action typography | Checkout price, payment proof, status, pickup progress, toast/error recovery | Customer lifecycle, safe mocks |
+| Staff: order/payments/pickups/production | Operational queues, toolbar, table density and badge appearance | **prioritizeLoadedQueue, all/action filtering, show-more, detail reveal, approve/reject/pickup guards, 409/conflict/focus feedback** | Safe transition tests |
+| Organization Admin: stores/products/campaign/settings/audit | Management layout and cards | Tenant and RBAC, admin edits, products/variants/media, confirmation and error states | Management by role |
+| Platform Admin: overview/organizations/users | Governance cards/filters visual hierarchy | Role-only access, actual status, directory filter and limit, confirmation and audit | Platform actions/denied access |
+
+### Real browser snapshot matrix (current `main` only)
+
+**Five roles × Light/Dark × 390/1440/3840 CSS px = 30 PNG screenshots**, recorded by Chromium read-only test in `frontend/quality-audit/.evidence/visual-migration-baseline/{light,dark}/`. Per-theme `visual-baseline.json` records H1, loaded flag, semantic CSS colors, main width, overflow, page errors and broken images.
+
+| View | Sample route | 390 / 1440 / 3840 Light and Dark | Focus of future comparison |
+| --- | --- | --- | --- |
+| Guest | `/` | Captured | Storefront branding, hero, search/filter, truth of store data |
+| Customer | `/my/orders/` | Captured | Order progress, account navigation |
+| Staff | `/org/orders/?organizationId=<local seed>` | Captured | Priority queue, all/action, details and show-more |
+| Organization Admin | `/org/dashboard/?organizationId=<local seed>` | Captured | Dashboard loading/loaded, tenant indicators |
+| Platform Admin | `/platform/organizations/` | Captured | Pending organizations, directory status and approval access |
+
+Verified baseline capture **2/2 browser tests PASS**, **30 screenshots**, **0 unexpected browser writes**, **0 reported overflow, broken images or page errors**, and all loaded after screenshot-timing correction. Seed-account login is local read-only session setup rather than a business-state write. Tested 4K *CSS viewport width*, not physical monitor calibration.
+
+Sample main widths at CSS 3840px: Public 3840, Customer 1760, Staff 2600, Organization Admin 2600, Platform Admin 3040. These intentionally task-dependent widths must not be forced down to design's generic 1440px cap.
+
+### Visibility and test limitations
+
+- The 30 baseline screenshots are **screens of `main`**. They are **not** a render or pixel-perfect proof of `design`, and do not exercise every canonical route or every action state.
+- The 28-route historical QA and 257-action ledger remain separate evidence. Visual parity at hover/focus/pending/error/modal states is **NOT_TESTED in this new baseline**. Physical 4K, native 200% browser zoom, screen-reader certification and real payment/pickup mutations are NOT_TESTED here.
+- No production API writes, tenant changes, DB/AWS/Backend changes, real checkout or approval took place. No source TSX/CSS production implementation is changed in this baseline; only the existing browser QA suite and this topic-owned report were extended.
+- **Next work:** semantic KMITL Orange tokens and accessible Dark variants first; subsequent subject work must compare styling to this baseline while preserving frozen `main` behaviors. No milestone-named files; no automatic Commit/Push/Deploy.
+
+
+## KMITL Orange semantic foundation — implemented on main
+
+**Goal:** Move the shared visual foundation toward the local `design` branch while preserving every nonvisual `main` behavior. This section describes the live token migration, not full page-level visual parity.
+
+### Changed design source
+
+- Changed **only** `frontend/src/app/globals.css` in the runtime design source: KMITL Orange primary/hover/strong/soft/on-foreground, neutral grayscale canvas/surfaces/text, lightened border tokens, orange focus, coherent accents and neutral-or-orange gradients. The optional high-emphasis action tokens `--action-primary` / `--action-primary-hover` / `--action-primary-on` from design were added. Consistent `--ops-*` neutral surface/attention aliases are defined for later operational components.
+- Brought design's card radius family down to approximately **4/6/8/10/12px** and reduced headline scale/shadows/motion expression using the same root variable names. Original spacing still follows **4px units** with the original body font family (`Noto Sans Thai` fallbacks) and minimum 44px touch targets.
+- Created a **warm neutral-orange Dark palette** because `design` itself is Light-only. Kept `prefers-color-scheme: dark`, native dark controls, readable ink, semantic status colors and existing dark-mode interaction tokens. Did not replace the Dark palette with inverted white.
+- Left task-specific width values exactly as on main: `--content-max:2680px`, `--content-wide:3000px`, `--content-marketplace:3360px`, 4K handling, desktop/mobile spacing breakpoints and the stable component token references.
+- Kept dark-field text tokens and **deep-colored Hero gradient** for existing white-on-dark Hero markup to avoid unreadable white text on the Light-only `design` Hero background. The later Storefront/Shared Shell redesign must explicitly migrate those markup/color pairs. Some existing CSS modules still hardcode teal/dark-green surfaces (e.g. sidebar and legacy Hero); that visual mismatch is intentionally **not** claimed fixed in the tokens-only scope.
+
+### Sample verified contrast pairings
+
+Computed against the actual Light/Dark semantic hexadecimal pairs. Minimum 4.5:1 for text and 3:1 for Focus/meaningful boundaries.
+
+| Measured pair | Light | Dark | Status |
+| --- | ---: | ---: | --- |
+| Ink / canvas | 19.60:1 | 17.02:1 | PASS |
+| Secondary ink / surface | 8.45:1 | 10.98:1 | PASS |
+| Brand on / brand fill | 5.48:1 | 10.31:1 | PASS |
+| Brand strong / brand soft | 6.63:1 | 9.62:1 | PASS |
+| Ink / hovered surface | 18.93:1 | 11.81:1 | PASS |
+| Ink / selected surface | 18.88:1 | 9.98:1 | PASS |
+| Focus ring / surface | 5.57:1 | 11.43:1 | PASS |
+
+**Visual sample:** `frontend/quality-audit/.evidence/kmitl-orange-theme/{light,dark}/` stores **30 PNG screenshots**, 5 roles × widths 390/1440/3840 × 2 themes, and `semantic-theme-audit.json` for all computed browser token pairs. The guarded Chromium suite in the existing `frontend/e2e/quality-audit/responsive-accessibility.spec.ts` passed **2/2**, 30 measurements, **zero browser business writes**, zero horizontal overflow/broken images/page errors. The existing shared-ui guest/authenticated brand/link/readability checks passed **4/4**. The displayed brand is still text-only until the independent asset migration step.
+
+**Engineering gates:** Frontend 382/382 Unit Tests, TypeScript, ESLint, 30/30 static build pages, repository artifact naming guard and `git diff --check` were executed in this workstream; see current terminal logs for post-change verification. The code changes are not yet committed.
+
+### Frozen functional boundaries / what this does not prove
+
+- The same `main` functionality is retained: auth return path/session, storefront query/filter/pagination, local fixture visibility, Staff queue prioritization/action filters/show more and order/payment/pickup guarded dialogs, tenant RBAC and Platform approval permission. **No relevant TSX/API/Backend code was replaced.**
+- These tests check semantic token pairing plus representative loaded routes, **not** all 28 route UIs or the 257 action-state permutations. WCAG manual screen-reader validation, physical 4K and native 200% browser zoom remain **NOT_TESTED** here. The already existing secondary-role and full-matrix evidence is historical, not a new test of every changed visual state.
+- Future stages must re-skin hardcoded module-specific greens, Hero, shared sidebar/forms and orange focus/active states, while preserving their `main` behavior and accessible Light/Dark. Do not reset `globals.css` to the Light-only design copy, narrow 4K widths or import design's interaction/route modules.
+- The brand image/favicon migration is intentionally deferred to its own stage. The older text-only brand screenshots still reflect current UI.
+
+
+## Approved UniStore Hub image identity — asset migration from design
+
+**Current task scope:** Move *only* the owner-approved brand image and favicon from the local `design` branch to `main`. Keep all behavior and navigation from `main`. This supersedes the historical text-only brand rule; older review sections remain as dated evidence, not current design authority.
+
+### Source identity and integrity
+
+| Asset | Provenance | Properties |
+| --- | --- | --- |
+| `frontend/src/assets/unistore-hub-logo.webp` | Byte-for-byte `git show design:frontend/src/assets/unistore-hub-logo.webp` | 256×256 WebP, 17,540 bytes; SHA-256 `313840b3c96805d2140422cb50fe60f9d79a92123f89d7a5d315cdf34746eb51` |
+| `frontend/src/app/icon.png` | Byte-for-byte `git show design:frontend/src/app/icon.png` | 192×192 PNG, 32,124 bytes; SHA-256 `7c624eb4168da828a4c80f1a1f686d880da220683ebf7e761fb83e32f9db40ad` |
+
+No remote web assets were fetched. These files are existing first-party repository assets, not newly AI-generated logo concepts. This provenance alone does **not** substitute for separate legal rights clearance if required for Production.
+
+### Visual locations, identity and access contract
+
+- **Public shopping header:** `src/modules/storefront/storefront-header.tsx` / `storefront-view.module.css` displays the approved 38px logo beside selectable **UniStore Hub** text; home remains a labeled `href="/"` Link. All logged-in/order/notification header links, labels, paths and status logic are untouched.
+- **Authenticated customer/staff/organization/platform shell:** `src/components/layout/application-shell.tsx` / `application-shell.module.css` shows the same 38px image/text on the existing sidebar/top brand Link. Existing navigation groups, role scoping, drawer focus trap, Escape return, scrollbar behavior and Logout remain exactly as on `main`. No design-branch sidebar collapse or persistence was imported.
+- **Login/Register:** `src/modules/auth/auth-page-frame.tsx` / `auth-form.module.css` shows the image beside the original text in the same labeled home Link. Existing form states, URL returnTo and authentication UX are unchanged.
+- **Protected order recovery:** `src/modules/auth/auth-recovery.tsx` / `auth-recovery.module.css` keeps its link to `/` and original visible text; adds a 36px decorative logo without changing its state transitions or return path.
+- **Favicon:** Next App Router discovers `src/app/icon.png` and includes the icon route in the build. Other static metadata and URLs are unchanged.
+
+**Accessible identity:** the image uses `alt=""` and `aria-hidden="true"` because text is present in the same link. It is not a second control or screen-reader announcement; brand links preserve their previous accessible names (including `UniStore Hub หน้าร้าน` on public/auth). Current visual logo is an explicit approved exception to the earlier *no-image-brand* rule, while arbitrary U badges/monograms remain forbidden. Shared functional navigation icons remain Lucide and are not brand art.
+
+**Layout constraint:** fixed 38px/36px asset box, `object-fit:contain`, CSS radius and non-shrinking image. The current 44px or larger interactive link region is preserved. No change to the current Light/Dark semantics, widths to 3840 CSS px or application flow.
+
+### Verification and limitations
+
+- Browser test updates are in existing `frontend/e2e/quality-audit/campus-commerce-ui.spec.ts`, replacing obsolete *no brand image* assertions with **loaded logo + decorative alt + visible selectable brand text** while retaining contrast, real Lucide and keyboard/accessible-name checks.
+- Existing Unit suites `src/modules/storefront/storefront-header.test.tsx` and `src/components/layout/application-shell.test.tsx` now check that the original home link/accessible name remains intact with a decorative image.
+- Representative screenshots are saved under existing ignored `frontend/quality-audit/.evidence/campus-commerce-icons/`; these are local browser observations, not physical screen-reader certification or exhaustive page/state proof.
+- Theme-specific shell backgrounds and other module colors still require visual migration later; this asset-only update intentionally does not repaint headers, hero backgrounds, forms or user journeys. Real checkout/payment/pickup/backend mutations are outside scope and NOT_TESTED here.
+
+### Final local verification of approved brand integration
+
+- **Frontend Unit Tests:** 383/383 PASS across 94 files after adding accessible logo + unchanged home destination assertions in existing Storefront and ApplicationShell suites.
+- **Read-only Chromium browser regression:** 15/15 PASS for shared UI, responsive, role identity/navigation, visual control contrast and icon suite. Includes Light/Dark appearance for Guest, Customer, Staff, Organization Admin and Platform Admin. Browser tests assert the logo is loaded and decorative while the brand text remains readable and clickable.
+- **Favicon runtime test:** included in the 15 passing browser cases. Browser exposes the Next.js icon link; fetching it succeeds with `image/png`, and the static export now reports **31/31** artifacts, including `/icon.png`.
+- **TypeScript, ESLint, artifact filename guard and Git Diff Check:** PASS. Existing `main` auth, role paths, drawer focus and business tests remain intact; no new API/backend/infra code changes.
+- **Screenshots:** browser observations under `frontend/quality-audit/.evidence/campus-commerce-icons/` and `frontend/quality-audit/.evidence/campus-commerce-responsive/`. Focused results under `frontend/quality-audit/.evidence/brand-identity/`, including Guest mobile Light/Dark and Staff desktop Dark. Representative views, not a complete 28-route/state matrix.
+- **NOT_TESTED:** physical devices, all 257 action-state permutations, third-party ownership clearance and real payment/approval/pickup writes. The image matches `design` byte-for-byte but rights/release signoff remains a separate check if required.
+
+**Scope outcome:** Brand image and favicon migration is complete in local `main`. Screen-level hardcoded colors and shell layout belong to subsequent visual stages. No Commit/Push/Deploy performed.
+
+
+## Shared navigation presentation — Orange/Neutral shell, main UX preserved
+
+**Scope:** Visual migration from branch `design` to `main`. This is an **appearance-only** update to `frontend/src/components/layout/application-shell.module.css` and the header selectors in `frontend/src/modules/storefront/storefront-view.module.css`. It does not transplant the `design` component, replace routes or change Role/RBAC.
+
+### Visual changes
+- Restyled Customer, Staff, Organization Admin and Platform Admin navigation rails from fixed teal/dark-green colors into semantic white/neutral `--surface`, KMITL Orange `--brand`/`--brand-soft`, neutral borders and clear active/current item indication.
+- Scoped Platform accent to the Orange brand for consistent navigation chrome; independent informational/success/warning/danger status semantics are not modified.
+- Sidebar brand, workspace context, card summary, active nav state, user footer, organization switch affordance and responsive drawer share the same Light/Dark semantic background/ink values.
+- Public Storefront header retains its existing sticky position, links, widths and responsive behavior while using neutral surface instead of tinted background, Orange selected tab and the existing high-emphasis `--action-primary` color.
+- Focus-visible outlines and minimum navigation/work-area touch size are kept or strengthened. At narrow widths, the existing mobile drawer and horizontal work-area menu remain functional.
+
+### Explicit UX freeze
+**Do not import `design`'s sidebar collapsing toggle, persistent localStorage sidebar preference, sessionStorage scroll persistence, portal Select component, alternate routing or role navigation structure.** Current `main` remains authoritative for focus trap, Escape focus return, body scroll lock, content inert handling, role-aware groups, workspace switch and current-route marking.
+
+### Local evidence and checks
+- Source owner: existing `frontend/e2e/quality-audit/campus-commerce-ui.spec.ts` under `Shared navigation visual migration`; no new milestone-named test artifact.
+- Guarded Chromium browser tests: **2/2 PASS**, covering 4 authenticated roles × Light/Dark × widths 390, 1440, 3840 CSS px = **24 rendered observations**, plus 8 mobile drawer open/Escape/focus-return interactions. Screenshots/JSON are saved under ignored `frontend/quality-audit/.evidence/shared-navigation-skin/{light,dark}/`.
+- Computed sidebar surface: Light `rgb(255,255,255)` and Dark `rgb(36,32,30)` at all sampled roles/sizes. All 24 checks retained at least one current Navigation item, no horizontal overflow, and no unexpected collapse-state attribute.
+- Frontend Unit **383/383 PASS**, TypeScript, lint, Next.js static build **31/31 generated pages**, and artifact-name guard PASS. Shared UI/brand full Chromium browser regression: **17/17 PASS**, logged under the same evidence folder.
+- Screenshots are representative samples, not full design pixel parity or exhaustive 28-route/257-action testing. Real payment/pickup/approval mutations, physical display accessibility and native zoom are NOT_TESTED here.
+
+**Handoff:** Shared Navigation skin now uses Orange/Neutral styles. The remaining Forms/Tables/Dialogs and per-role page visual styles belong to subsequent subject work; do not treat this as UI parity for all screens.
+
+## Shared control presentation — Buttons, Forms, Tables and Dialogs
+
+**Scope:** Active visual migration on `main`, current shared-component work only. The original pre-existing worktree changes were retained. `design` remains a read-only reference for appearance, and `main` remains authoritative for native controls, focus, business behavior, routes, role access, and data.
+
+**Implementation:** Updated `frontend/src/components/ui/primitives.module.css` to use KMITL Orange high-emphasis primary actions, neutral outlined secondary actions, flat forms/cards/status/table surfaces, compact badges, and responsive Dialog geometry. Removed the conflicting bottom-of-file teal/control override. Updated `operational.module.css` to remove shadow from FilterToolbar, Notice and TaskStatus. No component exports, React behavior, API, DB, AWS, dependencies, or backend files were changed. The native Select and Radix dialog remain intact; design's portal Select and pagination hooks were not imported.
+
+**Verified local checks:**
+
+- `git diff --check`, artifact naming, frontend TypeScript and ESLint: **PASS**.
+- Frontend unit tests: **384/384 PASS across 94 files**, including new native Select validation/change-handler coverage in `fields.test.tsx`.
+- Next.js static build: **PASS, 31/31 generated routes/assets**.
+- Guarded Chromium `campus-commerce-ui.spec.ts` Interaction checks: **2/2 PASS** across Light/Dark. Checked live computed input/select/option contrast, focus-visible, actual primary button Orange tokens, primary text contrast and minimum 44px touch target.
+- Guarded Chromium modal accessibility: **1/1 PASS**, with 8 Light/Dark × viewport observations at 320/390/768/1440 checking keyboard focus trap, Escape and focus return, bounded dialog geometry and targeted axe rules.
+- Guarded Chromium theme/text scaling: **1/1 PASS**; five representative routes with Dark Mode normal/root-font-200% snapshots, no test-reported overflow or targeted axe violations.
+- The tests above used locally served frontend and API; intercepted/blocked browser writes for the scoped browser suites. These tests do not prove every route/state or real transaction.
+- **NOT_TESTED:** complete 28-route/5-role shared visual parity, all 257 action/state permutations, Firefox/WebKit, physical device/browser zoom, full WCAG manual screen-reader review, real payment/pickup/approval writes and production integration. These are reserved for the wider browser and release gates.
+
+**Handoff:** Shared visual primitives complete for this scoped task; per-route guest/auth/customer/staff/organization/platform appearances remain their own pending work. No Commit, Push or Deploy.

@@ -1,15 +1,15 @@
 :root {
   color-scheme: light;
 
-  /* Editorial commerce — restrained semantic surfaces and status tokens */
-  --canvas: #f7f8f4;
+  /* KMITL Orange / neutral campus commerce — theme-compatible semantic tokens */
+  --canvas: #f7f7f7;
   --surface: #ffffff;
   --surface-raised: #ffffff;
-  --surface-muted: #eef3ee;
-  --surface-inset: #fbfcfa;
-  --surface-strong: #dce9e0;
-  --surface-hover: #e9f3ed;
-  --surface-selected: #d9eee3;
+  --surface-muted: #fafafa;
+  --surface-inset: #f1f1f1;
+  --surface-strong: #e8e8e8;
+  --surface-hover: #f3f3f3;
+  --surface-selected: #fff0e8;
   --focus-ring-offset-bg: var(--surface);
   --interactive-selected-ink: var(--ink);
   --interactive-selected-bg: var(--surface-selected);
@@ -27,29 +27,41 @@
   --on-selected: var(--ink);
 
   /* Text */
-  --ink: #193630;
-  --ink-secondary: #455f55;
-  --ink-tertiary: #547368;
-  --ink-muted: #58776c;
+  --ink: #000000;
+  --ink-secondary: #4d4d4d;
+  --ink-tertiary: #666666;
+  --ink-muted: #626262;
   --ink-inverse: #ffffff;
 
   /* Structure */
-  --line: rgb(31 27 45 / 14%);
-  --line-soft: rgb(31 27 45 / 8%);
-  --line-strong: rgb(31 27 45 / 24%);
-  --control-line: rgb(31 27 45 / 42%);
-  --control-line-hover: rgb(31 27 45 / 60%);
+  --line: #d9d9d9;
+  --line-soft: #e8e8e8;
+  --line-strong: #a8a8a8;
+  --control-line: #8a8a8a;
+  --control-line-hover: #666666;
 
   /* Brand */
-  --brand: #126357;
-  --brand-hover: #0c4f45;
-  --brand-strong: #0b4c42;
-  --brand-soft: #e3f2e9;
-  --brand-soft-strong: #cce7d8;
-  --brand-on: #ffffff;
-  --brand-line: #91c5ad;
+  --brand: #e35205;
+  --brand-hover: #c94700;
+  --brand-strong: #9b3200;
+  --brand-soft: #fff0e8;
+  --brand-soft-strong: #ffd8c2;
+  --brand-on: #000000;
+  --brand-line: #e8a47f;
 
-  /* Compatibility aliases while route-level v3 rollout is in progress. */
+  /* High-emphasis actions and operational surfaces: design-owned colors, main UX remains unchanged. */
+  --action-primary: #b84000;
+  --action-primary-hover: #963100;
+  --action-primary-on: #ffffff;
+  --ops-header: var(--surface);
+  --ops-surface: var(--surface);
+  --ops-surface-muted: var(--surface-muted);
+  --ops-surface-hover: var(--surface-hover);
+  --ops-attention: #fff4ed;
+  --ops-line: var(--line);
+  --ops-line-soft: var(--line-soft);
+
+  /* Existing aliases remain stable for all module stylesheets. */
   --campus: var(--brand);
   --campus-hover: var(--brand-hover);
   --campus-soft: var(--brand-soft);
@@ -58,15 +70,15 @@
   --campus-line: var(--brand-line);
 
   /* Expressive support palette — never semantic by itself. */
-  --accent-lavender: #e8eee6;
-  --accent-sky: #e3f0eb;
-  --accent-sky-strong: #5d9b91;
-  --accent-mint: #dcf0e5;
-  --accent-teal-soft: #e2f2ec;
-  --accent-coral: #f5e5d5;
-  --accent-coral-strong: #b66e4d;
-  --accent-yellow: #f6edcd;
-  --accent-yellow-ink: #49331b;
+  --accent-lavender: #f4f1ef;
+  --accent-sky: #f3f3f3;
+  --accent-sky-strong: #a8a8a8;
+  --accent-mint: #f2f5f2;
+  --accent-teal-soft: #f2f4f3;
+  --accent-coral: #fff0e8;
+  --accent-coral-strong: #b84000;
+  --accent-yellow: #fff7ed;
+  --accent-yellow-ink: #66320f;
 
   /* Semantic state */
   --success: #16794a;
@@ -83,12 +95,12 @@
   --info-line: color-mix(in srgb, var(--info) 28%, var(--line));
 
   /* Interaction */
-  --focus: #147a84;
-  --selection: #d1eadc;
-  --overlay-scrim: rgb(9 28 22 / 58%);
+  --focus: #b84000;
+  --selection: #ffd8c2;
+  --overlay-scrim: rgb(0 0 0 / 62%);
   --media-paper: #ffffff;
-  --media-paper-line: rgb(31 27 45 / 12%);
-  --media-paper-ink: #1f1b2d;
+  --media-paper-line: rgb(0 0 0 / 12%);
+  --media-paper-ink: #000000;
 
   /* Dark-field foregrounds used by branded hero/media zones. */
   --on-dark: #ffffff;
@@ -102,28 +114,28 @@
   --on-dark-surface-hover: rgb(255 255 255 / 16%);
 
   /* Controlled gradient families */
-  --gradient-hero: linear-gradient(130deg, #123f39 0%, #1b6256 100%);
-  --gradient-ambient: linear-gradient(135deg, #f1f7f1 0%, #e7f4ec 52%, #f7f6ee 100%);
-  --gradient-warm: linear-gradient(135deg, #faf1d8 0%, #f6e5d6 52%, #e5f1e8 100%);
-  --gradient-premium: linear-gradient(130deg, #122f2d 0%, #1d5149 100%);
-  --gradient-brand-soft: linear-gradient(135deg, #e8f3ed 0%, #f7f8f4 100%);
+  --gradient-hero: linear-gradient(130deg, #3b231a 0%, #813511 100%);
+  --gradient-ambient: linear-gradient(135deg, #fafafa 0%, #fff7f1 58%, #f7f7f7 100%);
+  --gradient-warm: linear-gradient(135deg, #fff7ed 0%, #fff0e8 52%, #f7f7f7 100%);
+  --gradient-premium: linear-gradient(130deg, #30241e 0%, #6a321c 100%);
+  --gradient-brand-soft: linear-gradient(135deg, #fff0e8 0%, #f7f7f7 100%);
   --gradient-product-panel:
-    linear-gradient(135deg, #ecf5ed 0%, #e9f2e7 55%, #f5edda 100%);
+    linear-gradient(135deg, #fafafa 0%, #fff3eb 55%, #fff7ed 100%);
   --gradient-product-stage:
-    linear-gradient(145deg, #edf4ea 0%, #f5edd7 52%, #d8ece2 100%);
+    linear-gradient(145deg, #f7f7f7 0%, #fff7ed 52%, #ffe8d8 100%);
 
-  --gradient-brand-orb: linear-gradient(145deg, #91d1b5, #24766a);
-  --gradient-surface-subtle: linear-gradient(135deg, #ffffff 0%, #fafaf9 100%);
-  --gradient-attention-row: linear-gradient(90deg, #fff7df 0%, #ffffff 72%);
+  --gradient-brand-orb: linear-gradient(145deg, #f6a36c, #e35205);
+  --gradient-surface-subtle: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
+  --gradient-attention-row: linear-gradient(90deg, #fff7ed 0%, #ffffff 72%);
   --gradient-ops-canvas:
-    linear-gradient(180deg, #edf4ed 0, #f6f8f4 230px, #f7f8f4 100%);
+    linear-gradient(180deg, #fafafa 0, #f7f7f7 230px, #f7f7f7 100%);
   --canvas-customer-ambient:
     var(--canvas);
 
   /* Decorative glow/material helpers */
-  --hero-glow-brand: rgb(25 124 100 / 15%);
-  --hero-glow-sky: rgb(115 200 242 / 16%);
-  --brand-glow-soft: rgb(18 99 87 / 13%);
+  --hero-glow-brand: rgb(227 82 5 / 5%);
+  --hero-glow-sky: rgb(227 82 5 / 3%);
+  --brand-glow-soft: rgb(227 82 5 / 9%);
 
   /* Spacing — 4px base */
   --space-1: 4px;
@@ -141,15 +153,15 @@
   --space-30: 120px;
 
   /* Shape */
-  --radius-xs: 5px;
-  --radius-sm: 8px;
-  --radius-control: 10px;
-  --radius-md: 10px;
-  --radius-card: 14px;
-  --radius-lg: 16px;
-  --radius-feature: 18px;
-  --radius-xl: 20px;
-  --radius-hero: 22px;
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-control: 6px;
+  --radius-md: 8px;
+  --radius-card: 10px;
+  --radius-lg: 10px;
+  --radius-feature: 12px;
+  --radius-xl: 12px;
+  --radius-hero: 12px;
   --radius-pill: 999px;
 
   /* Type */
@@ -157,14 +169,14 @@
   --text-body-sm: 0.875rem;
   --text-body: 1rem;
   --text-body-lg: 1.0625rem;
-  --text-card-title: 1.25rem;
-  --text-title-sm: 1.25rem;
+  --text-card-title: 1.125rem;
+  --text-title-sm: 1.125rem;
   --text-title: 1.5rem;
-  --text-section-title: 1.75rem;
-  --text-heading: 2rem;
-  --text-page-title: 2rem;
-  --text-display: 3.25rem;
-  --text-display-lg: 3.75rem;
+  --text-section-title: 1.5rem;
+  --text-heading: 1.875rem;
+  --text-page-title: 1.875rem;
+  --text-display: 2.5rem;
+  --text-display-lg: 2.5rem;
 
   --leading-tight: 1.2;
   --leading-normal: 1.6;
@@ -210,23 +222,23 @@
   --icon-lg: 24px;
 
   /* Depth */
-  --shadow-subtle: 0 2px 8px rgb(20 18 33 / 3%);
-  --shadow-row: 0 3px 12px rgb(20 18 33 / 4%);
-  --shadow-raised: 0 5px 18px rgb(20 18 33 / 6%);
-  --shadow-feature: 0 12px 34px rgb(20 18 33 / 9%);
+  --shadow-subtle: 0 1px 2px rgb(15 35 52 / 5%);
+  --shadow-row: 0 1px 2px rgb(15 35 52 / 5%);
+  --shadow-raised: 0 2px 8px rgb(15 35 52 / 7%);
+  --shadow-feature: 0 6px 18px rgb(15 35 52 / 9%);
   --shadow-floating: var(--shadow-raised);
   --shadow-overlay: 0 28px 70px rgb(20 14 36 / 24%);
-  --shadow-action: 0 3px 10px rgb(13 72 77 / 11%);
-  --shadow-action-hover: 0 6px 16px rgb(13 72 77 / 16%);
-  --shadow-media: 0 12px 22px rgb(20 18 33 / 9%);
-  --shadow-media-strong: 0 18px 30px rgb(20 18 33 / 12%);
-  --shadow-media-soft: 0 7px 18px rgb(20 18 33 / 7%);
-  --drop-shadow-media: drop-shadow(0 20px 28px rgb(43 28 77 / 18%));
+  --shadow-action: none;
+  --shadow-action-hover: none;
+  --shadow-media: 0 4px 12px rgb(15 35 52 / 8%);
+  --shadow-media-strong: 0 8px 20px rgb(15 35 52 / 10%);
+  --shadow-media-soft: 0 2px 8px rgb(15 35 52 / 7%);
+  --drop-shadow-media: drop-shadow(0 4px 8px rgb(15 35 52 / 10%));
 
   /* Motion */
   --motion-fast: 120ms;
   --motion-standard: 180ms;
-  --motion-expressive: 240ms;
+  --motion-expressive: 200ms;
   --motion-slow: var(--motion-expressive);
   --motion-ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
   --motion-press: ease-out;
@@ -246,14 +258,14 @@
   :root {
     color-scheme: dark;
 
-    --canvas: #111d1a;
-    --surface: #1d2d29;
-    --surface-raised: #263a34;
-    --surface-muted: #283d35;
-    --surface-inset: #15241f;
-    --surface-strong: #365047;
-    --surface-hover: #2d473e;
-    --surface-selected: #315549;
+    --canvas: #161312;
+    --surface: #24201e;
+    --surface-raised: #2d2724;
+    --surface-muted: #302a27;
+    --surface-inset: #1c1917;
+    --surface-strong: #453932;
+    --surface-hover: #3a302b;
+    --surface-selected: #543629;
     --focus-ring-offset-bg: var(--surface);
     --interactive-selected-ink: var(--ink);
     --interactive-selected-bg: var(--surface-selected);
@@ -266,35 +278,47 @@
     --control-disabled-ink: var(--ink-secondary);
     --control-disabled-bg: var(--surface-strong);
 
-    --ink: #f2f8f3;
-    --ink-secondary: #ccded2;
-    --ink-tertiary: #b6d0bf;
-    --ink-muted: #a6c8b3;
-    --ink-inverse: #17101f;
+    --ink: #f8f5f2;
+    --ink-secondary: #ded3ca;
+    --ink-tertiary: #cbb9aa;
+    --ink-muted: #bdafa4;
+    --ink-inverse: #18110d;
 
-    --line: rgb(245 241 255 / 14%);
-    --line-soft: rgb(245 241 255 / 8%);
-    --line-strong: rgb(245 241 255 / 24%);
-    --control-line: rgb(245 241 255 / 38%);
-    --control-line-hover: rgb(245 241 255 / 58%);
+    --line: rgb(249 242 235 / 16%);
+    --line-soft: rgb(249 242 235 / 10%);
+    --line-strong: rgb(249 242 235 / 28%);
+    --control-line: rgb(249 242 235 / 44%);
+    --control-line-hover: rgb(249 242 235 / 62%);
 
-    --brand: #93ddbd;
-    --brand-hover: #b5edce;
-    --brand-strong: #c4f1d8;
-    --brand-soft: #254639;
-    --brand-soft-strong: #305c48;
-    --brand-on: #133025;
-    --brand-line: #538d72;
+    --brand: #ffb47f;
+    --brand-hover: #ffc79e;
+    --brand-strong: #ffd7b8;
+    --brand-soft: #482a21;
+    --brand-soft-strong: #663928;
+    --brand-on: #241309;
+    --brand-line: #b77045;
 
-    --accent-lavender: #2c3a34;
-    --accent-sky: #263e3a;
-    --accent-sky-strong: #91c9bd;
-    --accent-mint: #224136;
-    --accent-teal-soft: #233e35;
-    --accent-coral: #503b2d;
-    --accent-coral-strong: #f3aa85;
-    --accent-yellow: #493b24;
-    --accent-yellow-ink: #fff0b0;
+    /* Theme-aware companion for operational surfaces and primary actions. */
+    --action-primary: #ffb47f;
+    --action-primary-hover: #ffc79e;
+    --action-primary-on: #241309;
+    --ops-header: var(--surface);
+    --ops-surface: var(--surface);
+    --ops-surface-muted: var(--surface-muted);
+    --ops-surface-hover: var(--surface-hover);
+    --ops-attention: #4b3022;
+    --ops-line: var(--line);
+    --ops-line-soft: var(--line-soft);
+
+    --accent-lavender: #362d2b;
+    --accent-sky: #322b28;
+    --accent-sky-strong: #c9b7ad;
+    --accent-mint: #29372e;
+    --accent-teal-soft: #293530;
+    --accent-coral: #482b22;
+    --accent-coral-strong: #ffbd96;
+    --accent-yellow: #423124;
+    --accent-yellow-ink: #ffdda8;
 
     --success: #73d8a4;
     --success-soft: #173527;
@@ -308,43 +332,45 @@
     --info: #8ccbff;
     --info-soft: #17304a;
 
-    --focus: #92eadb;
-    --selection: #335a47;
-    --overlay-scrim: rgb(5 18 13 / 74%);
+    --focus: #ffd19e;
+    --selection: #704330;
+    --overlay-scrim: rgb(0 0 0 / 74%);
     --media-paper: #f8f6fc;
     --media-paper-line: rgb(0 0 0 / 14%);
     --media-paper-ink: #1f1b2d;
 
-    --gradient-ambient: linear-gradient(135deg, #1d322b 0%, #244238 58%, #263a30 100%);
-    --gradient-warm: linear-gradient(135deg, #3f3829 0%, #473a2f 52%, #283b31 100%);
-    --gradient-premium: linear-gradient(130deg, #102723 0%, #245146 100%);
-    --gradient-brand-soft: linear-gradient(135deg, #244238 0%, #1d332c 100%);
+    --gradient-ambient: linear-gradient(135deg, #26211e 0%, #312823 58%, #211c1a 100%);
+    --gradient-warm: linear-gradient(135deg, #33251d 0%, #453021 52%, #28211d 100%);
+    --gradient-premium: linear-gradient(130deg, #211814 0%, #522f20 100%);
+    --gradient-brand-soft: linear-gradient(135deg, #38261f 0%, #28211d 100%);
     --gradient-product-panel:
-      linear-gradient(135deg, #2b473a 0%, #253f36 55%, #453b2c 100%);
+      linear-gradient(135deg, #302923 0%, #3b2d25 55%, #413024 100%);
     --gradient-product-stage:
-      linear-gradient(145deg, #294a3e 0%, #4a4431 52%, #244b3c 100%);
+      linear-gradient(145deg, #2b2621 0%, #443327 52%, #563523 100%);
 
-    --gradient-surface-subtle: linear-gradient(135deg, #1c2e27 0%, #233830 100%);
-    --gradient-attention-row: linear-gradient(90deg, #423821 0%, #1d2d29 72%);
+    --gradient-brand-orb: linear-gradient(145deg, #ffcd9d, #e35205);
+    --gradient-surface-subtle: linear-gradient(135deg, #24201e 0%, #302a27 100%);
+    --gradient-attention-row: linear-gradient(90deg, #403021 0%, #24201e 72%);
     --gradient-ops-canvas:
-      linear-gradient(180deg, #162821 0, #1d332b 250px, #111d1a 100%);
+      linear-gradient(180deg, #221d1a 0, #29211e 250px, #161312 100%);
     --canvas-customer-ambient:
       var(--canvas);
 
-    --hero-glow-brand: rgb(147 221 189 / 13%);
-    --hero-glow-sky: rgb(115 200 242 / 12%);
-    --brand-glow-soft: rgb(147 221 189 / 12%);
+    --hero-glow-brand: rgb(255 180 127 / 10%);
+    --hero-glow-sky: rgb(255 196 150 / 8%);
+    --gradient-hero: linear-gradient(130deg, #211714 0%, #713819 100%);
+    --brand-glow-soft: rgb(255 180 127 / 11%);
 
     --shadow-subtle: 0 3px 10px rgb(0 0 0 / 18%);
-    --shadow-raised: 0 6px 18px rgb(0 0 0 / 26%);
-    --shadow-feature: 0 16px 40px rgb(0 0 0 / 32%);
+    --shadow-raised: 0 2px 10px rgb(0 0 0 / 20%);
+    --shadow-feature: 0 8px 24px rgb(0 0 0 / 24%);
     --shadow-floating: var(--shadow-raised);
-    --shadow-overlay: 0 28px 70px rgb(0 0 0 / 54%);
-    --shadow-action: 0 10px 24px rgb(0 0 0 / 28%);
-    --shadow-action-hover: 0 14px 28px rgb(0 0 0 / 34%);
-    --shadow-media: 0 20px 32px rgb(0 0 0 / 30%);
-    --shadow-media-strong: 0 28px 40px rgb(0 0 0 / 36%);
-    --shadow-media-soft: 0 12px 30px rgb(0 0 0 / 24%);
+    --shadow-overlay: 0 28px 70px rgb(0 0 0 / 48%);
+    --shadow-action: none;
+    --shadow-action-hover: none;
+    --shadow-media: 0 6px 20px rgb(0 0 0 / 26%);
+    --shadow-media-strong: 0 10px 28px rgb(0 0 0 / 28%);
+    --shadow-media-soft: 0 4px 14px rgb(0 0 0 / 20%);
     --drop-shadow-media: drop-shadow(0 20px 28px rgb(0 0 0 / 30%));
   }
 }

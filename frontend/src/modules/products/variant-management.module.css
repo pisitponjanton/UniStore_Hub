@@ -229,3 +229,11 @@
 
 /* Campus Commerce A / Phase 13 */
 .root,.layout,.variantList,.row,.rowMain,.editForm,.createForm{min-width:0}.name,.price{overflow-wrap:anywhere}.rowEditing,.rowEditing:hover{background:var(--brand-soft);border-color:var(--brand-line);color:var(--ink)}.actions button,.editActions button,.createForm button{min-height:44px}@media(max-width:640px){.row{grid-template-columns:minmax(0,1fr)}}
+
+
+/* Organization management visual skin for product-scoped variants, not CRUD behavior. */
+.root, .createForm, .row { border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); box-shadow: none; }
+.row:hover { border-color: var(--control-line); background: var(--surface-hover); box-shadow: none; transform: none; }
+.rowEditing, .rowEditing:hover { border-color: var(--brand); border-radius: var(--radius-card); background: var(--brand-soft); box-shadow: inset 3px 0 0 var(--brand); }
+.createForm { background: var(--surface-muted); }
+.actions button, .editActions button, .createForm button { min-height: 44px; }

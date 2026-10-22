@@ -1,5 +1,42 @@
 # UniStore Hub — Campus Commerce A Interface System
 
+## Shared navigation visuals: migrated, behavior unchanged
+
+The active `main` ApplicationShell and public Storefront Header use a neutral/white + KMITL Orange visual skin via existing CSS Modules and Light/Dark semantic tokens. **This is visual only:** role-scoped paths, active current-page links, focus trap/Escape/inert/scroll lock, context switch and 4K width behavior remain owned by `main`. Do **not** copy `design` sidebar collapse, localStorage/sessionStorage sidebar behavior, menu click handling or components wholesale. Screenshots and safe browser tests are recorded in `docs/design/CAMPUS_COMMERCE_A_FOUNDATION_AND_UI_REVIEW.md`, "Shared navigation presentation" section. Shared forms, cards and tables now use the migrated visual primitives; page-specific styling remains in later work.
+
+## Platform governance and global state visuals
+
+Platform Summary, Organizations approval queue, Users read-only directory, Platform navigation and loaded-item-only filter chips now use the formal Orange/Neutral `design` palette through existing `main` CSS Modules, without importing different data/UX semantics. Organization attention and pending/selected affordances remain visually distinct, with semantic Light/Dark and 320–3840px responsive widths. Keep native mobile users-table cards, read-only roles, Platform RBAC, tenant isolation, server-sourced statuses, incremental directory limits and confirmation/focus/409 retry lifecycle exactly as in `main`. Shared AsyncPageFallback now presents neutral Error/Loading/Skeleton surfaces, preserving each route's actual retry, access denial and navigation. Scoped browser evidence and NOT_TESTED boundaries: `docs/design/CAMPUS_COMMERCE_A_OPERATIONS_REVIEW.md`, “Platform Admin, Tables & Shared Global States — Design visual migration”. Broad WCAG/action-state parity remains the separate browser QA task.
+
+## Organization Admin governance visual direction
+
+`main` Organization Selection, Dashboard, Settings, Membership & Roles, Stores, Products/Variants/Image Upload, Campaign Lifecycle, and Audit now reuse the neutral `design` visual language with semantic Orange selection/task signals and calm bordered surfaces. Preserve the `main` organization context and RBAC, real server data, inventory/media reconciliation state, create/edit/activate/deactivate confirmations, filter/cursor behavior, accessible native forms, read-only audit, and 320–3840px Light/Dark responsiveness. The historical teal organization-entry header has been retired without replacing its original selection or optional creation flow. Do not import `design` routes or components wholesale. Scoped evidence and NOT_TESTED boundaries are recorded in `docs/design/CAMPUS_COMMERCE_A_OPERATIONS_REVIEW.md`, “Organization Management & Governance — Design visual migration”.
+
+## Staff operational workbench visual direction
+
+The current `main` Staff Orders, Order Detail, Payment Review, and Pickup queues and Organization Admin-only Production Summary are now selectively skinned to the `design` branch's neutral operational ledger: calm border-separated headings, metric strips, form/toolbars, honest empty/loading states and Orange accent for actionable or selected rows. Preserve `main`'s `prioritizeLoadedQueue`, all/action filters, focusable filter feedback, cursor/show-more, selected detail, payment approve/reject and pickup confirmation guards, conflicting state recovery, 4K sizing and org/role denial. Do not import the older design queue/detail/modal flow. Evidence and NOT_TESTED boundaries in `docs/design/CAMPUS_COMMERCE_A_OPERATIONS_REVIEW.md`, “Staff Orders, Payment Review, Pickup & Production — Design visual migration.”
+
+## Customer workspace visual direction
+
+`main` Customer Checkout, Orders, Order Detail, Payment, Pickup and Notifications now share the design-branch's formal neutral surfaces, thin borders and accessible KMITL Orange action/status emphasis. Preserve all `main` business-state precedence, order amount/variant/quantity correctness, rejected-slip validation, destructive-dialog lifecycle, pickup token guard, and notification filters/paging. Retain the existing responsive order/product fixes and customer task navigation across 320–3840 CSS-pixel widths; never import `design` customer components or navigation wholesale. The current customer browser-only verification and NOT_TESTED boundaries are documented in `docs/design/CAMPUS_COMMERCE_A_AUTH_AND_CUSTOMER_REVIEW.md`, “Customer Workspaces & Commerce Journey — Design-branch visual migration.”
+
+## Authentication entry visual direction
+
+`main` Login, Register and protected Checkout recovery now use a formal Orange/Neutral two-column desktop account entry and compact responsive mobile presentation. Logo is the approved decorative UniStore Hub asset next to a readable accessible wordmark, not a text-only fallback. Keep the original form fields, native password autocomplete and visibility toggle, Error Summary focus, pending/disabled controls, session restoration, `returnTo` and source route back-links. Signed-in roles retain their original permitted next actions; never copy `design` routing or auth service calls. Scoped evidence and limitations: `docs/design/CAMPUS_COMMERCE_A_AUTH_AND_CUSTOMER_REVIEW.md`.
+
+## Guest Storefront visual direction
+
+The public `main` Storefront now applies the Orange/neutral `design` family to its existing real Store-first discovery grid, Hero, search/filters, Store/Product/Campaign details and contextual media. On wide screens the Hero uses a static three-step campus noticeboard with no invented storefront or product content; mobile keeps the direct search/CTA layout. Keep 320–3840px fluid widths, accessible Light/Dark paired colors and existing truthful API fallback states. Treat `main`'s search, organization selection, pagination, fixture visibility, actual variant pricing, campaign availability and checkout `returnTo` as frozen behavior. See `docs/design/CAMPUS_COMMERCE_A_STOREFRONT_REVIEW.md` for verified browser screenshots and test limits.
+
+## Shared control design
+
+Shared Buttons now use accessible Orange primary action tokens and neutral Secondary surfaces. Forms retain native HTML Select keyboard support and accessible error/focus states. Cards, badges, tables, toolbars, notices, and Radix Dialog styling follows the same neutral border and compact geometry. Selected rows, disabled/pending actions, focus-return and Escape remain governed by existing main components; design's custom portal Select and pagination behavior were not copied. The previous duplicate shared-control overrides have been consolidated. Per-route visual migration remains separate.
+
+## Design-branch visual migration notice
+
+Active BDXA task: appearance from `design` replaces the historical teal/text-only style one feature at a time. KMITL Orange shared tokens and the **approved brand image/favicon** are now implemented on `main`; other module styling still awaits migration. Historical reports describe the original implementation and must not override the current brand directive. The overriding task rule is `main` for UX/behavior, role access, Dark Mode, 4K widths and API contracts, and `design` for visual appearance only. The scoped reference and frozen UX/visual screenshots are in `docs/design/CAMPUS_COMMERCE_A_FOUNDATION_AND_UI_REVIEW.md`, section "Visual migration baseline". In particular, the previous text-only branding instruction is superseded by the owner's later request to use the design brand image **when its dedicated implementation is performed**. Never overwrite behavior with design components wholesale.
+
+
 > **Status: Approved, Phase 2 foundation (2026-10-19).**
 > This is the **single canonical visual authority** for `frontend/**`, superseding the historical "Playful Campus Commerce v3" purple/3D language. Git history preserves the previous document.
 > UX direction chosen by the project owner: **A — Campus Commerce**. Implementation phases are tracked in BDXA `task_b1d40dc3-4d57-4dcd-8df2-e5e61a143fae`. Frontend's semantic CSS token source remains `src/app/globals.css`; never introduce a parallel palette/theme.
@@ -10,34 +47,34 @@ UniStore Hub is a campus marketplace and pre-order tool for faculty groups, club
 
 Campus Commerce A must look like a dependable **real shopping service**, not an anonymous SaaS dashboard or a decorated pitch deck. Product/content clarity wins over visual effects.
 
-### Identity — explicit user directive
+### Identity — approved design-branch brand asset
 
-1. The only **visible brand** in every public, authenticated, mobile, sidebar, auth and footer shell is the wordmark **`UniStore Hub` as selectable text**.
-2. **No brand symbol, badge, square U, monogram, illustrative store logo, pictogram before/after the wordmark, or substitute graphic mark.** Keep the brand focusable as the existing accessible home link where applicable.
-3. Functional icons (orders, staff, search, notification, arrow, pickup) are allowed **when they identify actual actions**. A separate icon-system phase will standardize their family; do not substitute arbitrary Unicode arrows or stickers for the brand.
-4. Store media, partner logos owned by third parties, and the first letter of a real store name in a neutral product placeholder are **not UniStore branding**; do not conflate these with forbidden brand-mark treatments.
-5. Brand text must render clearly at 320px width, 200% zoom, with Thai + English font metrics and no reliance on hidden image alternatives.
+1. The **approved UniStore Hub visual identity** is the exact logo image from the repository `design` branch at `frontend/src/assets/unistore-hub-logo.webp`, displayed beside the selectable text **UniStore Hub** in public, auth, recovery and authenticated navigation links. The corresponding `frontend/src/app/icon.png` is the app favicon.
+2. The approved image is decorative within a labeled brand link (`alt=""` and `aria-hidden="true"`); the readable text is retained and screen readers get the original link name. The logo and text must fit 320px width, 200% text size and Light/Dark contrast without clipping.
+3. No second logo, square U, fabricated monogram, handmade glyph or alternate brand badge. The approved asset is an explicit owner-approved exception to the **superseded text-only restriction** recorded in historical QA reports.
+4. Functional icons for genuine actions continue to use the standard Lucide vocabulary; store-owned media, partner marks and real store-name initials are unrelated to UniStore branding.
+5. **No UX change** follows from switching brand media: brand links still navigate to `/`, drawer/focus handling is unchanged, and authentication return paths and role authorization are preserved. The dedicated visual-shell redesign may adjust styling later but must not replace this identity contract.
 
 ## Colors and semantics
 
-Design intent: **soft daylight, botanical green/teal, credible warm neutrals, highly legible text**, with a muted dark companion rather than a harsh black-mode inversion.
+Active design intent: **KMITL Orange, neutral white/gray surfaces and highly legible black text**, with a warm near-black Dark Mode companion. Module-level visual layouts still await subsequent work; this section describes live semantic tokens only.
 
 All live semantic variables reside in `src/app/globals.css`.
 
 | Semantic property | Light | Dark | Use |
 |---|---|---|---|
-| Canvas `--canvas` | `#F7F8F4` | `#111D1A` | Whole-page environment |
-| Surface `--surface` | `#FFFFFF` | `#1D2D29` | Cards/inputs/panels |
-| Muted `--surface-muted` | `#EEF3EE` | `#283D35` | Low-emphasis groups |
-| Hover `--surface-hover` | `#E9F3ED` | `#2D473E` | Interactive surface **with paired foreground** |
-| Selected `--surface-selected` | `#D9EEE3` | `#315549` | Selected row/tab |
-| Ink `--ink` | `#193630` | `#F2F8F3` | Primary text |
-| Secondary `--ink-secondary` | `#455F55` | `#CCDED2` | Descriptions/labels |
-| Brand `--brand` | `#126357` | `#93DDBD` | Primary action |
-| Brand hover `--brand-hover` | `#0C4F45` | `#B5EDCE` | Hover on primary action |
-| On-brand `--brand-on` | `#FFFFFF` | `#133025` | Text on brand |
-| Brand soft `--brand-soft` | `#E3F2E9` | `#254639` | Soft calls to action |
-| Focus `--focus` | High-contrast teal | Bright mint | Visible keyboard focus |
+| Canvas `--canvas` | `#F7F7F7` | `#161312` | Whole-page environment |
+| Surface `--surface` | `#FFFFFF` | `#24201E` | Cards/inputs/panels |
+| Muted `--surface-muted` | `#FAFAFA` | `#302A27` | Low-emphasis groups |
+| Hover `--surface-hover` | `#F3F3F3` | `#3A302B` | Interactive surface **with paired foreground** |
+| Selected `--surface-selected` | `#FFF0E8` | `#543629` | Selected row/tab |
+| Ink `--ink` | `#000000` | `#F8F5F2` | Primary text |
+| Secondary `--ink-secondary` | `#4D4D4D` | `#DED3CA` | Descriptions/labels |
+| Brand `--brand` | `#E35205` | `#FFB47F` | Primary action |
+| Brand hover `--brand-hover` | `#C94700` | `#FFC79E` | Hover on primary action |
+| On-brand `--brand-on` | `#000000` | `#241309` | Text on brand |
+| Brand soft `--brand-soft` | `#FFF0E8` | `#482A21` | Soft calls to action |
+| Focus `--focus` | `#B84000` | `#FFD19E` | Visible keyboard focus |
 
 `--on-surface`, `--on-surface-secondary`, `--on-hover`, and `--on-selected` alias the theme-appropriate ink family. **Never set a pale hover background with inherited dark theme pale text.** Respect 4.5:1 WCAG AA for regular text and 3:1 for sufficiently large text. Focus indicator must be visible against both adjoining surfaces.
 
@@ -45,7 +82,7 @@ All live semantic variables reside in `src/app/globals.css`.
 
 - Use `--canvas`, `--surface`, `--surface-muted`, `--surface-hover`, `--ink`, `--ink-secondary`, `--brand`, `--brand-strong`, `--brand-on`, `--line` and role-specific status tokens instead of hardcoded per-page colors. Any new status tokens belong in global CSS first.
 - Borders/controls must remain readable across themes: `--line`, `--line-strong`, `--control-line`, `--focus`, and explicit disabled/validation semantics.
-- Green is the shopping/identity color; don't equate `--brand` with semantic payment success. Preserve `--success`, `--warning`, `--danger`, `--info`.
+- KMITL Orange is the shopping/identity color; do not equate `--brand` with semantic payment success. Preserve independent `--success`, `--warning`, `--danger`, `--info`.
 - Avoid purple v3 gradients, clay blobs, pictogram logos, multicolor cards with hard-to-read labels and fake product imagery. Warm ivory and light tan may accent **real categories**, not compromise contrast.
 - Light-first does **not** mean disabling dark mode. Both `prefers-color-scheme` themes remain first-class; test actual hovered/focused text in the browser.
 - Use `color-mix()` thoughtfully where paired foreground readability is measurable; do not assume percentages guarantee WCAG AA.
@@ -79,7 +116,7 @@ The static inventory scans 38 CSS files, 237 interactive selector rules, and fla
 
 - All functional icons are **line SVGs** with an optical default 18px, absolute 1.8px stroke, matching caps/joins and theme-inherited `currentColor`. Small arrows can use 15–17px, menu icons 18–20px. Icons are noninteractive decorations inside named links/buttons and always `aria-hidden=true` / `focusable=false`.
 - Navigation roles are mapped to coherent symbols for store, orders, payment, pickup, notifications, dashboard, organization, staff, products, campaigns, production, settings, audit, users and platform. Symbols now come from Lucide, not handmade paths. Action links use `arrow-up-right` or `arrow-right`; step chevrons use `chevron`.
-- Both the visible brand wordmark and responsive/authenticated brand links remain **text-only `UniStore Hub`** — no U monogram, square, brand logo or pictogram is added. Illustrations formerly rendering `U`/`!`/`฿`/`✓` now use contextual Lucide symbols; no-image fallbacks use the neutral `image-off` icon.
+- **Current owner-approved brand update:** the sole approved image logo accompanies selectable `UniStore Hub` text in public, auth, recovery and authenticated brand links; no unrelated monogram, alternate icon or pictogram is added. Functional illustrations and image-off fallbacks still use Lucide. Historical text-only screenshot evidence predates this update.
 - The **store's own initial letter** in a real store-name preview or an account initial is not a UniStore logo. Do not erase legitimate content while removing brand art.
 - The local Next.js development status badge is disabled (`devIndicators:false`) so that it does not overlay screenshot/UI reviews. This setting does not change application navigation.
 - Git-locked vendored `braces` tarball is copied before `npm ci` in **`frontend/Dockerfile.dev` only**, ensuring the local frontend Docker image can be rebuilt reproducibly. Never make this a production/database change.

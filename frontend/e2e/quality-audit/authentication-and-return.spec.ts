@@ -67,7 +67,16 @@ for (const theme of ["light", "dark"] as const) {
         await page.goto(frontend + "/" + route + "/", { waitUntil: "domcontentloaded" });
         await waitForForm(page, route);
         await expect(page.getByRole("link", { name: "UniStore Hub หน้าร้าน" })).toHaveAttribute("href", "/");
-        await expect(page.locator('a[class*="brand"] img')).toHaveCount(0);
+        const brandMark = page.getByRole("link", { name: "UniStore Hub หน้าร้าน" }).locator("img");
+        await expect(brandMark).toHaveCount(1);
+        await expect(brandMark).toHaveAttribute("alt", "");
+        await expect.poll(async () => brandMark.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true);
+        const authSkin = await page.locator("section[class*='intro']").first().evaluate((el) => ({
+          background: getComputedStyle(el).backgroundColor,
+          text: getComputedStyle(el.querySelector('[class*="introTitle"]')!).color,
+        }));
+        expect(authSkin.background, "auth intro must use semantic surface").not.toBe("rgb(25, 59, 57)");
+        expect(authSkin.background, "auth intro must not use old teal").not.toBe("rgb(23, 56, 62)");
         await expect(page.getByRole("textbox", { name: "อีเมล" })).toHaveAttribute("autocomplete", "email");
         await expect(page.getByLabel("รหัสผ่าน")).toHaveAttribute("type", "password");
         if (route === "register") {
@@ -93,7 +102,7 @@ for (const theme of ["light", "dark"] as const) {
           expect(layout.panelWidth, "form too wide " + width).toBeLessThanOrEqual(595);
           expect(layout.panelWidth, "form too narrow " + width).toBeGreaterThan(Math.min(width - 36, 270));
           metrics.push({ theme, route, width, ...layout });
-          if ([390, 1440, 3840].includes(width)) {
+          if ([320, 390, 768, 1440, 3840].includes(width)) {
             await page.screenshot({ path: resolve(evidence, theme + "-" + route + "-" + width + ".png"), animations: "disabled" });
           }
         }
@@ -272,6 +281,26 @@ for (const theme of ["light", "dark"] as const) {
       await expect(expiredPage.getByRole("link", { name: "เข้าสู่ระบบเพื่อทำรายการต่อ" })).toBeVisible({ timeout: 15000 });
       expect(await expiredPage.evaluate(() => sessionStorage.getItem("unistoreHub.accessToken"))).toBeNull();
       await expect(expiredPage.getByRole("link", { name: "กลับไปดูสินค้า" })).toBeVisible();
+      // Auth Recovery follows the same neutral/Orange skin without changing expired-session navigation.
+      const recovery = expiredPage.locator('main [class*="content"]').first();
+      for (const width of [320, 390, 768, 1440, 3840]) {
+        await expiredPage.setViewportSize({ width, height: 900 });
+        const geometry = await recovery.evaluate((element) => ({
+          left: element.getBoundingClientRect().left,
+          right: element.getBoundingClientRect().right,
+          border: getComputedStyle(element).borderTopStyle,
+          background: getComputedStyle(element).backgroundColor,
+          overflow: Math.max(0, document.documentElement.scrollWidth - innerWidth),
+        }));
+        expect(geometry.border).toBe("solid");
+        expect(geometry.background).not.toBe("rgba(0, 0, 0, 0)");
+        expect(geometry.left).toBeGreaterThanOrEqual(0);
+        expect(geometry.right).toBeLessThanOrEqual(width + 1);
+        expect(geometry.overflow, theme + " recovery at " + width).toBeLessThanOrEqual(1);
+        if ([390, 1440].includes(width)) {
+          await expiredPage.screenshot({ path: resolve(evidence, theme + "-expired-recovery-" + width + ".png"), animations: "disabled" });
+        }
+      }
     } finally { await expired.close(); }
   });
 

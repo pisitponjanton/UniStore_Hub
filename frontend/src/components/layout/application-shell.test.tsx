@@ -42,6 +42,12 @@ describe("ApplicationShell accessibility", () => {
       screen.getByRole("link", { name: "ข้ามไปยังเนื้อหาหลัก" }),
     ).toHaveAttribute("href", "#main-content");
 
+    const brandLink = screen.getByRole("link", { name: /^UniStore Hub$/ });
+    expect(brandLink).toHaveAttribute("href", "/");
+    expect(brandLink).toHaveTextContent("UniStore Hub");
+    expect(brandLink.querySelector("img")).toHaveAttribute("alt", "");
+    expect(brandLink.querySelector("img")).toHaveAttribute("aria-hidden", "true");
+
     const mainContent = document.getElementById("main-content");
     expect(mainContent).toHaveAttribute("tabindex", "-1");
   });

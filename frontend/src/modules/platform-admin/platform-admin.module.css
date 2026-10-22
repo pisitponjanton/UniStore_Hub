@@ -916,3 +916,49 @@
 @media(max-width:1050px){.header{grid-template-columns:minmax(0,1fr)}.headerAside{justify-items:start;grid-template-columns:repeat(2,minmax(0,max-content))}.priorityStrip,.statusLedger{grid-template-columns:repeat(2,minmax(0,1fr))}.organizationRow{grid-template-columns:minmax(0,1fr)}.organizationActions{justify-items:stretch}}
 @media(max-width:760px){.main{padding-inline:14px}.headerAside{grid-template-columns:minmax(0,1fr)}.priorityStrip{grid-template-columns:repeat(2,minmax(0,1fr))}.priorityItem:first-child{grid-column:1/-1}.statusLedger{grid-template-columns:minmax(0,1fr)}.organizationHeading{grid-template-columns:minmax(0,1fr)}.organizationActions{width:100%}.actions button{min-height:44px}.platformUsersTable tbody tr:hover{background:var(--surface-hover)}}
 @media(max-width:380px){.actions{display:grid;grid-template-columns:minmax(0,1fr)}.priorityStrip{gap:7px}}
+
+
+/* Platform governance visual migration — neutral institutional ledger, main behavior remains authoritative. */
+.page { background: var(--canvas); }
+.header { padding: 0 0 var(--space-5); border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent; box-shadow: none; }
+.header::before, .header::after { content: none; display: none; }
+.title { color: var(--ink); }
+.scopeContext, .headerCount { border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface-muted); box-shadow: none; }
+.scopeContext > span:last-child, .description { color: var(--ink-secondary); }
+.priorityStrip, .statusLedger { gap: 0; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); }
+.priorityItem, .priorityItem:last-child, .priorityItem:nth-child(2), .priorityItem:nth-child(3) {
+  min-width: 0; border: 0; border-right: 1px solid var(--line); border-radius: 0; background: transparent; box-shadow: none;
+}
+.priorityItem:last-child { border-right: 0; }
+.priorityItem[data-attention="true"] { border-color: var(--brand-line); background: var(--brand-soft); box-shadow: inset 3px 0 0 var(--brand); }
+.section { border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); box-shadow: none; }
+.statusRow, .statusRow:last-child { min-width: 0; border: 0; border-right: 1px solid var(--line); border-radius: 0; background: transparent; box-shadow: none; }
+.statusRow:first-child { background: var(--surface-muted); }
+.statusRow:last-child { border-right: 0; }
+.organizationList { border: 0; }
+.organizationRow { border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); box-shadow: none; transform: none; }
+.organizationRow::before { content: none; display: none; }
+.organizationRow:hover { transform: none; border-color: var(--control-line); background: var(--surface-hover); box-shadow: none; }
+.organizationRow[data-attention="true"], .organizationRow[data-attention="true"]:hover { border-color: var(--brand-line); background: var(--brand-soft); box-shadow: inset 4px 0 0 var(--brand); }
+.metaItem, .metaItem:first-child, .metaItem:last-child { border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--surface-muted); }
+.organizationActions { border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface-muted); }
+.governancePriority { border: 1px solid var(--brand-line); border-radius: var(--radius-control); background: var(--brand-soft); }
+.platformUsersTable thead { background: var(--surface-muted); }
+.platformUsersTable tbody tr:hover { background: var(--surface-hover); }
+.actions button { min-height: 44px; }
+@media (max-width: 1050px) {
+  .priorityStrip, .statusLedger { gap: 0; }
+  .priorityItem, .priorityItem:last-child, .priorityItem:nth-child(2), .priorityItem:nth-child(3) { border: 0; border-bottom: 1px solid var(--line); }
+  .priorityItem:last-child { border-bottom: 0; }
+  .statusRow, .statusRow:last-child { border: 0; border-bottom: 1px solid var(--line); }
+  .statusRow:last-child { border-bottom: 0; }
+}
+@media (max-width: 760px) {
+  .header { padding: 0 0 var(--space-4); }
+  .priorityStrip { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .priorityItem:first-child { grid-column: 1 / -1; }
+  .priorityItem, .priorityItem:last-child, .priorityItem:nth-child(2), .priorityItem:nth-child(3) { min-height: 115px; }
+  .section { padding: var(--space-4); }
+  .platformUsersTable thead { background: var(--surface-muted); }
+}
+@media (max-width: 380px) { .priorityStrip { grid-template-columns: minmax(0,1fr); } }

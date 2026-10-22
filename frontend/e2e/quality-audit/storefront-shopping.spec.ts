@@ -358,7 +358,7 @@ for (const theme of ["light", "dark"] as const) {
         const overflow = await page.evaluate(() => Math.max(0, document.documentElement.scrollWidth - innerWidth));
         expect(overflow, theme + " store overflow " + width).toBeLessThanOrEqual(1);
         measurements.push({ route: "store", theme, width, overflow });
-        if ([390, 1440, 3840].includes(width)) await page.screenshot({ path: resolve(evidence, theme + "-store-" + width + ".png") });
+        if ([320, 390, 768, 1440, 3840].includes(width)) await page.screenshot({ path: resolve(evidence, theme + "-store-" + width + ".png"), animations: "disabled" });
       }
       await page.setViewportSize({ width: 1440, height: 950 });
       await page.goto(frontend + routes.campaign, { waitUntil: "domcontentloaded" });
@@ -385,7 +385,7 @@ for (const theme of ["light", "dark"] as const) {
       const target = new URL((await order.getAttribute("href")) ?? "", "http://localhost:3000");
       expect(target.pathname).toMatch(/^\/login\/?$/);
       expect(target.searchParams.get("returnTo")).toContain("variantId=" + variantB);
-      for (const width of [390, 1440, 3840]) {
+      for (const width of [320, 390, 768, 1440, 3840]) {
         await page.setViewportSize({ width, height: 950 });
         const overflow = await page.evaluate(() => Math.max(0, document.documentElement.scrollWidth - innerWidth));
         expect(overflow, theme + " product overflow " + width).toBeLessThanOrEqual(1);
@@ -394,7 +394,7 @@ for (const theme of ["light", "dark"] as const) {
       }
       await page.goto(frontend + routes.campaign, { waitUntil: "domcontentloaded" });
       await expect(page.getByRole("heading", { level: 1, name: "รอบเปิดรับ" })).toBeVisible();
-      for (const width of [390, 1440, 3840]) {
+      for (const width of [320, 390, 768, 1440, 3840]) {
         await page.setViewportSize({ width, height: 950 });
         const overflow = await page.evaluate(() => Math.max(0, document.documentElement.scrollWidth - innerWidth));
         expect(overflow, theme + " campaign overflow " + width).toBeLessThanOrEqual(1);

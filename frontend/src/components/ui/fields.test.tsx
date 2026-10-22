@@ -1,9 +1,9 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 
 import { createRef } from "react";
 
-import { ErrorSummary, FileField } from "./fields";
+import { ErrorSummary, FileField, SelectField } from "./fields";
 
 describe("FileField", () => {
   it("keeps label, hint, error, required state, and file semantics connected", () => {
@@ -66,5 +66,41 @@ describe("FileField", () => {
 
     summaryRef.current?.focus();
     expect(summary).toHaveFocus();
+  });
+});
+
+
+describe("Native SelectField behavior during visual migration", () => {
+  it("retains the HTML select, label, hint, validation and keyboard change semantics", () => {
+    const onChange = vi.fn();
+    render(
+      <SelectField
+        id="campaign-status"
+        label="สถานะรอบสั่งซื้อ"
+        hint="เลือกสถานะที่ต้องการ"
+        error="กรุณาเลือกสถานะ"
+        defaultValue=""
+        onChange={onChange}
+        required
+      >
+        <option value="">เลือกสถานะ</option>
+        <option value="OPEN">เปิดรับคำสั่งซื้อ</option>
+        <option value="CLOSED">ปิดรับคำสั่งซื้อ</option>
+      </SelectField>,
+    );
+
+    const select = screen.getByRole("combobox", { name: /สถานะรอบสั่งซื้อ/ });
+    expect(select.tagName).toBe("SELECT");
+    expect(select).toBeRequired();
+    expect(select).toHaveAttribute("aria-invalid", "true");
+    expect(select).toHaveAttribute(
+      "aria-describedby",
+      "campaign-status-hint campaign-status-error",
+    );
+    expect(select).toHaveAttribute("aria-errormessage", "campaign-status-error");
+    expect(screen.getByRole("option", { name: "เปิดรับคำสั่งซื้อ" })).toHaveValue("OPEN");
+    fireEvent.change(select, { target: { value: "OPEN" } });
+    expect(select).toHaveValue("OPEN");
+    expect(onChange).toHaveBeenCalledOnce();
   });
 });

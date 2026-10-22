@@ -51,3 +51,11 @@ a.tab:hover { color: var(--ink); background: var(--surface-muted); text-decorati
 
 /* Campus Commerce A / Phase 13 */
 .root,.tabs{min-width:0}.caption{color:var(--ink-secondary)}.tab,.switch{display:inline-flex;align-items:center;justify-content:center;min-height:44px;line-height:1.4}.tab:hover:not([data-selected]),.switch:hover{background:var(--surface-hover);color:var(--ink);text-decoration:none}@media(max-width:760px){.tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}.switch{grid-column:1/-1;margin:0}}
+
+
+/* Organization navigation keeps main destinations and keyboard semantics. */
+.root { min-width: 0; border-color: var(--line); background: var(--surface); box-shadow: none; }
+.tab { min-height: 44px; border-radius: var(--radius-control); }
+.tab[data-selected] { background: var(--brand-soft); color: var(--brand-strong); }
+a.tab:hover:not([data-selected]), .switch:hover { background: var(--surface-hover); color: var(--ink); }
+.switch { min-height: 44px; color: var(--brand-strong); }

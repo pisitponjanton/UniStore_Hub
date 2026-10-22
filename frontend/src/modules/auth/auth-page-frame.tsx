@@ -1,5 +1,8 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
+
+import brandLogo from "@/assets/unistore-hub-logo.webp";
 
 import styles from "./auth-form.module.css";
 
@@ -16,7 +19,16 @@ export function AuthPageFrame({
     <main className={styles.page}>
       <section className={styles.intro} aria-label="UniStore Hub">
         <Link href="/" className={styles.brand} aria-label="UniStore Hub หน้าร้าน">
-
+          <Image
+            src={brandLogo}
+            alt=""
+            aria-hidden="true"
+            width={38}
+            height={38}
+            sizes="38px"
+            priority
+            className={styles.brandMark}
+          />
           <span className={styles.brandCopy}>
             <strong>UniStore Hub</strong>
           </span>

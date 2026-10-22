@@ -242,3 +242,12 @@
 
 /* Campus Commerce A / Phase 13 */
 .root,.currentState,.lifecycleRail,.actionArea{min-width:0}.lifecycleStep,.stateBlock,.actionCopy{min-width:0;overflow-wrap:anywhere}.actions button{min-height:44px}@media(max-width:620px){.currentState{grid-template-columns:minmax(0,1fr)}}
+
+
+/* Organization management visual skin: only explicit existing lifecycle states trigger actions. */
+.root, .currentState { border-color: var(--line); border-radius: var(--radius-card); background: var(--surface); box-shadow: none; }
+.lifecycleStep { border-color: var(--line); border-radius: var(--radius-control); background: var(--surface-muted); }
+.lifecycleStep[data-state="current"] { border-color: var(--brand-line); background: var(--brand-soft); }
+.actionArea { border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface-muted); }
+.none { border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--surface-muted); }
+.actions button { min-height: 44px; }

@@ -325,7 +325,7 @@
   padding-inline: var(--space-3);
   margin-left: calc(var(--space-3) * -1);
   border-radius: var(--radius-md);
-  color: var(--campus);
+  color: var(--brand-strong);
   font-weight: 650;
   text-decoration: none;
 }
@@ -931,3 +931,29 @@
 
 /* Keep densely packed 4K order rows comfortably scannable. */
 .section{max-width:1900px}.rowMain{max-width:100ch}.filterPanel{max-width:1950px}
+
+
+/* Staff visual migration — operational ledger; queue order, filters and detail routing stay in main. */
+.header { padding: 0 0 var(--space-5); border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent; box-shadow: none; }
+.header::before, .header::after, .detailHero::before, .detailHero::after { content: none; }
+.title { color: var(--ink); }
+.summaryStrip { gap: 0; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); }
+.summaryStrip > div, .summaryStrip > div:nth-child(n) { min-width: 0; border: 0; border-right: 1px solid var(--line); border-radius: 0; background: transparent; box-shadow: none; }
+.summaryStrip > div:last-child { border-right: 0; }
+.filterPanel { border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); box-shadow: none; }
+.section { border-color: transparent; background: transparent; box-shadow: none; }
+.row { border: 1px solid var(--line); background: var(--surface); border-radius: var(--radius-card); box-shadow: none; }
+.row[data-attention="true"] { border-color: var(--brand-line); background: var(--brand-soft); box-shadow: inset 3px 0 0 var(--brand); }
+.row:hover { background: var(--surface-hover); border-color: var(--control-line); box-shadow: none; }
+.row[data-attention="true"]:hover { background: var(--brand-soft); border-color: var(--brand); box-shadow: inset 3px 0 0 var(--brand); }
+.row:focus-within { border-color: var(--brand); }
+.detailHero, .itemsPanel, .totalPanel { border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); box-shadow: none; }
+.summaryCell, .itemCard { border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--surface-muted); }
+.detailLink, .row[data-attention="true"] .detailLink { min-height: 44px; }
+@media (max-width: 620px) {
+  .summaryStrip { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .summaryStrip > div, .summaryStrip > div:nth-child(n) { border: 0; border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); }
+  .summaryStrip > div:nth-child(2n) { border-right: 0; }
+  .header { padding: 0 0 var(--space-4); }
+}
+@media (max-width: 360px) { .summaryStrip { grid-template-columns: minmax(0,1fr); } .summaryStrip > div { border-right: 0 !important; } }

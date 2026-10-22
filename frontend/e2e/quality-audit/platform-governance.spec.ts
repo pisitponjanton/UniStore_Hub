@@ -87,6 +87,15 @@ for (const theme of ["light", "dark"] as const) {
       for (const spec of paths) {
         await page.goto(base + spec.path, { waitUntil: "domcontentloaded" });
         await waitForLoaded(page, spec.heading);
+        // The visual migration must keep a neutral heading, not the old decorative gradient.
+        const headerSkin = await page.locator("main > header").first().evaluate(element => ({
+          backgroundImage: getComputedStyle(element).backgroundImage,
+          background: getComputedStyle(element).backgroundColor,
+          borderBottomStyle: getComputedStyle(element).borderBottomStyle,
+        }));
+        expect(headerSkin.backgroundImage, theme + " / " + spec.name + " Platform heading").toBe("none");
+        expect(headerSkin.borderBottomStyle).toBe("solid");
+        expect(headerSkin.background).not.toBe("rgb(25, 59, 57)");
         if (spec.name === "organizations") await expect(page.getByText("Campus Pending Club").first()).toBeVisible();
         if (spec.name === "users") await expect(page.getByText("Operator Example").first()).toBeVisible();
         for (const width of [320, 390, 768, 1024, 1440, 1920, 2560, 3840]) {
@@ -173,6 +182,11 @@ for (const theme of ["light", "dark"] as const) {
     try {
       await page.goto(base + "/platform/users/", { waitUntil: "domcontentloaded" });
       await expect(page.getByText("ยังไม่มีผู้ใช้")).toBeVisible({ timeout: 15000 });
+      const emptyVisual = await page.locator("main").first().evaluate(element => ({
+        overflow: Math.max(0, document.documentElement.scrollWidth - innerWidth),
+        panelCount: element.querySelectorAll('[class*="statePanel"]').length,
+      }));
+      expect(emptyVisual.overflow).toBeLessThanOrEqual(1);
       await page.screenshot({ path: resolve(output, theme + "-users-empty-390.png"), animations: "disabled" });
       await page.goto(base + "/platform/organizations/", { waitUntil: "domcontentloaded" });
       await expect(page.getByText("ไม่สามารถโหลดหน่วยงานได้")).toBeVisible({ timeout: 15000 });

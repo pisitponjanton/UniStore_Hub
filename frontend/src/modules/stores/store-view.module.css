@@ -473,3 +473,23 @@
 
 /* Campus Commerce A / Phase 13 */
 .main{width:min(100%,2600px);min-width:0;padding-inline:clamp(14px,2.2vw,44px)}.header,.section,.panel,.list,.row{min-width:0}@media(max-width:620px){.main{padding-inline:14px}}.grid{min-width:0;grid-template-columns:minmax(0,1fr) minmax(315px,660px);gap:clamp(14px,1.7vw,28px)}@media(max-width:1050px){.grid{grid-template-columns:minmax(0,1fr)}.panel{position:static}}.row:focus-within{border-color:var(--brand-line)}.rowSelected,.rowSelected:hover{color:var(--ink);background:var(--brand-soft);border-color:var(--brand-line)}.cardTitle,.meta{overflow-wrap:anywhere}.main a:focus-visible,.main button:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+
+
+/* Organization governance visual migration: store inventory and editor, main behaviors unchanged. */
+.header { padding: 0 0 var(--space-5); border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent; box-shadow: none; }
+.header::before, .header::after, .row::before, .rowSelected::before, .editPanel::before { content: none; }
+.summaryStrip { display: grid; gap: 0; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); }
+.summaryStrip > div, .summaryStrip > div:nth-child(n) { min-width: 0; border: 0; border-right: 1px solid var(--line); border-radius: 0; background: transparent; box-shadow: none; }
+.summaryStrip > div:last-child { border-right: 0; }
+.section { border-color: transparent; background: transparent; box-shadow: none; }
+.row, .panel, .editPanel { border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); box-shadow: none; }
+.row:hover { border-color: var(--control-line); background: var(--surface-hover); box-shadow: none; }
+.rowSelected, .rowSelected:hover { border-color: var(--brand); background: var(--brand-soft); box-shadow: inset 3px 0 0 var(--brand); }
+.row:focus-within { border-color: var(--brand); }
+.editActions button { min-height: 44px; }
+@media (max-width: 620px) {
+  .header { padding: 0 0 var(--space-4); }
+  .summaryStrip { grid-template-columns: minmax(0,1fr); }
+  .summaryStrip > div, .summaryStrip > div:nth-child(n) { border: 0; border-bottom: 1px solid var(--line); }
+  .summaryStrip > div:last-child { border-bottom: 0; }
+}

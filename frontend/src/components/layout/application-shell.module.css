@@ -10,13 +10,13 @@
 }
 
 .shell[data-shell-scope="customer"] {
-  background: var(--canvas-customer-ambient);
+  background: var(--canvas);
 }
 
 .shell[data-shell-scope="platform"] {
-  --shell-accent: var(--info);
-  --shell-accent-soft: var(--info-soft);
-  --shell-accent-strong: var(--info);
+  --shell-accent: var(--brand);
+  --shell-accent-soft: var(--brand-soft);
+  --shell-accent-strong: var(--brand-strong);
 }
 
 .sidebar {
@@ -56,6 +56,14 @@
 
 .brand:hover {
   text-decoration: none;
+}
+
+.brandMark {
+  width: 38px;
+  height: 38px;
+  flex: none;
+  border-radius: var(--radius-sm);
+  object-fit: contain;
 }
 
 .brandCopy {
@@ -795,7 +803,7 @@
   }
 }
 
-/* Workspace Foundation: visible context, real task hierarchy and a single quiet shell.
+/* Campus Commerce shared shell: design neutral/orange skin while keeping main navigation UX.
    Desktop uses a unified navigation rail. Mobile preserves the same navigation authority. */
 .shell {
   background: var(--canvas);
@@ -803,8 +811,8 @@
 .sidebar {
   gap: 0;
   padding: 0;
-  background: #132a30;
-  border-right-color: rgb(241 250 245 / 12%);
+  background: var(--surface);
+  border-right-color: var(--line);
 }
 .sidebarTop {
   min-height: 86px;
@@ -814,7 +822,7 @@
   box-shadow: none;
 }
 .brandCopy strong {
-  color: #f8faf7;
+  color: var(--ink);
   font-size: 1.13rem;
   letter-spacing: -0.035em;
 }
@@ -822,7 +830,7 @@
   min-height: 24px;
   padding: 0;
   background: transparent;
-  color: #a8cec5;
+  color: var(--brand-strong);
 }
 .desktopScopeLabel {
   font-size: 0.7rem;
@@ -830,9 +838,9 @@
 }
 .sidebarPanel {
   margin: 0 12px 12px;
-  border: 1px solid rgb(241 250 245 / 10%);
+  border: 1px solid var(--line-soft);
   border-radius: 15px;
-  background: #1b3339;
+  background: var(--surface-muted);
   box-shadow: none;
 }
 .sidebarBody {
@@ -841,22 +849,22 @@
 }
 .workspaceSummary {
   gap: 5px;
-  border: 1px solid rgb(244 255 250 / 9%);
+  border: 1px solid var(--brand-line);
   border-radius: 11px;
-  background: #294349;
+  background: var(--brand-soft);
   padding: 14px;
 }
 .workspaceSummary::after { content: none; }
-.workspaceTitle { color: #fbfffc; font-size: .92rem; }
-.workspaceDescription, .workspaceReference { color: #cbddd8; }
-.workspaceReference span { color: #c1d7d0; }
-.workspaceReference strong { color: #fff; font-family: var(--font-sans); }
-.workspaceTechnical { color: #c2d8d0; }
-.workspaceTechnical summary { color: #d9eee4; }
+.workspaceTitle { color: var(--ink); font-size: .92rem; }
+.workspaceDescription, .workspaceReference { color: var(--ink-secondary); }
+.workspaceReference span { color: var(--ink-secondary); }
+.workspaceReference strong { color: var(--ink); font-family: var(--font-sans); }
+.workspaceTechnical { color: var(--ink-secondary); }
+.workspaceTechnical summary { color: var(--brand-strong); }
 .navigation { gap: 17px; padding-inline: 2px; }
 .groupHeading { padding-inline: 12px; }
 .groupLabel, .group[data-active-group="true"] .groupLabel {
-  color: #9ebdb6;
+  color: var(--ink-tertiary);
   font-size: .7rem;
   letter-spacing: .035em;
   font-weight: 700;
@@ -864,33 +872,33 @@
 .groupList { gap: 3px; }
 .navLink {
   grid-template-columns: 21px minmax(0, 1fr) 4px;
-  min-height: 42px;
+  min-height: var(--target-min);
   gap: 10px;
   padding-inline: 11px;
-  color: #d0e0dc;
+  color: var(--ink-secondary);
   font-size: .85rem;
   font-weight: 570;
 }
-.navIcon { display: flex; align-items: center; justify-content: center; color: #a5c4bb; }
-.navLink:hover { transform: none; color: #fff; background: rgb(255 255 255 / 10%); }
+.navIcon { display: flex; align-items: center; justify-content: center; color: var(--brand-strong); }
+.navLink:hover { transform: none; color: var(--ink); background: var(--surface-hover); }
 .navLinkActive {
-  color: #13343a;
-  background: #d9ede2;
-  border-color: transparent;
+  color: var(--brand-strong);
+  background: var(--brand-soft);
+  border-color: var(--brand-line);
   box-shadow: none;
 }
-.navLinkActive .navIcon { color: #17575b; }
-.navLinkActive:hover { color: #13343a; background: #d9ede2; }
+.navLinkActive .navIcon { color: var(--brand-strong); }
+.navLinkActive:hover { color: var(--brand-strong); background: var(--brand-soft); }
 .navState { width: 4px; height: 15px; border: 0; border-radius: 3px; }
-.navLinkActive .navState { background: #166268; box-shadow: none; }
-.sidebarFooter { border-top-color: rgb(255 255 255 / 12%); }
-.userBlock { grid-template-columns: 34px minmax(0, 1fr); background: transparent; }
-.userAvatar { width: 34px; height: 34px; background: #d9ede2; color: #15363a; }
-.userLabel, .userEmail { color: #bbd4cd; }
-.userName { color: #f7faf6; }
-.switchOrganization { color: #e8f9f2; border-color: rgb(255 255 255 / 22%); background: #29474d; }
-.switchOrganization:hover { background: #345a60; border-color: rgb(255 255 255 / 42%); }
-.footerActions :global(button) { color: #eff8f3; border: 1px solid rgb(255 255 255 / 18%); }
+.navLinkActive .navState { background: var(--brand); box-shadow: none; }
+.sidebarFooter { border-top-color: var(--line); }
+.userBlock { grid-template-columns: 34px minmax(0, 1fr); background: var(--surface-muted); }
+.userAvatar { width: 34px; height: 34px; background: var(--brand-soft); color: var(--brand-strong); }
+.userLabel, .userEmail { color: var(--ink-secondary); }
+.userName { color: var(--ink); }
+.switchOrganization { color: var(--ink); border-color: var(--line); background: var(--surface-muted); }
+.switchOrganization:hover { background: var(--surface-hover); border-color: var(--line-strong); }
+.footerActions :global(button) { color: var(--ink); border: 1px solid var(--line); }
 .content {
   background: var(--canvas);
   min-width: 0;
@@ -927,7 +935,7 @@
   gap: 6px;
 }
 .workAreaLink {
-  min-height: 36px;
+  min-height: var(--target-min);
   display: inline-flex;
   align-items: center;
   gap: 7px;
@@ -943,28 +951,28 @@
 .workAreaLinkCurrent:hover { color: var(--brand-strong); background: var(--brand-soft-strong); }
 
 @media (max-width: 900px) {
-  .sidebar { border-bottom-color: rgb(241 250 245 / 20%); background: #132a30; }
-  .sidebarTop { min-height: 65px; padding-block: 8px; background: #132a30; }
-  .mobileCurrent { background: #132a30; color: #f9fffc; }
-  .mobileCurrentScope { color: #e5f5ec; background: #34575b; }
-  .mobileCurrentValue { color: #f5fffb; }
-  .mobileCurrentDivider { background: rgb(255 255 255 / 26%); }
-  .menuButton { background: #28484e; border-color: rgb(255 255 255 / 23%); color: #ecfbf4; }
-  .menuButton:hover { background: #31565c; }
-  .menuButton:active { background: #28484e; }
-  .menuIcon span { background: #ecfbf4; }
-  .sidebarPanel { inset: 0 auto 0 0; height: 100dvh; margin: 0; border-radius: 0 18px 18px 0; background: #1b3339; }
+  .sidebar { border-bottom-color: var(--line); background: var(--surface); }
+  .sidebarTop { min-height: 65px; padding-block: 8px; background: var(--surface); }
+  .mobileCurrent { background: var(--surface); color: var(--ink); }
+  .mobileCurrentScope { color: var(--brand-strong); background: var(--brand-soft); }
+  .mobileCurrentValue { color: var(--ink); }
+  .mobileCurrentDivider { background: var(--line-strong); }
+  .menuButton { background: var(--surface-hover); border-color: var(--line); color: var(--ink); }
+  .menuButton:hover { background: var(--surface-selected); }
+  .menuButton:active { background: var(--surface-hover); }
+  .menuIcon span { background: var(--ink); }
+  .sidebarPanel { inset: 0 auto 0 0; height: 100dvh; margin: 0; border-radius: 0 18px 18px 0; background: var(--surface); }
   .sidebarBody { padding: 14px 12px; }
-  .mobilePanelHeader { background: #132a30; border-bottom-color: rgb(255 255 255 / 13%); }
-  .mobilePanelHeader strong { color: #f6fff9; }
-  .mobilePanelLabel { color: #a6d0c7; }
-  .drawerClose { background: #26434a; border-color: rgb(255 255 255 / 22%); color: #fff; }
-  .drawerClose:hover { background: #345860; }
+  .mobilePanelHeader { background: var(--surface); border-bottom-color: var(--line); }
+  .mobilePanelHeader strong { color: var(--ink); }
+  .mobilePanelLabel { color: var(--ink-secondary); }
+  .drawerClose { background: var(--surface-hover); border-color: var(--line); color: var(--ink); }
+  .drawerClose:hover { background: var(--surface-selected); }
   .orientation { min-height: 52px; padding: 7px var(--page-gutter); }
   .orientationPath { display: none; }
   .workAreaNavigation { justify-content: flex-start; flex-wrap: nowrap; overflow-x: auto; width: 100%; scrollbar-width: none; }
   .workAreaNavigation::-webkit-scrollbar { display: none; }
-  .workAreaLink { white-space: nowrap; flex-shrink: 0; min-height: 37px; }
+  .workAreaLink { white-space: nowrap; flex-shrink: 0; min-height: var(--target-min); }
 }
 @media (max-width: 620px) {
   .brandCopy strong { font-size: 1.05rem; }
@@ -973,4 +981,16 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .workAreaLink, .orientation { transition: none; }
+}
+
+/* Stable navigation presentation: neutral/Orange skin without changing menu focus, state or routes. */
+.brand { padding: 4px; transition: background-color var(--motion-fast) var(--motion-ease-out); }
+.brand:hover { background: var(--surface-hover); }
+.brand:focus-visible, .navLink:focus-visible, .workAreaLink:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.sidebarTop { border-bottom: 1px solid var(--line-soft); }
+.navLinkActive { border-color: var(--brand-line); }
+@media (max-width: 900px) {
+  .menuButton:focus-visible, .drawerClose:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+  .sidebarPanel { background: var(--surface); }
+  .mobilePanelHeader { background: var(--surface); }
 }

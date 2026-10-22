@@ -626,3 +626,19 @@
 .filterButton:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
 @media(max-width:860px){.row{grid-template-columns:minmax(0,1fr)}.actions{justify-items:stretch}}
 @media(max-width:620px){.main{padding-inline:14px}.header{padding:16px}.row{padding:14px}}
+
+
+/* Customer visual migration: readable inbox, semantic unread emphasis and Orange next actions. */
+.header { border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent; box-shadow: none; }
+.header::before, .header::after { content: none; }
+.title { max-width: 22ch; color: var(--ink); font-size: clamp(1.875rem, 3.2vw, 2.75rem); line-height: 1.13; letter-spacing: -.028em; }
+.description { color: var(--ink-secondary); }
+.header button { background: var(--surface); color: var(--ink); border-color: var(--line); }
+.controlBar, .listSummary > div { border: 1px solid var(--line); background: var(--surface); box-shadow: none; }
+.row { border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); box-shadow: none; }
+.rowUnread { border-color: var(--brand-line); background: var(--brand-soft); box-shadow: inset 3px 0 0 var(--brand); }
+.rowUnread:hover { background: var(--brand-soft); box-shadow: inset 3px 0 0 var(--brand); }
+.notificationNextAction { min-height: 44px; background: var(--action-primary); color: var(--action-primary-on); border-color: var(--action-primary); }
+.notificationNextAction:hover { background: var(--action-primary-hover); border-color: var(--action-primary-hover); color: var(--action-primary-on); }
+.filterButton:focus-visible, .notificationNextAction:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+@media (max-width: 620px) { .header { padding: 16px 0; } .row { padding: 14px; } }

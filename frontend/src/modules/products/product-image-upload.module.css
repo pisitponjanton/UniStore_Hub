@@ -210,3 +210,14 @@
 
 /* Campus Commerce A / Phase 13 */
 .root,.selected,.selectedCopy,.progress,.progressSteps,.currentMedia{min-width:0}.fileName,.meta{overflow-wrap:anywhere}.actions button{min-height:44px}@media(max-width:620px){.header,.progressSteps{grid-template-columns:minmax(0,1fr)}}
+
+
+/* Organization management visual skin for the existing guarded image lifecycle. */
+.root { border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); box-shadow: none; }
+.currentMedia { border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--surface-muted); }
+.progress { border: 1px solid var(--brand-line); border-radius: var(--radius-card); background: var(--brand-soft); }
+.progressStep { border-radius: var(--radius-control); }
+.progressStep[data-state="current"] { background: var(--surface); border-color: var(--brand-line); }
+.progressStep[data-state="current"] .progressMarker { border-color: var(--brand); background: var(--brand-soft); box-shadow: none; }
+.progressStep[data-state="current"] .progressStateLabel { color: var(--brand-strong); }
+.actions button { min-height: 44px; }

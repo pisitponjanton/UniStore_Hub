@@ -681,3 +681,19 @@
 .selectedFileName,.paymentId,.orderCode{overflow-wrap:anywhere}
 @media(max-width:960px){.header{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:620px){.main{padding-inline:14px}.header{padding:16px}.uploadSection{padding:14px}}
+
+
+/* Customer visual migration: restrained payment proof and authoritative amount hierarchy. */
+.header { border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); box-shadow: none; }
+.header::before, .header::after, .selectedFile::after { content: none; }
+.title { max-width: 22ch; color: var(--ink); font-size: clamp(1.875rem, 3.2vw, 2.75rem); line-height: 1.13; letter-spacing: -.028em; }
+.description { color: var(--ink-secondary); }
+.headerAmount { border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface-muted); box-shadow: none; }
+.headerAmount .amount { color: var(--brand-strong); font-variant-numeric: tabular-nums; }
+.paymentFacts > div, .uploadSection, .reviewSummary { border: 1px solid var(--line); background: var(--surface); box-shadow: none; }
+.selectedFile, .noFileState, .progressPanel { border: 1px solid var(--line); background: var(--surface-muted); box-shadow: none; }
+.progressStep { border: 1px solid var(--line); background: var(--surface); box-shadow: none; }
+.progressStep[data-state="current"] { border-color: var(--brand-line); background: var(--brand-soft); box-shadow: none; }
+.uploadForm input[type="file"] { min-width: 0; max-width: 100%; width: 100%; }
+@media (max-width: 760px) { .actions { box-shadow: none; } }
+@media (max-width: 620px) { .header { padding: 16px; } .uploadSection, .reviewSummary { padding: 14px; } }

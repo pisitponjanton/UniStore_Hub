@@ -156,7 +156,17 @@ export function StorefrontLanding() {
               ร้านค้าและรอบขายขึ้นอยู่กับแต่ละหน่วยงาน ตรวจสอบรายละเอียดก่อนสั่งทุกครั้ง
             </div>
           </div>
-
+          <div className={styles.heroGuide} aria-label="วิธีเริ่มซื้อสินค้า">
+            <div className={styles.heroGuideHeading}>
+              <span>เริ่มใช้งานใน 3 ขั้นตอน</span>
+              <strong>ค้นหา เลือก แล้วติดตาม</strong>
+            </div>
+            <ol className={styles.heroGuideSteps}>
+              <li><strong>เลือกร้านที่สนใจ</strong><span>ค้นหาร้านของชมรมและหน่วยงาน</span></li>
+              <li><strong>ดูสินค้าและรอบขาย</strong><span>ตรวจสอบรายละเอียดและสถานะก่อนสั่ง</span></li>
+              <li><strong>ติดตามคำสั่งซื้อ</strong><span>ดูการชำระเงินและขั้นตอนรับสินค้า</span></li>
+            </ol>
+          </div>
         </section>
 
         <section className={styles.finder} aria-label="ค้นหาและกรองร้านค้า">

@@ -971,3 +971,29 @@
 
 @media(min-width:1181px){.layout{grid-template-columns:minmax(0,1fr) minmax(340px,720px)}}
 .rowMain{max-width:95ch}
+
+
+/* Staff visual migration — preserve order-ready pickup handover and confirmation guards. */
+.header { padding: 0 0 var(--space-5); border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent; box-shadow: none; }
+.header::before, .header::after { content: none; }
+.summaryStrip { gap: 0; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); }
+.summaryStrip > div, .summaryStrip > div:nth-child(n) { min-width: 0; border: 0; border-right: 1px solid var(--line); border-radius: 0; background: transparent; box-shadow: none; }
+.summaryStrip > div:last-child { border-right: 0; }
+.filterPanel, .detailPanel, .tokenPanel, .orderPanel { border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); box-shadow: none; }
+.section { border-color: transparent; background: transparent; box-shadow: none; }
+.row { border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); box-shadow: none; }
+.row[data-attention="true"] { border-color: var(--brand-line); background: var(--brand-soft); box-shadow: inset 3px 0 0 var(--brand); }
+.row:hover { border-color: var(--control-line); background: var(--surface-hover); box-shadow: none; }
+.rowSelected, .rowSelected[data-attention="true"], .rowSelected:hover { border-color: var(--brand); background: var(--brand-soft); box-shadow: inset 3px 0 0 var(--brand); }
+.row:focus-within, .rowSelected:focus-within { border-color: var(--brand); }
+.verificationGuide { border: 1px solid var(--brand-line); border-radius: var(--radius-card); background: var(--brand-soft); }
+.verificationStep { border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--surface); }
+.emptyDetail { border: 1px dashed var(--line); background: var(--surface-muted); }
+.cardActions button, .detailActions button { min-height: 44px; }
+@media (max-width: 620px) {
+  .header { padding: 0 0 var(--space-4); }
+  .summaryStrip { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .summaryStrip > div, .summaryStrip > div:nth-child(n) { border: 0; border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); }
+  .summaryStrip > div:nth-child(2n) { border-right: 0; }
+}
+@media (max-width: 360px) { .summaryStrip { grid-template-columns: minmax(0,1fr); } .summaryStrip > div { border-right: 0 !important; } }

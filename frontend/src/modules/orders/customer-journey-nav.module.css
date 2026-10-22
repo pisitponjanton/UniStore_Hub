@@ -74,3 +74,11 @@ a.tab:hover { background: var(--surface-muted); text-decoration: none; color: va
   .tab { min-height: 38px; padding: 6px 3px; }
   .contextLink { display: none; }
 }
+
+
+/* Align secondary journey navigation with the shared Orange/Neutral control system. */
+.nav { border-color: var(--line); border-radius: var(--radius-card); background: var(--surface); box-shadow: none; }
+.tab { min-height: 44px; border-radius: var(--radius-control); }
+.tab[data-active="true"] { background: var(--brand-soft); color: var(--brand-strong); }
+a.tab:hover:not([data-active="true"]) { background: var(--surface-hover); }
+@media (max-width: 760px) { .tab { min-height: 40px; } }

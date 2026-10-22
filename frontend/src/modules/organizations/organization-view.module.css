@@ -878,3 +878,33 @@
 .settingsPanel .sectionDescription{max-width:65ch}
 .settingsPanel .settingsForm{width:100%;max-width:760px;min-width:0}
 @media(max-width:1100px){.settingsWorkspace{grid-template-columns:minmax(0,1fr)}}
+
+
+/* Organization governance visual migration — neutral settings and account selection, original membership rules preserved. */
+.workspaceHeader, .settingsHeader { padding: 0 0 var(--space-5); border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent; box-shadow: none; }
+.workspaceHeader::before, .workspaceHeader::after, .settingsHeader::before, .settingsHeader::after { content: none; }
+.title { color: var(--ink); }
+.description { color: var(--ink-secondary); }
+.headerSummary, .statusBlock { border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface-muted); color: var(--ink); box-shadow: none; }
+.headerSummaryLabel, .statusLabel { color: var(--ink-secondary); }
+.headerSummary strong { color: var(--ink); }
+.organizationRow, .createPanel, .settingsPanel, .governancePanel { border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); box-shadow: none; }
+.organizationRow::before { content: none; }
+.organizationRow:hover { border-color: var(--control-line); background: var(--surface-hover); box-shadow: none; transform: none; }
+.organizationRow:focus-within { border-color: var(--brand); }
+.governanceList > li, .referenceStrip > div { border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--surface-muted); }
+.secondaryLink, .secondaryLink:hover { border-color: var(--line); border-radius: var(--radius-control); background: var(--surface); color: var(--brand-strong); }
+.page[data-page="organization-entry"] .workspaceHeader { padding: 0 0 var(--space-5); min-height: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent; }
+.page[data-page="organization-entry"] .title, .page[data-page="organization-entry"] .description { color: var(--ink); }
+.page[data-page="organization-entry"] .description, .entryEyebrow { color: var(--ink-secondary); }
+.page[data-page="organization-entry"] .headerSummary { border: 1px solid var(--line); background: var(--surface-muted); }
+.page[data-page="organization-entry"] .headerSummaryLabel,
+.page[data-page="organization-entry"] .headerSummary > span:nth-of-type(2) { color: var(--ink-secondary); }
+.page[data-page="organization-entry"] .headerSummary strong { color: var(--ink); }
+.page[data-page="organization-entry"] .workspaceJump { border: 1px solid var(--brand-line); background: var(--brand-soft); color: var(--brand-strong); }
+.page[data-page="organization-entry"] .workspaceJump:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+.page[data-page="organization-entry"] .organizationRow { border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); }
+.page[data-page="organization-entry"] .organizationRow::before { content: none; }
+.page[data-page="organization-entry"] .organizationRow:hover { background: var(--surface-hover); }
+.page[data-page="organization-entry"] .createPanel { border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); }
+@media (max-width: 620px) { .workspaceHeader, .settingsHeader, .page[data-page="organization-entry"] .workspaceHeader { padding: 0 0 var(--space-4); } }

@@ -732,3 +732,19 @@
 
 /* Campus Commerce A / Phase 13 */
 .main{width:min(100%,2600px);min-width:0;padding-inline:clamp(14px,2.2vw,44px)}.header,.section,.panel,.list,.row{min-width:0}@media(max-width:620px){.main{padding-inline:14px}}.filters{grid-template-columns:repeat(2,minmax(0,1fr));max-width:1100px}.actionBoard,.statusGrid{min-width:0}.priorityValue,.revenueValue,.statusCount{overflow-wrap:anywhere}.headerLink,.metricAction,.adminShortcuts a{min-height:44px}@media(max-width:760px){.filters{grid-template-columns:1fr}}.main a:focus-visible,.main button:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+
+
+/* Organization governance visual migration: neutral reporting surfaces with Orange task signals. */
+.header { padding: 0 0 var(--space-5); border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent; box-shadow: none; }
+.header::before, .header::after, .actionMetric::after { content: none; }
+.title { color: var(--ink); }
+.actionMetric, .actionMetric:first-child, .actionMetric:nth-child(2), .resourceStrip > div, .resourceStrip > div:nth-child(n) {
+  border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); box-shadow: none;
+}
+.actionMetric[data-attention="true"] { border-color: var(--brand-line); background: var(--brand-soft); box-shadow: inset 3px 0 0 var(--brand); }
+.revenueMetric { border: 1px solid var(--brand-line); border-radius: var(--radius-card); background: var(--brand-soft); box-shadow: none; }
+.reportScope, .filterPanel, .statusPanel, .statusPanel:nth-child(n) { border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); box-shadow: none; }
+.scopeSummary span { border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface-muted); color: var(--ink-secondary); }
+.statusRow { min-height: 44px; }
+.headerLink, .metricAction, .adminShortcuts a { min-height: 44px; }
+@media (max-width: 620px) { .header { padding: 0 0 var(--space-4); } }

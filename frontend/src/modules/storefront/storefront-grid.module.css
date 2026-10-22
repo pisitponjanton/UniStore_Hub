@@ -13,16 +13,16 @@
   flex-direction: column;
   overflow: hidden;
   border: 1px solid var(--line);
-  border-radius: 15px;
+  border-radius: var(--radius-card);
   background: var(--surface);
   color: var(--ink);
   text-decoration: none;
-  transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+  transition: border-color var(--motion-standard) var(--motion-ease-out), box-shadow var(--motion-standard) var(--motion-ease-out), background-color var(--motion-standard) var(--motion-ease-out);
 }
 .storeCard:hover {
   border-color: var(--brand-line);
-  box-shadow: var(--shadow-media-soft);
-  transform: translateY(-2px);
+  background: var(--surface-hover);
+  box-shadow: var(--shadow-subtle);
   text-decoration: none;
 }
 .storeCard:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
@@ -30,8 +30,8 @@
   min-height: 148px;
   max-height: 200px;
   aspect-ratio: 16 / 7;
-  background: var(--surface-muted);
-  color: var(--ink-tertiary);
+  background: var(--gradient-brand-soft);
+  color: var(--brand-strong);
   border-bottom: 1px solid var(--line-soft);
   display: flex;
   flex-direction: column;
@@ -87,7 +87,7 @@
   align-items: center;
   min-height: 28px;
   padding: 2px 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
   background: var(--brand-soft);
   color: var(--brand-strong);
   font-size: .72rem;
@@ -121,7 +121,7 @@
   gap: var(--space-2);
   padding: var(--space-4);
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius-card);
   background: var(--surface-muted);
 }
 .emptyOrganization strong { color: var(--ink); overflow-wrap: anywhere; }

@@ -188,3 +188,33 @@ This is a local snapshot, not an assertion about Production or a claim that all 
 **Next phase:** Phase 9 — Login/Register redesign. Do not begin or commit unless requested.
 
 ---
+
+
+## Guest visual skin migration — Storefront and Discovery
+
+**Active task:** `task_1febbe60-581b-42d0-8765-506f38b362f0`, BDXA visual migration, Phase 06, on `main`. Source `design` was consulted for KMITL Orange hero, neutral campus-noticeboard cards, consistent text, radii and visual controls; `main` retains complete application and commerce behavior. The pre-existing uncommitted work from earlier phases remains untouched.
+
+### Visual implementation
+
+- `frontend/src/modules/storefront/storefront-landing.module.css`: replaced historical hardcoded green hero, accents and forms with accessible Orange / neutral semantic tokens in Light and Dark; stronger high-emphasis CTA contrast and explicit focus outlines, while retaining search, native filters, page navigation, status feedback and 4K-sized marketplace containers.
+- `frontend/src/modules/storefront/storefront-landing.tsx`: a **static informational** three-step noticeboard on desktop, using existing discover → inspect → track guidance. Does not create recommendations, fabricated stores/products, or extra purchase paths. Hides during active filtering and at narrow layouts; does not change the underlying query/role/session state.
+- `frontend/src/modules/storefront/storefront-grid.module.css`: restrained Orange/neutral Store-first cards, stable selected/hover/focus treatment, explicit no-image fallback and truthful QA fixture badge. Does not invent store artwork or override API content.
+- `frontend/src/modules/storefront/storefront-view.module.css`: removes hardcoded green/teal colors from public Store/Product/Campaign detail presentation, including campaign status and action, while keeping actual media/variant/price/availability and order navigation semantics unchanged.
+- Existing behavior tests `storefront-landing.test.tsx`, `campus-commerce-ui.spec.ts`, and `storefront-shopping.spec.ts` were extended rather than adding milestone-named files.
+
+### Local verification evidence
+
+- `git diff --check`, artifact-name guard, frontend ESLint and TypeScript: **PASS**.
+- `npm test -- --reporter=dot`: **384/384 PASS** (94 test files). Static `npm run build`: **PASS, 31/31 generated pages/assets**.
+- Guarded Chromium Storefront suite: **12/12 PASS**, both Light/Dark, covering real Store-first directory, search/organization/availability filters, pagination, fixture segregation and QA opt-in, legitimate lookalike records, loading/error/empty/retry, Store/Product/Campaign navigation, OPEN/CLOSED/empty availability, actual variant price estimate and guest `returnTo`. Browser API writes blocked; test response data was local/intercepted.
+- Guarded Chromium marketplace responsive suite: **2/2 PASS**, all 8 CSS widths (320, 390, 768, 1024, 1440, 1920, 2560, 3840) for Light/Dark.
+- Guarded Chromium visual/contrast checks: **2/2 PASS**. Verified computed Orange hero gradient, no previous green hero color, no invented card artwork, native Select/options, focus and primary Button contrast. Dark Mode / root-font-200% across five representative routes: **1/1 PASS**.
+- Screenshots `frontend/quality-audit/.evidence/campus-commerce-responsive/marketplace-{light,dark}-{320,390,768,1440,2560,3840}.png`. Detailed Store screenshots `frontend/quality-audit/.evidence/campus-commerce-public-commerce/{light,dark}-store-{320,390,768,1440,3840}.png`; corresponding Product/Campaign screenshots at 320/390/768/1440/3840, plus JSON guest detail evidence. These show test/local fixtures only; there is **no new customer data or fabricated API content**.
+- Direct visual review inspected generated 390/1440/3840 viewport screenshots after styling.
+
+### Known limitations and next gate
+
+- **NOT_TESTED:** Firefox/WebKit cross-browser, true physical devices and native zoom, manual screen-reader checks, all 28 routes × 5 roles × all interaction states, actual backend checkout/payment/pickup writes, production data and release/security review.
+- Complete visual parity is intentionally limited by the authoritative `main` functional/UX differences and expanded 4K layout. No merge/cherry-pick from `design`, no backend, API, DB, infrastructure or AWS edits, no Commit/Push/Deploy.
+
+**Handoff:** Guest Storefront & Product Discovery visual scope has been implemented and tested. The next task phase addresses Authentication visuals only; no automatic continuation.
