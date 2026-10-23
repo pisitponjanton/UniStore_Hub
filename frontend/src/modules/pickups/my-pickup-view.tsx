@@ -1,6 +1,5 @@
 "use client";
 
-import { CustomerJourneyNav } from "@/modules/orders/customer-journey-nav";
 
 import { PageLoadingRows, PageStateHeading } from "@/components/ui/async-page";
 
@@ -190,7 +189,6 @@ export function MyPickupView() {
     return (
       <div className={styles.page}>
         <main className={styles.main}>
-          <CustomerJourneyNav current="pickup" orderId={state.order.orderId} />
           <Link
             href={myOrderHref(state.order.orderId)}
             className={styles.backLink}
@@ -286,7 +284,6 @@ export function MyPickupView() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <CustomerJourneyNav current="pickup" orderId={order.orderId} />
         <Link href={myOrderHref(order.orderId)} className={styles.backLink}>
           กลับรายละเอียดคำสั่งซื้อ
         </Link>

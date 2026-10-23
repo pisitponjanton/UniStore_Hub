@@ -1,6 +1,5 @@
 "use client";
 
-import { CustomerJourneyNav } from "./customer-journey-nav";
 
 import { PageLoadingRows, PageStateHeading } from "@/components/ui/async-page";
 
@@ -385,7 +384,6 @@ export function OrderCreateView() {
         <StorefrontHeader />
 
         <main className={styles.successMain}>
-          <CustomerJourneyNav current="orders" />
           <div className={styles.successMarker} aria-hidden="true" />
 
           <header className={styles.successHeading}>
@@ -474,7 +472,6 @@ export function OrderCreateView() {
       <StorefrontHeader />
 
       <main className={styles.main}>
-        <CustomerJourneyNav current="checkout" />
         <Link
           href={productHref({
             organizationId: context.organizationId,

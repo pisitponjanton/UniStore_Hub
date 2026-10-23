@@ -179,4 +179,30 @@ describe("StoreView mobile shopping hierarchy", () => {
       }
     }
   });
+
+
+  it("sorts products by newest and by Thai name without changing the storefront links", async () => {
+    const data = dataWithCatalog();
+    const secondProduct = {
+      ...data.products[0],
+      productId: "product-2",
+      name: "Another Product",
+      createdAt: "2026-09-20T00:00:00.000Z",
+    };
+    mocks.getStoreView.mockResolvedValue({
+      ...data,
+      products: [...data.products, secondProduct],
+    });
+    const { container } = render(<StoreView />);
+    await screen.findByRole("heading", { name: "Local Demo Store" });
+    const order = () => [...container.querySelectorAll('a[href*="/products/view"] h3')].map(node => node.textContent);
+    expect(order()).toEqual(["Local Demo Product", "Another Product"]);
+    const sort = screen.getByRole("combobox", { name: "เรียงสินค้า" });
+    fireEvent.change(sort, { target: { value: "recent" } });
+    expect(order()).toEqual(["Another Product", "Local Demo Product"]);
+    fireEvent.change(sort, { target: { value: "name" } });
+    expect(order()).toEqual(["Another Product", "Local Demo Product"]);
+    fireEvent.change(sort, { target: { value: "featured" } });
+    expect(order()).toEqual(["Local Demo Product", "Another Product"]);
+  });
 });

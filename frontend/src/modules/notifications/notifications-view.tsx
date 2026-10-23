@@ -1,6 +1,5 @@
 "use client";
 
-import { CustomerJourneyNav } from "@/modules/orders/customer-journey-nav";
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
@@ -60,6 +59,8 @@ export function NotificationsView() {
     useState<NotificationState>({ status: "loading" });
   const [loadingMore, setLoadingMore] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [filterPending, setFilterPending] = useState(false);
+  const activeFilterRef = useRef<NotificationReadFilter>("all");
   const [markingId, setMarkingId] = useState<string | null>(null);
   const [inlineError, setInlineError] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
@@ -124,6 +125,10 @@ export function NotificationsView() {
         }
 
         setState({ status: "error" });
+      } finally {
+        if (!controller.signal.aborted) {
+          setFilterPending(false);
+        }
       }
     }
 
@@ -133,9 +138,10 @@ export function NotificationsView() {
   }, [filter]);
 
   async function handleRefresh() {
-    if (refreshing) {
+    if (refreshing || filterPending) {
       return;
     }
+    const requestedFilter = activeFilterRef.current;
 
     setRefreshing(true);
     setInlineError(null);
@@ -143,8 +149,9 @@ export function NotificationsView() {
 
     try {
       const result = await notificationService.listNotifications({
-        filter,
+        filter: requestedFilter,
       });
+      if (activeFilterRef.current !== requestedFilter) return;
 
       setState(
         result.items.length === 0
@@ -164,6 +171,7 @@ export function NotificationsView() {
         return;
       }
 
+      if (activeFilterRef.current !== requestedFilter) return;
       setInlineError(
         error instanceof ApiClientError
           ? error.userMessage
@@ -178,20 +186,23 @@ export function NotificationsView() {
     if (
       state.status !== "success" ||
       !state.nextCursor ||
-      loadingMore
+      loadingMore ||
+      filterPending
     ) {
       return;
     }
 
+    const requestedFilter = activeFilterRef.current;
     setLoadingMore(true);
     setInlineError(null);
     setFeedback(null);
 
     try {
       const result = await notificationService.listNotifications({
-        filter,
+        filter: requestedFilter,
         cursor: state.nextCursor,
       });
+      if (activeFilterRef.current !== requestedFilter) return;
 
       const nextItems = [...state.items, ...result.items];
 
@@ -209,6 +220,7 @@ export function NotificationsView() {
         return;
       }
 
+      if (activeFilterRef.current !== requestedFilter) return;
       setInlineError(
         error instanceof ApiClientError
           ? error.userMessage
@@ -220,9 +232,10 @@ export function NotificationsView() {
   }
 
   async function handleMarkRead(notificationId: string) {
-    if (markingId) {
+    if (markingId || filterPending) {
       return;
     }
+    const requestedFilter = activeFilterRef.current;
 
     setMarkingId(notificationId);
     setInlineError(null);
@@ -230,6 +243,7 @@ export function NotificationsView() {
 
     try {
       const updated = await notificationService.markRead(notificationId);
+      if (activeFilterRef.current !== requestedFilter) return;
 
       if (state.status !== "success") {
         return;
@@ -263,6 +277,7 @@ export function NotificationsView() {
         return;
       }
 
+      if (activeFilterRef.current !== requestedFilter) return;
       setInlineError(
         error instanceof ApiClientError
           ? error.userMessage
@@ -288,7 +303,8 @@ export function NotificationsView() {
           aria-pressed={filter === option.value}
           onClick={() => {
             if (filter !== option.value) {
-              setState({ status: "loading" });
+              activeFilterRef.current = option.value;
+              setFilterPending(true);
               setInlineError(null);
               setFeedback(null);
               setFilter(option.value);
@@ -320,8 +336,7 @@ export function NotificationsView() {
 
   return (
     <div className={styles.page}>
-      <main className={styles.main} data-empty-notifications={state.status === "empty" ? "true" : undefined}>
-        {state.status !== "empty" ? <CustomerJourneyNav current="notifications" /> : null}
+      <main className={styles.main}>
         <header className={styles.header}>
           <div className={styles.headerCopy}>
             <h1 className={styles.title}>การแจ้งเตือน</h1>
@@ -333,6 +348,7 @@ export function NotificationsView() {
             variant="secondary"
             aria-label="รีเฟรชรายการ"
             pending={refreshing}
+            disabled={filterPending}
             pendingLabel="กำลังรีเฟรช"
             onClick={handleRefresh}
           >
@@ -343,9 +359,11 @@ export function NotificationsView() {
         <section className={styles.controlPanel} aria-label="ตัวกรองและภาพรวมการแจ้งเตือน">
           <div className={styles.controlBar}>
             {filterControls}
-            {state.status !== "empty" ? <div className={styles.refreshNote}>
-              รายการไม่อัปเดตอัตโนมัติ กดรีเฟรชเพื่อดูข้อมูลล่าสุด
-            </div> : null}
+            <div className={styles.refreshNote} role="status" aria-live="polite">
+              {filterPending
+                ? "กำลังอัปเดตรายการตามตัวกรอง..."
+                : "รายการไม่อัปเดตอัตโนมัติ กดรีเฟรชเพื่อดูข้อมูลล่าสุด"}
+            </div>
           </div>
 
           {state.status === "success" ? (
@@ -423,7 +441,7 @@ export function NotificationsView() {
           <section
             className={styles.list}
             aria-label="รายการการแจ้งเตือน"
-            aria-busy={loadingMore || markingId !== null}
+            aria-busy={filterPending || loadingMore || markingId !== null}
           >
             {state.items.map((notification) => {
               const unread = notification.readAt === null;
@@ -487,7 +505,7 @@ export function NotificationsView() {
                         size="small"
                         pending={markingId === notification.notificationId}
                         pendingLabel="กำลังบันทึก"
-                        disabled={markingId !== null}
+                        disabled={filterPending || markingId !== null}
                         onClick={() =>
                           handleMarkRead(notification.notificationId)
                         }
@@ -510,6 +528,7 @@ export function NotificationsView() {
             <Button
               variant="secondary"
               pending={loadingMore}
+              disabled={filterPending}
               pendingLabel="กำลังโหลด"
               onClick={handleLoadMore}
             >

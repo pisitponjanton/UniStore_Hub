@@ -3,6 +3,7 @@
 import { PageLoadingRows, PageStateHeading, RecoveryActions } from "@/components/ui/async-page";
 
 import Link from "next/link";
+import { CalendarDays, Store, ShoppingBag } from "lucide-react";
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 
 import { EmptyIllustration, ErrorState, LoadingState } from "@/components";
@@ -50,6 +51,7 @@ export function StoreView() {
   const shopsHref = auth.status === "authenticated" ? "/shops/" : "/";
   const [state, setState] = useState<StoreViewState>({ status: "loading" });
   const [productQuery, setProductQuery] = useState("");
+  const [productSort, setProductSort] = useState<"featured" | "name" | "recent">("featured");
   const [campaignFilter, setCampaignFilter] = useState<"all" | "open">("all");
 
   const [retryAttempt, setRetryAttempt] = useState(0);
@@ -167,6 +169,9 @@ export function StoreView() {
   const matchingCampaigns = orderedCampaigns.filter(campaign => campaignFilter === "all" || campaign.status === "OPEN");
   const normalizedQuery = productQuery.trim().normalize("NFKC").toLocaleLowerCase();
   const matchingProducts = products.filter(product => !normalizedQuery || (product.name + " " + (product.description ?? "")).normalize("NFKC").toLocaleLowerCase().includes(normalizedQuery));
+  const visibleProducts = [...matchingProducts];
+  if (productSort === "name") visibleProducts.sort((a, b) => a.name.localeCompare(b.name, "th"));
+  if (productSort === "recent") visibleProducts.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 
   return (
     <div className={styles.page}>
@@ -179,46 +184,37 @@ export function StoreView() {
           <span aria-current="page">{store.name}</span>
         </nav>
 
-        <section className={`${styles.hero} ${styles.storeHero}`}>
-          <div className={styles.heroCopy}>
-            <h1 tabIndex={-1} className={styles.title}>{store.name}</h1>
-            {store.description ? (
-              <p className={styles.description}>{store.description}</p>
-            ) : (
+        <section className={`${styles.hero} ${styles.storeHero}`} aria-label="ข้อมูลร้านค้า">
+          <div className={styles.storeIdentity}>
+            <span className={styles.storeIdentityMark} aria-hidden="true"><Store size={27} strokeWidth={1.6} /></span>
+            <div className={styles.storeIdentityCopy}>
+              <span className={styles.storeEyebrow}>ร้านค้าในมหาวิทยาลัย</span>
+              <h1 tabIndex={-1} className={styles.title}>{store.name}</h1>
               <p className={styles.description}>
-                เลือกดูสินค้าและแคมเปญที่ร้านนี้เปิดให้เข้าชม
+                {store.description || "สำรวจสินค้าจากร้านนี้ และติดตามรอบพรีออเดอร์ที่เปิดรับ"}
               </p>
-            )}
-            <p className={styles.storeReadiness} role="status">
-              <span className={openCampaigns.length ? styles.readinessDotActive : styles.readinessDot} aria-hidden="true" />
-              {openCampaigns.length > 0
-                ? "มี " + openCampaigns.length + " รอบที่เปิดรับคำสั่งซื้อ"
-                : "ยังไม่มีรอบที่เปิดรับคำสั่งซื้อ ตรวจสอบรายการสินค้าที่ร้านมีได้"}
-            </p>
-            <nav className={styles.storeQuickLinks} aria-label="ทางลัดไปรายการในร้าน">
-              <a href="#campaign-heading" className={styles.storeQuickLinkPrimary} onClick={(event) => focusStoreSection(event, "campaign-heading")}>
-                ดูรอบพรีออเดอร์
-              </a>
-              <a href="#product-heading" className={styles.storeQuickLinkSecondary} onClick={(event) => focusStoreSection(event, "product-heading")}>
-                เลือกดูสินค้า
-              </a>
-            </nav>
+            </div>
           </div>
-
-          <div className={styles.storeHeroAside}>
+          <div className={styles.storeHeroBottom}>
+            <div className={styles.storeHeroActions}>
+              <p className={styles.storeReadiness} role="status">
+                <span className={openCampaigns.length ? styles.readinessDotActive : styles.readinessDot} aria-hidden="true" />
+                {openCampaigns.length > 0
+                  ? "มี " + openCampaigns.length + " รอบที่เปิดรับคำสั่งซื้อ"
+                  : "ยังไม่มีรอบที่เปิดรับคำสั่งซื้อ"}
+              </p>
+              <nav className={styles.storeQuickLinks} aria-label="ทางลัดไปรายการในร้าน">
+                <a href="#product-heading" className={styles.storeQuickLinkPrimary} onClick={(event) => focusStoreSection(event, "product-heading")}>
+                  <ShoppingBag size={16} aria-hidden="true" />เลือกดูสินค้า
+                </a>
+                <a href="#campaign-heading" className={styles.storeQuickLinkSecondary} onClick={(event) => focusStoreSection(event, "campaign-heading")}>
+                  ดูรอบพรีออเดอร์
+                </a>
+              </nav>
+            </div>
             <dl className={styles.heroMeta} aria-label="สรุปร้านค้า">
-            <div>
-              <dt className={styles.metaLabel}>รอบขายทั้งหมด</dt>
-              <dd className={styles.metaValue} data-numeric>
-                {campaigns.length}
-              </dd>
-            </div>
-            <div>
-              <dt className={styles.metaLabel}>สินค้า</dt>
-              <dd className={styles.metaValue} data-numeric>
-                {products.length}
-              </dd>
-            </div>
+              <div><dt className={styles.metaLabel}>รอบขายทั้งหมด</dt><dd className={styles.metaValue} data-numeric>{campaigns.length}</dd></div>
+              <div><dt className={styles.metaLabel}>สินค้า</dt><dd className={styles.metaValue} data-numeric>{products.length}</dd></div>
             </dl>
           </div>
         </section>
@@ -255,12 +251,16 @@ export function StoreView() {
                   key={campaign.campaignId}
                 />
               ))}
-            </div> : <div className={styles.emptyBox}><EmptyIllustration compact />ไม่มีรอบที่เปิดรับคำสั่งซื้อในขณะนี้ <button type="button" className={styles.detailReset} onClick={() => setCampaignFilter("all")}>ดูรอบขายทั้งหมด</button></div>}
+            </div> : <div className={styles.storeCampaignNotice} role="status"><CalendarDays size={22} aria-hidden="true" /><div><strong>ไม่มีรอบที่เปิดรับคำสั่งซื้อในขณะนี้</strong><p>ลองดูรอบขายอื่นของร้านนี้</p></div><button type="button" className={styles.detailReset} onClick={() => setCampaignFilter("all")}>ดูรอบขายทั้งหมด</button></div>}
             </>
           ) : (
-            <div className={styles.emptyBox}>
-              <EmptyIllustration compact />
-              ร้านนี้ยังไม่มีแคมเปญที่เปิดให้ลูกค้าเข้าชม
+            <div className={styles.storeCampaignNotice} role="status">
+              <CalendarDays size={22} strokeWidth={1.7} aria-hidden="true" />
+              <div>
+                <strong>ยังไม่มีรอบพรีออเดอร์ที่เปิดให้เข้าชม</strong>
+                <p>ร้านนี้ยังไม่มีแคมเปญที่เปิดให้ลูกค้าเข้าชม</p>
+              </div>
+              <a href="#product-heading" onClick={(event) => focusStoreSection(event, "product-heading")}>ดูสินค้าในร้าน <span aria-hidden="true">→</span></a>
             </div>
           )}
         </section>
@@ -286,9 +286,17 @@ export function StoreView() {
                   ค้นหาสินค้าในร้าน
                   <input id="store-product-search" type="search" value={productQuery} placeholder="ชื่อสินค้าหรือคำอธิบาย" onChange={event => setProductQuery(event.target.value)} />
                 </label>
+                <label className={styles.detailSortField} htmlFor="store-product-sort">
+                  เรียงสินค้า
+                  <select id="store-product-sort" value={productSort} onChange={(event) => setProductSort(event.target.value as "featured" | "name" | "recent")}>
+                    <option value="featured">ตามลำดับร้านค้า</option>
+                    <option value="recent">สินค้าใหม่ล่าสุด</option>
+                    <option value="name">ชื่อสินค้า ก–ฮ</option>
+                  </select>
+                </label>
               </div>
-              {matchingProducts.length > 0 ? <div className={styles.cardGrid}>
-              {matchingProducts.map((product) => (
+              {matchingProducts.length > 0 ? <div className={`${styles.cardGrid} ${styles.storeCatalogGrid}`}>
+              {visibleProducts.map((product) => (
                 <ProductCard
                   key={product.productId}
                   organizationId={store.organizationId}
@@ -298,9 +306,9 @@ export function StoreView() {
             </div> : <div className={styles.emptyBox}><EmptyIllustration compact />ไม่พบสินค้าที่ตรงกับการค้นหา <button type="button" className={styles.detailReset} onClick={() => { setProductQuery(""); document.getElementById("store-product-search")?.focus(); }}>ล้างคำค้นหา</button></div>}
             </>
           ) : (
-            <div className={styles.emptyBox}>
+            <div className={styles.storeCatalogEmpty}>
               <EmptyIllustration compact />
-              ร้านนี้ยังไม่มีสินค้าที่เปิดให้เข้าชม
+              <div><strong>ยังไม่มีสินค้าในร้าน</strong><p>ร้านนี้ยังไม่มีสินค้าที่เปิดให้เข้าชม</p></div>
             </div>
           )}
         </section>

@@ -642,32 +642,16 @@
 .notificationNextAction:hover { background: var(--action-primary-hover); border-color: var(--action-primary-hover); color: var(--action-primary-on); }
 .filterButton:focus-visible, .notificationNextAction:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
 @media (max-width: 620px) { .header { padding: 16px 0; } .row { padding: 14px; } }
-
-/* A quiet, compact empty inbox; keep role filters and manual refresh available. */
-.main[data-empty-notifications="true"] {
-  width: min(100%, 1760px);
-  gap: clamp(14px, 2vw, 22px);
+/* Keep the inbox shell and filter geometry stable in every data state. */
+.filterButton.filterButtonActive,
+.filterButton.filterButtonActive:hover {
+  background: var(--surface-selected);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--brand-line);
 }
-
-.main[data-empty-notifications="true"] .header {
-  padding-top: var(--space-3);
-  padding-bottom: var(--space-4);
-  gap: var(--space-4);
-}
-
-.main[data-empty-notifications="true"] .title {
-  font-size: clamp(1.65rem, 2.7vw, 2.3rem);
-}
-
-.main[data-empty-notifications="true"] .description {
-  font-size: var(--text-body-sm);
-}
-
-.main[data-empty-notifications="true"] .controlBar {
-  padding: var(--space-2);
-}
-
-.main[data-empty-notifications="true"] [data-state-kind="empty"] {
-  min-height: clamp(300px, 33vh, 390px);
+.filterButton:active { transform: none; }
+.refreshNote { min-height: 2.5em; display: flex; align-items: center; }
+.main [data-state-kind="empty"] {
+  min-height: clamp(290px, 32vh, 380px);
   border-color: var(--line-soft);
 }

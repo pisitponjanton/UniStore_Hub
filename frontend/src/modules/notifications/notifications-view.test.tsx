@@ -143,6 +143,54 @@ describe("NotificationsView", () => {
     ).toBeInTheDocument();
   });
 
+  it("keeps the inbox shell and visible content stable while switching filters", async () => {
+    const unread = makeNotification();
+    let resolveRead!: (value: { items: NotificationDTO[]; nextCursor: null }) => void;
+    const readResponse = new Promise<{ items: NotificationDTO[]; nextCursor: null }>((resolve) => {
+      resolveRead = resolve;
+    });
+    mocks.listNotifications.mockImplementation(({ filter }: { filter: string }) =>
+      filter === "read" ? readResponse : Promise.resolve({ items: [unread], nextCursor: null }),
+    );
+
+    render(<NotificationsView />);
+    await screen.findByText("การชำระเงินถูกปฏิเสธ");
+
+    fireEvent.click(screen.getByRole("button", { name: /^อ่านแล้ว$/ }));
+    expect(screen.getByRole("button", { name: /^อ่านแล้ว$/ })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByText("การชำระเงินถูกปฏิเสธ")).toBeInTheDocument();
+    expect(screen.queryByRole("navigation", { name: "เส้นทางผู้ซื้อ" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "กำลังโหลดการแจ้งเตือน" })).not.toBeInTheDocument();
+    expect(screen.getByText("กำลังอัปเดตรายการตามตัวกรอง...")).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "รายการการแจ้งเตือน" })).toHaveAttribute("aria-busy", "true");
+
+    resolveRead({ items: [], nextCursor: null });
+    expect(await screen.findByRole("heading", { name: "ไม่มีการแจ้งเตือน" })).toBeInTheDocument();
+    expect(screen.queryByRole("navigation", { name: "เส้นทางผู้ซื้อ" })).not.toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "กรองการแจ้งเตือน" })).toBeInTheDocument();
+    expect(screen.queryByText("กำลังอัปเดตรายการตามตัวกรอง...")).not.toBeInTheDocument();
+  });
+
+  it("does not apply a stale filter response after switching again", async () => {
+    const notification = makeNotification();
+    let resolveRead!: (value: { items: NotificationDTO[]; nextCursor: null }) => void;
+    mocks.listNotifications.mockImplementation(({ filter }: { filter: string }) =>
+      filter === "read"
+        ? new Promise(resolve => { resolveRead = resolve; })
+        : Promise.resolve({ items: [notification], nextCursor: null }),
+    );
+    render(<NotificationsView />);
+    await screen.findByText(notification.title);
+
+    fireEvent.click(screen.getByRole("button", { name: /^อ่านแล้ว$/ }));
+    fireEvent.click(screen.getByRole("button", { name: /^ทั้งหมด$/ }));
+    resolveRead({ items: [], nextCursor: null });
+
+    expect(await screen.findByText(notification.title)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^ทั้งหมด$/ })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.queryByRole("heading", { name: "ไม่มีการแจ้งเตือน" })).not.toBeInTheDocument();
+  });
+
   it("loads the next page with the opaque cursor", async () => {
     const first = makeNotification();
     const second = makeNotification({
