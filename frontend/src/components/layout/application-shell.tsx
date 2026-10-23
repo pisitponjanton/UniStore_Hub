@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
-import brandLogo from "@/assets/unistore-hub-logo.webp";
+import brandLogo from "@/assets/unistore-hub-logo.png";
 import { Button } from "@/components/ui";
 import {
   isNavigationItemActive,

@@ -69,7 +69,7 @@ export function AuthenticatedShell({
     (item) => item.status === "ACTIVE",
   );
   const workAreas = [
-    { id: "customer" as const, href: "/", label: "ซื้อสินค้า" },
+    { id: "customer" as const, href: "/shops/", label: "ซื้อสินค้า" },
     ...(activeMemberships.length > 0
       ? [{
           id: "organization" as const,

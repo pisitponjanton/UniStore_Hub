@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -57,7 +58,7 @@ export function StatePanel({
         {media ? <div className={styles.stateMedia}>{media}</div> : null}
         {kind === "loading" ? (
           <span className={styles.spinner} aria-hidden="true" />
-        ) : (
+        ) : kind === "empty" ? null : (
           <span className={styles.stateLabel}>
             <span className={styles.stateDot} aria-hidden="true" />
             <span>{stateLabel[kind]}</span>
@@ -92,6 +93,22 @@ export function LoadingState({
   );
 }
 
+/** Shared illustration for genuinely empty collections and filtered results. */
+export function EmptyIllustration({ compact = false }: { compact?: boolean }) {
+  return (
+    <Image
+      src="/images/empty.png"
+      alt=""
+      aria-hidden="true"
+      width={1402}
+      height={1122}
+      unoptimized
+      data-empty-artwork
+      className={compact ? styles.emptyArtworkCompact : styles.emptyArtwork}
+    />
+  );
+}
+
 export function EmptyState({
   title = "ยังไม่มีข้อมูล",
   description,
@@ -111,7 +128,7 @@ export function EmptyState({
       title={title}
       description={description}
       actions={actions}
-      media={media}
+      media={media ?? <EmptyIllustration />}
       headingLevel={headingLevel}
     />
   );

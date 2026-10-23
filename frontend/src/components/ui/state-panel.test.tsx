@@ -39,8 +39,12 @@ describe("shared async and access states", () => {
     expect(
       screen.getByRole("heading", { name: "ยังไม่มีรายการ" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("ยังไม่มีข้อมูล")).toBeInTheDocument();
+    expect(screen.queryByText("ยังไม่มีข้อมูล")).not.toBeInTheDocument();
     expect(screen.queryByText("Empty")).not.toBeInTheDocument();
+    expect(document.querySelector('[data-empty-artwork]')).toHaveAttribute(
+      "src",
+      "/images/empty.png",
+    );
   });
 
   it("supports optional decorative media without changing empty-state semantics", () => {
@@ -71,6 +75,7 @@ describe("shared async and access states", () => {
       "โหลดข้อมูลไม่สำเร็จ",
     );
     expect(screen.getByText("เกิดข้อผิดพลาด")).toBeInTheDocument();
+    expect(document.querySelector('[data-empty-artwork]')).not.toBeInTheDocument();
   });
 
   it("distinguishes unauthorized from forbidden states", () => {

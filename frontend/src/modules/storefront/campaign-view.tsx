@@ -7,7 +7,8 @@ import { PageLoadingRows, PageStateHeading, RecoveryActions } from "@/components
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
-import { ErrorState, LoadingState } from "@/components";
+import { EmptyIllustration, ErrorState, LoadingState } from "@/components";
+import { useAuthSession } from "@/modules/auth";
 import { ApiClientError } from "@/services";
 import type { CampaignStatus } from "@/types";
 import { formatIsoDateTime, getRequiredQueryId } from "@/utils";
@@ -42,6 +43,8 @@ const campaignGuidance: Record<CampaignStatus, string> = {
 };
 
 export function CampaignView() {
+  const auth = useAuthSession();
+  const shopsHref = auth.status === "authenticated" ? "/shops/" : "/";
   const [state, setState] = useState<CampaignViewState>({
     status: "loading",
   });
@@ -130,14 +133,14 @@ export function CampaignView() {
             <ErrorState
               title="ลิงก์แคมเปญไม่สมบูรณ์"
               description="ลิงก์แคมเปญนี้ไม่ครบถ้วน กรุณากลับไปเลือกร้านค้าใหม่"
-              actions={<Link href="/">กลับไปเลือกร้านค้า</Link>}
+              actions={<Link href={shopsHref}>กลับไปเลือกร้านค้า</Link>}
             />
           ) : null}
           {state.status === "notFound" ? (
             <ErrorState
               title="ไม่พบแคมเปญ"
               description="แคมเปญนี้อาจปิดการเข้าชมหรือไม่มีอยู่ในระบบ"
-              actions={<Link href="/">กลับไปเลือกร้านค้า</Link>}
+              actions={<Link href={shopsHref}>กลับไปเลือกร้านค้า</Link>}
             />
           ) : null}
           {state.status === "error" ? (
@@ -160,7 +163,7 @@ export function CampaignView() {
 
       <main className={styles.main}>
         <nav className={styles.breadcrumbs} aria-label="เส้นทางรอบพรีออเดอร์">
-          <Link href="/">ร้านค้าทั้งหมด</Link>
+          <Link href={shopsHref}>ร้านค้าทั้งหมด</Link>
           <span aria-hidden="true">/</span>
           <Link href={storeHref(store.organizationId, store.storeId)}>{store.name}</Link>
           <span aria-hidden="true">/</span>
@@ -284,6 +287,7 @@ export function CampaignView() {
             </div>
           ) : (
             <div className={styles.emptyBox}>
+              <EmptyIllustration compact />
               ร้านนี้ยังไม่มีสินค้าที่เปิดให้เข้าชม
             </div>
           )}

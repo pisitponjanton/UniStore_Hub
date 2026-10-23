@@ -8,6 +8,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Button,
   EmptyState,
+  EmptyIllustration,
   ErrorState,
   ForbiddenState,
   LoadingState,
@@ -210,7 +211,7 @@ export function MyOrdersView() {
   if (state.status !== "success") {
     return (
       <div className={styles.page}>
-        <main className={styles.stateWrap}>
+        <main className={styles.stateWrap} data-empty-orders={state.status === "empty" ? "true" : undefined}>
           <h1 className={styles.stateHeading}>คำสั่งซื้อของฉัน</h1>
           {state.status === "loading" ? (
             <LoadingState
@@ -221,8 +222,8 @@ export function MyOrdersView() {
           {state.status === "empty" ? (
             <EmptyState
               title="ยังไม่มีคำสั่งซื้อ"
-              description="เมื่อสั่งสินค้าจากหน้าร้าน คำสั่งซื้อและขั้นตอนถัดไปจะปรากฏที่นี่"
-              actions={<Link href="/">เลือกสินค้า</Link>}
+              description="เริ่มเลือกสินค้า แล้วติดตามคำสั่งซื้อได้ที่นี่"
+              actions={<Link href="/shops/">เลือกสินค้า</Link>}
             />
           ) : null}
           {state.status === "unauthorized" ? (
@@ -240,7 +241,7 @@ export function MyOrdersView() {
                   >
                     ลองโหลดอีกครั้ง
                   </Button>
-                  <Link href="/">กลับหน้าร้าน</Link>
+                  <Link href="/shops/">กลับหน้าร้าน</Link>
                 </>
               }
             />
@@ -261,7 +262,7 @@ export function MyOrdersView() {
               เริ่มจากรายการที่ต้องทำต่อ แล้วค่อยเปิดดูรายละเอียดของแต่ละคำสั่งซื้อ
             </p>
           </div>
-          <Link href="/" className={styles.headerAction}>
+          <Link href="/shops/" className={styles.headerAction}>
             เลือกสินค้าเพิ่ม
           </Link>
         </header>
@@ -385,7 +386,8 @@ export function MyOrdersView() {
           </div>
           {filteredOrders.length === 0 ? (
             <div className={styles.filteredEmpty} role="status">
-              ยังไม่มีคำสั่งซื้อในกลุ่มนี้จากรายการที่โหลดแล้ว
+              <EmptyIllustration compact />
+              <p>ยังไม่มีคำสั่งซื้อในกลุ่มนี้จากรายการที่โหลดแล้ว</p>
               <button type="button" onClick={() => setViewFilter("all")}>ดูคำสั่งซื้อทั้งหมด</button>
             </div>
           ) : null}

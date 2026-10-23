@@ -37,3 +37,17 @@
   .inputRow { flex-wrap: wrap; }
   .inputRow input { flex-basis: 72%; }
 }
+
+/* Zero matches after loading: illustrated filter feedback, not a fetch error. */
+.empty {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  padding: var(--space-5);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-card);
+  background: var(--surface-muted);
+  text-align: center;
+}
+.empty [data-empty-artwork] { max-width: 144px; }
+.empty p { margin: 0; }

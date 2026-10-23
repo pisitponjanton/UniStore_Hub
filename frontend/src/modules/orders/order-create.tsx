@@ -327,14 +327,14 @@ export function OrderCreateView() {
             <ErrorState
               title="ลิงก์สร้างคำสั่งซื้อไม่สมบูรณ์"
               description="ไม่พบข้อมูลที่จำเป็นสำหรับสินค้า ตัวเลือก หรือรอบพรีออเดอร์"
-              actions={<Link href="/">กลับหน้าร้าน</Link>}
+              actions={<Link href="/shops/">กลับหน้าร้าน</Link>}
             />
           ) : null}
           {state.status === "notFound" ? (
             <ErrorState
               title="ไม่พบข้อมูลสำหรับสร้างคำสั่งซื้อ"
               description="สินค้า ตัวเลือกสินค้า หรือรอบพรีออเดอร์อาจไม่เปิดให้ใช้งานแล้ว"
-              actions={<Link href="/">กลับหน้าร้าน</Link>}
+              actions={<Link href="/shops/">กลับหน้าร้าน</Link>}
             />
           ) : null}
           {state.status === "forbidden" ? (
@@ -343,7 +343,7 @@ export function OrderCreateView() {
               description="บัญชีนี้ไม่สามารถเข้าถึงสินค้า หรือรอบพรีออเดอร์ที่เลือกได้ กรุณาตรวจสอบข้อมูลอีกครั้ง"
               actions={
                 <>
-                  <Link href="/">ดูร้านค้าทั้งหมด</Link>
+                  <Link href="/shops/">ดูร้านค้าทั้งหมด</Link>
                   <Link href="/my/orders/">คำสั่งซื้อของฉัน</Link>
                 </>
               }
@@ -364,7 +364,7 @@ export function OrderCreateView() {
                   >
                     ลองโหลดอีกครั้ง
                   </Button>
-                  <Link href="/">กลับหน้าร้าน</Link>
+                  <Link href="/shops/">กลับหน้าร้าน</Link>
                 </>
               }
             />

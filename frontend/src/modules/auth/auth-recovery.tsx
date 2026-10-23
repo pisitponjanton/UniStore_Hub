@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import brandLogo from "@/assets/unistore-hub-logo.webp";
+import brandLogo from "@/assets/unistore-hub-logo.png";
 import { ForbiddenState, LoadingState, UnauthorizedState, Button } from "@/components";
 
 import { getUnauthenticatedExit } from "./return-route";

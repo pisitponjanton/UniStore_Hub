@@ -1,5 +1,7 @@
 "use client";
 
+import { EmptyIllustration } from "@/components/ui/state-panel";
+
 import styles from "./loaded-directory-controls.module.css";
 
 type Props = {
@@ -42,7 +44,10 @@ export function LoadedDirectoryControls({
         <span> · ค้นหาเฉพาะ {loadedCount.toLocaleString("th-TH")} รายการที่โหลดมาแล้ว</span>
       </p>
       {matchingCount === 0 && loadedCount > 0 ? (
-        <p className={styles.empty}>ไม่พบรายการที่ตรงคำค้นหา ลองเปลี่ยนคำหรือกดล้าง</p>
+        <div className={styles.empty} role="status">
+          <EmptyIllustration compact />
+          <p>ไม่พบรายการที่ตรงคำค้นหา ลองเปลี่ยนคำหรือกดล้าง</p>
+        </div>
       ) : null}
       {matchingCount > visibleCount ? (
         <button className={styles.more} type="button" onClick={onShowMore}>

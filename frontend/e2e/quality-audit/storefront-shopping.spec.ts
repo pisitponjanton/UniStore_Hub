@@ -49,7 +49,7 @@ for (const theme of ["light", "dark"] as const) {
       const cards = page.locator('a[class*="storeCard"]');
       await expect(cards).toHaveCount(12, { timeout: 15000 });
       await expect(page.getByText("หน้า 1 จาก 3")).toBeVisible();
-      await expect(page.getByText("พบ 26 ร้าน")).toBeVisible();
+      await expect(page.getByText("พบ 26 ร้าน")).toHaveCount(0);
       await expect(page.getByRole("heading", { name: "เลือกร้านที่อยากซื้อ" })).toBeVisible();
       await expect(cards.first()).toHaveAttribute("href", /organizationId=org-engineering.*storeId=org-engineering-store-1/);
       await expect(cards.first().locator('[class*="storeCardMedia"]')).toContainText("ยังไม่มีรูปหน้าร้าน");
@@ -152,11 +152,11 @@ for (const theme of ["light", "dark"] as const) {
     try {
       await page.goto(frontend + "/", { waitUntil: "domcontentloaded" });
       const cards = page.locator('a[class*="storeCard"]');
-      const showQa = page.getByRole("button", { name: /แสดงข้อมูล E2E\/QA \(3 หน่วยงาน\)/ });
+      const showQa = page.getByRole("button", { name: "แสดงข้อมูล E2E/QA" });
       await expect(showQa).toBeVisible();
       await expect(cards).toHaveCount(12);
       await expect(page.getByText("หน้า 1 จาก 2")).toBeVisible();
-      await expect(page.getByText(/พบ 17 ร้าน และ 1 หน่วยงานที่ยังไม่มีร้าน/)).toBeVisible();
+      await expect(page.getByText(/พบ 17 ร้าน และ 1 หน่วยงานที่ยังไม่มีร้าน/)).toHaveCount(0);
       await expect(page.getByRole("option", { name: "Demo QA Student Club" })).toHaveCount(1);
       await expect(page.getByRole("option", { name: /QA Commerce Org/ })).toHaveCount(0);
       await expect(page.locator('a[data-qa-fixture="true"]')).toHaveCount(0);
@@ -179,7 +179,7 @@ for (const theme of ["light", "dark"] as const) {
       await showQa.click();
       await expect(page.getByText(/โหมดตรวจสอบ QA/)).toBeVisible();
       await expect(page.getByRole("button", { name: "ซ่อนข้อมูล E2E/QA" })).toBeVisible();
-      await expect(page.getByText(/พบ 20 ร้าน และ 2 หน่วยงานที่ยังไม่มีร้าน/)).toBeVisible();
+      await expect(page.getByText(/พบ 20 ร้าน และ 2 หน่วยงานที่ยังไม่มีร้าน/)).toHaveCount(0);
       await expect(page.locator('a[data-qa-fixture="true"]')).toHaveCount(0); // first page stays ordinary shops
       await page.getByLabel("หน่วยงาน", { exact: true }).selectOption("test-compound");
       await expect(cards).toHaveCount(2);
@@ -188,7 +188,7 @@ for (const theme of ["light", "dark"] as const) {
       await page.getByRole("button", { name: "ซ่อนข้อมูล E2E/QA" }).click();
       await expect(page.getByLabel("หน่วยงาน", { exact: true })).toHaveValue("");
       await expect(page.getByRole("option", { name: /QA Commerce Org/ })).toHaveCount(0);
-      await expect(page.getByText(/พบ 17 ร้าน และ 1 หน่วยงานที่ยังไม่มีร้าน/)).toBeVisible();
+      await expect(page.getByText(/พบ 17 ร้าน และ 1 หน่วยงานที่ยังไม่มีร้าน/)).toHaveCount(0);
       for (const width of [390, 768, 1440, 3840]) {
         await page.setViewportSize({ width, height: 900 });
         expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth),

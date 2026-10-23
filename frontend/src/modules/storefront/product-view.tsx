@@ -7,6 +7,7 @@ import { PageLoadingRows, PageStateHeading, RecoveryActions } from "@/components
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  EmptyIllustration,
   ErrorState,
   LoadingState,
   MediaFallback,
@@ -60,6 +61,7 @@ function loginHref(returnTo: string): string {
 
 export function ProductView() {
   const auth = useAuthSession();
+  const shopsHref = auth.status === "authenticated" ? "/shops/" : "/";
   const [state, setState] = useState<ProductViewState>({ status: "loading" });
   const [retryAttempt, setRetryAttempt] = useState(0);
   const retryFocusRequested = useRef(false);
@@ -202,14 +204,14 @@ export function ProductView() {
             <ErrorState
               title="ลิงก์สินค้าไม่สมบูรณ์"
               description="ลิงก์สินค้านี้ไม่ครบถ้วน กรุณากลับไปเลือกร้านค้าใหม่"
-              actions={<Link href="/">กลับไปเลือกร้านค้า</Link>}
+              actions={<Link href={shopsHref}>กลับไปเลือกร้านค้า</Link>}
             />
           ) : null}
           {state.status === "notFound" ? (
             <ErrorState
               title="ไม่พบสินค้า"
               description="สินค้านี้อาจปิดการเข้าชมหรือไม่มีอยู่ในระบบ"
-              actions={<Link href="/">กลับไปเลือกร้านค้า</Link>}
+              actions={<Link href={shopsHref}>กลับไปเลือกร้านค้า</Link>}
             />
           ) : null}
           {state.status === "error" ? (
@@ -256,7 +258,7 @@ export function ProductView() {
 
       <main className={styles.main}>
         <nav className={styles.breadcrumbs} aria-label="เส้นทางสินค้า">
-          <Link href="/">ร้านค้าทั้งหมด</Link>
+          <Link href={shopsHref}>ร้านค้าทั้งหมด</Link>
           <span aria-hidden="true">/</span>
           <Link href={storeHref(store.organizationId, store.storeId)}>{store.name}</Link>
           <span aria-hidden="true">/</span>
@@ -510,6 +512,7 @@ export function ProductView() {
               </div>
             ) : (
               <div className={styles.emptyBox}>
+                <EmptyIllustration compact />
                 สินค้านี้ยังไม่มีตัวเลือกที่เปิดใช้งาน
               </div>
             )}

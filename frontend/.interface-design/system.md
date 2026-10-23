@@ -49,7 +49,7 @@ Campus Commerce A must look like a dependable **real shopping service**, not an 
 
 ### Identity — approved design-branch brand asset
 
-1. The **approved UniStore Hub visual identity** is the exact logo image from the repository `design` branch at `frontend/src/assets/unistore-hub-logo.webp`, displayed beside the selectable text **UniStore Hub** in public, auth, recovery and authenticated navigation links. The corresponding `frontend/src/app/icon.png` is the app favicon.
+1. The **approved UniStore Hub visual identity** is the user-supplied `~/Downloads/Icon.png`, copied unchanged to `frontend/src/assets/unistore-hub-logo.png`, displayed beside the selectable text **UniStore Hub** in public, auth, recovery and authenticated navigation links. The corresponding `frontend/src/app/icon.png` is the app favicon.
 2. The approved image is decorative within a labeled brand link (`alt=""` and `aria-hidden="true"`); the readable text is retained and screen readers get the original link name. The logo and text must fit 320px width, 200% text size and Light/Dark contrast without clipping.
 3. No second logo, square U, fabricated monogram, handmade glyph or alternate brand badge. The approved asset is an explicit owner-approved exception to the **superseded text-only restriction** recorded in historical QA reports.
 4. Functional icons for genuine actions continue to use the standard Lucide vocabulary; store-owned media, partner marks and real store-name initials are unrelated to UniStore branding.

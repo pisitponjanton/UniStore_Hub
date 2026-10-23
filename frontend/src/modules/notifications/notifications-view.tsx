@@ -9,7 +9,6 @@ import { myPaymentHref } from "@/modules/payments/payment-helpers";
 import { myPickupHref } from "@/modules/pickups/pickup-helpers";
 
 import {
-  BrandIllustration,
   Button,
   EmptyState,
   ErrorState,
@@ -321,13 +320,13 @@ export function NotificationsView() {
 
   return (
     <div className={styles.page}>
-      <main className={styles.main}>
-        <CustomerJourneyNav current="notifications" />
+      <main className={styles.main} data-empty-notifications={state.status === "empty" ? "true" : undefined}>
+        {state.status !== "empty" ? <CustomerJourneyNav current="notifications" /> : null}
         <header className={styles.header}>
           <div className={styles.headerCopy}>
             <h1 className={styles.title}>การแจ้งเตือน</h1>
             <p className={styles.description}>
-              ใช้หน้านี้เพื่อดูว่าเกิดอะไรขึ้นล่าสุด แล้วเปิดหน้าคำสั่งซื้อหรือขั้นตอนที่เกี่ยวข้องเพื่อตรวจสถานะจริง
+              ความคืบหน้าคำสั่งซื้อของคุณ
             </p>
           </div>
           <Button
@@ -344,9 +343,9 @@ export function NotificationsView() {
         <section className={styles.controlPanel} aria-label="ตัวกรองและภาพรวมการแจ้งเตือน">
           <div className={styles.controlBar}>
             {filterControls}
-            <div className={styles.refreshNote}>
-              รายการนี้ไม่อัปเดตอัตโนมัติ กดตรวจเหตุการณ์ล่าสุดเมื่ออยากดูข้อมูลรอบใหม่
-            </div>
+            {state.status !== "empty" ? <div className={styles.refreshNote}>
+              รายการไม่อัปเดตอัตโนมัติ กดรีเฟรชเพื่อดูข้อมูลล่าสุด
+            </div> : null}
           </div>
 
           {state.status === "success" ? (
@@ -395,11 +394,10 @@ export function NotificationsView() {
         {state.status === "empty" ? (
           <EmptyState
             title="ไม่มีการแจ้งเตือน"
-            media={<BrandIllustration variant="notification" decorative />}
             description={
               filter === "all"
-                ? "เมื่อมีความคืบหน้าเรื่องการชำระเงินหรือรับสินค้า ระบบจะแจ้งที่นี่"
-                : "ไม่มีการแจ้งเตือนที่ตรงกับตัวกรองนี้"
+                ? "ความคืบหน้าคำสั่งซื้อจะแสดงที่นี่"
+                : "ไม่พบรายการในตัวกรองนี้"
             }
           />
         ) : null}
@@ -523,12 +521,12 @@ export function NotificationsView() {
           </div>
         ) : null}
 
-        <aside
+        {state.status === "success" ? <aside
           className={styles.authorityNote}
           aria-label="แหล่งอ้างอิงสถานะปัจจุบัน"
         >
           การแจ้งเตือนเป็นเพียงสัญญาณเหตุการณ์ สถานะการชำระเงินและการรับสินค้าปัจจุบันยังอ้างอิงจากหน้าคำสั่งซื้อ การชำระเงิน และการรับสินค้า
-        </aside>
+        </aside> : null}
       </main>
     </div>
   );

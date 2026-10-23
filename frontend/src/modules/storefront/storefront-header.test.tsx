@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
@@ -23,17 +23,14 @@ describe("StorefrontHeader navigation", () => {
     mocks.useAuthSession.mockReturnValue({ status: "unauthenticated" });
   });
 
-  it("marks the storefront destination as current on the landing page", () => {
+  it("shows only login and register for public guests", () => {
     render(<StorefrontHeader />);
 
-    expect(screen.getByRole("link", { name: "ร้านค้า" })).toHaveAttribute(
-      "aria-current",
-      "page",
-    );
-    expect(screen.getByRole("link", { name: "สมัครสมาชิก" })).toHaveAttribute(
-      "href",
-      "/register",
-    );
+    const nav = screen.getByRole("navigation", { name: "เมนูหน้าร้าน" });
+    expect(within(nav).getByRole("link", { name: "เข้าสู่ระบบ" })).toHaveAttribute("href", "/login");
+    expect(within(nav).getByRole("link", { name: "สมัครสมาชิก" })).toHaveAttribute("href", "/register");
+    expect(within(nav).queryByRole("link", { name: "ร้านค้า" })).not.toBeInTheDocument();
+    expect(within(nav).queryByRole("link", { name: "พื้นที่ของฉัน" })).not.toBeInTheDocument();
   });
 
   it("shows the approved image logo without changing the home link name or destination", () => {
@@ -48,20 +45,25 @@ describe("StorefrontHeader navigation", () => {
     expect(logo?.getAttribute("src")).toContain("unistore-hub-logo");
   });
 
-  it("uses current-page semantics for authenticated order navigation", () => {
-    mocks.usePathname.mockReturnValue("/my/payment/");
+  it("shows one workspace shortcut for authenticated users without duplicate links", () => {
     mocks.useAuthSession.mockReturnValue({ status: "authenticated" });
 
     render(<StorefrontHeader />);
 
-    expect(
-      screen.getByRole("link", { name: "คำสั่งซื้อของฉัน" }),
-    ).toHaveAttribute("aria-current", "page");
-    expect(
-      screen.getByRole("link", { name: "การแจ้งเตือน" }),
-    ).not.toHaveAttribute("aria-current");
-    expect(screen.getByRole("link", { name: "ร้านค้า" })).not.toHaveAttribute(
-      "aria-current",
-    );
+    const nav = screen.getByRole("navigation", { name: "เมนูหน้าร้าน" });
+    expect(within(nav).getAllByRole("link")).toHaveLength(1);
+    const shortcut = within(nav).getByRole("link", { name: "พื้นที่ของฉัน" });
+    expect(shortcut).toHaveAttribute("href", "/shops");
+    expect(shortcut.querySelectorAll("svg")).toHaveLength(2);
+    expect(within(nav).queryByRole("link", { name: "คำสั่งซื้อของฉัน" })).not.toBeInTheDocument();
+    expect(within(nav).queryByRole("link", { name: "การแจ้งเตือน" })).not.toBeInTheDocument();
+  });
+
+  it("does not flash guest links while the session is loading", () => {
+    mocks.useAuthSession.mockReturnValue({ status: "loading" });
+    render(<StorefrontHeader />);
+
+    expect(screen.getByRole("status")).toHaveTextContent("กำลังตรวจสอบบัญชี");
+    expect(screen.getByRole("navigation", { name: "เมนูหน้าร้าน" }).querySelector("a")).toBeNull();
   });
 });

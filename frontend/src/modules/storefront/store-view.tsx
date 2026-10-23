@@ -5,7 +5,8 @@ import { PageLoadingRows, PageStateHeading, RecoveryActions } from "@/components
 import Link from "next/link";
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 
-import { ErrorState, LoadingState } from "@/components";
+import { EmptyIllustration, ErrorState, LoadingState } from "@/components";
+import { useAuthSession } from "@/modules/auth";
 import { ApiClientError } from "@/services";
 import { getRequiredQueryId } from "@/utils";
 
@@ -45,6 +46,8 @@ type StoreViewState =
   | { status: "success"; data: StorefrontStoreView };
 
 export function StoreView() {
+  const auth = useAuthSession();
+  const shopsHref = auth.status === "authenticated" ? "/shops/" : "/";
   const [state, setState] = useState<StoreViewState>({ status: "loading" });
   const [productQuery, setProductQuery] = useState("");
   const [campaignFilter, setCampaignFilter] = useState<"all" | "open">("all");
@@ -133,14 +136,14 @@ export function StoreView() {
             <ErrorState
               title="ลิงก์ร้านค้าไม่สมบูรณ์"
               description="ลิงก์ร้านค้านี้ไม่ครบถ้วน กรุณากลับไปเลือกร้านค้าใหม่"
-              actions={<Link href="/">กลับไปเลือกร้านค้า</Link>}
+              actions={<Link href={shopsHref}>กลับไปเลือกร้านค้า</Link>}
             />
           ) : null}
           {state.status === "notFound" ? (
             <ErrorState
               title="ไม่พบร้านค้า"
               description="ร้านค้านี้อาจปิดการเข้าชมหรือไม่มีอยู่ในระบบ"
-              actions={<Link href="/">กลับไปเลือกร้านค้า</Link>}
+              actions={<Link href={shopsHref}>กลับไปเลือกร้านค้า</Link>}
             />
           ) : null}
           {state.status === "error" ? (
@@ -171,7 +174,7 @@ export function StoreView() {
 
       <main className={`${styles.main} ${styles.storeMain}`}>
         <nav className={styles.breadcrumbs} aria-label="เส้นทางร้านค้า">
-          <Link href="/">ร้านค้าทั้งหมด</Link>
+          <Link href={shopsHref}>ร้านค้าทั้งหมด</Link>
           <span aria-hidden="true">/</span>
           <span aria-current="page">{store.name}</span>
         </nav>
@@ -252,10 +255,11 @@ export function StoreView() {
                   key={campaign.campaignId}
                 />
               ))}
-            </div> : <div className={styles.emptyBox}>ไม่มีรอบที่เปิดรับคำสั่งซื้อในขณะนี้ <button type="button" className={styles.detailReset} onClick={() => setCampaignFilter("all")}>ดูรอบขายทั้งหมด</button></div>}
+            </div> : <div className={styles.emptyBox}><EmptyIllustration compact />ไม่มีรอบที่เปิดรับคำสั่งซื้อในขณะนี้ <button type="button" className={styles.detailReset} onClick={() => setCampaignFilter("all")}>ดูรอบขายทั้งหมด</button></div>}
             </>
           ) : (
             <div className={styles.emptyBox}>
+              <EmptyIllustration compact />
               ร้านนี้ยังไม่มีแคมเปญที่เปิดให้ลูกค้าเข้าชม
             </div>
           )}
@@ -291,10 +295,11 @@ export function StoreView() {
                   product={product}
                 />
               ))}
-            </div> : <div className={styles.emptyBox}>ไม่พบสินค้าที่ตรงกับการค้นหา <button type="button" className={styles.detailReset} onClick={() => { setProductQuery(""); document.getElementById("store-product-search")?.focus(); }}>ล้างคำค้นหา</button></div>}
+            </div> : <div className={styles.emptyBox}><EmptyIllustration compact />ไม่พบสินค้าที่ตรงกับการค้นหา <button type="button" className={styles.detailReset} onClick={() => { setProductQuery(""); document.getElementById("store-product-search")?.focus(); }}>ล้างคำค้นหา</button></div>}
             </>
           ) : (
             <div className={styles.emptyBox}>
+              <EmptyIllustration compact />
               ร้านนี้ยังไม่มีสินค้าที่เปิดให้เข้าชม
             </div>
           )}

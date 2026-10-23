@@ -1472,3 +1472,38 @@
   .header, .detailHero { padding: 16px; }
   .orderRow { padding: 13px; }
 }
+
+
+/* Compact first-order prompt instead of an oversized empty dashboard. */
+.stateWrap[data-empty-orders="true"] {
+  width: min(100%, 1760px);
+  padding: clamp(24px, 3vw, 42px) clamp(16px, 2.1vw, 44px) var(--page-block-end);
+}
+
+.stateWrap[data-empty-orders="true"] .stateHeading {
+  margin-bottom: var(--space-4);
+  font-size: clamp(1.65rem, 2.6vw, 2.15rem);
+  text-align: left;
+}
+
+.stateWrap[data-empty-orders="true"] [data-state-kind="empty"] {
+  min-height: clamp(300px, 33vh, 390px);
+  border-color: var(--line-soft);
+}
+
+@media (max-width: 620px) {
+  .stateWrap[data-empty-orders="true"] {
+    padding-top: 24px;
+  }
+}
+
+/* Filtered-out collections use the same empty-data illustration. */
+.filteredEmpty {
+  justify-items: center;
+  text-align: center;
+  gap: var(--space-3);
+  padding: var(--space-6);
+}
+.filteredEmpty [data-empty-artwork] { max-width: 160px; }
+.filteredEmpty p { margin: 0; }
+.filteredEmpty button { font-weight: 700; }

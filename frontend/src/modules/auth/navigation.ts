@@ -90,7 +90,7 @@ export function buildCustomerNavigation(): NavigationGroup {
   return {
     label: "บัญชีของฉัน",
     items: [
-      { label: "หน้าร้านค้า", href: "/" },
+      { label: "ร้านค้า", href: "/shops/" },
       {
         label: "คำสั่งซื้อของฉัน",
         href: "/my/orders/",

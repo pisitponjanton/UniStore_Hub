@@ -1993,3 +1993,138 @@
 @media (max-width: 700px) {
   .productDetail[data-has-image="false"] .productDetailMedia { height: 156px; }
 }
+
+/* Shared data-empty illustration for store, product and campaign sub-lists. */
+.emptyBox {
+  min-height: 230px;
+  align-content: center;
+  justify-items: center;
+  gap: var(--space-3);
+  border: 1px solid var(--line-soft);
+  background: var(--surface);
+  box-shadow: none;
+}
+.emptyBox [data-empty-artwork] { max-width: 150px; }
+
+
+/* Public storefront navigation: a quiet app bar, not a raised pill/card. */
+.topbar {
+  padding: 0;
+  border-bottom: 1px solid var(--line-soft);
+  background: var(--surface);
+}
+.topbarInner {
+  min-height: 70px;
+  padding: 0 clamp(12px, 2vw, 24px);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.brandMark {
+  border-radius: 0;
+}
+.topbarNav {
+  gap: 4px;
+  padding: 0;
+}
+.topbarHome,
+.topbarLink,
+.topbarPrimary {
+  border-radius: 6px;
+}
+.topbarLinkActive {
+  background: var(--brand-soft);
+  box-shadow: none;
+}
+.topbarHome:hover,
+.topbarLink:hover,
+.topbarPrimary:hover {
+  transform: none;
+}
+@media (max-width: 620px) {
+  .topbar {
+    padding: 0;
+  }
+  .topbarInner {
+    min-height: 62px;
+    border-radius: 0;
+    padding: 0 var(--page-gutter-compact);
+  }
+}
+@media (max-width: 420px) {
+  .topbarInner {
+    flex-wrap: nowrap;
+    padding-block: 0;
+    gap: 8px;
+  }
+  .brand {
+    flex: 0 1 auto;
+    min-height: var(--target-min);
+  }
+  .brandCopy strong {
+    font-size: .88rem;
+  }
+  .topbarNav {
+    width: auto;
+    flex: 0 1 auto;
+    margin-left: auto;
+    justify-content: flex-end;
+  }
+  .topbarLink,
+  .topbarPrimary {
+    padding-inline: 7px;
+  }
+}
+
+@media (max-width: 360px) {
+  .brandCopy {
+    display: none;
+  }
+  .brandMark {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* Logged-in customers have one workspace entry instead of duplicate navigation. */
+.topbarWorkspace {
+  min-height: var(--target-comfortable);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  background: var(--surface-muted);
+  color: var(--ink);
+  font-size: var(--text-body-sm);
+  font-weight: 680;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background-color var(--motion-fast) var(--motion-ease-out),
+              border-color var(--motion-fast) var(--motion-ease-out);
+}
+.topbarWorkspace:hover {
+  background: var(--surface-hover);
+  border-color: var(--line-strong);
+  color: var(--ink);
+  text-decoration: none;
+}
+.topbarWorkspace:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+.topbarWorkspace > svg {
+  flex-shrink: 0;
+}
+.topbarWorkspace > svg:last-child {
+  color: var(--ink-secondary);
+}
+@media (max-width: 420px) {
+  .topbarWorkspace {
+    gap: 6px;
+    padding: 0 10px;
+  }
+}

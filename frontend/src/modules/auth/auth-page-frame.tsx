@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-import brandLogo from "@/assets/unistore-hub-logo.webp";
+import brandLogo from "@/assets/unistore-hub-logo.png";
 
 import styles from "./auth-form.module.css";
 

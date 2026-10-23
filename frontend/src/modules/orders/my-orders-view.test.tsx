@@ -62,7 +62,11 @@ describe("MyOrdersView", () => {
     expect(screen.getAllByRole("main")).toHaveLength(1);
     expect(screen.getByRole("link", { name: "เลือกสินค้า" })).toHaveAttribute(
       "href",
-      "/",
+      "/shops",
+    );
+    expect(document.querySelector("main [data-empty-artwork]")).toHaveAttribute(
+      "src",
+      "/images/empty.png",
     );
   });
 

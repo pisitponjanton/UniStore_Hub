@@ -3,9 +3,10 @@
 import { AppIcon } from "@/components/ui/app-icon";
 
 import Link from "next/link";
+import { ChevronDown } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
-import { Button, EmptyState, ErrorState, LoadingState, Skeleton } from "@/components";
+import { Button, EmptyIllustration, EmptyState, ErrorState, LoadingState, Skeleton } from "@/components";
 import { buildAuthPagePath, useAuthSession } from "@/modules/auth";
 
 import {
@@ -31,7 +32,9 @@ function storeHref(organizationId: string, storeId: string): string {
   return "/stores/view/?" + params.toString();
 }
 
-export function StorefrontLanding() {
+const SHOP_FILTERS_KEY = "unistoreHub.customerShopFilters.v1";
+
+export function StorefrontLanding({ workspace = false }: { workspace?: boolean } = {}) {
   const auth = useAuthSession();
   const [state, setState] = useState<LandingState>({ status: "loading" });
   const [loadAttempt, setLoadAttempt] = useState(0);
@@ -40,7 +43,54 @@ export function StorefrontLanding() {
   const [selectedOrganizationId, setSelectedOrganizationId] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [showAutomationFixtures, setShowAutomationFixtures] = useState(false);
+  const [shopFiltersReady, setShopFiltersReady] = useState(!workspace);
   const localQaDirectory = process.env.NODE_ENV === "development";
+
+  useEffect(() => {
+    if (!workspace) return;
+    let canceled = false;
+    // Restore after hydration; do not read tab storage during server rendering.
+    queueMicrotask(() => {
+      if (canceled) return;
+      try {
+        const saved = window.sessionStorage.getItem(SHOP_FILTERS_KEY);
+      if (saved) {
+        const parsed: unknown = JSON.parse(saved);
+        if (parsed && typeof parsed === "object") {
+          const filters = parsed as Record<string, unknown>;
+          if (typeof filters.query === "string") setSearchQuery(filters.query.slice(0, 160));
+          if (filters.availability === "all" || filters.availability === "with-stores" || filters.availability === "without-stores") {
+            setAvailabilityFilter(filters.availability);
+          }
+          if (typeof filters.organizationId === "string") setSelectedOrganizationId(filters.organizationId);
+          if (localQaDirectory && filters.showQa === true) setShowAutomationFixtures(true);
+          if (typeof filters.page === "number" && Number.isSafeInteger(filters.page) && filters.page > 0) {
+            setCurrentPage(Math.min(filters.page, 999));
+          }
+        }
+      }
+      } catch {
+        // Browsing remains functional with storage disabled or invalid.
+      }
+      if (!canceled) setShopFiltersReady(true);
+    });
+    return () => { canceled = true; };
+  }, [workspace, localQaDirectory]);
+
+  useEffect(() => {
+    if (!workspace || !shopFiltersReady) return;
+    try {
+      window.sessionStorage.setItem(SHOP_FILTERS_KEY, JSON.stringify({
+        query: searchQuery,
+        availability: availabilityFilter,
+        organizationId: selectedOrganizationId,
+        page: currentPage,
+        showQa: localQaDirectory && showAutomationFixtures,
+      }));
+    } catch {
+      // Session storage is only a convenience, never a requirement.
+    }
+  }, [workspace, shopFiltersReady, searchQuery, availabilityFilter, selectedOrganizationId, currentPage, localQaDirectory, showAutomationFixtures]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -85,26 +135,17 @@ export function StorefrontLanding() {
     [directoryData],
   );
   const directoryEntries = useMemo(() => buildDirectoryEntries(directoryData), [directoryData]);
-  const availableStores = useMemo(
-    () => directoryEntries.filter((entry) => entry.store !== null),
-    [directoryEntries],
-  );
-  const summary = state.status === "success"
-    ? { organizations: directoryData.length, stores: availableStores.length }
-    : null;
-
   const filteredEntries = useMemo(
     () => filterDirectoryEntries(directoryEntries, searchQuery, availabilityFilter)
       .filter(({ organization }) => !selectedOrganizationId || organization.organizationId === selectedOrganizationId),
     [directoryEntries, searchQuery, availabilityFilter, selectedOrganizationId],
   );
   const pageCount = Math.max(1, Math.ceil(filteredEntries.length / DIRECTORY_PAGE_SIZE));
-  const start = (currentPage - 1) * DIRECTORY_PAGE_SIZE;
+  const displayedPage = Math.min(currentPage, pageCount);
+  const start = (displayedPage - 1) * DIRECTORY_PAGE_SIZE;
   const visibleEntries = filteredEntries.slice(start, start + DIRECTORY_PAGE_SIZE);
   const visibleStores = visibleEntries.filter((entry) => entry.store !== null);
   const visibleEmptyOrganizations = visibleEntries.filter((entry) => entry.store === null);
-  const resultStoreCount = filteredEntries.filter((entry) => entry.store !== null).length;
-  const resultEmptyOrganizationCount = filteredEntries.length - resultStoreCount;
   const hasActiveFilters = searchQuery.trim().length > 0 || availabilityFilter !== "all" || selectedOrganizationId !== "";
 
   function clearFilters() {
@@ -124,9 +165,16 @@ export function StorefrontLanding() {
     : buildAuthPagePath("/login/", "/my/orders/");
 
   return (
-    <div className={styles.page} data-filtering={hasActiveFilters ? "true" : "false"}>
-      <StorefrontHeader />
+    <div className={styles.page} data-workspace={workspace ? "true" : undefined} data-filtering={hasActiveFilters ? "true" : "false"}>
+      {!workspace ? <StorefrontHeader /> : null}
       <main className={styles.main}>
+        {workspace ? (
+          <header className={styles.workspaceHeading}>
+            <h1>เลือกร้านค้า</h1>
+            <p>ค้นหาร้านค้าและสินค้าที่สนใจ</p>
+          </header>
+        ) : null}
+        {!workspace ? (
         <section className={styles.hero} aria-labelledby="storefront-intro-heading">
           <div className={styles.heroMain}>
             <span className={styles.heroEyebrow}>UNISTORE HUB / CAMPUS MARKETPLACE</span>
@@ -168,12 +216,15 @@ export function StorefrontLanding() {
             </ol>
           </div>
         </section>
+        ) : null}
 
         <section className={styles.finder} aria-label="ค้นหาและกรองร้านค้า">
-          <div className={styles.finderHeading}>
-            <span className={styles.finderKicker}>ค้นพบร้านค้า</span>
-            <strong>หาร้านที่อยากซื้อ</strong>
-          </div>
+          {!workspace ? (
+            <div className={styles.finderHeading}>
+              <span className={styles.finderKicker}>ค้นพบร้านค้า</span>
+              <strong>หาร้านที่อยากซื้อ</strong>
+            </div>
+          ) : null}
           <form
             className={styles.heroSearch}
             role="search"
@@ -198,76 +249,73 @@ export function StorefrontLanding() {
             </div>
             <div className={styles.filterField}>
               <label htmlFor="storefront-filter">แสดงรายการ</label>
-              <select
-                id="storefront-filter"
-                value={availabilityFilter}
-                onChange={(event) => {
-                  setAvailabilityFilter(event.target.value as DirectoryFilter);
-                  setCurrentPage(1);
-                }}
-              >
-                <option value="all">ทุกรายการ</option>
-                <option value="with-stores">ร้านค้าที่เปิดอยู่</option>
-                <option value="without-stores">หน่วยงานที่ยังไม่มีร้าน</option>
-              </select>
+              <span className={styles.selectShell}>
+                <select
+                  data-custom-chevron
+                  id="storefront-filter"
+                  value={availabilityFilter}
+                  onChange={(event) => {
+                    setAvailabilityFilter(event.target.value as DirectoryFilter);
+                    setCurrentPage(1);
+                  }}
+                >
+                  <option value="all">ทุกรายการ</option>
+                  <option value="with-stores">ร้านค้าที่เปิดอยู่</option>
+                  <option value="without-stores">หน่วยงานที่ยังไม่มีร้าน</option>
+                </select>
+                <ChevronDown size={18} aria-hidden="true" className={styles.selectChevron} />
+              </span>
             </div>
             <div className={styles.organizationFilter}>
               <label htmlFor="storefront-organization">หน่วยงาน</label>
-              <select
-                id="storefront-organization"
-                value={selectedOrganizationId}
-                onChange={(event) => {
-                  setSelectedOrganizationId(event.target.value);
-                  setCurrentPage(1);
-                }}
-              >
-                <option value="">ทุกหน่วยงาน</option>
-                {organizationOptions.map(({ value, label }) => (
-                  <option key={value} value={value}>{label}</option>
-                ))}
-              </select>
+              <span className={styles.selectShell}>
+                <select
+                  data-custom-chevron
+                  id="storefront-organization"
+                  value={selectedOrganizationId}
+                  onChange={(event) => {
+                    setSelectedOrganizationId(event.target.value);
+                    setCurrentPage(1);
+                  }}
+                >
+                  <option value="">ทุกหน่วยงาน</option>
+                  {organizationOptions.map(({ value, label }) => (
+                    <option key={value} value={value}>{label}</option>
+                  ))}
+                </select>
+                <ChevronDown size={18} aria-hidden="true" className={styles.selectChevron} />
+              </span>
             </div>
             <button className={styles.searchJump} type="submit">ดูผลลัพธ์ <AppIcon name="arrow-up-right" size={17} /></button>
           </form>
-          {summary ? (
-            <p className={styles.finderSummary} role="status">
-              มีร้านค้า <strong data-numeric>{summary.stores}</strong> ร้าน
-              จาก <strong data-numeric>{summary.organizations}</strong> หน่วยงาน
-            </p>
-          ) : null}
         </section>
 
         <section className={styles.catalog} aria-labelledby="storefront-heading">
           <div className={styles.catalogHeader}>
             <div>
-              <span className={styles.catalogEyebrow}>EXPLORE / ร้านค้าในมหาวิทยาลัย</span>
+              {!workspace ? <span className={styles.catalogEyebrow}>EXPLORE / ร้านค้าในมหาวิทยาลัย</span> : null}
               <h2 className={styles.catalogTitle} id="storefront-heading" tabIndex={-1}>
-                เลือกร้านที่อยากซื้อ
+                {workspace ? "ร้านค้าทั้งหมด" : "เลือกร้านที่อยากซื้อ"}
               </h2>
             </div>
-            <p className={styles.catalogDescription}>ค้นหาร้านค้าและดูสินค้าหรือรอบพรีออเดอร์ของแต่ละร้านโดยตรง</p>
+            {!workspace ? <p className={styles.catalogDescription}>ค้นหาร้านค้าและดูสินค้าหรือรอบพรีออเดอร์ของแต่ละร้านโดยตรง</p> : null}
           </div>
 
           {state.status === "success" ? (
             <>
-              <div className={styles.directoryResultsHeader}>
-                <p className={styles.resultSummary} role="status" aria-live="polite" aria-atomic="true">
-                  พบ {resultStoreCount} ร้าน
-                  {resultEmptyOrganizationCount > 0 ? " และ " + resultEmptyOrganizationCount + " หน่วยงานที่ยังไม่มีร้าน" : ""}
-                  {filteredEntries.length > 0
-                    ? " · แสดง " + (start + 1) + "–" + (start + visibleEntries.length) + " จาก " + filteredEntries.length + " รายการ"
-                    : ""}
-                </p>
+              {(fixtureCount > 0 || hasActiveFilters) ? (
+                <div className={styles.directoryResultsHeader}>
                 {fixtureCount > 0 ? (
                   <button className={styles.clearFilters} type="button" aria-pressed={showAutomationFixtures}
                     onClick={() => { setShowAutomationFixtures((current) => !current); setSelectedOrganizationId(""); setCurrentPage(1); }}>
-                    {showAutomationFixtures ? "ซ่อนข้อมูล E2E/QA" : "แสดงข้อมูล E2E/QA (" + fixtureCount + " หน่วยงาน)"}
+                    {showAutomationFixtures ? "ซ่อนข้อมูล E2E/QA" : "แสดงข้อมูล E2E/QA"}
                   </button>
                 ) : null}
                 {hasActiveFilters ? (
                   <button className={styles.clearFilters} type="button" onClick={clearFilters}>ล้างตัวกรอง</button>
                 ) : null}
-              </div>
+                </div>
+              ) : null}
 
               {showAutomationFixtures && localQaDirectory && fixtureCount > 0 ? (
                 <p className={styles.qaNotice} role="note">โหมดตรวจสอบ QA — ข้อมูลทดสอบไม่ได้หมายถึงร้านที่เปิดขายจริง</p>
@@ -275,8 +323,9 @@ export function StorefrontLanding() {
 
               {filteredEntries.length === 0 ? (
                 <div className={styles.directoryEmpty}>
-                  <h3>{noOrdinaryStoresYet && !hasActiveFilters ? "ยังไม่มีร้านค้าทั่วไปที่เปิดให้เข้าชม" : "ไม่พบร้านค้าหรือหน่วยงานที่ตรงกับการค้นหา"}</h3>
-                  <p>{noOrdinaryStoresYet && !hasActiveFilters ? "ข้อมูลที่ตรวจพบในสภาพแวดล้อมนี้เป็นข้อมูลสำหรับการพัฒนาและทดสอบ ไม่ใช่ร้านค้าสำหรับผู้ใช้ทั่วไป" : "ลองเปลี่ยนชื่อที่ค้นหา หรือเลือกตัวกรองอื่น"}</p>
+                  <EmptyIllustration compact />
+                  <h3>{noOrdinaryStoresYet && !hasActiveFilters ? "ยังไม่มีร้านค้าเปิดให้ชม" : "ไม่พบร้านค้าหรือหน่วยงานที่ตรงกับการค้นหา"}</h3>
+                  <p>{noOrdinaryStoresYet && !hasActiveFilters ? "ขณะนี้ยังไม่มีร้านค้าสำหรับผู้ใช้ทั่วไป" : "ลองเปลี่ยนคำค้นหาหรือตัวกรอง"}</p>
                   {hasActiveFilters ? <button className={styles.clearFilters} type="button" onClick={clearFilters}>แสดงรายการทั้งหมด</button> : null}
                 </div>
               ) : (
@@ -333,12 +382,12 @@ export function StorefrontLanding() {
                   {pageCount > 1 ? (
                     <nav className={styles.directoryPagination} aria-label="การแบ่งหน้ารายการร้านค้า">
                       <button className={styles.pageButton} type="button"
-                        disabled={currentPage === 1} onClick={() => goToPage(currentPage - 1)}>ก่อนหน้า</button>
+                        disabled={displayedPage === 1} onClick={() => goToPage(displayedPage - 1)}>ก่อนหน้า</button>
                       <span className={styles.pageIndicator} aria-live="polite" data-numeric>
-                        หน้า {currentPage} จาก {pageCount}
+                        หน้า {displayedPage} จาก {pageCount}
                       </span>
                       <button className={styles.pageButton} type="button"
-                        disabled={currentPage === pageCount} onClick={() => goToPage(currentPage + 1)}>ถัดไป</button>
+                        disabled={displayedPage === pageCount} onClick={() => goToPage(displayedPage + 1)}>ถัดไป</button>
                     </nav>
                   ) : null}
                 </>
@@ -375,11 +424,14 @@ export function StorefrontLanding() {
               }}>ลองโหลดอีกครั้ง</Button>} />
           </div>
         ) : null}
-        <footer className={styles.footer}>
+        {!workspace ? <footer className={styles.footer}>
           <strong>UniStore Hub</strong>
           <span>เลือกร้าน สั่งพรีออเดอร์ และติดตามการรับสินค้าในมหาวิทยาลัย</span>
-          <Link href={orderTrackingPath}>คำสั่งซื้อของฉัน <AppIcon name="arrow-up-right" size={17} /></Link>
-        </footer>
+          <Link href={orderTrackingPath} className={styles.footerOrdersLink}>
+            <span>คำสั่งซื้อของฉัน</span>
+            <AppIcon name="arrow-up-right" size={17} />
+          </Link>
+        </footer> : null}
       </main>
     </div>
   );

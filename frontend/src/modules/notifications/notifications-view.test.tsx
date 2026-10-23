@@ -54,6 +54,23 @@ describe("NotificationsView", () => {
     vi.clearAllMocks();
   });
 
+  it("shows a compact shared illustration without duplicated empty-state chrome", async () => {
+    mocks.listNotifications.mockResolvedValue({ items: [], nextCursor: null });
+
+    render(<NotificationsView />);
+
+    expect(
+      await screen.findByRole("heading", { name: "ไม่มีการแจ้งเตือน" }),
+    ).toBeInTheDocument();
+    expect(document.querySelector('[data-empty-artwork]')).toHaveAttribute(
+      "src",
+      "/images/empty.png",
+    );
+    expect(screen.queryByText("ยังไม่มีข้อมูล")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "รีเฟรชรายการ" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "ยังไม่อ่าน" })).toBeInTheDocument();
+  });
+
   it("renders unread presentation and updates the item after mark-read", async () => {
     const notification = makeNotification();
     const updated = {

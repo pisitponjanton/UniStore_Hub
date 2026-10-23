@@ -12,7 +12,7 @@ interface CustomerJourneyNavProps {
 
 export function CustomerJourneyNav({ current, orderId }: CustomerJourneyNavProps) {
   const tabs = [
-    { key: "shop", title: "ค้นหาร้านค้า", href: "/" },
+    { key: "shop", title: "ค้นหาร้านค้า", href: "/shops/" },
     { key: "orders", title: "คำสั่งซื้อ", href: "/my/orders/" },
     { key: "notifications", title: "การแจ้งเตือน", href: "/notifications/" },
   ] as const;

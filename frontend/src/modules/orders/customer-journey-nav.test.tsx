@@ -9,7 +9,7 @@ describe("CustomerJourneyNav", () => {
     const nav = screen.getByRole("navigation", { name: "เส้นทางผู้ซื้อ" });
     expect(nav).toHaveTextContent("พื้นที่ของผู้ซื้อ");
     expect(nav.querySelector('[aria-current="page"]')).toHaveTextContent("คำสั่งซื้อ");
-    expect(screen.getByRole("link", { name: "ค้นหาร้านค้า" })).toHaveAttribute("href", "/");
+    expect(screen.getByRole("link", { name: "ค้นหาร้านค้า" })).toHaveAttribute("href", "/shops");
     expect(screen.getByRole("link", { name: "การแจ้งเตือน" })).toHaveAttribute("href", "/notifications");
     expect(screen.queryByRole("link", { name: "กลับคำสั่งซื้อนี้" })).not.toBeInTheDocument();
   });
