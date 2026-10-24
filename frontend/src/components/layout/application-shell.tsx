@@ -50,7 +50,6 @@ export function ApplicationShell({
   contextValue,
   contextId,
   contextMeta,
-  showOrganizationSwitcher = false,
   workAreas = [],
   onLogout,
   children,
@@ -62,7 +61,6 @@ export function ApplicationShell({
   contextValue?: string;
   contextId?: string;
   contextMeta?: string;
-  showOrganizationSwitcher?: boolean;
   workAreas?: readonly { id: ShellScope; href: string; label: string }[];
   onLogout: () => void;
   children: ReactNode;
@@ -393,15 +391,6 @@ export function ApplicationShell({
               </div>
 
               <div className={styles.footerActions}>
-                {showOrganizationSwitcher ? (
-                  <Link
-                    href="/org/select/"
-                    className={styles.switchOrganization}
-                    onClick={closeMenu}
-                  >
-                    เปลี่ยนหน่วยงาน
-                  </Link>
-                ) : null}
                 <Button
                   variant="quiet"
                   size="small"

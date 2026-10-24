@@ -11,6 +11,8 @@ export interface DialogProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   onCloseAutoFocus?: ComponentProps<typeof DialogPrimitive.Content>["onCloseAutoFocus"];
+  onOpenAutoFocus?: ComponentProps<typeof DialogPrimitive.Content>["onOpenAutoFocus"];
+  contentClassName?: string;
   title: ReactNode;
   description?: ReactNode;
   children?: ReactNode;
@@ -23,6 +25,8 @@ export function Dialog({
   open,
   onOpenChange,
   onCloseAutoFocus,
+  onOpenAutoFocus,
+  contentClassName,
   title,
   description,
   children,
@@ -36,7 +40,12 @@ export function Dialog({
       ) : null}
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className={styles.overlay} />
-        <DialogPrimitive.Content className={styles.dialogContent} aria-modal="true" onCloseAutoFocus={onCloseAutoFocus}>
+        <DialogPrimitive.Content
+          className={[styles.dialogContent, contentClassName].filter(Boolean).join(" ")}
+          aria-modal="true"
+          onCloseAutoFocus={onCloseAutoFocus}
+          onOpenAutoFocus={onOpenAutoFocus}
+        >
           <div className={styles.dialogHeader}>
             <DialogPrimitive.Title className={styles.dialogTitle}>
               {title}

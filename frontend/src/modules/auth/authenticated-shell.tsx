@@ -107,7 +107,6 @@ export function AuthenticatedShell({
             : "สิทธิ์: เจ้าหน้าที่"
           : undefined
       }
-      showOrganizationSwitcher={activeMemberships.length > 0}
       workAreas={workAreas}
       onLogout={() => {
         authSession.logout();

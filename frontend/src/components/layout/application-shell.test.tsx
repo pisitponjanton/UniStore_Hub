@@ -288,7 +288,6 @@ describe("ApplicationShell accessibility", () => {
         contextLabel="หน่วยงานปัจจุบัน"
         contextValue="org-1"
         contextMeta="สิทธิ์: เจ้าหน้าที่"
-        showOrganizationSwitcher
         onLogout={vi.fn()}
       >
         <p>เนื้อหาหลัก</p>
@@ -305,10 +304,25 @@ describe("ApplicationShell accessibility", () => {
     );
     expect(screen.getByText(/org-1/)).toBeInTheDocument();
     expect(screen.getByText("สิทธิ์: เจ้าหน้าที่")).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: "เปลี่ยนหน่วยงาน" }),
-    ).toHaveAttribute("href", "/org/select");
+    expect(screen.queryByRole("link", { name: "เปลี่ยนหน่วยงาน" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "ออกจากระบบ" })).toBeInTheDocument();
   });
+  it("shows only the logout action at the bottom of the selector sidebar", () => {
+    mocks.usePathname.mockReturnValue("/org/select/");
+    renderWithTheme(
+      <ApplicationShell
+        groups={[{ label: "หน่วยงาน", items: [{ label: "เปิดร้าน / สมัครหน่วยงาน", href: "/org/select/" }] }]}
+        userName="Organization User"
+        userEmail="admin@example.com"
+        onLogout={vi.fn()}
+      >
+        <p>เลือกหน่วยงาน</p>
+      </ApplicationShell>,
+    );
+    expect(screen.queryByRole("link", { name: "เปลี่ยนหน่วยงาน" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "ออกจากระบบ" })).toBeInTheDocument();
+  });
+
   it("shows only permitted workspace areas and keeps the current area identifiable", () => {
     mocks.usePathname.mockReturnValue("/platform/summary/");
     renderWithTheme(

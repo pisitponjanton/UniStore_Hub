@@ -372,45 +372,12 @@
 
 .footerActions {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-2);
-}
-
-.footerActions > :only-child {
-  grid-column: 1 / -1;
 }
 
 .footerActions button {
   width: 100%;
-}
-
-.switchOrganization {
-  min-height: var(--control-height-sm);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding-inline: var(--space-3);
-  border: 1px solid color-mix(in srgb, var(--shell-accent) 18%, var(--line));
-  border-radius: var(--radius-sm);
-  background: var(--shell-accent-soft);
-  color: var(--shell-accent-strong);
-  font-size: var(--text-body-sm);
-  font-weight: 700;
-  transition:
-    transform var(--motion-standard) var(--motion-ease-out),
-    background-color var(--motion-standard) var(--motion-ease-out),
-    border-color var(--motion-standard) var(--motion-ease-out);
-}
-
-.switchOrganization:hover {
-  transform: translateY(-1px);
-  background: color-mix(in srgb, var(--shell-accent-soft) 76%, var(--surface));
-  border-color: color-mix(in srgb, var(--shell-accent) 30%, var(--line));
-  text-decoration: none;
-}
-
-.switchOrganization:active {
-  transform: translateY(0) scale(0.99);
 }
 
 .content {
@@ -790,15 +757,13 @@
   .navLink,
   .menuButton,
   .sidebarPanel,
-  .drawerClose,
-  .switchOrganization {
+  .drawerClose {
     transition: none;
   }
 
   .navLink:hover,
   .menuButton:hover,
-  .drawerClose:hover,
-  .switchOrganization:hover {
+  .drawerClose:hover {
     transform: none;
   }
 }
@@ -896,8 +861,6 @@
 .userAvatar { width: 34px; height: 34px; background: var(--brand-soft); color: var(--brand-strong); }
 .userLabel, .userEmail { color: var(--ink-secondary); }
 .userName { color: var(--ink); }
-.switchOrganization { color: var(--ink); border-color: var(--line); background: var(--surface-muted); }
-.switchOrganization:hover { background: var(--surface-hover); border-color: var(--line-strong); }
 .footerActions :global(button) { color: var(--ink); border: 1px solid var(--line); }
 .content {
   background: var(--canvas);

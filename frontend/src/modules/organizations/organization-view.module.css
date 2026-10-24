@@ -909,24 +909,423 @@
 .page[data-page="organization-entry"] .createPanel { border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); }
 @media (max-width: 620px) { .workspaceHeader, .settingsHeader, .page[data-page="organization-entry"] .workspaceHeader { padding: 0 0 var(--space-4); } }
 
-/* First-time campus organization registration and application status. */
-.page[data-page="organization-entry"][data-onboarding="true"] .main{max-width:1000px}
-.page[data-page="organization-entry"][data-onboarding="true"] .workspaceHeader{grid-template-columns:minmax(0,1fr)}
-.page[data-page="organization-entry"][data-onboarding="true"] .workspaceGrid{display:block;max-width:710px;margin-inline:auto;width:100%}
-.page[data-page="organization-entry"][data-onboarding="true"] .createPanel{position:static;padding:clamp(20px,3vw,34px)}
-.page[data-page="organization-entry"][data-onboarding="true"] .createPanel .sectionTitle{font-size:clamp(1.25rem,2.5vw,1.65rem)}
+/* Organization application status. */
 .createdApplicationLink a{display:inline-flex;min-height:44px;align-items:center;color:var(--brand-strong);font-weight:760}
-.applicationMain{width:min(100%,860px);margin-inline:auto;padding:clamp(20px,4vw,54px) var(--page-gutter) var(--page-block-end);display:grid;gap:18px}
-.applicationBack{width:fit-content;min-height:44px;display:inline-flex;align-items:center;color:var(--ink-secondary);font-size:.85rem;font-weight:700}
-.applicationBack:hover{color:var(--brand-strong)}
-.applicationCard{display:grid;justify-items:start;gap:18px;padding:clamp(20px,3.5vw,42px);border:1px solid var(--line);border-radius:17px;background:var(--surface)}
-.applicationEyebrow{color:var(--brand-strong);font-size:.73rem;letter-spacing:.045em;font-weight:780}
-.applicationCard h1{font-size:clamp(1.6rem,3vw,2.3rem);letter-spacing:-.03em;line-height:1.2;color:var(--ink);overflow-wrap:anywhere}
-.applicationMessage{width:100%;display:grid;gap:8px;padding:18px;border:1px solid var(--line-soft);border-radius:11px;background:var(--surface-muted)}
-.applicationMessage strong{font-size:1rem;color:var(--ink)}
-.applicationMessage p{font-size:.9rem;color:var(--ink-secondary);line-height:1.65}
-.applicationActions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-.applicationPrimary{min-height:44px;padding:10px 16px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;background:var(--action-primary);color:var(--action-primary-on);font-size:.87rem;font-weight:740;text-decoration:none}
-.applicationPrimary:hover{background:var(--action-primary-hover);color:var(--action-primary-on);text-decoration:none}
-.applicationMain a:focus-visible,.applicationMain button:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
-@media(max-width:620px){.applicationActions,.applicationActions>*{width:100%}.applicationCard{gap:14px}.page[data-page="organization-entry"][data-onboarding="true"] .createPanel{padding:18px}}
+/* Application status — full content width, no nested cards. */
+.applicationMain {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  margin: 0;
+  padding: clamp(20px, 3vw, 44px) var(--page-gutter) var(--page-block-end);
+  display: grid;
+  align-content: start;
+  gap: clamp(22px, 3vw, 32px);
+}
+.applicationHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  min-width: 0;
+  padding-bottom: clamp(18px, 2vw, 26px);
+  border-bottom: 1px solid var(--line);
+}
+.applicationHeading { display: grid; gap: 7px; min-width: 0; }
+.applicationHeading h1 {
+  color: var(--ink);
+  font-size: clamp(1.8rem, 3.4vw, 2.7rem);
+  font-weight: 790;
+  line-height: 1.17;
+  letter-spacing: -.028em;
+}
+.applicationHeading p {
+  color: var(--ink-secondary);
+  font-size: .94rem;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.applicationRefresh {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  color: var(--ink);
+  background: var(--surface);
+  cursor: pointer;
+}
+.applicationRefresh:hover:not(:disabled) { background: var(--surface-hover); border-color: var(--line-strong); }
+.applicationRefresh:disabled { cursor: progress; opacity: .7; }
+.applicationRefreshSpinning { animation: application-refresh-spin .85s linear infinite; }
+@keyframes application-refresh-spin { to { transform: rotate(360deg); } }
+.applicationStatus {
+  display: grid;
+  justify-items: start;
+  align-content: start;
+  gap: clamp(18px, 2.4vw, 25px);
+  min-height: 140px;
+  min-width: 0;
+}
+.applicationStatusLine { display: flex; gap: 9px 14px; flex-wrap: wrap; align-items: center; }
+.applicationStatusLine > span:last-child:not(:first-child) {
+  font-size: .86rem;
+  color: var(--ink-secondary);
+  line-height: 1.55;
+}
+.applicationStatusCopy { display: grid; gap: 8px; max-width: 75ch; min-width: 0; }
+.applicationStatusCopy h2 {
+  color: var(--ink);
+  font-weight: 750;
+  font-size: clamp(1.25rem, 2vw, 1.55rem);
+  line-height: 1.35;
+}
+.applicationStatusCopy p {
+  font-size: .94rem;
+  line-height: 1.7;
+  color: var(--ink-secondary);
+}
+.applicationRefreshError {
+  max-width: 75ch;
+  border-left: 3px solid var(--danger);
+  background: var(--danger-soft);
+  color: var(--danger);
+  border-radius: 5px;
+  padding: 10px 14px;
+  font-size: .86rem;
+  line-height: 1.6;
+}
+.applicationState { min-height: 210px; width: 100%; }
+.applicationPrimary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 10px 16px;
+  border-radius: 9px;
+  background: var(--action-primary);
+  color: var(--action-primary-on);
+  font-weight: 730;
+  font-size: .88rem;
+  text-decoration: none;
+}
+.applicationPrimary svg { flex: none; }
+.applicationPrimary:hover { background: var(--action-primary-hover); color: var(--action-primary-on); text-decoration: none; }
+.applicationBack {
+  width: fit-content;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  border-top: 0;
+  color: var(--ink-secondary);
+  font-size: .85rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+.applicationBack:hover { color: var(--brand-strong); }
+.applicationMain a:focus-visible, .applicationMain button:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+@media (max-width: 620px) {
+  .applicationMain { padding-top: 20px; gap: 20px; }
+  .applicationHeader { gap: 12px; align-items: flex-start; padding-bottom: 18px; }
+  .applicationHeading h1 { font-size: clamp(1.6rem, 7vw, 2rem); }
+  .applicationHeading p { font-size: .88rem; }
+  .applicationStatus { gap: 19px; }
+  .applicationPrimary { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .applicationRefreshSpinning { animation: none; }
+}
+
+/* First-time organization signup: full workspace width, form-led and calm. */
+.page[data-page="organization-entry"][data-onboarding="true"] .main {
+  width: 100%;
+  max-width: none;
+  gap: clamp(22px, 3vw, 34px);
+  padding-top: clamp(24px, 3.1vw, 42px);
+}
+.page[data-page="organization-entry"][data-onboarding="true"] .workspaceHeader {
+  width: 100%;
+  grid-template-columns: minmax(0, 1fr);
+  padding-bottom: clamp(17px, 2vw, 24px);
+}
+.page[data-page="organization-entry"][data-onboarding="true"] .title {
+  max-width: none;
+  font-size: clamp(1.85rem, 3vw, 2.7rem);
+  line-height: 1.2;
+}
+.page[data-page="organization-entry"][data-onboarding="true"] .description {
+  max-width: 75ch;
+  font-size: .91rem;
+  line-height: 1.6;
+}
+.page[data-page="organization-entry"][data-onboarding="true"] .workspaceGrid {
+  display: grid;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  grid-template-columns: minmax(0, 1.65fr) minmax(255px, .8fr);
+  align-items: start;
+  gap: clamp(34px, 5vw, 86px);
+}
+.page[data-page="organization-entry"][data-onboarding="true"] .createPanel {
+  display: grid;
+  position: static;
+  align-content: start;
+  min-width: 0;
+  padding: 0;
+  gap: 17px;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+.page[data-page="organization-entry"][data-onboarding="true"] .formOnlyHeading {
+  color: var(--ink);
+  font-size: clamp(1.15rem, 1.8vw, 1.4rem);
+  font-weight: 750;
+  line-height: 1.35;
+}
+.page[data-page="organization-entry"][data-onboarding="true"] .form {
+  min-width: 0;
+  display: grid;
+  gap: 19px;
+}
+.page[data-page="organization-entry"][data-onboarding="true"] .form textarea {
+  min-height: 140px;
+  resize: vertical;
+}
+.page[data-page="organization-entry"][data-onboarding="true"] .createActions {
+  justify-items: start;
+  padding-top: 2px;
+  gap: 8px;
+}
+.page[data-page="organization-entry"][data-onboarding="true"] .createActions button {
+  width: auto;
+  min-width: 230px;
+  min-height: 46px;
+  padding-inline: 24px;
+}
+.onboardingGuide {
+  min-width: 0;
+  display: grid;
+  gap: 22px;
+  padding: 2px 0 0 clamp(18px, 3vw, 44px);
+  border-left: 1px solid var(--line);
+}
+.onboardingGuide h2 { color: var(--ink); font-size: clamp(1.05rem, 1.65vw, 1.27rem); font-weight: 760; }
+.onboardingSteps { display: grid; gap: clamp(19px, 2.5vw, 28px); margin: 0; padding: 0; list-style: none; }
+.onboardingSteps li { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 12px; min-width: 0; }
+.onboardingStepNumber {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--brand-soft);
+  color: var(--brand-strong);
+  font-size: .82rem;
+  font-weight: 800;
+}
+.onboardingSteps li > div { display: grid; gap: 4px; min-width: 0; }
+.onboardingSteps strong { color: var(--ink); font-size: .92rem; font-weight: 720; }
+.onboardingSteps p, .guideNote { color: var(--ink-secondary); font-size: .81rem; line-height: 1.6; }
+.guideNote { padding-top: 15px; border-top: 1px solid var(--line-soft); }
+.entryLoading { min-width: 0; min-height: 300px; display: grid; align-items: start; }
+.page[data-page="organization-entry"][data-loading] .main { gap: 22px; }
+.page[data-page="organization-entry"][data-loading] .workspaceHeader {
+  min-height: 0;
+  padding: 0 0 18px;
+  grid-template-columns: minmax(0, 1fr);
+}
+.page[data-page="organization-entry"][data-loading] .title { max-width: none; }
+@media (max-width: 900px) {
+  .page[data-page="organization-entry"][data-onboarding="true"] .workspaceGrid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 30px;
+  }
+  .onboardingGuide { border-left: 0; border-top: 1px solid var(--line); padding: 24px 0 0; gap: 17px; }
+  .onboardingSteps { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+  .onboardingSteps li { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 620px) {
+  .page[data-page="organization-entry"][data-onboarding="true"] .main { gap: 20px; padding-top: 20px; }
+  .page[data-page="organization-entry"][data-onboarding="true"] .title { font-size: clamp(1.55rem, 6vw, 1.9rem); }
+  .page[data-page="organization-entry"][data-onboarding="true"] .createPanel { padding: 0; gap: 14px; }
+  .page[data-page="organization-entry"][data-onboarding="true"] .form { gap: 16px; }
+  .page[data-page="organization-entry"][data-onboarding="true"] .createActions button { width: 100%; min-width: 0; }
+  .onboardingSteps { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .onboardingSteps li { grid-template-columns: 28px minmax(0, 1fr); }
+  .entryLoading { min-height: 220px; }
+}
+
+/* Organization form feedback: one inline validation message, no large summary card. */
+.inlineFieldError {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 7px;
+  font-size: .81rem;
+  line-height: 1.45;
+}
+.inlineFieldError svg {
+  flex: none;
+  margin-top: 1px;
+}
+.actionError {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 11px 13px;
+  border: 1px solid var(--danger);
+  border-left-width: 3px;
+  border-radius: 9px;
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-size: .86rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.actionError svg { flex: none; margin-top: 1px; }
+.actionError:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+
+
+/* Returning member directory: primary full-width list, restrained rows. */
+.page[data-page="organization-entry"]:not([data-onboarding="true"]) .main {
+ width:100%;max-width:none;gap:clamp(20px,2.5vw,30px);padding-top:clamp(22px,3vw,38px);
+}
+.page[data-page="organization-entry"]:not([data-onboarding="true"]) .workspaceHeader {
+ grid-template-columns:minmax(0,1fr);gap:0;min-height:0;align-items:start;padding:0 0 clamp(17px,2vw,23px);
+}
+.page[data-page="organization-entry"]:not([data-onboarding="true"]) .title {
+ max-width:none;font-size:clamp(1.85rem,3.4vw,2.7rem);line-height:1.22;
+}
+.page[data-page="organization-entry"]:not([data-onboarding="true"]) .description {
+ max-width:none;color:var(--ink-secondary);font-size:.89rem;line-height:1.5;
+}
+.page[data-page="organization-entry"]:not([data-onboarding="true"]) .workspaceGrid {
+ width:100%;max-width:none;margin:0;grid-template-columns:minmax(0,1fr);gap:14px;
+}
+.page[data-page="organization-entry"]:not([data-onboarding="true"]) .organizationSection {gap:13px}
+.page[data-page="organization-entry"]:not([data-onboarding="true"]) .sectionHeading {
+ display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;padding:0;
+}
+.page[data-page="organization-entry"]:not([data-onboarding="true"]) .sectionTitle {
+ font-size:clamp(1.12rem,2vw,1.38rem);line-height:1.35;
+}
+.page[data-page="organization-entry"]:not([data-onboarding="true"]) .organizationList {
+ display:grid;gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface);
+}
+.page[data-page="organization-entry"]:not([data-onboarding="true"]) .organizationRow {
+ display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;min-height:0;
+ padding:17px clamp(16px,2.1vw,24px);gap:16px;border:0;border-radius:0;
+ box-shadow:none;background:transparent;transform:none;
+}
+.page[data-page="organization-entry"]:not([data-onboarding="true"]) .organizationRow + .organizationRow {
+ border-top:1px solid var(--line-soft);
+}
+.page[data-page="organization-entry"]:not([data-onboarding="true"]) .organizationRow:hover,
+.page[data-page="organization-entry"]:not([data-onboarding="true"]) .organizationRow:focus-within {
+ background:var(--surface-hover);box-shadow:none;transform:none;
+}
+.page[data-page="organization-entry"]:not([data-onboarding="true"]) .organizationCopy {gap:4px;padding:0}
+.page[data-page="organization-entry"]:not([data-onboarding="true"]) .organizationHeading {
+ display:flex;gap:8px 14px;align-items:center;justify-content:flex-start;flex-wrap:wrap;
+}
+.page[data-page="organization-entry"]:not([data-onboarding="true"]) .organizationName {
+ font-size:1rem;line-height:1.45;
+}
+.page[data-page="organization-entry"]:not([data-onboarding="true"]) .organizationRole {
+ color:var(--ink-secondary);font-size:.79rem;line-height:1.45;
+}
+.page[data-page="organization-entry"]:not([data-onboarding="true"]) .organizationDescription {
+ color:var(--ink-secondary);font-size:.8rem;line-height:1.5;max-width:none;
+}
+.page[data-page="organization-entry"]:not([data-onboarding="true"]) .organizationTechnical {
+ margin-top:3px;font-size:.73rem;
+}
+.page[data-page="organization-entry"]:not([data-onboarding="true"]) .organizationAction button {
+ min-height:42px;font-size:.83rem;white-space:nowrap;
+}
+@media(max-width:620px) {
+ .page[data-page="organization-entry"]:not([data-onboarding="true"]) .main {padding-top:20px;gap:18px}
+ .page[data-page="organization-entry"]:not([data-onboarding="true"]) .title {font-size:clamp(1.6rem,7vw,1.95rem)}
+ .page[data-page="organization-entry"]:not([data-onboarding="true"]) .organizationRow {
+  grid-template-columns:minmax(0,1fr);gap:12px;padding:16px;
+ }
+ .page[data-page="organization-entry"]:not([data-onboarding="true"]) .organizationAction {justify-content:flex-start}
+}
+
+
+/* Returning selector: one header action and an accessible creation dialog. */
+.page[data-page="organization-entry"]:not([data-onboarding="true"]) .workspaceHeader {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px 20px;
+  align-items: center;
+}
+.createHeaderButton {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  justify-self: end;
+  padding: 9px 16px;
+  white-space: nowrap;
+}
+.createHeaderButton svg { flex: none; }
+.createModal { width: min(520px, calc(100vw - 24px)); }
+.modalForm { display: grid; min-width: 0; gap: 15px; }
+.modalForm .form { display: grid; min-width: 0; gap: 17px; }
+.modalForm .createActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 5px;
+}
+.modalForm .createActions button {
+  width: auto;
+  min-height: 44px;
+  min-width: 0;
+  flex: none;
+  padding-inline: 17px;
+}
+.modalForm .createActions button[type="submit"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+.modalForm .createActions svg { flex: none; }
+.modalForm textarea { min-height: 110px; }
+@media (max-width: 620px) {
+ .page[data-page="organization-entry"]:not([data-onboarding="true"]) .workspaceHeader {
+   grid-template-columns: minmax(0, 1fr);
+   align-items: start;
+ }
+ .createHeaderButton { justify-self: end; width: auto; min-width: 0; }
+ .modalForm .createActions { flex-wrap: nowrap; }
+ .modalForm .createActions button { flex: 1 1 0; min-width: 0; padding-inline: 8px; font-size: .83rem; }
+}
+@media (max-width: 360px) { .modalForm .createActions button { font-size: .77rem; } }
+
+/* Button primitive wraps content in a span: align text and icon together. */
+.createHeaderButton > span,
+.modalForm .createActions button[type="submit"] > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+.createHeaderButton > span svg,
+.modalForm .createActions button[type="submit"] > span svg { flex: none; }

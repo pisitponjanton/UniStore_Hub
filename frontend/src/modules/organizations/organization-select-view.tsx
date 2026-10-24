@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { ArrowRight, CircleAlert, Plus } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { LoadedDirectoryControls } from "@/modules/organization-directory/loaded-directory-controls";
 import { searchLoadedItems, visibleLoadedItems } from "@/modules/organization-directory/loaded-directory-helpers";
@@ -9,11 +10,9 @@ import { searchLoadedItems, visibleLoadedItems } from "@/modules/organization-di
 import {
   Badge,
   Button,
+  Dialog,
   ErrorState,
-  ErrorSummary,
-  useErrorSummaryFocus,
   LoadingState,
-  Notice,
   TextareaField,
   TextField,
 } from "@/components";
@@ -73,7 +72,6 @@ function membershipRoleLabel(
 }
 
 export function OrganizationSelectView() {
-  const focusErrorSummary = useErrorSummaryFocus();
   const retryFocusRequested = useRef(false);
   const actionFeedbackFocusRequested = useRef(false);
   const router = useRouter();
@@ -87,8 +85,10 @@ export function OrganizationSelectView() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [nameError, setNameError] = useState<string | undefined>();
+  const [nameEdited, setNameEdited] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
   const [createdOrganizationId, setCreatedOrganizationId] = useState<string | null>(null);
 
   // Only relocate focus following an explicit user action, not hydration.
@@ -169,6 +169,21 @@ export function OrganizationSelectView() {
     entry.organization.organizationId, entry.membership.role,
   ]);
   const directoryVisible = visibleLoadedItems(directoryMatches, directoryLimit);
+  const showDirectorySearch = accessible.length > 5;
+
+  function handleCreateDialogChange(open: boolean) {
+    if (creating) return;
+    setCreateOpen(open);
+    if (!open) {
+      setName("");
+      setDescription("");
+      setNameError(undefined);
+      setNameEdited(false);
+      setSubmitError(null);
+      setCreatedOrganizationId(null);
+      actionFeedbackFocusRequested.current = false;
+    }
+  }
 
   function handleSelect(
     organizationId: string,
@@ -209,7 +224,7 @@ export function OrganizationSelectView() {
     setSubmitError(null);
 
     if (!validation.valid) {
-      focusErrorSummary("organization-create-error-summary");
+      document.getElementById("organization-name")?.focus();
       return;
     }
 
@@ -252,44 +267,154 @@ export function OrganizationSelectView() {
     }
   }
 
+  // Wait for the authoritative response before picking the selection or signup layout.
+  if (loadState.status !== "success") {
+    return (
+      <div className={styles.page} data-page="organization-entry" data-loading={loadState.status}>
+        <main className={styles.main}>
+          <header className={styles.workspaceHeader}>
+            <div className={styles.headerCopy}>
+              <h1 id="organization-select-heading" tabIndex={-1} className={styles.title}>พื้นที่หน่วยงาน</h1>
+              <p className={styles.description}>จัดการหน่วยงานและคำขอเปิดร้านของคุณ</p>
+            </div>
+          </header>
+          <div className={styles.entryLoading}>
+            {loadState.status === "loading" ? (
+              <LoadingState title="กำลังตรวจสอบข้อมูลหน่วยงาน" description="กำลังโหลดสิทธิ์และข้อมูลล่าสุดของคุณ" />
+            ) : (
+              <ErrorState
+                title="ไม่สามารถโหลดหน่วยงานได้"
+                description="ลองดึงหน่วยงานและสิทธิ์ล่าสุดอีกครั้ง"
+                actions={<Button onClick={() => {
+                  retryFocusRequested.current = true;
+                  setLoadState({ status: "loading" });
+                  setLoadAttempt((attempt) => attempt + 1);
+                }}>ลองโหลดอีกครั้ง</Button>}
+              />
+            )}
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  const createForm = (
+            <form className={styles.form} onSubmit={handleCreate} noValidate>
+              <TextField
+                id="organization-name"
+                label="ชื่อหน่วยงาน"
+                value={name}
+                onChange={(event) => {
+                  setName(event.target.value);
+                  setNameEdited(true);
+                  setNameError(undefined);
+                  setSubmitError(null);
+                }}
+                error={nameError ? (
+                  <span className={styles.inlineFieldError}>
+                    <CircleAlert size={15} strokeWidth={2} aria-hidden="true" />
+                    <span>{nameError}</span>
+                  </span>
+                ) : undefined}
+                announceError
+                onBlur={() => {
+                  if (!nameEdited) return;
+                  setNameError(validateOrganizationForm({ name, description }).errors.name);
+                }}
+                required
+                disabled={creating}
+              />
+
+              <TextareaField
+                id="organization-description"
+                label="คำอธิบาย"
+                value={description}
+                onChange={(event) => {
+                  setDescription(event.target.value);
+                  setSubmitError(null);
+                }}
+                placeholder="แนะนำหน่วยงานของคุณ (ไม่บังคับ)"
+                disabled={creating}
+              />
+
+              <div className={styles.createActions}>
+                {!newApplicant ? (
+                  <Button type="button" variant="secondary" disabled={creating} onClick={() => handleCreateDialogChange(false)}>
+                    ยกเลิก
+                  </Button>
+                ) : null}
+                <Button
+                  type="submit"
+                  size="large"
+                  pending={creating}
+                  pendingLabel="กำลังสร้างหน่วยงาน"
+                >
+                  {newApplicant ? "ส่งคำขอสมัครหน่วยงาน" : "ส่งคำขอ"}
+                  {!newApplicant ? <ArrowRight size={18} strokeWidth={2.5} aria-hidden="true" /> : null}
+                </Button>
+              </div>
+            </form>
+  );
+
   return (
     <div className={styles.page} data-page="organization-entry" data-onboarding={newApplicant ? "true" : undefined}>
       <main className={styles.main}>
         <header className={styles.workspaceHeader} data-workspace-state={loadState.status}>
           <div className={styles.headerCopy}>
-            <span className={styles.entryEyebrow}>{newApplicant ? "UNISTORE / START SELLING" : "พื้นที่ทำงาน / หน่วยงานที่ได้รับสิทธิ์"}</span>
-            <h1 id="organization-select-heading" tabIndex={-1} className={styles.title}>{newApplicant ? "เริ่มต้นสร้างหน่วยงานของคุณ" : "วันนี้จะทำงานกับหน่วยงานไหน?"}</h1>
+            <h1 id="organization-select-heading" tabIndex={-1} className={styles.title}>{newApplicant ? "สมัครเปิดร้านสำหรับหน่วยงาน" : "หน่วยงานของฉัน"}</h1>
             <p className={styles.description}>
               {newApplicant
-                ? "ใช้บัญชีเดิมสมัครให้ชมรม คณะ หรือหน่วยงานของคุณ หลังส่งคำขอให้รอการอนุมัติจากผู้ดูแลแพลตฟอร์มก่อนเปิดขาย"
-                : "เลือกหน่วยงานของคุณเพื่อเปิดงานที่ได้รับมอบหมาย แต่ละแห่งมีบทบาทและสิทธิ์แยกจากกัน"}
+                ? "สร้างพื้นที่ขายสินค้าสำหรับชมรม คณะ หรือหน่วยงานของคุณ"
+                : "เลือกหน่วยงานเพื่อเข้าใช้งาน หรือติดตามสถานะคำขอ"}
             </p>
           </div>
-
-          {loadState.status === "success" && !newApplicant ? (
-            <div
-              className={styles.headerSummary}
-              role="status"
-              aria-live="polite"
-              aria-atomic="true"
+          {!newApplicant ? (
+            <Dialog
+              open={createOpen}
+              onOpenChange={handleCreateDialogChange}
+              onOpenAutoFocus={event => {
+                event.preventDefault();
+                document.getElementById("organization-name")?.focus();
+              }}
+              contentClassName={styles.createModal}
+              title="สร้างหน่วยงาน"
+              description="กรอกข้อมูลหน่วยงานเพื่อส่งคำขออนุมัติ"
+              trigger={
+                <Button type="button" className={styles.createHeaderButton}>
+                  <Plus size={18} strokeWidth={2.2} aria-hidden="true" />
+                  สร้างหน่วยงาน
+                </Button>
+              }
             >
-              <span className={styles.headerSummaryLabel}>เข้าถึงได้</span>
-              <strong data-numeric>{accessible.length}</strong>
-              <span>หน่วยงาน</span>
-              <a href="#organizations" className={styles.workspaceJump}>ไปที่รายชื่อ ↓</a>
-            </div>
+              <div className={styles.modalForm}>
+                {submitError ? (
+                  <div id="organization-action-feedback" className={styles.actionError} role="alert" tabIndex={-1}>
+                    <CircleAlert size={17} strokeWidth={1.9} aria-hidden="true" />
+                    <span>{submitError}</span>
+                  </div>
+                ) : null}
+                {createdOrganizationId && submitError ? (
+                  <Link href={applicationHref(createdOrganizationId)}>เปิดหน้าติดตามคำขอหน่วยงาน</Link>
+                ) : null}
+                {createForm}
+              </div>
+            </Dialog>
           ) : null}
         </header>
 
-        {submitError ? (
-          <div id="organization-action-feedback" tabIndex={-1}>
-            <Notice tone="danger" role="alert" title="ดำเนินการไม่สำเร็จ">
-              {submitError}
-            </Notice>
+        {submitError && (newApplicant || !createOpen) ? (
+          <div
+            id="organization-action-feedback"
+            className={styles.actionError}
+            tabIndex={-1}
+            role="alert"
+          >
+            <CircleAlert size={17} strokeWidth={1.9} aria-hidden="true" />
+            <span>{submitError}</span>
           </div>
         ) : null}
 
-        {createdOrganizationId && submitError ? (
+        {createdOrganizationId && submitError && (newApplicant || !createOpen) ? (
           <div className={styles.createdApplicationLink}>
             <Link href={applicationHref(createdOrganizationId)}>เปิดหน้าติดตามคำขอหน่วยงาน</Link>
           </div>
@@ -301,44 +426,12 @@ export function OrganizationSelectView() {
             aria-labelledby="organizations"
           >
             <div className={styles.sectionHeading}>
-              <div>
-                <h2 className={styles.sectionTitle} id="organizations">
-                  เลือกพื้นที่เพื่อเริ่มงาน
-                </h2>
-              </div>
-              <p className={styles.sectionDescription}>
-                ดูสถานะและสิทธิ์ของแต่ละหน่วยงาน แล้วกดเข้าใช้งานที่ต้องการ
-              </p>
+              <h2 className={styles.sectionTitle} id="organizations">หน่วยงาน ({accessible.length.toLocaleString("th-TH")})</h2>
             </div>
-
-            {loadState.status === "loading" ? (
-              <LoadingState
-                title="กำลังโหลดหน่วยงาน"
-                description="กำลังตรวจสอบหน่วยงานและสิทธิ์ที่บัญชีนี้เข้าถึงได้"
-              />
-            ) : null}
-
-            {loadState.status === "error" ? (
-              <ErrorState
-                title="ไม่สามารถโหลดหน่วยงานได้"
-                description="ลองดึงหน่วยงานและสิทธิ์ล่าสุดอีกครั้ง"
-                actions={
-                  <Button
-                    onClick={() => {
-                      retryFocusRequested.current = true;
-                      setLoadState({ status: "loading" });
-                      setLoadAttempt((attempt) => attempt + 1);
-                    }}
-                  >
-                    ลองโหลดอีกครั้ง
-                  </Button>
-                }
-              />
-            ) : null}
 
             {loadState.status === "success" && accessible.length > 0 ? (
               <>
-                <LoadedDirectoryControls
+                {showDirectorySearch ? <LoadedDirectoryControls
                   id="organization-directory-search"
                   label="ค้นหาหน่วยงานที่เข้าถึงได้"
                   query={directoryQuery}
@@ -347,8 +440,8 @@ export function OrganizationSelectView() {
                   matchingCount={directoryMatches.length}
                   visibleCount={directoryVisible.length}
                   onShowMore={() => setDirectoryLimit(value => value + 24)}
-                  placeholder="ชื่อหน่วยงาน คำอธิบาย หรือรหัส"
-                />
+                  placeholder="ค้นหาชื่อหน่วยงาน"
+                /> : null}
                 <ul className={styles.organizationList}>
                 {directoryVisible.map(({ organization, membership }) => (
                   <li
@@ -360,28 +453,19 @@ export function OrganizationSelectView() {
                         <h3 className={styles.organizationName}>
                           {organization.name}
                         </h3>
-                        <div className={styles.metaRow}>
-                          <Badge
-                            tone={organizationStatusTone(organization.status)}
-                          >
-                            {organizationStatusLabel(organization.status)}
-                          </Badge>
-                          <Badge
-                            tone={
-                              membership.role === "ORGANIZATION_ADMIN"
-                                ? "info"
-                                : "neutral"
-                            }
-                          >
-                            {membershipRoleLabel(membership.role)}
-                          </Badge>
-                        </div>
+                        <Badge tone={organizationStatusTone(organization.status)}>
+                          {organizationStatusLabel(organization.status)}
+                        </Badge>
                       </div>
 
-                      <p className={styles.organizationDescription}>
-                        {organization.description ||
-                          "ยังไม่มีคำอธิบายหน่วยงาน"}
-                      </p>
+                      <p className={styles.organizationRole}>{membershipRoleLabel(membership.role)}</p>
+                      {organization.status === "PENDING" ? (
+                        <p className={styles.organizationDescription}>กำลังรอการตรวจสอบจากผู้ดูแลแพลตฟอร์ม</p>
+                      ) : organization.status === "SUSPENDED" ? (
+                        <p className={styles.organizationDescription}>หน่วยงานนี้ถูกระงับการใช้งานชั่วคราว</p>
+                      ) : organization.description ? (
+                        <p className={styles.organizationDescription}>{organization.description}</p>
+                      ) : null}
 
                       <details className={styles.organizationTechnical}>
                         <summary>ดูรหัสหน่วยงาน</summary>
@@ -413,75 +497,23 @@ export function OrganizationSelectView() {
             ) : null}
           </section> : null}
 
-          <aside className={styles.createPanel} aria-labelledby="create-organization">
-            <div className={styles.createPanelHeading}>
-              <h2 className={styles.sectionTitle} id="create-organization">
-                {newApplicant ? "สมัครหน่วยงาน" : "ต้องการพื้นที่ใหม่?"}
-              </h2>
-              <p className={styles.sectionDescription}>
-                {newApplicant
-                  ? "ระบุชื่อหน่วยงานที่ต้องการใช้เปิดร้าน เช่น ชมรมหรือคณะ ผู้สมัครจะเป็นผู้ดูแลหน่วยงานและต้องรออนุมัติ"
-                  : "สร้างหน่วยงานเฉพาะเมื่อยังไม่มีพื้นที่ที่ต้องการ ผู้สร้างจะเป็นผู้ดูแลและต้องรออนุมัติจากส่วนกลาง"}
-              </p>
-            </div>
-
-            <form className={styles.form} onSubmit={handleCreate} noValidate>
-              <ErrorSummary
-                id="organization-create-error-summary"
-                items={
-                  nameError
-                    ? [{ fieldId: "organization-name", message: nameError }]
-                    : []
-                }
-              />
-              <TextField
-                id="organization-name"
-                label="ชื่อหน่วยงาน"
-                value={name}
-                onChange={(event) => {
-                  setName(event.target.value);
-                  setNameError(undefined);
-                  setSubmitError(null);
-                }}
-                error={nameError}
-                announceError={false}
-                onBlur={() => {
-                  const validation = validateOrganizationForm({
-                    name,
-                    description,
-                  });
-                  setNameError(validation.errors.name);
-                }}
-                required
-                disabled={creating}
-              />
-
-              <TextareaField
-                id="organization-description"
-                label="คำอธิบาย"
-                value={description}
-                onChange={(event) => {
-                  setDescription(event.target.value);
-                  setSubmitError(null);
-                }}
-                disabled={creating}
-              />
-
-              <div className={styles.createActions}>
-                <Button
-                  type="submit"
-                  size="large"
-                  pending={creating}
-                  pendingLabel="กำลังสร้างหน่วยงาน"
-                >
-                  {newApplicant ? "ส่งคำขอสมัครหน่วยงาน" : "สร้างหน่วยงาน"}
-                </Button>
-                <span className={styles.createHint}>
-                  หลังส่งคำขอสำเร็จ ระบบจะพาไปหน้าติดตามสถานะการอนุมัติ
-                </span>
-              </div>
-            </form>
-          </aside>
+          {newApplicant ? (
+            <section id="create-organization-panel" className={styles.createPanel} aria-labelledby="create-organization">
+              <h2 className={styles.formOnlyHeading} id="create-organization">ข้อมูลหน่วยงาน</h2>
+              {createForm}
+            </section>
+          ) : null}
+          {newApplicant ? (
+            <aside className={styles.onboardingGuide} aria-labelledby="onboarding-guide-heading">
+              <h2 id="onboarding-guide-heading">ขั้นตอนการเปิดร้าน</h2>
+              <ol className={styles.onboardingSteps}>
+                <li><span className={styles.onboardingStepNumber}>1</span><div><strong>กรอกข้อมูล</strong><p>ระบุชื่อและรายละเอียดหน่วยงานที่ต้องการเปิดร้าน</p></div></li>
+                <li><span className={styles.onboardingStepNumber}>2</span><div><strong>รอการอนุมัติ</strong><p>ผู้ดูแลแพลตฟอร์มจะตรวจสอบคำขอของคุณ</p></div></li>
+                <li><span className={styles.onboardingStepNumber}>3</span><div><strong>เริ่มเปิดร้าน</strong><p>หลังได้รับอนุมัติ คุณจะจัดการร้านและสินค้าได้</p></div></li>
+              </ol>
+              <p className={styles.guideNote}>หลังส่งคำขอ ระบบจะพาไปติดตามสถานะการอนุมัติ</p>
+            </aside>
+          ) : null}
         </div>
       </main>
     </div>

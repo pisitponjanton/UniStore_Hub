@@ -99,6 +99,27 @@ describe("OrganizationSelectView", () => {
     );
   });
 
+  it("keeps a small directory free of redundant search, count card and creation form", async () => {
+    mocks.listAccessible.mockResolvedValue([{ ...organization("org-1", "IT Club"), status: "PENDING" }]);
+    render(<OrganizationSelectView />);
+    expect(await screen.findByRole("heading", { name: "หน่วยงานของฉัน" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "หน่วยงาน (1)" })).toBeInTheDocument();
+    expect(screen.getByText("กำลังรอการตรวจสอบจากผู้ดูแลแพลตฟอร์ม")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "ดูสถานะคำขอ IT Club" })).toBeInTheDocument();
+    expect(screen.queryByRole("searchbox", { name: "ค้นหาหน่วยงานที่เข้าถึงได้" })).not.toBeInTheDocument();
+    expect(screen.queryByText("เข้าถึงได้")).not.toBeInTheDocument();
+    expect(screen.queryByRole("textbox", { name: "ชื่อหน่วยงาน" })).not.toBeInTheDocument();
+    const open = screen.getByRole("button", { name: "สร้างหน่วยงาน" });
+    expect(screen.queryByRole("dialog", { name: "สร้างหน่วยงาน" })).not.toBeInTheDocument();
+    fireEvent.click(open);
+    const dialog = await screen.findByRole("dialog", { name: "สร้างหน่วยงาน" });
+    expect(dialog).toHaveAttribute("aria-modal", "true");
+    expect(screen.getByRole("textbox", { name: "ชื่อหน่วยงาน" })).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "ยกเลิก" }));
+    await waitFor(() => expect(screen.queryByRole("dialog", { name: "สร้างหน่วยงาน" })).not.toBeInTheDocument());
+    expect(screen.queryByRole("textbox", { name: "ชื่อหน่วยงาน" })).not.toBeInTheDocument();
+  });
+
   it("retries loading accessible organizations in place after a recoverable error", async () => {
     mocks.listAccessible
       .mockRejectedValueOnce(new Error("network"))
@@ -114,7 +135,7 @@ describe("OrganizationSelectView", () => {
     expect(await screen.findByText("IT Club")).toBeInTheDocument();
   });
 
-  it("shows a focusable validation summary before creating an unnamed organization", async () => {
+  it("focuses the invalid name with one inline message before creating an organization", async () => {
     mocks.listAccessible.mockResolvedValue([
       organization("org-1", "IT Club"),
     ]);
@@ -123,16 +144,20 @@ describe("OrganizationSelectView", () => {
 
     await screen.findByText("IT Club");
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "สร้างหน่วยงาน" }),
-    );
+    const open = screen.getByRole("button", { name: "สร้างหน่วยงาน" });
+    fireEvent.click(open);
+    expect(await screen.findByRole("dialog", { name: "สร้างหน่วยงาน" })).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "ส่งคำขอ" }));
 
-    const summary = await screen.findByRole("alert");
-    expect(summary).toHaveAttribute("tabindex", "-1");
-    expect(
-      screen.getByRole("link", { name: "กรุณาระบุชื่อหน่วยงาน" }),
-    ).toHaveAttribute("href", "#organization-name");
-    await waitFor(() => expect(summary).toHaveFocus());
+    const field = screen.getByRole("textbox", { name: "ชื่อหน่วยงาน" });
+    expect(field).toHaveAttribute("aria-invalid", "true");
+    expect(field).toHaveAttribute("aria-describedby", "organization-name-error");
+    expect(field).toHaveFocus();
+    const error = screen.getByRole("alert");
+    expect(error).toHaveTextContent("กรุณาระบุชื่อหน่วยงาน");
+    expect(error).toHaveAttribute("id", "organization-name-error");
+    expect(error.querySelector("svg.lucide-circle-alert")).toBeInTheDocument();
+    expect(screen.queryByText("กรุณาตรวจสอบข้อมูล")).not.toBeInTheDocument();
     expect(mocks.create).not.toHaveBeenCalled();
   });
   it("searches accessible organization #145 without rendering 145 cards or leaking unowned organizations", async () => {
@@ -153,7 +178,7 @@ describe("OrganizationSelectView", () => {
     });
     render(<OrganizationSelectView />);
     await screen.findByText("Campus Club 0");
-    expect(screen.getByText("เข้าถึงได้").parentElement).toHaveTextContent("145");
+    expect(screen.getByRole("heading", { name: "หน่วยงาน (145)" })).toBeInTheDocument();
     expect(screen.queryByText("Final KMITL Club")).not.toBeInTheDocument();
     expect(screen.queryByText("Private Organization")).not.toBeInTheDocument();
     const input = screen.getByRole("searchbox", { name: "ค้นหาหน่วยงานที่เข้าถึงได้" });
@@ -175,10 +200,59 @@ describe("OrganizationSelectView", () => {
     });
     mocks.listAccessible.mockResolvedValue([]);
     render(<OrganizationSelectView />);
-    expect(await screen.findByRole("heading", { name: "เริ่มต้นสร้างหน่วยงานของคุณ" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "สมัครหน่วยงาน" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "สมัครเปิดร้านสำหรับหน่วยงาน" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "ข้อมูลหน่วยงาน" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "ขั้นตอนการเปิดร้าน" })).toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: "ชื่อหน่วยงาน" })).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "เลือกพื้นที่เพื่อเริ่มงาน" })).not.toBeInTheDocument();
+  });
+
+  it("keeps a neutral loading layout until authorization resolves, without flashing the wrong form", async () => {
+    let finishLoading!: (organizations: OrganizationDTO[]) => void;
+    mocks.listAccessible.mockImplementation(() => new Promise<OrganizationDTO[]>(resolve => { finishLoading = resolve; }));
+    mocks.useAuthSession.mockReturnValue({
+      status: "authenticated",
+      user: { userId: "user-1", name: "Buyer", email: "buyer@example.com", status: "ACTIVE", platformRole: null },
+      memberships: [],
+    });
+    const { container } = render(<OrganizationSelectView />);
+    expect(container.querySelector('[data-page="organization-entry"][data-loading="loading"]')).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "พื้นที่หน่วยงาน" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "วันนี้จะทำงานกับหน่วยงานไหน?" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("textbox", { name: "ชื่อหน่วยงาน" })).not.toBeInTheDocument();
+    finishLoading([]);
+    expect(await screen.findByRole("heading", { name: "สมัครเปิดร้านสำหรับหน่วยงาน" })).toBeVisible();
+    expect(container.querySelector('[data-onboarding="true"]')).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
+  it("does not validate untouched blur and shows one inline error after invalid submit", async () => {
+    mocks.listAccessible.mockResolvedValue([]);
+    mocks.useAuthSession.mockReturnValue({
+      status: "authenticated",
+      user: { userId: "user-1", name: "Buyer", email: "buyer@example.com", status: "ACTIVE", platformRole: null },
+      memberships: [],
+    });
+    render(<OrganizationSelectView />);
+    const field = await screen.findByRole("textbox", { name: "ชื่อหน่วยงาน" });
+    fireEvent.focus(field);
+    fireEvent.blur(field);
+    expect(field).not.toHaveAttribute("aria-invalid", "true");
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    fireEvent.change(field, { target: { value: "  " } });
+    fireEvent.blur(field);
+    expect(field).toHaveAttribute("aria-invalid", "true");
+    const error = screen.getByRole("alert");
+    expect(error).toHaveAttribute("id", "organization-name-error");
+    expect(error).toHaveTextContent("กรุณาระบุชื่อหน่วยงาน");
+    fireEvent.click(screen.getByRole("button", { name: "ส่งคำขอสมัครหน่วยงาน" }));
+    expect(field).toHaveFocus();
+    expect(screen.getAllByRole("alert")).toHaveLength(1);
+    expect(screen.queryByText("กรุณาตรวจสอบข้อมูล")).not.toBeInTheDocument();
+    expect(mocks.create).not.toHaveBeenCalled();
+    fireEvent.change(field, { target: { value: "ชมรมไอที" } });
+    expect(field).not.toHaveAttribute("aria-invalid");
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
   it("routes a newly created pending organization to an approval status page", async () => {
@@ -196,7 +270,7 @@ describe("OrganizationSelectView", () => {
       user: { userId: "user-1", platformRole: null },
     });
     render(<OrganizationSelectView />);
-    await screen.findByRole("heading", { name: "เริ่มต้นสร้างหน่วยงานของคุณ" });
+    await screen.findByRole("heading", { name: "สมัครเปิดร้านสำหรับหน่วยงาน" });
     fireEvent.change(screen.getByRole("textbox", { name: "ชื่อหน่วยงาน" }), { target: { value: "ชมรมไอที" } });
     fireEvent.click(screen.getByRole("button", { name: "ส่งคำขอสมัครหน่วยงาน" }));
     await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/org/application/?organizationId=org-new"));
