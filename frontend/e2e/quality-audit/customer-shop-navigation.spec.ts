@@ -35,8 +35,7 @@ for (const theme of ["light", "dark"] as const) {
       };
       try {
         await page.goto(frontend + "/my/orders/", { waitUntil: "domcontentloaded" });
-        await expect(page.getByRole("navigation", { name: "เปลี่ยนพื้นที่ใช้งาน" }))
-          .toBeVisible({ timeout: 20_000 });
+        await expect(page.getByRole("navigation", { name: "เปลี่ยนพื้นที่ใช้งาน" })).toHaveCount(0);
         await useCustomerLink("ร้านค้า");
         await expect(page).toHaveURL(/\/shops\/?$/);
         await expect(page.getByRole("heading", { name: "เลือกร้านค้า", level: 1 }))

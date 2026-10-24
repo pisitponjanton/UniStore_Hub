@@ -1,94 +1,190 @@
 .controls {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-2);
+  flex-wrap: wrap;
+  gap: 9px 14px;
   min-width: 0;
 }
-.primary,.secondary {
-  min-height: 44px;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-4);
-  border-radius: var(--radius-control);
-  border: 1px solid var(--line-soft);
-  color: var(--ink);
-  text-decoration: none;
-}
-.primary { background: var(--brand-soft); color: var(--brand-strong); }
-.primary span { font-weight: 650; }
-.primary strong { font-size: var(--text-caption); }
-.secondary { background: var(--surface); }
 .filters {
   display: inline-flex;
   gap: 3px;
   padding: 3px;
-  border-radius: var(--radius-control);
   background: var(--surface-muted);
+  border-radius: var(--radius-control);
 }
 .filters button {
-  min-height: 40px;
-  padding-inline: var(--space-3);
+  min-width: 0;
+  min-height: 44px;
+  padding: 8px 13px;
   border: 0;
-  background: transparent;
+  border-radius: var(--radius-control);
   color: var(--ink-secondary);
-  border-radius: calc(var(--radius-control) - 3px);
+  background: transparent;
   font: inherit;
-  font-weight: 650;
+  font-weight: 680;
+  font-size: .87rem;
   cursor: pointer;
 }
-.filters button[aria-pressed="true"] {
-  background: var(--brand);
-  color: var(--brand-on);
-}
-.filters button span { margin-left: 4px; font-variant-numeric: tabular-nums; }
-.controls a:focus-visible,.controls button:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
-@media (max-width: 620px) {
-  .controls { display: grid; grid-template-columns: 1fr auto; }
-  .primary { grid-column: 1 / -1; justify-content: space-between; }
-  .filters { min-width: 0; }
-  .filters button { min-width: 0; padding-inline: var(--space-2); }
-  .secondary { padding-inline: var(--space-3); justify-content: center; }
-}
-@media (max-width: 360px) {
-  .controls { grid-template-columns: 1fr; }
-  .filters { display: grid; grid-template-columns: 1fr 1fr; }
-}
-
-.caption { color: var(--ink-tertiary); font-size: var(--text-caption); }
-.zero {
-  display: grid;
-  gap: var(--space-2);
-  justify-items: start;
-  padding: var(--space-4);
-  border: 1px solid var(--line-soft);
-  border-radius: var(--radius-card);
+.filters button[aria-pressed="true"] { background: var(--brand); color: var(--brand-on); }
+.filters button:hover:not([aria-pressed="true"]) { background: var(--surface-hover); color: var(--ink); }
+.filters button span { margin-inline-start: 4px; font-variant-numeric: tabular-nums; }
+.loadedNote { color: var(--ink-tertiary); font-size: .75rem; line-height: 1.35; }
+.filterToggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-inline-start: auto;
+  min-height: 44px;
+  padding: 8px 13px;
   background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 680;
+  font-size: .85rem;
+  cursor: pointer;
+}
+.filterToggle:hover { background: var(--surface-hover); border-color: var(--line-strong); }
+.controls :is(button):focus-visible, .zero button:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+.zero {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px 14px;
+  padding: 13px 0;
   color: var(--ink-secondary);
+  font-size: .87rem;
 }
 .zero button {
   min-height: 44px;
+  padding: 7px 12px;
   border: 1px solid var(--line);
   border-radius: var(--radius-control);
-  padding: var(--space-2) var(--space-4);
-  background: var(--brand-soft);
   color: var(--brand-strong);
+  background: var(--surface);
   font: inherit;
   font-weight: 650;
   cursor: pointer;
 }
-.zero button:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+@media(max-width:620px) {
+  .controls { gap: 8px; }
+  .loadedNote { order: 3; flex-basis: 100%; }
+  .filterToggle { margin-inline-start: auto; }
+  .filters button { padding-inline: 9px; }
+}
+@media(max-width:360px) {
+ .loadedNote { order: 2; }
+ .filterToggle { order: 3; width: 100%; }
+}
 
-/* Campus Commerce A / Phase 12 — task-first queue filtering */
-.controls{min-width:0;gap:9px;align-items:center}
-.primary,.secondary{min-height:44px;border-color:var(--line);line-height:1.4;overflow-wrap:anywhere}
-.primary:hover{background:var(--brand-soft-strong);color:var(--brand-strong)}
-.secondary:hover{background:var(--surface-hover);color:var(--ink)}
-.filters{min-width:0;max-width:100%;gap:4px}
-.filters button{min-height:44px;min-width:0;overflow-wrap:anywhere}
-.filters button:hover:not([aria-pressed="true"]){background:var(--surface-hover);color:var(--ink)}
-.filters button[aria-pressed="true"]{background:var(--brand);color:var(--brand-on)}
-.caption{color:var(--ink-secondary);max-width:50ch}
-.zero button:hover{background:var(--brand-soft-strong);color:var(--brand-strong)}
-@media(max-width:620px){.controls{grid-template-columns:minmax(0,1fr);gap:8px}.primary{grid-column:1}.filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}.secondary{width:100%}}
+/* Shared compact filter popover: fixed positioning avoids pushing the queue down. */
+.count {
+  display: inline-grid;
+  min-width: 21px;
+  height: 21px;
+  place-items: center;
+  padding-inline: 5px;
+  border-radius: 999px;
+  background: var(--brand-soft);
+  color: var(--brand-strong);
+  font-size: .73rem;
+  font-variant-numeric: tabular-nums;
+}
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: transparent;
+  z-index: 100;
+}
+.popover {
+  position: fixed;
+  z-index: 101;
+  width: min(420px, calc(100vw - 32px));
+  max-height: min(570px, calc(100dvh - 98px));
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line-strong);
+  background: var(--surface-raised);
+  border-radius: 14px;
+  box-shadow: 0 16px 44px rgb(0 0 0 / 24%);
+  overflow: hidden;
+}
+.popoverHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 58px;
+  padding: 12px 17px;
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+.popoverTitle {
+  color: var(--ink);
+  font-size: 1rem;
+  font-weight: 730;
+}
+.closeButton {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink-secondary);
+  cursor: pointer;
+}
+.closeButton:hover { background: var(--surface-hover); }
+.popoverBody { overflow-y: auto; overscroll-behavior: contain; padding: 16px 18px 20px; min-height: 0; }
+.chips { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; min-width: 0; }
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink-secondary);
+  padding: 6px 9px 6px 12px;
+  font-size: .76rem;
+  line-height: 1.35;
+  cursor: pointer;
+}
+.chip span { min-width: 0; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
+.chip:hover { background: var(--surface-hover); color: var(--ink); }
+.chip:disabled { opacity: .55; cursor: wait; }
+.popover :is(button, input, select):focus-visible, .chips button:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+@media(max-width:620px) {
+  .backdrop { background: rgb(0 0 0 / 54%); }
+  .popover {
+    inset: auto 0 0 0 !important;
+    width: 100%;
+    max-height: min(78dvh, 660px) !important;
+    border-radius: 18px 18px 0 0;
+    border-bottom: none;
+    padding-bottom: env(safe-area-inset-bottom);
+    box-shadow: 0 -10px 34px rgb(0 0 0 / 28%);
+  }
+  .popoverBody { padding: 15px 18px 22px; }
+}
+@media(prefers-reduced-motion: reduce) { .popover { animation: none; } }
+
+.filterError {
+  padding: 10px 12px;
+  margin-bottom: 13px;
+  border: 1px solid var(--danger-line, var(--line-strong));
+  border-radius: 8px;
+  color: var(--danger);
+  background: var(--danger-soft);
+  font-size: .82rem;
+  line-height: 1.5;
+}

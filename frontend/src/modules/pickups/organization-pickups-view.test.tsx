@@ -125,6 +125,7 @@ describe("OrganizationPickupsView", () => {
     );
 
     await screen.findByText("รายการรับสินค้า pickup-1");
+    expect(screen.queryByText("เลือกรายการเพื่อเริ่มตรวจรับสินค้า")).not.toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText("Pickup token"), {
       target: { value: "  token-search  " },
@@ -132,6 +133,9 @@ describe("OrganizationPickupsView", () => {
     fireEvent.change(screen.getByLabelText("Order ID"), {
       target: { value: "  order-2  " },
     });
+    expect(screen.queryByLabelText("Campaign ID")).not.toBeInTheDocument();
+    expect(screen.getByRole("search", { name: "ค้นหารายการรับสินค้า" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "ตัวกรอง" }));
     fireEvent.change(screen.getByLabelText("Campaign ID"), {
       target: { value: "  campaign-2  " },
     });
@@ -158,6 +162,17 @@ describe("OrganizationPickupsView", () => {
     expect(await screen.findByRole("status")).toHaveTextContent(
       "แสดง 1 รายการรับสินค้า · รับสินค้าแล้ว",
     );
+  });
+
+  it("shows a single empty queue and keeps token/order lookup ready", async () => {
+    mocks.listOrganizationPickups.mockResolvedValueOnce({ items: [], nextCursor: null });
+    const { container } = render(<OrganizationPickupsView organizationId="org-1" />);
+    expect(await screen.findByText("ยังไม่มีรายการรับสินค้า")).toBeInTheDocument();
+    expect(container.querySelector("#staff-pickup-detail")).not.toBeInTheDocument();
+    expect(container.querySelector('[data-single-column="true"]')).toBeInTheDocument();
+    expect(screen.getByLabelText("Pickup token")).toBeVisible();
+    expect(screen.getByLabelText("Order ID")).toBeVisible();
+    expect(screen.queryByLabelText("Campaign ID")).not.toBeInTheDocument();
   });
 
   it("loads fresh Pickup and Order detail before confirmation", async () => {

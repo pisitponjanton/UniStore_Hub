@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 
 import { ApplicationShell, LoadingState } from "@/components";
@@ -19,6 +19,7 @@ export function AuthenticatedShell({
 }) {
   const auth = useAuthSession();
   const router = useRouter();
+  const pathname = usePathname();
   const [organizationLabel, setOrganizationLabel] = useState<{
     id: string;
     name: string;
@@ -63,6 +64,7 @@ export function AuthenticatedShell({
     user: auth.user,
     memberships: auth.memberships,
     organizationId,
+    pathname,
   });
 
   const activeMemberships = auth.memberships.filter(

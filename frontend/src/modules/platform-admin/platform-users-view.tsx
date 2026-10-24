@@ -1,6 +1,5 @@
 "use client";
 
-import { PlatformWorkspaceNav } from "./platform-workspace-nav";
 
 import { AsyncPageFallback } from "@/components/ui/async-page";
 import { LoadedDirectoryControls } from "@/modules/organization-directory/loaded-directory-controls";
@@ -141,7 +140,6 @@ export function PlatformUsersView() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <PlatformWorkspaceNav current="users" />
         <header className={styles.header}>
           <div className={styles.headerCopy}>
             <h1 className={styles.title}>ผู้ใช้ระดับ Platform</h1>

@@ -11,6 +11,7 @@ test("Staff Orders, Payments, Pickups read-only action queues and safe dialogs",
   const evidenceDir = join("test-results", "quality-audit", "uxqa-" + randomUUID(), "staff-operations");
   await mkdir(evidenceDir, { recursive: true });
   const org = "?organizationId=" + encodeURIComponent(ids.organizationId);
+  const orgParam = "organizationId=" + encodeURIComponent(ids.organizationId);
   const stages = [
     { name: "orders", path: "/org/orders/" + org, heading: "คำสั่งซื้อของหน่วยงาน", listId: "orders-list" },
     { name: "payments", path: "/org/payments/" + org, heading: "ตรวจสอบการชำระเงิน", listId: "payment-review-list" },
@@ -38,19 +39,15 @@ test("Staff Orders, Payments, Pickups read-only action queues and safe dialogs",
       await expect(page.getByRole("heading", { name: stage.heading, level: 1 })).toBeVisible({ timeout: 20000 });
       const queue = page.locator("#" + stage.listId);
       await expect(queue).toBeVisible({ timeout: 20000 });
-      const queueNav = page.getByRole("navigation", { name: "คิวงานเจ้าหน้าที่" });
-      await expect(queueNav).toBeVisible();
-      const orgParam = "organizationId=" + encodeURIComponent(ids.organizationId);
-      if (stage.name === "orders") {
-        await expect(queueNav.getByRole("link", { name: "ตรวจชำระเงิน" }))
-          .toHaveAttribute("href", new RegExp("/org/payments/?\\?" + orgParam));
-        await expect(queueNav.locator('[aria-current="page"]')).toHaveText("คำสั่งซื้อ");
-      } else if (stage.name === "payments") {
-        await expect(queueNav.locator('[aria-current="page"]')).toHaveText("ตรวจชำระเงิน");
-      } else {
-        await expect(queueNav.locator('[aria-current="page"]')).toHaveText("รับสินค้า");
-      }
-      await expect(queueNav.getByRole("link", { name: "คำสั่งซื้อ" })).toHaveCount(stage.name === "orders" ? 0 : 1);
+      await expect(page.getByRole("navigation", { name: "คิวงานเจ้าหน้าที่" })).toHaveCount(0);
+      await page.getByRole("button", { name: "เปิดเมนูหลัก" }).click();
+      const drawer = page.getByRole("dialog", { name: "เมนูหลัก" });
+      const orgNav = drawer.getByRole("navigation", { name: "เมนูหลัก" });
+      await expect(orgNav).toBeVisible();
+      await expect(orgNav).not.toContainText("คำสั่งซื้อของฉัน");
+      await drawer.getByRole("button", { name: "ปิดเมนูหลัก" }).click();
+      await expect(page.getByRole("group", { name: "มุมมองรายการที่โหลดแล้ว" })).toBeVisible();
+      await expect(page.getByRole("button", { name: "ตัวกรอง" })).toHaveAttribute("aria-expanded", "false");
       const controls = page.getByRole("group", { name: "มุมมองรายการที่โหลดแล้ว" });
       await expect(controls).toBeVisible({ timeout: 18000 });
       const all = controls.getByRole("button", { name: /^ทั้งหมด/ });
@@ -77,6 +74,17 @@ test("Staff Orders, Payments, Pickups read-only action queues and safe dialogs",
         await page.screenshot({ path: join(evidenceDir, stage.name + "-" + width + ".png"), animations: "disabled" });
       }
 
+      for (const scheme of ["light", "dark"] as const) {
+        await page.emulateMedia({ colorScheme: scheme });
+        for (const width of [390, 1440]) {
+          await page.setViewportSize({ width, height: 900 });
+          await expect(page.getByRole("heading", { name: stage.heading, level: 1 })).toBeVisible();
+          const overflow = await page.evaluate(() => Math.max(0, document.documentElement.scrollWidth - innerWidth));
+          expect(overflow, stage.name + " " + scheme + " width=" + width).toBeLessThanOrEqual(1);
+          await page.screenshot({ path: join(evidenceDir, stage.name + "-" + scheme + "-" + width + ".png"), animations: "disabled" });
+        }
+      }
+      await page.emulateMedia({ colorScheme: "light" });
       await page.setViewportSize({ width: 390, height: 844 });
       if (stage.name === "orders") {
         const detailLink = page.locator('article a[href*="/org/orders/view/"]').first();
@@ -118,7 +126,8 @@ test("Staff Orders, Payments, Pickups read-only action queues and safe dialogs",
       if (stage.name === "pickups") {
         const select = page.getByRole("button", { name: /^ดูรายละเอียด Pickup/ }).first();
         if (await select.count() === 0) {
-          await expect(page.getByText("ไม่พบ Pickup")).toBeVisible();
+          await expect(page.getByText("ยังไม่มีรายการรับสินค้า")).toBeVisible();
+          await expect(page.locator("#staff-pickup-detail")).toHaveCount(0);
           results.push({ stage: "pickups", detailState: "BLOCKED", reason: "NO_LOCAL_PICKUP_FIXTURE" });
         } else {
         await expect(select).toBeVisible();

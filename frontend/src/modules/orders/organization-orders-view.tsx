@@ -1,18 +1,18 @@
 "use client";
 
-import { StaffOperationNav } from "@/modules/operations/staff-operation-nav";
 
 import { AsyncPageFallback } from "@/components/ui/async-page";
 import { useQueueFilterFeedback } from "@/modules/operations/use-queue-filter-feedback";
-import { QueuePriorityControls, QueueFilterEmpty } from "@/modules/operations/queue-priority-controls";
+import { QueuePriorityControls, QueueActiveFilters, type QueueFilterChip, QueueFilterEmpty } from "@/modules/operations/queue-priority-controls";
 import { prioritizeLoadedQueue, visibleLoadedQueue } from "@/modules/operations/queue-priority";
 
 import Link from "next/link";
+import { ClipboardList } from "lucide-react";
+
 import { useEffect, useState, type FormEvent } from "react";
 
 import {
   Button,
-  EmptyState,
   Notice,
   SelectField,
   TextField,
@@ -84,6 +84,7 @@ export function OrganizationOrdersView({
     useState<AppliedFilters>(EMPTY_FILTERS);
   const [filtering, setFiltering] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [filterOpen, setFilterOpen] = useState(false);
   const [queueView, setQueueView] = useState<"all" | "action">("all");
   const [visibleLimit, setVisibleLimit] = useState(30);
   const [inlineError, setInlineError] = useState<string | null>(null);
@@ -142,18 +143,20 @@ export function OrganizationOrdersView({
     return () => controller.abort();
   }, [organizationId]);
 
-  async function applyFilters(event?: FormEvent<HTMLFormElement>) {
+  async function applyFilters(event?: FormEvent<HTMLFormElement>, overrides?: AppliedFilters) {
     event?.preventDefault();
 
     if (filtering) {
       return;
     }
 
-    const nextFilters: AppliedFilters = {
+    const nextFilters: AppliedFilters = overrides ?? {
       campaignId: draftCampaignId.trim(),
       customerId: draftCustomerId.trim(),
       status: draftStatus,
     };
+
+
 
     setFiltering(true);
     setInlineError(null);
@@ -169,6 +172,12 @@ export function OrganizationOrdersView({
       );
 
       setAppliedFilters(nextFilters);
+    if (overrides) {
+      setDraftCampaignId(overrides.campaignId);
+      setDraftCustomerId(overrides.customerId);
+      setDraftStatus(overrides.status);
+    }
+      setFilterOpen(false);
       setState({
         status: "success",
         orders: result.items,
@@ -191,6 +200,10 @@ export function OrganizationOrdersView({
     }
   }
 
+  function removeAppliedFilter(field: keyof AppliedFilters) {
+    void applyFilters(undefined, { ...appliedFilters, [field]: "" } as AppliedFilters);
+  }
+
   async function clearFilters() {
     if (filtering) {
       return;
@@ -209,6 +222,7 @@ export function OrganizationOrdersView({
       );
 
       setAppliedFilters(EMPTY_FILTERS);
+      setFilterOpen(false);
       setState({
         status: "success",
         orders: result.items,
@@ -297,22 +311,16 @@ export function OrganizationOrdersView({
     Boolean(appliedFilters.campaignId) ||
     Boolean(appliedFilters.customerId) ||
     Boolean(appliedFilters.status);
+  const activeFilterCount = [appliedFilters.campaignId,appliedFilters.customerId,appliedFilters.status].filter(Boolean).length;
+  const activeFilterChips: QueueFilterChip[] = [
+    ...(appliedFilters.campaignId ? [{ key: "campaignId", label: "แคมเปญ: " + appliedFilters.campaignId, onRemove: () => { void removeAppliedFilter("campaignId"); } }] : []),
+    ...(appliedFilters.customerId ? [{ key: "customerId", label: "ลูกค้า: " + appliedFilters.customerId, onRemove: () => { void removeAppliedFilter("customerId"); } }] : []),
+    ...(appliedFilters.status ? [{ key: "status", label: "สถานะ: " + getOrderStatusLabel(appliedFilters.status), onRemove: () => { void removeAppliedFilter("status"); } }] : []),
+  ];
+
   const paymentReviewCount = state.orders.filter(
     (order) => order.status === "PAYMENT_REVIEW",
   ).length;
-  const paymentActionCount = state.orders.filter(
-    (order) =>
-      order.status === "PENDING_PAYMENT" ||
-      order.status === "PAYMENT_REJECTED",
-  ).length;
-  const fulfillmentCount = state.orders.filter((order) =>
-    [
-      "CONFIRMED",
-      "IN_PRODUCTION",
-      "READY_FOR_PICKUP",
-    ].includes(order.status),
-  ).length;
-
   const isActionable = (order: OrderDTO) => order.status === "PAYMENT_REVIEW";
   const sortedRows = prioritizeLoadedQueue(state.orders, isActionable, item => item.updatedAt);
   const queueRows = visibleLoadedQueue(sortedRows, queueView, isActionable);
@@ -321,7 +329,6 @@ export function OrganizationOrdersView({
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <StaffOperationNav organizationId={organizationId} current="orders" />
         <header className={styles.header}>
           <div className={styles.headerCopy}>
             <h1 className={styles.title}>คำสั่งซื้อของหน่วยงาน</h1>
@@ -339,11 +346,93 @@ export function OrganizationOrdersView({
           mode={queueView}
           onChange={(next) => { setQueueView(next); setVisibleLimit(30); }}
           listId="orders-list"
-          filterId="order-filter-title"
+          filterId="order-filter-title-panel"
+          filterTitle="ตัวกรองคำสั่งซื้อ"
+          filterContent={
+            <div className={styles.filterPanel}>
+              <form
+                className={styles.filterForm}
+                onSubmit={applyFilters}
+                aria-busy={filtering}
+              >
+                <div className={styles.filters}>
+                  <TextField
+                    id="organization-orders-campaign"
+                    label="Campaign ID"
+                    value={draftCampaignId}
+                    onChange={(event) =>
+                      setDraftCampaignId(event.target.value)
+                    }
+                    placeholder="เช่น campaign-..."
+                    disabled={filtering}
+                  />
+
+
+                  <TextField
+                    id="organization-orders-customer"
+                    label="Customer ID"
+                    value={draftCustomerId}
+                    onChange={(event) =>
+                      setDraftCustomerId(event.target.value)
+                    }
+                    placeholder="เช่น customer-..."
+                    disabled={filtering}
+                  />
+
+                  <SelectField
+                    id="organization-orders-status"
+                    label="สถานะ Order"
+                    value={draftStatus}
+                    onChange={(event) =>
+                      setDraftStatus(
+                        event.target.value as OrderStatus | "",
+                      )
+                    }
+                    disabled={filtering}
+                  >
+                    <option value="">ทุกสถานะ</option>
+                    {ORDER_STATUSES.map((status) => (
+                      <option key={status} value={status}>
+                        {getOrderStatusLabel(status)}
+                      </option>
+                    ))}
+                  </SelectField>
+                </div>
+
+                <div className={styles.filterActions}>
+                  <Button
+                    type="submit"
+                    pending={filtering}
+                    pendingLabel="กำลังค้นหา"
+                  >
+                    ใช้ตัวกรอง
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="quiet"
+                    disabled={
+                      filtering ||
+                      (!hasFilters &&
+                        !draftCampaignId.trim() &&
+                        !draftCustomerId.trim() &&
+                        !draftStatus)
+                    }
+                    onClick={() => {
+                      void clearFilters();
+                    }}
+                  >
+                    ล้างตัวกรอง
+                  </Button>
+                </div>
+              </form>
+            </div>
+          }
+          filterError={inlineError}
+          activeFilterCount={activeFilterCount}
+          filterOpen={filterOpen}
+          onFilterToggle={() => setFilterOpen(open => !open)}
         />
-
-
-
+        <QueueActiveFilters chips={activeFilterChips} disabled={filtering} />
 
 
 
@@ -375,9 +464,6 @@ export function OrganizationOrdersView({
               <h2 className={styles.sectionTitle} id="orders-list">
                 รายการคำสั่งซื้อ
               </h2>
-              <p className={styles.sectionDescription}>
-                สถานะและยอดรวมในแต่ละรายการเป็นข้อมูลล่าสุดที่โหลดจากระบบ
-              </p>
             </div>
             <span className={styles.sectionMeta}>
               {state.orders.length.toLocaleString("th-TH")} รายการ
@@ -385,14 +471,11 @@ export function OrganizationOrdersView({
           </div>
 
           {state.orders.length === 0 ? (
-            <EmptyState
-              title="ไม่พบคำสั่งซื้อ"
-              description={
-                hasFilters
-                  ? "ไม่มีคำสั่งซื้อที่ตรงกับตัวกรองปัจจุบัน"
-                  : "หน่วยงานนี้ยังไม่มีคำสั่งซื้อ"
-              }
-            />
+                          <div className={styles.compactEmpty} role="status">
+                <ClipboardList size={29} strokeWidth={1.6} aria-hidden="true" />
+                <strong>{hasFilters ? "ไม่พบคำสั่งซื้อที่ตรงกับตัวกรอง" : "ยังไม่มีคำสั่งซื้อ"}</strong>
+                <span>{hasFilters ? "ปรับตัวกรองหรือแสดงทั้งหมด" : "คำสั่งซื้อใหม่จะแสดงที่นี่"}</span>
+              </div>
           ) : (
             <div className={styles.list}>
               {visibleRows.length === 0 ? <QueueFilterEmpty onShowAll={() => setQueueView("all")} /> : null}
@@ -421,15 +504,6 @@ export function OrganizationOrdersView({
                         สร้างเมื่อ {formatIsoDateTime(order.createdAt)}
                       </time>
                     </div>
-
-                    {order.status === "PAYMENT_REVIEW" ? (
-                      <div className={styles.taskPriority} role="note">
-                        <span className={styles.taskPriorityLabel}>
-                          ต้องดำเนินการ
-                        </span>
-                        <strong>ตรวจหลักฐานการชำระเงิน</strong>
-                      </div>
-                    ) : null}
                   </div>
 
                   <div className={styles.rowAside}>
@@ -475,131 +549,8 @@ export function OrganizationOrdersView({
             </div>
           ) : null}
         </section>
-        <section className={styles.summaryStrip} aria-label="สรุปคำสั่งซื้อที่โหลด">
-          <div>
-            <span className={styles.summaryLabel}>รายการที่โหลด</span>
-            <strong>{state.orders.length}</strong>
-          </div>
-          <div>
-            <span className={styles.summaryLabel}>รอตรวจการชำระเงิน</span>
-            <strong>{paymentReviewCount}</strong>
-          </div>
-          <div>
-            <span className={styles.summaryLabel}>รอชำระหรือแก้ไขการชำระ</span>
-            <strong>{paymentActionCount}</strong>
-          </div>
-          <div>
-            <span className={styles.summaryLabel}>กำลังดำเนินการหลังยืนยัน</span>
-            <strong>{fulfillmentCount}</strong>
-          </div>
-        </section>
 
-        <section className={styles.filterPanel} aria-labelledby="order-filter-title">
-          <div className={styles.filterHeading}>
-            <div>
-              <h2 className={styles.sectionTitle} id="order-filter-title">
-                ค้นหาและกรอง
-              </h2>
-              <p className={styles.sectionDescription}>
-                ใช้รหัสแคมเปญ รหัสลูกค้า หรือสถานะร่วมกันได้
-              </p>
-            </div>
-            <div className={styles.appliedFilters} role="group" aria-label="ตัวกรองที่ใช้อยู่">
-              {hasFilters ? (
-                <>
-                  {appliedFilters.campaignId ? (
-                    <span>Campaign: {appliedFilters.campaignId}</span>
-                  ) : null}
-                  {appliedFilters.customerId ? (
-                    <span>Customer: {appliedFilters.customerId}</span>
-                  ) : null}
-                  {appliedFilters.status ? (
-                    <span>
-                      สถานะ: {getOrderStatusLabel(appliedFilters.status)}
-                    </span>
-                  ) : null}
-                </>
-              ) : (
-                <span>แสดงทุกคำสั่งซื้อ</span>
-              )}
-            </div>
-          </div>
 
-          <form
-            className={styles.filterForm}
-            onSubmit={applyFilters}
-            aria-busy={filtering}
-          >
-            <div className={styles.filters}>
-              <TextField
-                id="organization-orders-campaign"
-                label="Campaign ID"
-                value={draftCampaignId}
-                onChange={(event) =>
-                  setDraftCampaignId(event.target.value)
-                }
-                placeholder="เช่น campaign-..."
-                disabled={filtering}
-              />
-
-              <TextField
-                id="organization-orders-customer"
-                label="Customer ID"
-                value={draftCustomerId}
-                onChange={(event) =>
-                  setDraftCustomerId(event.target.value)
-                }
-                placeholder="เช่น customer-..."
-                disabled={filtering}
-              />
-
-              <SelectField
-                id="organization-orders-status"
-                label="สถานะ Order"
-                value={draftStatus}
-                onChange={(event) =>
-                  setDraftStatus(
-                    event.target.value as OrderStatus | "",
-                  )
-                }
-                disabled={filtering}
-              >
-                <option value="">ทุกสถานะ</option>
-                {ORDER_STATUSES.map((status) => (
-                  <option key={status} value={status}>
-                    {getOrderStatusLabel(status)}
-                  </option>
-                ))}
-              </SelectField>
-            </div>
-
-            <div className={styles.filterActions}>
-              <Button
-                type="submit"
-                pending={filtering}
-                pendingLabel="กำลังค้นหา"
-              >
-                ใช้ตัวกรอง
-              </Button>
-              <Button
-                type="button"
-                variant="quiet"
-                disabled={
-                  filtering ||
-                  (!hasFilters &&
-                    !draftCampaignId.trim() &&
-                    !draftCustomerId.trim() &&
-                    !draftStatus)
-                }
-                onClick={() => {
-                  void clearFilters();
-                }}
-              >
-                แสดงทั้งหมด
-              </Button>
-            </div>
-          </form>
-        </section>
       </main>
     </div>
   );

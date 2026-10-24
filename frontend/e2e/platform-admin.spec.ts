@@ -58,19 +58,9 @@ test("Platform Admin can navigate Platform scope, read live summary counts, and 
     ).toBeVisible({ timeout: 20_000 });
   }
 
-  for (const label of [
-    "หน้าร้านค้า",
-    "คำสั่งซื้อของฉัน",
-    "การแจ้งเตือน",
-  ]) {
-    await expect(
-      page.getByRole("link", {
-        name: label,
-        exact: true,
-      }),
-    ).toBeVisible({ timeout: 20_000 });
-  }
-
+  const platformNav = page.getByRole("navigation", { name: "เมนูหลัก" });
+  await expect(platformNav).not.toContainText("คำสั่งซื้อของฉัน");
+  await expect(platformNav).not.toContainText("การแจ้งเตือน");
   await expect(
     page.getByRole("link", {
       name: "เปลี่ยนหน่วยงาน",
@@ -121,13 +111,10 @@ test("Platform Admin can navigate Platform scope, read live summary counts, and 
     }),
   ).toBeVisible({ timeout: 20_000 });
 
-  await page
-    .getByRole("link", {
-      name: "หน้าร้านค้า",
-      exact: true,
-    })
-    .click();
-  await expect(page).toHaveURL(/\/$/);
+  await page.getByText("พื้นที่ปัจจุบัน").click();
+  await page.getByRole("navigation", { name: "สลับพื้นที่ใช้งาน" })
+    .getByRole("link", { name: "บัญชีส่วนตัว" }).click();
+  await expect(page).toHaveURL(/\/shops\/?$/);
   await expect(
     page.getByRole("link", {
       name: "ภาพรวมระบบ",
@@ -167,19 +154,16 @@ test("Platform Admin can navigate Platform scope, read live summary counts, and 
   await page.goto("/org/select/", { waitUntil: "domcontentloaded" });
   await expect(
     page.getByRole("heading", {
-      name: "เลือกหน่วยงานที่จะทำงาน",
+      name: "สมัครเปิดร้านสำหรับหน่วยงาน",
       level: 1,
     }),
   ).toBeVisible({ timeout: 20_000 });
   await expect(
-    page.getByText("ยังไม่มีหน่วยงานที่เข้าถึงได้"),
+    page.getByText("สร้างพื้นที่ขายสินค้าสำหรับชมรม คณะ หรือหน่วยงานของคุณ"),
   ).toBeVisible({ timeout: 20_000 });
-  await expect(
-    page.getByRole("link", {
-      name: "ภาพรวมระบบ",
-      exact: true,
-    }),
-  ).toBeVisible({ timeout: 20_000 });
+  // Platform controls must not leak into an organization application screen.
+  await expect(page.getByRole("navigation", { name: "เมนูหลัก" })
+    .getByRole("link", { name: "ภาพรวมระบบ" })).toHaveCount(0);
 
   expect(unexpectedDiagnostics(qaEvents)).toEqual([]);
 });
@@ -434,12 +418,9 @@ test("Platform Admin Users surface is read-only and exposes persisted Platform r
   });
   await expect(usersSection).toBeVisible();
 
-  await expect(
-    usersSection.locator("button"),
-  ).toHaveCount(0);
-  await expect(
-    usersSection.locator("input, select, textarea"),
-  ).toHaveCount(0);
+  // Filtering/paging is allowed; editing account rights or deleting users is not.
+  await expect(usersSection.getByRole("button", { name: /สร้าง|แก้ไข|ลบผู้ใช้|เปลี่ยนสิทธิ์/ })).toHaveCount(0);
+  await expect(usersSection.getByRole("button", { name: /บันทึก|ระงับผู้ใช้|เพิ่มผู้ดูแล/ })).toHaveCount(0);
 
   const platformAdminRow = page
     .locator("tr")

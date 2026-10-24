@@ -1,6 +1,5 @@
 "use client";
 
-import { CommerceManagementNav } from "@/modules/operations/commerce-management-nav";
 
 import { AsyncPageFallback } from "@/components/ui/async-page";
 import { LoadedDirectoryControls } from "@/modules/organization-directory/loaded-directory-controls";
@@ -609,7 +608,6 @@ export function CampaignManagementView({
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <CommerceManagementNav current="campaigns" organizationId={organizationId} />
         <header className={styles.header}>
           <div className={styles.headerCopy}>
             <h1 className={styles.title}>แคมเปญ</h1>

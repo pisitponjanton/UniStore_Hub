@@ -1,6 +1,5 @@
 "use client";
 
-import { OrganizationOperationsNav } from "@/modules/operations/organization-operations-nav";
 
 import { AsyncPageFallback } from "@/components/ui/async-page";
 import { LoadedDirectoryControls } from "@/modules/organization-directory/loaded-directory-controls";
@@ -327,7 +326,6 @@ export function AuditView({
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <OrganizationOperationsNav organizationId={organizationId} current="audit" />
         <header className={styles.header}>
           <div className={styles.headerCopy}>
             <span className={styles.readOnlyBadge}>อ่านอย่างเดียว</span>

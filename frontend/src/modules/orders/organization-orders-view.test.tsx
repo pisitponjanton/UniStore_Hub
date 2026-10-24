@@ -66,6 +66,8 @@ describe("OrganizationOrdersView", () => {
       "href",
       "/org/orders/view?organizationId=org-1&orderId=order-1",
     );
+    expect(screen.queryByRole("navigation", { name: "คิวงานเจ้าหน้าที่" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "สรุปคำสั่งซื้อที่โหลด" })).not.toBeInTheDocument();
     expect(mocks.listOrganizationOrders).toHaveBeenCalledWith(
       "org-1",
       {
@@ -81,6 +83,11 @@ describe("OrganizationOrdersView", () => {
 
     await screen.findByText("คำสั่งซื้อ order-1");
 
+    expect(screen.queryByLabelText("Campaign ID")).not.toBeInTheDocument();
+    const filterToggle = screen.getByRole("button", { name: "ตัวกรอง" });
+    expect(filterToggle).toHaveAttribute("aria-expanded", "false");
+    fireEvent.click(filterToggle);
+    expect(filterToggle).toHaveAttribute("aria-expanded", "true");
     fireEvent.change(screen.getByLabelText("Campaign ID"), {
       target: { value: "  campaign-2  " },
     });

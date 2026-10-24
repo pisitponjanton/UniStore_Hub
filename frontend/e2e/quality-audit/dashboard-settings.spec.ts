@@ -86,23 +86,35 @@ test("Organization Dashboard and Settings links, validation and mocked save life
     await expect(page.getByRole("heading",{name:"ภาพรวมหน่วยงาน",level:1})).toBeVisible();
     await saveProof(page,"FE-UX-14-01","503-dashboard-retry","Initial GET 503 recovered via visible Retry button");
     const links=[
-      ["FE-UX-14-02","ตั้งค่าหน่วยงาน","/org/settings/"],
+      ["FE-UX-14-02","ข้อมูลหน่วยงาน","/org/settings/"],
       ["FE-UX-14-03","เปิดคิวตรวจการชำระเงิน","/org/payments/"],
       ["FE-UX-14-04","เปิดรายการคำสั่งซื้อ","/org/orders/"],
-      ["FE-UX-14-05","จัดการร้านค้า","/org/stores/"],
-      ["FE-UX-14-06","จัดการสินค้า","/org/products/"],
+      ["FE-UX-14-05","ร้านค้า","/org/stores/"],
+      ["FE-UX-14-06","สินค้า","/org/products/"],
       ["FE-UX-14-11","แคมเปญ","/org/campaigns/"],
       ["FE-UX-14-12","เปิดคำสั่งซื้อ","/org/orders/"],
     ] as const;
     for(const [id,label,dest] of links){
       const link=page.getByRole("link",{name:label,exact:true});
-      await expect(link).toBeVisible();
-      await link.click();
+      if(await link.count() === 1 && await link.isVisible()) {
+        await link.click();
+      } else {
+        await page.getByRole("button",{name:"เปิดเมนูหลัก"}).click();
+        await page.getByRole("dialog",{name:"เมนูหลัก"})
+          .getByRole("navigation",{name:"เมนูหลัก"})
+          .getByRole("link",{name:label,exact:true}).click();
+      }
       await expect(page).toHaveURL(new RegExp(dest.replaceAll("/","\\/")+"\\?organizationId="));
       await saveProof(page,id,"scoped-navigation","Clicked actual shortcut and verified scoped destination URL");
       await page.goto(dashboard,{waitUntil:"domcontentloaded"});
       await expect(page.getByRole("heading",{name:"ภาพรวมหน่วยงาน",level:1})).toBeVisible({timeout:15000});
     }
+    const filterToggle=page.getByRole("button",{name:"ตัวกรอง",exact:true});
+    await expect(filterToggle).toHaveAttribute("aria-expanded","false");
+    await expect(page.locator("#dashboard-campaign-filter")).toHaveCount(0);
+    await filterToggle.click();
+    await expect(filterToggle).toHaveAttribute("aria-expanded","true");
+    await expect(page.getByRole("dialog",{name:"กรองรายงาน"})).toBeVisible();
     const campaign=page.locator("#dashboard-campaign-filter"),store=page.locator("#dashboard-store-filter");
     await campaign.fill("  campaign-example  ");
     await expect(campaign).toHaveValue("  campaign-example  ");
@@ -111,7 +123,8 @@ test("Organization Dashboard and Settings links, validation and mocked save life
     await expect(store).toHaveValue("  store-example  ");
     await saveProof(page,"FE-UX-14-08","store-draft","Store filter editable, no write");
     await page.getByRole("button",{name:"ใช้ตัวกรอง"}).click();
-    await expect(page.getByRole("alert").filter({hasText:"ใช้ตัวกรองไม่สำเร็จ"})).toBeVisible();
+    await expect(page.getByRole("dialog",{name:"กรองรายงาน"}).getByRole("alert")).toBeVisible();
+    await expect(campaign).toHaveValue("campaign-example");
     await saveProof(page,"FE-UX-14-09","503-filter-error","Filtered report failure visible and form retains draft");
     await page.getByRole("button",{name:"ใช้ตัวกรอง"}).click();
     await expect(page.getByRole("status",{name:"ขอบเขตรายงานที่ใช้อยู่"})).toContainText("campaign-example");
@@ -119,10 +132,16 @@ test("Organization Dashboard and Settings links, validation and mocked save life
     expect(params.get("campaignId")).toBe("campaign-example");
     expect(params.get("storeId")).toBe("store-example");
     await saveProof(page,"FE-UX-14-09","server-get-filter-success","Filtered report passed only documented trimmed GET query");
-    await page.getByRole("button",{name:"แสดงทั้งหน่วยงาน"}).click();
+    await expect(page.getByRole("dialog",{name:"กรองรายงาน"})).toHaveCount(0);
+    await filterToggle.click();
+    await page.getByRole("button",{name:"ล้างค่า"}).click();
     await expect(page.getByRole("status",{name:"ขอบเขตรายงานที่ใช้อยู่"})).toContainText("ทั้งหน่วยงาน");
-    await expect(campaign).toHaveValue("");
-    await expect(store).toHaveValue("");
+    await expect(page.getByRole("dialog",{name:"กรองรายงาน"})).toHaveCount(0);
+    await filterToggle.click();
+    await expect(page.locator("#dashboard-campaign-filter")).toHaveValue("");
+    await expect(page.locator("#dashboard-store-filter")).toHaveValue("");
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("dialog",{name:"กรองรายงาน"})).toHaveCount(0);
     await saveProof(page,"FE-UX-14-10","clear-filter","Cleared both local draft values and report scope");
 
     await page.goto(settings,{waitUntil:"domcontentloaded"});
@@ -167,7 +186,10 @@ test("Organization Dashboard and Settings links, validation and mocked save life
     await expect(page.getByText("ข้อมูลหน่วยงานถูกอัปเดตเรียบร้อย")).toBeVisible();
     expect(mockedPatches).toBe(2);
     await saveProof(page,"FE-UX-15-05","synthetic-save-success","Browser-only PATCH 200 produces success and disables clean form");
-    await page.getByRole("link",{name:"เปลี่ยนหน่วยงาน"}).click();
+    await page.getByRole("button",{name:"เปิดเมนูหลัก"}).click();
+    await page.getByRole("dialog",{name:"เมนูหลัก"}).getByText("พื้นที่ปัจจุบัน").click();
+    await page.getByRole("dialog",{name:"เมนูหลัก"}).getByRole("navigation",{name:"สลับพื้นที่ใช้งาน"})
+      .getByRole("link",{name:"หน่วยงานของฉัน"}).click();
     await expect(page).toHaveURL(/\/org\/select\/?/);
     await saveProof(page,"FE-UX-15-06","switch-org","Switch Organization shortcut navigates to selector");
     await page.close();

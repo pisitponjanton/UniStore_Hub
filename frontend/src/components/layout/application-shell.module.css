@@ -1017,3 +1017,72 @@
   .orientation:has(.workAreaNavigation) .orientationPath { display: none; }
   .topbarActions { flex: 1 1 auto; }
 }
+
+
+/* Workspace switcher is the single route between Buyer/Organization/Platform spaces. */
+.workspaceSwitcher {
+  position: relative;
+  margin-bottom: 3px;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+.workspaceSwitchTrigger {
+  position: relative;
+  display: grid;
+  gap: 3px;
+  padding: 13px 39px 13px 14px;
+  cursor: pointer;
+  list-style: none;
+  min-height: 72px;
+}
+.workspaceSwitchTrigger::-webkit-details-marker { display: none; }
+.workspaceSwitchTrigger::marker { content: ""; }
+.workspaceSwitchCaption { color: var(--ink-tertiary); font-size: .72rem; line-height: 1.45; }
+.workspaceSwitchCurrent {
+  font-size: .96rem;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+  line-height: 1.35;
+}
+.workspaceSwitchHint { font-size: .74rem; color: var(--ink-secondary); line-height: 1.4; }
+.workspaceSwitchChevron {
+  position: absolute;
+  right: 15px;
+  top: 33%;
+  color: var(--ink-secondary);
+  font-size: 1.3rem;
+  transition: transform .16s ease;
+}
+.workspaceSwitcher[open] .workspaceSwitchChevron { transform: rotate(180deg); }
+.workspaceSwitchList {
+  display: grid;
+  padding: 6px;
+  gap: 3px;
+  border-top: 1px solid var(--line-soft);
+}
+.workspaceSwitchOption {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  color: var(--ink-secondary);
+  font-size: .83rem;
+  font-weight: 650;
+  text-decoration: none;
+}
+.workspaceSwitchOption > span:nth-child(2) { min-width: 0; flex: 1; }
+.workspaceSwitchOption:hover { color: var(--ink); background: var(--surface-hover); text-decoration: none; }
+.workspaceSwitchOption[aria-current] { background: var(--brand-soft); color: var(--brand-strong); }
+.workspaceSwitchOption:focus-visible, .workspaceSwitchTrigger:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+.shell[data-shell-scope="organization"] .sidebarBody { gap: 12px; }
+.shell[data-shell-scope="organization"] .navigation { padding-top: 1px; }
+@media (prefers-reduced-motion: reduce) {
+  .workspaceSwitchChevron { transition: none; }
+}

@@ -217,32 +217,39 @@ export function buildPlatformNavigation(
   };
 }
 
+export type WorkspaceScope = "customer" | "organization" | "platform";
+
+export function resolveWorkspaceScope(pathname: string): WorkspaceScope {
+  if (pathname.startsWith("/platform/") || pathname === "/platform") return "platform";
+  if (pathname.startsWith("/org/") || pathname === "/org") return "organization";
+  return "customer";
+}
+
 export function buildNavigationGroups({
   user,
   memberships,
   organizationId,
+  pathname = "/shops/",
 }: {
   user: CurrentUserDTO;
   memberships: readonly CurrentMembershipDTO[];
   organizationId?: string | null;
+  pathname?: string;
 }): NavigationGroup[] {
-  const groups: NavigationGroup[] = [buildCustomerNavigation()];
+  const scope = resolveWorkspaceScope(pathname);
+  if (scope === "customer") return [buildCustomerNavigation()];
+  if (scope === "platform") {
+    const platform = buildPlatformNavigation(user);
+    return platform ? [platform] : [];
+  }
   const membership = getActiveMembership(memberships, organizationId);
-
   if (membership) {
-    groups.push(
-      ...buildOrganizationNavigationGroups(
-        membership.organizationId,
-        membership.role,
-      ),
-    );
+    return buildOrganizationNavigationGroups(membership.organizationId, membership.role);
   }
-
-  const platform = buildPlatformNavigation(user);
-
-  if (platform) {
-    groups.push(platform);
-  }
-
-  return groups;
+  // Organization landing/application is accessible to applicants before approval.
+  // Do not expose tenant-specific operational links without an ACTIVE membership.
+  return [{
+    label: "พื้นที่หน่วยงาน",
+    items: [{ label: "หน่วยงานของฉัน", href: "/org/select/", activePaths: ["/org/application/"] }],
+  }];
 }

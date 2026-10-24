@@ -3,7 +3,6 @@
 import { AppIcon } from "@/components/ui/app-icon";
 
 import Link from "next/link";
-import { OrganizationOperationsNav } from "@/modules/operations/organization-operations-nav";
 
 import {
   useEffect,
@@ -312,7 +311,6 @@ export function ProductionSummaryView({
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <OrganizationOperationsNav organizationId={organizationId} current="production" />
         <header className={styles.header}>
           <div className={styles.headerCopy}>
             <h1 className={styles.title}>สรุปงานผลิต</h1>

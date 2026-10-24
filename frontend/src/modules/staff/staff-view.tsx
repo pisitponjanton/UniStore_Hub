@@ -1,6 +1,5 @@
 "use client";
 
-import { OrganizationAdminNav } from "@/modules/organizations/organization-admin-nav";
 
 import { AsyncPageFallback } from "@/components/ui/async-page";
 import { LoadedDirectoryControls } from "@/modules/organization-directory/loaded-directory-controls";
@@ -343,7 +342,6 @@ export function StaffView({
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <OrganizationAdminNav organizationId={organizationId} current="staff" />
         <header className={styles.header}>
           <div className={styles.headerCopy}>
             <h1 className={styles.title}>บุคลากรและสิทธิ์</h1>

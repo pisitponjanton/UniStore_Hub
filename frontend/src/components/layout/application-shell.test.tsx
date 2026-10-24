@@ -343,13 +343,18 @@ describe("ApplicationShell accessibility", () => {
       </ApplicationShell>,
     );
 
-    const workspaceNav = screen.getByRole("navigation", { name: "เปลี่ยนพื้นที่ใช้งาน" });
-    expect(within(workspaceNav).getAllByRole("link")).toHaveLength(1);
+    expect(screen.queryByRole("navigation", { name: "เปลี่ยนพื้นที่ใช้งาน" })).not.toBeInTheDocument();
+    const switcher = screen.getByText("พื้นที่ปัจจุบัน").closest("details");
+    expect(switcher).not.toBeNull();
+    expect(switcher).toHaveTextContent("ผู้ดูแลแพลตฟอร์ม");
+    fireEvent.click(within(switcher as HTMLElement).getByText("พื้นที่ปัจจุบัน"));
+    const workspaceNav = screen.getByRole("navigation", { name: "สลับพื้นที่ใช้งาน" });
+    expect(within(workspaceNav).getAllByRole("link")).toHaveLength(2);
     expect(within(workspaceNav).getByRole("link", { name: "ดูแลแพลตฟอร์ม" }))
       .toHaveAttribute("aria-current", "location");
-    expect(within(workspaceNav).queryByRole("link", { name: "จัดการหน่วยงาน" }))
-      .not.toBeInTheDocument();
-    expect(within(workspaceNav).queryByRole("link", { name: "ซื้อสินค้า" }))
+    expect(within(workspaceNav).getByRole("link", { name: "บัญชีส่วนตัว" }))
+      .toHaveAttribute("href", "/shops");
+    expect(within(workspaceNav).queryByRole("link", { name: "หน่วยงานของฉัน" }))
       .not.toBeInTheDocument();
     expect(screen.getAllByLabelText("เปลี่ยนธีม")).toHaveLength(1);
     const header = document.querySelector('[aria-label="ตำแหน่งในระบบ"]');

@@ -71,10 +71,19 @@ export function ApplicationShell({
   const drawerCloseRef = useRef<HTMLButtonElement>(null);
   const sidebarPanelRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const workspaceSwitchRef = useRef<HTMLDetailsElement>(null);
   const menuOpen = openMenuPath === pathname;
   const shellScope = resolveShellScope(pathname);
-  // The storefront remains in the sidebar; no redundant Buy Products topbar shortcut.
-  const secondaryWorkAreas = workAreas.filter((area) => area.id !== "customer");
+  const workspaceChoices = [
+    { id: "customer" as const, href: "/shops/", label: "บัญชีส่วนตัว" },
+    ...workAreas.filter(area => area.id !== "customer"),
+    ...(shellScope === "organization" && !workAreas.some(area => area.id === "organization")
+      ? [{ id: "organization" as const, href: "/org/select/", label: "หน่วยงานของฉัน" }]
+      : []),
+  ];
+  const currentWorkspaceLabel = shellScope === "organization"
+    ? (contextValue && contextValue !== "หน่วยงานที่เลือก" ? contextValue : "พื้นที่หน่วยงาน")
+    : shellScope === "platform" ? "ผู้ดูแลแพลตฟอร์ม" : "บัญชีส่วนตัว";
 
   const activeNavigation =
     groups
@@ -189,7 +198,12 @@ export function ApplicationShell({
       mobileViewport?.removeEventListener("change", handleViewportChange);
     };
   }, [menuOpen]);
+  useEffect(() => {
+    if (workspaceSwitchRef.current) workspaceSwitchRef.current.open = false;
+  }, [pathname]);
+
   function closeMenu() {
+    if (workspaceSwitchRef.current) workspaceSwitchRef.current.open = false;
     setOpenMenuPath(null);
   }
 
@@ -309,6 +323,52 @@ export function ApplicationShell({
           </div>
 
           <div className={styles.sidebarBody}>
+            {workspaceChoices.length > 1 ? (
+              <details
+                ref={workspaceSwitchRef}
+                className={styles.workspaceSwitcher}
+                onKeyDown={(event) => {
+                  if (event.key === "Escape" && workspaceSwitchRef.current?.open) {
+                    event.preventDefault();
+                    workspaceSwitchRef.current.open = false;
+                    workspaceSwitchRef.current.querySelector("summary")?.focus();
+                  }
+                }}
+              >
+                <summary className={styles.workspaceSwitchTrigger}>
+                  <span className={styles.workspaceSwitchCaption}>พื้นที่ปัจจุบัน</span>
+                  <strong className={styles.workspaceSwitchCurrent}>{currentWorkspaceLabel}</strong>
+                  <span className={styles.workspaceSwitchHint}>
+                    {shellScope === "organization" ? contextMeta ?? "เลือกและจัดการหน่วยงาน" :
+                     shellScope === "platform" ? "Platform Admin" : "เลือกซื้อและติดตามคำสั่งซื้อ"}
+                  </span>
+                  <span className={styles.workspaceSwitchChevron} aria-hidden="true"><WorkspaceIcon name="chevron" size={18} /></span>
+                </summary>
+                <nav className={styles.workspaceSwitchList} aria-label="สลับพื้นที่ใช้งาน">
+                  {workspaceChoices.map((area) => (
+                    <Link
+                      key={area.id}
+                      href={area.href}
+                      aria-current={area.id === shellScope ? "location" : undefined}
+                      className={styles.workspaceSwitchOption}
+                      onClick={closeMenu}
+                    >
+                      <WorkspaceIcon name={area.id === "organization" ? "organization" :
+                        area.id === "platform" ? "platform" : "store"} size={17} />
+                      <span>{area.id === "organization" ? "หน่วยงานของฉัน" : area.label}</span>
+                      {area.id === shellScope ? <span aria-hidden="true"><WorkspaceIcon name="check" size={16} /></span> : null}
+                    </Link>
+                  ))}
+                </nav>
+              </details>
+            ) : null}
+            {shellScope === "organization" && contextId ? (
+              <details className={styles.workspaceTechnical}>
+                <summary>ดูรหัสหน่วยงาน</summary>
+                <code>{contextId}</code>
+              </details>
+            ) : null}
+            {shellScope !== "organization" ? (
             <section className={styles.workspaceSummary} aria-label="ขอบเขตการใช้งาน">
               <strong className={styles.workspaceTitle}>
                 {activeNavigation?.group.label ?? scopeLabel[shellScope]}
@@ -329,6 +389,7 @@ export function ApplicationShell({
                 </details>
               ) : null}
             </section>
+            ) : null}
 
             <nav className={styles.navigation} aria-label="เมนูหลัก">
               {groups.map((group) => {
@@ -420,24 +481,6 @@ export function ApplicationShell({
             <strong>{activeNavigation?.item.label ?? "หน้าหลัก"}</strong>
           </div>
           <div className={styles.topbarActions}>
-            {secondaryWorkAreas.length > 0 ? (
-              <nav className={styles.workAreaNavigation} aria-label="เปลี่ยนพื้นที่ใช้งาน">
-                {secondaryWorkAreas.map((area) => (
-                  <Link
-                    key={area.id}
-                    href={area.href}
-                    aria-current={area.id === shellScope ? "location" : undefined}
-                    className={[
-                      styles.workAreaLink,
-                      area.id === shellScope ? styles.workAreaLinkCurrent : "",
-                    ].filter(Boolean).join(" ")}
-                  >
-                    <WorkspaceIcon name={area.id === "organization" ? "organization" : "platform"} size={16} />
-                    <span>{area.label}</span>
-                  </Link>
-                ))}
-              </nav>
-            ) : null}
             <ThemeSwitcher placement="down" compact />
           </div>
         </div>

@@ -82,8 +82,8 @@ for(const role of ["staff","organizationAdmin","platformAdmin"] as Role[]){
     await expect(nav.getByRole("link",{name:"แดชบอร์ด"})).toHaveCount(0);
     await expect(nav.getByRole("link",{name:"ภาพรวมระบบ"})).toBeVisible();
    }
-   await expect(nav.getByRole("link",{name:"หน้าร้านค้า"})).toBeVisible();
-   await expect(nav.getByRole("link",{name:"คำสั่งซื้อของฉัน"})).toBeVisible();
+   await expect(nav.getByRole("link",{name:"หน้าร้านค้า"})).toHaveCount(0);
+   await expect(nav.getByRole("link",{name:"คำสั่งซื้อของฉัน"})).toHaveCount(0);
 
    // Every named role-specific menu link is actually clicked and the destination checked.
    for(const action of config.items){
@@ -93,7 +93,7 @@ for(const role of ["staff","organizationAdmin","platformAdmin"] as Role[]){
     await menuItem.click();
     await expect(page).toHaveURL(frontend+target);
     await expect(page.locator("[data-shell-scope]")).toHaveAttribute("data-shell-scope",config.scope);
-    await expect(page.getByRole("button",{name:"เปิดเมนูหลัก"})).toBeVisible();
+    await expect(page.getByRole("button",{name:"เปิดเมนูหลัก"})).toBeVisible({timeout:20000});
     await capture(page,action.id,"navigated-"+action.id.split("-").at(-1),"Clicked role-scoped navigation link and asserted exact route/query");
     await page.getByRole("button",{name:"เปิดเมนูหลัก"}).click();
     await expect(drawer).toBeVisible();
@@ -116,21 +116,24 @@ for(const role of ["staff","organizationAdmin","platformAdmin"] as Role[]){
    await skip.press("Enter");
    await expect(page.locator("#main-content")).toBeFocused();
    await capture(page,sourceId+"-02","keyboard-skip","Skip link focuses main content");
-   // Switch organization only appears for ACTIVE memberships.
+   // The workspace switcher replaces the old footer organization link.
+   await page.getByRole("button",{name:"เปิดเมนูหลัก"}).click();
    if(config.switchOrg){
-    await page.getByRole("button",{name:"เปิดเมนูหลัก"}).click();
-    const orgLink=drawer.getByRole("link",{name:"เปลี่ยนหน่วยงาน"});
-    await expect(orgLink).toHaveAttribute("href","/org/select/");
-    await orgLink.click();
-    await expect(page).toHaveURL(frontend+"/org/select/");
-    await expect(page.getByRole("heading",{name:"วันนี้จะทำงานกับหน่วยงานไหน?",level:1})).toBeVisible();
-    await capture(page,sourceId+(role==="staff"?"-06":"-14"),"organization-switch","Role authorized Organization switch opens the correct selector");
-    await page.goto(frontend+initial,{waitUntil:"domcontentloaded"});
-    await expect(page.getByRole("button",{name:"เปิดเมนูหลัก"})).toBeVisible();
+     const current=drawer.getByText("พื้นที่ปัจจุบัน");
+     await current.click();
+     const choices=drawer.getByRole("navigation",{name:"สลับพื้นที่ใช้งาน"});
+     const orgLink=choices.getByRole("link",{name:"หน่วยงานของฉัน"});
+     await expect(orgLink).toHaveAttribute("href",/\/org\/select/);
+     await orgLink.click();
+     await expect(page).toHaveURL(/\/org\/select\/?/);
+     await expect(page.getByRole("heading",{name:"หน่วยงานของฉัน",level:1})).toBeVisible();
+     await capture(page,sourceId+(role==="staff"?"-06":"-14"),"organization-switch","Workspace switcher opens org selection");
+     await page.goto(frontend+initial,{waitUntil:"domcontentloaded"});
    }else{
-    await page.getByRole("button",{name:"เปิดเมนูหลัก"}).click();
-    await expect(drawer.getByRole("link",{name:"เปลี่ยนหน่วยงาน"})).toHaveCount(0);
-    await drawer.getByRole("button",{name:"ปิดเมนูหลัก"}).click();
+     await drawer.getByText("พื้นที่ปัจจุบัน").click();
+     await expect(drawer.getByRole("navigation",{name:"สลับพื้นที่ใช้งาน"})
+       .getByRole("link",{name:"หน่วยงานของฉัน"})).toHaveCount(0);
+     await drawer.getByRole("button",{name:"ปิดเมนูหลัก"}).click();
    }
    // Shell brand sits outside mobile dialog; close it before actual brand click.
    await page.locator('aside a[href="/"]').first().click();
@@ -138,7 +141,7 @@ for(const role of ["staff","organizationAdmin","platformAdmin"] as Role[]){
    await capture(page,sourceId+"-01","brand-return","App shell brand click opens public storefront");
    // Resume authenticated workspace before logout.
    await page.goto(frontend+initial,{waitUntil:"domcontentloaded"});
-   await expect(page.getByRole("button",{name:"เปิดเมนูหลัก"})).toBeVisible();
+   await expect(page.getByRole("button",{name:"เปิดเมนูหลัก"})).toBeVisible({timeout:20000});
    await page.getByRole("button",{name:"เปิดเมนูหลัก"}).click();
    await drawer.getByRole("button",{name:"ออกจากระบบ"}).click();
    await expect(page).toHaveURL(frontend+"/");

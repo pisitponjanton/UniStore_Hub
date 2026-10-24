@@ -178,21 +178,19 @@ describe("role-aware navigation", () => {
     ]);
   });
 
-  it("combines customer, organization, and platform groups without treating membership as platform authority", () => {
-    const groups = buildNavigationGroups({
-      user: {
-        ...session.user,
-        platformRole: "PLATFORM_ADMIN",
-      },
-      memberships,
-      organizationId: "org-staff",
-    });
-
-    expect(groups.map((group) => group.label)).toEqual([
-      "บัญชีของฉัน",
-      "งานของหน่วยงาน",
-      "ผู้ดูแลแพลตฟอร์ม",
-    ]);
+  it("isolates customer, staff, admin, and platform navigation to the current route scope", () => {
+    const user = { ...session.user, platformRole: "PLATFORM_ADMIN" as const };
+    const nav = (pathname: string, organizationId: string | null = "org-staff") =>
+      buildNavigationGroups({ user, memberships, organizationId, pathname });
+    expect(nav("/shops/").map(group => group.label)).toEqual(["บัญชีของฉัน"]);
+    expect(nav("/org/orders/").map(group => group.label)).toEqual(["งานของหน่วยงาน"]);
+    expect(nav("/org/dashboard/", "org-admin").map(group => group.label))
+      .toEqual(["เริ่มงาน", "คำสั่งซื้อและการส่งมอบ", "ร้านค้าและพรีออเดอร์", "ทีมและการตั้งค่า"]);
+    expect(nav("/platform/summary/").map(group => group.label)).toEqual(["ผู้ดูแลแพลตฟอร์ม"]);
+    expect(nav("/org/select/", null)[0]?.items).toEqual([{label:"หน่วยงานของฉัน",href:"/org/select/",activePaths:["/org/application/"]}]);
+    expect(nav("/org/orders/", "org-inactive").flatMap(group => group.items).map(item => item.href))
+      .not.toContain("/org/dashboard/?organizationId=org-inactive");
+    expect(buildNavigationGroups({user:session.user,memberships,pathname:"/platform/summary/"})).toEqual([]);
   });
 
   it("keeps nested operational detail routes highlighted under their parent item", () => {

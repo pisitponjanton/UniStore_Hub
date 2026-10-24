@@ -1,6 +1,5 @@
 "use client";
 
-import { OrganizationAdminNav } from "@/modules/organizations/organization-admin-nav";
 
 import { PageLoadingRows, PageStateHeading } from "@/components/ui/async-page";
 
@@ -282,7 +281,6 @@ export function OrganizationSettingsView({
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <OrganizationAdminNav organizationId={organizationId} current="settings" />
         <header className={styles.settingsHeader} data-organization-status={organization.status}>
           <div className={styles.headerCopy}>
             <span className={styles.managementEyebrow}>กำลังดูแล: {organization.name}</span>

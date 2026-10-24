@@ -18,9 +18,9 @@ const cases: {
 }[] = [
   { role: "customer", path: "/my/orders/", current: "", options: [] },
   { role: "staff", path: `/org/orders/?organizationId=${ids.organizationId}`,
-    current: "จัดการหน่วยงาน", options: ["จัดการหน่วยงาน"] },
+    current: "หน่วยงานของฉัน", options: ["หน่วยงานของฉัน"] },
   { role: "organizationAdmin", path: `/org/dashboard/?organizationId=${ids.organizationId}`,
-    current: "จัดการหน่วยงาน", options: ["จัดการหน่วยงาน"] },
+    current: "หน่วยงานของฉัน", options: ["หน่วยงานของฉัน"] },
   { role: "platformAdmin", path: "/platform/summary/", current: "ดูแลแพลตฟอร์ม",
     options: ["ดูแลแพลตฟอร์ม"] },
 ];
@@ -48,33 +48,58 @@ for (const scenario of cases) {
     await mkdir(evidence, { recursive: true });
     try {
       await page.goto(frontend + scenario.path, { waitUntil: "domcontentloaded" });
-      const workArea = page.getByRole("navigation", { name: "เปลี่ยนพื้นที่ใช้งาน" });
+      await expect(page.getByRole("navigation", { name: "เปลี่ยนพื้นที่ใช้งาน" })).toHaveCount(0);
       const themeButton = page.getByLabel("เปลี่ยนธีม");
       await expect(themeButton).toBeVisible({ timeout: 20000 });
       await expect(page.locator('[aria-label="ตำแหน่งในระบบ"]').getByLabel("เปลี่ยนธีม")).toHaveCount(1);
       await expect(page.locator("footer").getByLabel("เปลี่ยนธีม")).toHaveCount(0);
-      await expect(page.getByRole("link", { name: "ซื้อสินค้า", exact: true })).toHaveCount(0);
-      if (scenario.options.length > 0) {
-        await expect(workArea).toBeVisible();
-        await expect(workArea.getByRole("link")).toHaveCount(scenario.options.length);
-        for (const label of scenario.options) {
-          await expect(workArea.getByRole("link", { name: label })).toBeVisible();
-        }
-        await expect(workArea.getByRole("link", { name: scenario.current })).toHaveAttribute("aria-current", "location");
-      } else {
-        await expect(workArea).toHaveCount(0);
-      }
       const menu = page.getByRole("button", { name: "เปิดเมนูหลัก" });
       await expect(menu).toBeVisible();
       await menu.click();
       await expect(page.getByRole("dialog", { name: "เมนูหลัก" })).toBeVisible();
-      await expect(page.getByRole("dialog", { name: "เมนูหลัก" }).getByRole("button", { name: "ปิดเมนูหลัก" })).toBeFocused();
+      const drawer = page.getByRole("dialog", { name: "เมนูหลัก" });
+      await expect(drawer.getByRole("button", { name: "ปิดเมนูหลัก" })).toBeFocused();
+      const navigation = drawer.getByRole("navigation", { name: "เมนูหลัก" });
+      if (scenario.role === "customer") {
+        await expect(navigation).toContainText("คำสั่งซื้อของฉัน");
+        await expect(navigation).not.toContainText("ตรวจสอบการชำระเงิน");
+      } else if (scenario.role === "platformAdmin") {
+        await expect(navigation).toContainText("ภาพรวมระบบ");
+        await expect(navigation).not.toContainText("คำสั่งซื้อของฉัน");
+        await expect(navigation).not.toContainText("คำสั่งซื้อและการส่งมอบ");
+      } else {
+        await expect(navigation).toContainText("ตรวจสอบการชำระเงิน");
+        await expect(navigation).not.toContainText("คำสั่งซื้อของฉัน");
+        await expect(navigation).not.toContainText("การแจ้งเตือน");
+        if (scenario.role === "staff") {
+          await expect(navigation).not.toContainText("ตั้งค่า");
+          await expect(navigation).not.toContainText("บุคลากร");
+        } else {
+          await expect(navigation).toContainText("บุคลากร");
+        }
+      }
+      const currentArea = drawer.getByText("พื้นที่ปัจจุบัน");
+      if (scenario.options.length > 0) {
+        await expect(currentArea).toBeVisible();
+        await currentArea.click();
+        const choices = drawer.getByRole("navigation", { name: "สลับพื้นที่ใช้งาน" });
+        await expect(choices.getByRole("link", { name: "บัญชีส่วนตัว" })).toHaveAttribute("href", /\/shops/);
+        await expect(choices.getByRole("link", { name: scenario.current })).toHaveAttribute("aria-current", "location");
+        if (scenario.role === "platformAdmin") {
+          await expect(choices.getByRole("link", { name: "หน่วยงานของฉัน" })).toHaveCount(0);
+        } else {
+          await expect(choices.getByRole("link", { name: "หน่วยงานของฉัน" })).toBeVisible();
+        }
+        await page.keyboard.press("Escape");
+      } else {
+        await expect(currentArea).toHaveCount(0);
+      }
       await page.keyboard.press("Escape");
-      await expect(page.getByRole("dialog", { name: "เมนูหลัก" })).not.toBeVisible();
+      await expect(drawer).not.toBeVisible();
       await expect(menu).toBeFocused();
       for (const width of [320, 390, 768, 1440]) {
         await page.setViewportSize({ width, height: 900 });
-        if (scenario.options.length > 0) await expect(workArea).toBeVisible();
+        await expect(page.getByRole("navigation", { name: "เปลี่ยนพื้นที่ใช้งาน" })).toHaveCount(0);
         await expect(themeButton).toBeVisible();
         const overflow = await page.evaluate(() => Math.max(0, document.documentElement.scrollWidth - innerWidth));
         expect(overflow, `${scenario.role} at ${width}px`).toBeLessThanOrEqual(1);
@@ -84,6 +109,16 @@ for (const scenario of cases) {
             animations: "disabled",
           });
         }
+      }
+      await page.emulateMedia({ colorScheme: "dark" });
+      for (const width of [390, 1440]) {
+        await page.setViewportSize({ width, height: 900 });
+        await expect(themeButton).toBeVisible();
+        expect(await page.evaluate(() => Math.max(0, document.documentElement.scrollWidth - innerWidth))).toBeLessThanOrEqual(1);
+        await page.screenshot({
+          path: join(evidence, scenario.role + "-dark-shell-" + width + ".png"),
+          animations: "disabled",
+        });
       }
       expect(attemptedWrite).toBe(0);
     } finally {

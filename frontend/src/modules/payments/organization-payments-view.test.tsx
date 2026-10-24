@@ -113,18 +113,27 @@ describe("OrganizationPaymentsView", () => {
     render(<OrganizationPaymentsView organizationId="org-1" />);
 
     expect(await screen.findByText("หลักฐาน payment-1")).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: /ดูคิวตรวจสลิป/ }),
-    ).toHaveAttribute("href", "#payment-review-list");
-    expect(
-      screen.getByRole("link", { name: "ตัวกรองรายการ" }),
-    ).toHaveAttribute("href", "#payment-filter-title");
-    expect(
-      screen.getByRole("link", { name: /ดูคิวตรวจสลิป/ }),
-    ).toHaveTextContent("1 รอตรวจสอบ");
+    expect(screen.queryByText("เลือกหลักฐานเพื่อเริ่มตรวจสอบ")).not.toBeInTheDocument();
+    const toggle = screen.getByRole("button", { name: "ตัวกรอง" });
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByLabelText("สถานะ Payment")).not.toBeInTheDocument();
+    expect(screen.queryByRole("navigation", { name: "คิวงานเจ้าหน้าที่" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "สรุปคิวชำระเงินที่โหลด" })).not.toBeInTheDocument();
+    fireEvent.click(toggle);
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
     expect(screen.getByLabelText("สถานะ Payment")).toBeInTheDocument();
     expect(screen.getByLabelText("Campaign ID")).toBeInTheDocument();
     expect(screen.getByLabelText("Order ID")).toBeInTheDocument();
+  });
+
+  it("uses one compact empty state without an empty review panel", async () => {
+    mocks.listOrganizationPayments.mockResolvedValueOnce({ items: [], nextCursor: null });
+    const { container } = render(<OrganizationPaymentsView organizationId="org-1" />);
+    expect(await screen.findByText("ยังไม่มีรายการชำระเงิน")).toBeInTheDocument();
+    expect(screen.queryByText("เลือกหลักฐานเพื่อเริ่มตรวจสอบ")).not.toBeInTheDocument();
+    expect(container.querySelector("#staff-payment-detail")).not.toBeInTheDocument();
+    expect(container.querySelector('[data-single-column="true"]')).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "ตัวกรอง" })).toHaveAttribute("aria-expanded", "false");
   });
 
   it("announces applied payment queue filters with useful context", async () => {
@@ -144,6 +153,7 @@ describe("OrganizationPaymentsView", () => {
 
     await screen.findByText("หลักฐาน payment-1");
 
+    fireEvent.click(screen.getByRole("button", { name: "ตัวกรอง" }));
     fireEvent.change(screen.getByLabelText("สถานะ Payment"), {
       target: { value: "PENDING_REVIEW" },
     });

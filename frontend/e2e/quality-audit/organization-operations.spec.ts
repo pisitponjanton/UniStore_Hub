@@ -295,14 +295,18 @@ for (const theme of ["light", "dark"] as const) {
           });
         }
         await page.setViewportSize({ width: 1440, height: 920 });
-        if (route.name === "dashboard" || route.name === "settings" || route.name === "staff") {
-          const nav = page.getByRole("navigation", { name: "พื้นที่จัดการหน่วยงาน" });
-          await expect(nav).toBeVisible();
-          await expect(nav.getByRole("link", { name: "เปลี่ยนหน่วยงาน" })).toHaveAttribute("href", "/org/select/");
-          for (const link of await nav.locator('a[href*="organizationId="]').all()) {
-            const href = (await link.getAttribute("href"))!;
-            expect(new URL(href, host).searchParams.get("organizationId")).toBe(org);
+        if (["dashboard", "settings", "staff"].includes(route.name)) {
+          await expect(page.getByRole("navigation", { name: "พื้นที่จัดการหน่วยงาน" })).toHaveCount(0);
+          const sidebar = page.locator('nav[aria-label="เมนูหลัก"]');
+          await expect(sidebar).toBeVisible();
+          for (const link of await sidebar.locator('a[href*="organizationId="]').all()) {
+            expect(new URL((await link.getAttribute("href"))!, host).searchParams.get("organizationId")).toBe(org);
           }
+          const switcher = page.getByText("พื้นที่ปัจจุบัน").locator("xpath=ancestor::details");
+          await expect(switcher).toBeVisible();
+          await switcher!.locator("summary").click();
+          await expect(page.getByRole("navigation", { name: "สลับพื้นที่ใช้งาน" })
+            .getByRole("link", { name: "หน่วยงานของฉัน" })).toHaveAttribute("href", /\/org\/select/);
         }
         if (route.name === "select") {
           await expect(page.getByText(organization.name).first()).toBeVisible();

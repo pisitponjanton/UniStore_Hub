@@ -1,14 +1,13 @@
 "use client";
 
-import { OrganizationAdminNav } from "@/modules/organizations/organization-admin-nav";
 
 import { PageLoadingRows, PageStateHeading } from "@/components/ui/async-page";
 
 import Link from "next/link";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import { ChevronDown, SlidersHorizontal, ArrowUpRight } from "lucide-react";
 
 import {
-  Badge,
   Button,
   ErrorState,
   ForbiddenState,
@@ -93,10 +92,41 @@ export function DashboardView({
   const [draftStoreId, setDraftStoreId] = useState("");
   const [appliedFilters, setAppliedFilters] =
     useState<ReportFilters>(EMPTY_FILTERS);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [filterPlacement, setFilterPlacement] = useState<"top" | "bottom">("bottom");
+  const [filterMaxHeight, setFilterMaxHeight] = useState(400);
+  const [filterLeftOffset, setFilterLeftOffset] = useState(0);
+  const filterAreaRef = useRef<HTMLDivElement>(null);
+  const filterToggleRef = useRef<HTMLButtonElement>(null);
   const [filtering, setFiltering] = useState(false);
   const [inlineError, setInlineError] = useState<string | null>(
     null,
   );
+
+  useEffect(() => {
+    if (!filterOpen) return;
+
+    // Focus the first field when opening the anchored panel.
+    filterAreaRef.current?.querySelector<HTMLInputElement>("input")?.focus();
+
+    function handlePointerDown(event: PointerEvent) {
+      if (event.target instanceof Node && !filterAreaRef.current?.contains(event.target)) {
+        setFilterOpen(false);
+      }
+    }
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      setFilterOpen(false);
+      filterToggleRef.current?.focus();
+    }
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [filterOpen]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -161,6 +191,7 @@ export function DashboardView({
 
       setAppliedFilters(filters);
       setState({ status: "success", summary });
+      setFilterOpen(false);
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();
@@ -179,6 +210,24 @@ export function DashboardView({
     } finally {
       setFiltering(false);
     }
+  }
+
+  function toggleFilter() {
+    if (filterOpen) {
+      setFilterOpen(false);
+      return;
+    }
+    const rect = filterToggleRef.current?.getBoundingClientRect();
+    const above = Math.max(0, (rect?.top ?? 0) - 16);
+    const below = Math.max(0, window.innerHeight - (rect?.bottom ?? 0) - 16);
+    const placement = below < 360 && above > below ? "top" : "bottom";
+    const popoverWidth = Math.min(350, window.innerWidth - 32);
+    const idealLeft = (rect?.right ?? popoverWidth + 16) - popoverWidth;
+    const clampedLeft = Math.max(16, Math.min(window.innerWidth - popoverWidth - 16, idealLeft));
+    setFilterLeftOffset(clampedLeft - (rect?.left ?? 0));
+    setFilterPlacement(placement);
+    setFilterMaxHeight(Math.max(120, (placement === "top" ? above : below) - 9));
+    setFilterOpen(true);
   }
 
   function handleFilter(event: FormEvent<HTMLFormElement>) {
@@ -253,260 +302,168 @@ export function DashboardView({
     Boolean(appliedFilters.storeId);
   const hasDraftFilters =
     Boolean(draftCampaignId.trim()) || Boolean(draftStoreId.trim());
+  const visibleCampaignStatuses = CAMPAIGN_STATUSES.filter(status =>
+    (summary.campaignsByStatus[status] ?? 0) > 0
+  );
+  const visibleOrderStatuses = ORDER_STATUSES.filter(status =>
+    (summary.ordersByStatus[status] ?? 0) > 0
+  );
 
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <OrganizationAdminNav organizationId={organizationId} current="dashboard" />
         <header className={styles.header} data-has-attention={summary.pendingPaymentReviews > 0 || undefined}>
           <div className={styles.headerCopy}>
             <h1 className={styles.title}>ภาพรวมหน่วยงาน</h1>
             <p className={styles.description}>
               {summary.pendingPaymentReviews > 0
-                ? "มีหลักฐานการชำระเงินที่ต้องตรวจ เริ่มจากคิวงานก่อน แล้วดูภาพรวมและรายงานของหน่วยงานด้านล่าง"
-                : "ไม่มีหลักฐานการชำระเงินค้างตรวจในรายงานนี้ ดูสถานะคำสั่งซื้อ ร้านค้า และงานอื่นของหน่วยงานได้ด้านล่าง"}
+                ? "มีรายการชำระเงินรอการตรวจสอบ ตรวจสอบงานค้างก่อนดำเนินการอื่น"
+                : "สรุปคำสั่งซื้อ รายได้ และงานของหน่วยงาน"}
             </p>
           </div>
 
-          <div className={styles.headerActions}>
-            <Badge tone="info">ผู้ดูแลหน่วยงาน</Badge>
-            <Link
-              href={organizationHref("/org/settings/", organizationId)}
-              className={styles.headerLink}
-            >
-              ตั้งค่าหน่วยงาน
-            </Link>
-          </div>
         </header>
 
-        <section className={styles.actionBoard} aria-label="งานและตัวเลขสำคัญ">
-          <article
-            className={styles.actionMetric}
-            data-attention={summary.pendingPaymentReviews > 0 || undefined}
-          >
-            <div className={styles.metricTopline}>
-              <span className={styles.metricLabel}>การชำระเงินรอตรวจสอบ</span>
-              <span className={styles.metricSignal}>
-                {summary.pendingPaymentReviews > 0 ? "ต้องตรวจ" : "ไม่มีค้าง"}
-              </span>
-            </div>
-            <strong className={styles.priorityValue} data-numeric>
-              {countLabel(summary.pendingPaymentReviews)}
-            </strong>
-            <Link
-              href={organizationHref("/org/payments/", organizationId)}
-              className={styles.metricAction}
-            >
-              เปิดคิวตรวจการชำระเงิน
-            </Link>
-          </article>
-
-          <article className={styles.actionMetric}>
-            <div className={styles.metricTopline}>
-              <span className={styles.metricLabel}>คำสั่งซื้อที่ชำระแล้ว</span>
-              <span className={styles.metricSignal}>ในขอบเขตนี้</span>
-            </div>
-            <strong className={styles.priorityValue} data-numeric>
-              {countLabel(summary.paidOrderCount)}
-            </strong>
-            <Link
-              href={organizationHref("/org/orders/", organizationId)}
-              className={styles.metricAction}
-            >
-              เปิดรายการคำสั่งซื้อ
-            </Link>
-          </article>
-
-          <article className={styles.revenueMetric}>
-            <span className={styles.metricLabel}>
-              รายได้จากคำสั่งซื้อที่ชำระแล้ว
-            </span>
-            <strong className={styles.revenueValue} data-numeric>
-              {formatSatang(summary.paidRevenueSatang)}
-            </strong>
-            <span className={styles.metricHint}>
-              อ้างอิงยอดที่ระบบบันทึกจากคำสั่งซื้อในขอบเขตรายงานปัจจุบัน
-            </span>
-          </article>
-        </section>
-
-        <nav className={styles.adminShortcuts} aria-label="ทางลัดงานผู้ดูแลหน่วยงาน">
-          <span>ไปจัดการงาน</span>
-          <Link href={organizationHref("/org/staff/", organizationId)}>สมาชิกและสิทธิ์</Link>
-          <Link href={organizationHref("/org/campaigns/", organizationId)}>แคมเปญ</Link>
-          <Link href={organizationHref("/org/production/", organizationId)}>สรุปงานผลิต</Link>
-          <Link href={organizationHref("/org/pickups/", organizationId)}>จุดรับสินค้า</Link>
-          <Link href={organizationHref("/org/audit/", organizationId)}>ประวัติการทำรายการ</Link>
-        </nav>
-
-        <section className={styles.resourceStrip} aria-label="ทรัพยากรในขอบเขตที่เลือก">
-          <div>
-            <span className={styles.metricLabel}>ร้านค้า</span>
-            <strong className={styles.resourceValue} data-numeric>
-              {countLabel(summary.totalStores)}
-            </strong>
-            <Link href={organizationHref("/org/stores/", organizationId)}>
-              จัดการร้านค้า
+        <section className={styles.summaryStrip} aria-label="งานและตัวเลขสำคัญ">
+          <div className={styles.summaryMetric} data-attention={summary.pendingPaymentReviews > 0 || undefined}>
+            <span className={styles.summaryLabel}>รอตรวจชำระเงิน</span>
+            <strong className={styles.summaryValue} data-numeric>{countLabel(summary.pendingPaymentReviews)}</strong>
+            <Link href={organizationHref("/org/payments/", organizationId)} className={styles.summaryLink}>
+              เปิดคิวตรวจการชำระเงิน <ArrowUpRight size={15} aria-hidden="true" />
             </Link>
           </div>
-          <div>
-            <span className={styles.metricLabel}>สินค้า</span>
-            <strong className={styles.resourceValue} data-numeric>
-              {countLabel(summary.totalProducts)}
-            </strong>
-            <Link href={organizationHref("/org/products/", organizationId)}>
-              จัดการสินค้า
+          <div className={styles.summaryMetric}>
+            <span className={styles.summaryLabel}>คำสั่งซื้อที่ชำระแล้ว</span>
+            <strong className={styles.summaryValue} data-numeric>{countLabel(summary.paidOrderCount)}</strong>
+            <Link href={organizationHref("/org/orders/", organizationId)} className={styles.summaryLink}>
+              เปิดรายการคำสั่งซื้อ <ArrowUpRight size={15} aria-hidden="true" />
             </Link>
           </div>
-          <div className={styles.resourceContext}>
-            <span className={styles.metricLabel}>ขอบเขตรายงาน</span>
-            <strong>{hasFilters ? "กำลังกรองข้อมูล" : "ทั้งหน่วยงาน"}</strong>
-            <span className={styles.metricHint}>
-              ตัวกรองด้านล่างมีผลกับตัวเลขและสถานะในหน้านี้เท่านั้น
-            </span>
+          <div className={styles.summaryMetric}>
+            <span className={styles.summaryLabel}>รายได้จากคำสั่งซื้อที่ชำระแล้ว</span>
+            <strong className={styles.summaryValue} data-numeric>{formatSatang(summary.paidRevenueSatang)}</strong>
+            <span className={styles.summaryHelper}>ยอดในขอบเขตรายงานปัจจุบัน</span>
           </div>
         </section>
 
-        <section className={styles.reportScope} aria-labelledby="report-filter-title">
-          <div className={styles.reportScopeHeading}>
-            <div>
-              <h2 className={styles.sectionTitle} id="report-filter-title">
-                ตัวกรองรายงาน
-              </h2>
-              <p className={styles.sectionDescription}>
-                ระบุรหัสร้านค้าหรือแคมเปญเมื่ออยากดูตัวเลขเฉพาะส่วน หากเว้นว่างจะรวมทั้งหน่วยงาน
-              </p>
-            </div>
-            <div
-              className={styles.scopeSummary}
-              role="status"
-              aria-live="polite"
-              aria-atomic="true"
-              aria-label="ขอบเขตรายงานที่ใช้อยู่"
-            >
+        <div className={styles.reportToolbar}>
+          <div className={styles.reportContext}>
+            <span>ร้านค้า <strong data-numeric>{countLabel(summary.totalStores)}</strong></span>
+            <span className={styles.resourceDivider} aria-hidden="true">·</span>
+            <span>สินค้า <strong data-numeric>{countLabel(summary.totalProducts)}</strong></span>
+          </div>
+          <div className={styles.reportTools}>
+            <span className={styles.reportScopeValue} role="status" aria-live="polite" aria-atomic="true" aria-label="ขอบเขตรายงานที่ใช้อยู่">
               {hasFilters ? (
                 <>
-                  {appliedFilters.storeId ? (
-                    <span>ร้านค้า: {appliedFilters.storeId}</span>
-                  ) : null}
-                  {appliedFilters.campaignId ? (
-                    <span>แคมเปญ: {appliedFilters.campaignId}</span>
-                  ) : null}
+                  {appliedFilters.storeId ? <span>ร้านค้า: {appliedFilters.storeId}</span> : null}
+                  {appliedFilters.campaignId ? <span>แคมเปญ: {appliedFilters.campaignId}</span> : null}
                 </>
-              ) : (
-                <span>ทั้งหน่วยงาน</span>
-              )}
+              ) : <span>ทั้งหน่วยงาน</span>}
+            </span>
+            <div className={styles.filterPopoverAnchor} ref={filterAreaRef}>
+              <button
+                ref={filterToggleRef}
+                type="button"
+                className={styles.filterToggle}
+                onClick={toggleFilter}
+                aria-controls={filterOpen ? "dashboard-report-filter-panel" : undefined}
+                aria-expanded={filterOpen}
+                aria-haspopup="dialog"
+              >
+                <SlidersHorizontal size={17} aria-hidden="true" />
+                ตัวกรอง
+                <ChevronDown size={15} aria-hidden="true" className={filterOpen ? styles.filterChevronOpen : undefined} />
+              </button>
+              {filterOpen ? (
+                <section
+                  id="dashboard-report-filter-panel"
+                  className={styles.reportFilter}
+                  data-side={filterPlacement}
+                  style={{ maxHeight: filterMaxHeight, left: filterLeftOffset }}
+                  role="dialog"
+                  aria-modal="false"
+                  aria-label="กรองรายงาน"
+                >
+                  <h2 className={styles.filterTitle}>กรองรายงาน</h2>
+                  <form className={styles.filterForm} onSubmit={handleFilter} aria-busy={filtering}>
+                    <div className={styles.filters}>
+                      <TextField
+                        id="dashboard-campaign-filter"
+                        label="รหัสแคมเปญ"
+                        value={draftCampaignId}
+                        onChange={event => setDraftCampaignId(event.target.value)}
+                        placeholder="ทุกแคมเปญ"
+                        disabled={filtering}
+                      />
+                      <TextField
+                        id="dashboard-store-filter"
+                        label="รหัสร้านค้า"
+                        value={draftStoreId}
+                        onChange={event => setDraftStoreId(event.target.value)}
+                        placeholder="ทุกร้านค้า"
+                        disabled={filtering}
+                      />
+                    </div>
+                    {inlineError ? (
+                      <p role="alert" className={styles.filterError}>{inlineError}</p>
+                    ) : null}
+                    <div className={styles.filterActions}>
+                      <Button type="button" variant="secondary" disabled={filtering || (!hasDraftFilters && !hasFilters)} onClick={handleClear}>ล้างค่า</Button>
+                      <Button type="submit" pending={filtering} pendingLabel="กำลังโหลดรายงาน">ใช้ตัวกรอง</Button>
+                    </div>
+                  </form>
+                </section>
+              ) : null}
             </div>
           </div>
+        </div>
 
-          <form
-            className={styles.filterPanel}
-            onSubmit={handleFilter}
-            aria-busy={filtering}
-          >
-            <div className={styles.filters}>
-              <TextField
-                id="dashboard-campaign-filter"
-                label="รหัสแคมเปญ"
-                value={draftCampaignId}
-                onChange={(event) =>
-                  setDraftCampaignId(event.target.value)
-                }
-                placeholder="เว้นว่างเพื่อรวมทุกแคมเปญ"
-                disabled={filtering}
-              />
-
-              <TextField
-                id="dashboard-store-filter"
-                label="รหัสร้านค้า"
-                value={draftStoreId}
-                onChange={(event) =>
-                  setDraftStoreId(event.target.value)
-                }
-                placeholder="เว้นว่างเพื่อรวมทุกร้านค้า"
-                disabled={filtering}
-              />
-            </div>
-
-            <div className={styles.filterActions}>
-              <Button
-                type="submit"
-                pending={filtering}
-                pendingLabel="กำลังโหลดรายงาน"
-              >
-                ใช้ตัวกรอง
-              </Button>
-              <Button
-                type="button"
-                variant="quiet"
-                disabled={filtering || (!hasDraftFilters && !hasFilters)}
-                onClick={handleClear}
-              >
-                แสดงทั้งหน่วยงาน
-              </Button>
-            </div>
-          </form>
-        </section>
-
-        {inlineError ? (
-          <Notice tone="danger" role="alert" title="ใช้ตัวกรองไม่สำเร็จ">
-            {inlineError}
-          </Notice>
+        {inlineError && !filterOpen ? (
+          <Notice tone="danger" role="alert" title="ใช้ตัวกรองไม่สำเร็จ">{inlineError}</Notice>
         ) : null}
 
         <section className={styles.statusGrid} aria-label="สถานะการดำเนินงาน">
-          <article className={styles.statusPanel}>
-            <div className={styles.statusPanelHeading}>
-              <div>
-                <h2 className={styles.sectionTitle}>
-                  แคมเปญตามสถานะ
-                </h2>
-              </div>
+          <article className={styles.statusSection}>
+            <div className={styles.statusHeading}>
+              <h2>แคมเปญ</h2>
               <Link href={organizationHref("/org/campaigns/", organizationId)}>
-                จัดการแคมเปญ
+                จัดการแคมเปญ <ArrowUpRight size={15} aria-hidden="true" />
               </Link>
             </div>
-            <dl className={styles.statusList}>
-              {CAMPAIGN_STATUSES.map((status) => (
-                <div className={styles.statusRow} key={status}>
-                  <dt className={styles.statusName}>
-                    {campaignStatusLabel(status)}
-                  </dt>
-                  <dd className={styles.statusCount} data-numeric>
-                    {countLabel(
-                      summary.campaignsByStatus[status] ?? 0,
-                    )}
-                  </dd>
-                </div>
-              ))}
-            </dl>
+            {visibleCampaignStatuses.length ? (
+              <dl className={styles.statusList}>
+                {visibleCampaignStatuses.map(status => (
+                  <div className={styles.statusRow} key={status}>
+                    <dt>{campaignStatusLabel(status)}</dt>
+                    <dd data-numeric>{countLabel(summary.campaignsByStatus[status] ?? 0)}</dd>
+                  </div>
+                ))}
+              </dl>
+            ) : (
+              <p className={styles.emptySummary}>ยังไม่มีแคมเปญ</p>
+            )}
           </article>
 
-          <article className={styles.statusPanel}>
-            <div className={styles.statusPanelHeading}>
-              <div>
-                <h2 className={styles.sectionTitle}>
-                  คำสั่งซื้อตามสถานะ
-                </h2>
-              </div>
+          <article className={styles.statusSection}>
+            <div className={styles.statusHeading}>
+              <h2>คำสั่งซื้อ</h2>
               <Link href={organizationHref("/org/orders/", organizationId)}>
-                เปิดคำสั่งซื้อ
+                เปิดคำสั่งซื้อ <ArrowUpRight size={15} aria-hidden="true" />
               </Link>
             </div>
-            <dl className={styles.statusList}>
-              {ORDER_STATUSES.map((status) => (
-                <div className={styles.statusRow} key={status}>
-                  <dt className={styles.statusName}>
-                    {getOrderStatusLabel(status)}
-                  </dt>
-                  <dd className={styles.statusCount} data-numeric>
-                    {countLabel(
-                      summary.ordersByStatus[status] ?? 0,
-                    )}
-                  </dd>
-                </div>
-              ))}
-            </dl>
+            {visibleOrderStatuses.length ? (
+              <dl className={styles.statusList}>
+                {visibleOrderStatuses.map(status => (
+                  <div className={styles.statusRow} key={status}>
+                    <dt>{getOrderStatusLabel(status)}</dt>
+                    <dd data-numeric>{countLabel(summary.ordersByStatus[status] ?? 0)}</dd>
+                  </div>
+                ))}
+              </dl>
+            ) : (
+              <p className={styles.emptySummary}>ยังไม่มีคำสั่งซื้อ</p>
+            )}
           </article>
         </section>
       </main>
