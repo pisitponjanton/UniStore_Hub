@@ -655,3 +655,39 @@
   min-height: clamp(290px, 32vh, 380px);
   border-color: var(--line-soft);
 }
+
+/* One compact refresh control; preserve the existing filter and fetch logic. */
+.header .refreshButton {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+}
+.header .refreshButton:hover:not(:disabled) { background: var(--surface-hover); }
+.header .refreshButton:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+.header .refreshButton:disabled { cursor: progress; opacity: .68; }
+.refreshIconSpinning { animation: refresh-icon-spin .9s linear infinite; }
+@keyframes refresh-icon-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .refreshIconSpinning { animation: none; } }
+.refreshNote { min-height: 0; }
+
+/* Keep the icon refresh action alongside the title on narrow screens. */
+@media (max-width: 620px) {
+  .header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 44px;
+    gap: 10px;
+    align-items: center;
+    padding: 16px 0;
+  }
+  .headerCopy { min-width: 0; }
+  .header .refreshButton { justify-self: end; }
+}

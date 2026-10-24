@@ -104,7 +104,7 @@ describe("AuthEntryState", () => {
       .toHaveAttribute("href", "/orders/new?campaignId=preorder-test");
     expect(screen.getByRole("link", { name: /คำสั่งซื้อของฉัน/ }))
       .toHaveAttribute("href", "/my/orders");
-    expect(screen.queryByRole("link", { name: /จัดการหน่วยงาน/ })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /เปิดร้าน \/ สมัครหน่วยงาน/ })).toHaveAttribute("href", "/org/select");
     expect(screen.queryByRole("link", { name: /ดูแลแพลตฟอร์ม/ })).not.toBeInTheDocument();
   });
 
@@ -117,7 +117,7 @@ describe("AuthEntryState", () => {
     render(<AuthEntryState><div>auth-form</div></AuthEntryState>);
     expect(screen.getByRole("link", { name: /ดูแลแพลตฟอร์ม/ }))
       .toHaveAttribute("href", "/platform/summary");
-    expect(screen.queryByRole("link", { name: /จัดการหน่วยงาน/ })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /เปิดร้าน \/ สมัครหน่วยงาน/ })).toHaveAttribute("href", "/org/select");
   });
 
   it("does not expose an external returnTo destination in an authenticated action", () => {

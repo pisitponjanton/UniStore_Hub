@@ -165,4 +165,48 @@ describe("OrganizationSelectView", () => {
     expect(mocks.remember).not.toHaveBeenCalledWith("private-1", expect.any(Array));
   });
 
+
+
+  it("prioritizes a first organization's signup for a customer with no membership", async () => {
+    mocks.useAuthSession.mockReturnValue({
+      status: "authenticated",
+      user: { userId: "user-1", name: "Buyer", email: "buyer@example.com", status: "ACTIVE", platformRole: null },
+      memberships: [],
+    });
+    mocks.listAccessible.mockResolvedValue([]);
+    render(<OrganizationSelectView />);
+    expect(await screen.findByRole("heading", { name: "เริ่มต้นสร้างหน่วยงานของคุณ" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "สมัครหน่วยงาน" })).toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: "ชื่อหน่วยงาน" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "เลือกพื้นที่เพื่อเริ่มงาน" })).not.toBeInTheDocument();
+  });
+
+  it("routes a newly created pending organization to an approval status page", async () => {
+    const created = { ...organization("org-new", "ชมรมไอที"), status: "PENDING" as const };
+    mocks.listAccessible.mockResolvedValue([]);
+    mocks.useAuthSession.mockReturnValue({
+      status: "authenticated",
+      user: { userId: "user-1", name: "Buyer", email: "buyer@example.com", status: "ACTIVE", platformRole: null },
+      memberships: [],
+    });
+    mocks.create.mockResolvedValue(created);
+    mocks.restore.mockResolvedValue({
+      status: "authenticated",
+      memberships: [{ organizationId: "org-new", role: "ORGANIZATION_ADMIN", status: "ACTIVE" }],
+      user: { userId: "user-1", platformRole: null },
+    });
+    render(<OrganizationSelectView />);
+    await screen.findByRole("heading", { name: "เริ่มต้นสร้างหน่วยงานของคุณ" });
+    fireEvent.change(screen.getByRole("textbox", { name: "ชื่อหน่วยงาน" }), { target: { value: "ชมรมไอที" } });
+    fireEvent.click(screen.getByRole("button", { name: "ส่งคำขอสมัครหน่วยงาน" }));
+    await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/org/application/?organizationId=org-new"));
+    expect(mocks.create).toHaveBeenCalledWith(expect.objectContaining({ name: "ชมรมไอที" }));
+  });
+
+  it("directs a pending organization admin to status, not the dashboard", async () => {
+    mocks.listAccessible.mockResolvedValue([{ ...organization("org-1", "ชมรมไอที"), status: "PENDING" }]);
+    render(<OrganizationSelectView />);
+    fireEvent.click(await screen.findByRole("button", { name: "ดูสถานะคำขอ ชมรมไอที" }));
+    expect(mocks.push).toHaveBeenCalledWith("/org/application/?organizationId=org-1");
+  });
 });

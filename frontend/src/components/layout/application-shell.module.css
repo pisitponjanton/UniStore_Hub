@@ -994,3 +994,63 @@
   .sidebarPanel { background: var(--surface); }
   .mobilePanelHeader { background: var(--surface); }
 }
+
+/* Global theme shortcut replaces the redundant top-right shop link. */
+.topbarActions {
+  margin-left: auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+.topbarActions .workAreaNavigation { min-width: 0; flex: 1 1 auto; }
+.topbarActions > :last-child { flex: none; }
+
+/* One shared sidebar rhythm across Customer, Staff, Org Admin and Platform Admin. */
+@media (min-width: 901px) {
+  .sidebarTop {
+    min-height: 0;
+    padding: 24px 22px 18px;
+    row-gap: 20px;
+  }
+  .desktopScope { min-height: 22px; }
+  .sidebarBody { padding: 20px 14px 14px; gap: 20px; }
+  .workspaceSummary { padding: 16px; gap: 6px; }
+  .navigation { gap: 18px; }
+  .group { gap: 8px; }
+  .groupHeading { padding-inline: 11px; }
+  .groupList { gap: 4px; }
+  .sidebarFooter { gap: 16px; padding-top: 16px; }
+}
+@media (max-width: 900px) {
+  .topbarActions { width: 100%; gap: 10px; }
+  .topbarActions .workAreaNavigation {
+    min-width: 0;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+    justify-content: flex-end;
+  }
+  .topbarActions .workAreaNavigation::-webkit-scrollbar { display: none; }
+  .sidebarBody { gap: 20px; padding: 18px 14px; }
+  .workspaceSummary { padding: 16px; }
+  .navigation { gap: 18px; }
+  .group { gap: 8px; }
+  .groupList { gap: 4px; }
+  .sidebarFooter { gap: 16px; padding-top: 16px; }
+}
+
+/* On mobile the topbar carries the breadcrumb and theme in the same row. */
+@media (max-width: 900px) {
+  .mobileCurrent { display: none; }
+  .orientation { min-height: 56px; padding: 6px var(--page-gutter); }
+  .orientationPath { display: flex; min-width: 0; flex: 1 1 auto; font-size: .77rem; }
+  .orientationPath strong { overflow: hidden; text-overflow: ellipsis; }
+  .topbarActions { width: auto; flex: 0 1 auto; margin-left: auto; }
+  .topbarActions .workAreaNavigation { max-width: 180px; }
+}
+@media (max-width: 360px) {
+  .orientation:has(.workAreaNavigation) .orientationPath { display: none; }
+  .topbarActions { flex: 1 1 auto; }
+}

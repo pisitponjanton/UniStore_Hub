@@ -102,10 +102,11 @@ describe("MyOrdersView", () => {
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
 
     expect(screen.getAllByText("รอชำระเงิน").length).toBeGreaterThan(0);
-    expect(screen.queryByText("รับสินค้าแล้ว")).not.toBeInTheDocument();
+    expect(screen.getAllByText("รับสินค้าแล้ว").length).toBeGreaterThan(0);
+    expect(screen.getByRole("button", { name: /ดูทั้งหมด 2/ })).toHaveAttribute("aria-pressed", "true");
     fireEvent.click(screen.getByRole("button", { name: /เสร็จสิ้น 1/ }));
     expect(screen.getAllByText("รับสินค้าแล้ว").length).toBeGreaterThan(0);
-    fireEvent.click(screen.getByRole("button", { name: /ทั้งหมด 2/ }));
+    fireEvent.click(screen.getByRole("button", { name: /ดูทั้งหมด 2/ }));
 
     expect(
       screen.getByRole("link", {
@@ -118,9 +119,11 @@ describe("MyOrdersView", () => {
       }),
     ).toHaveAttribute("href", "/my/order?orderId=order-done");
 
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "รายการที่แสดง2 รายการ",
-    );
+    expect(screen.getAllByRole("article")).toHaveLength(2);
+    const detail = screen.getByRole("link", { name: "ดูรายละเอียด คำสั่งซื้อ order-done" });
+    expect(detail.querySelector("svg.lucide-arrow-up-right")).toBeInTheDocument();
+    expect(detail.textContent).toBe("ดูรายละเอียด ");
+    expect(screen.queryByRole("region", { name: "ภาพรวมคำสั่งซื้อที่โหลดอยู่" })).not.toBeInTheDocument();
   });
 
   it("retries the initial order list in place after a recoverable error", async () => {
@@ -155,9 +158,7 @@ describe("MyOrdersView", () => {
     render(<MyOrdersView />);
 
     expect(await screen.findByText("อ้างอิง order-1")).toBeInTheDocument();
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "รายการที่แสดง1 รายการ",
-    );
+    expect(screen.getAllByRole("article")).toHaveLength(1);
 
     fireEvent.click(
       screen.getByRole("button", { name: "โหลดคำสั่งซื้อเพิ่มเติม" }),
@@ -166,13 +167,46 @@ describe("MyOrdersView", () => {
     await waitFor(() => {
       expect(screen.getByRole("button", { name: /กำลังดำเนินการ 1/ })).toBeInTheDocument();
     });
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "รายการที่แสดง2 รายการ",
-    );
+    // All loaded orders are visible by default.
+    expect(screen.getAllByRole("article")).toHaveLength(2);
     fireEvent.click(screen.getByRole("button", { name: /กำลังดำเนินการ 1/ }));
     expect(screen.getByText("อ้างอิง order-2")).toBeInTheDocument();
+    expect(screen.getAllByRole("article")).toHaveLength(1);
+    fireEvent.click(screen.getByRole("button", { name: /ดูทั้งหมด 2/ }));
+    expect(screen.getAllByRole("article")).toHaveLength(2);
     expect(mocks.listMyOrders).toHaveBeenLastCalledWith({
       cursor: "cursor-2",
     });
   });
+  it("uses an accessible mobile select and separated all-orders action without extra summary copy", async () => {
+    mocks.listMyOrders.mockResolvedValue({
+      items: [
+        makeOrder("pay-now"),
+        makeOrder("in-production", { status: "IN_PRODUCTION" }),
+        makeOrder("received", { status: "RECEIVED" }),
+      ],
+      nextCursor: null,
+    });
+    render(<MyOrdersView />);
+    await screen.findByRole("link", { name: "ชำระเงิน คำสั่งซื้อ pay-now" });
+
+    expect(screen.getAllByRole("article")).toHaveLength(3);
+    expect(screen.queryByText(/ยังไม่มีงานที่ต้องทำต่อในรายการที่โหลดอยู่/)).not.toBeInTheDocument();
+    const toolbar = screen.getByRole("group", { name: "กรองคำสั่งซื้อที่โหลดแล้ว" });
+    const allButton = screen.getByRole("button", { name: /ดูทั้งหมด 3/ });
+    expect(toolbar).toContainElement(allButton);
+    expect(allButton).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: /ต้องทำต่อ 1/ })).toHaveAttribute("aria-pressed", "false");
+
+    const select = screen.getByRole("combobox", { name: "เลือกสถานะคำสั่งซื้อ" });
+    expect(select).toHaveValue("all");
+    fireEvent.change(select, { target: { value: "progress" } });
+    expect(screen.getByText("อ้างอิง in-produ")).toBeInTheDocument();
+    expect(screen.getAllByRole("article")).toHaveLength(1);
+    fireEvent.click(allButton);
+    expect(select).toHaveValue("all");
+    expect(allButton).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getAllByRole("article")).toHaveLength(3);
+  });
+
 });

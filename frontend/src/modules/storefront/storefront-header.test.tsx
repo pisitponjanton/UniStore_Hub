@@ -1,4 +1,6 @@
-import { render, screen, within } from "@testing-library/react";
+import type { ReactElement } from "react";
+import { ThemeProvider } from "@/components/theme/theme-provider";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
@@ -16,6 +18,10 @@ vi.mock("@/modules/auth", () => ({
 
 import { StorefrontHeader } from "./storefront-header";
 
+function renderWithTheme(element: ReactElement) {
+  return render(<ThemeProvider>{element}</ThemeProvider>);
+}
+
 describe("StorefrontHeader navigation", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -23,8 +29,27 @@ describe("StorefrontHeader navigation", () => {
     mocks.useAuthSession.mockReturnValue({ status: "unauthenticated" });
   });
 
+  it("lets guests select a persistent theme without changing navigation", () => {
+    window.localStorage.removeItem("unistore-theme");
+    renderWithTheme(<StorefrontHeader />);
+    fireEvent.click(screen.getByLabelText("เปลี่ยนธีม"));
+    fireEvent.click(screen.getByRole("button", { name: "Dark" }));
+    expect(document.documentElement).toHaveAttribute("data-theme", "dark");
+    expect(window.localStorage.getItem("unistore-theme")).toBe("dark");
+
+    fireEvent.click(screen.getByLabelText("เปลี่ยนธีม"));
+    fireEvent.click(screen.getByRole("button", { name: "Light" }));
+    expect(document.documentElement).toHaveAttribute("data-theme", "light");
+    expect(window.localStorage.getItem("unistore-theme")).toBe("light");
+
+    fireEvent.click(screen.getByLabelText("เปลี่ยนธีม"));
+    fireEvent.click(screen.getByRole("button", { name: "System" }));
+    expect(window.localStorage.getItem("unistore-theme")).toBeNull();
+    expect(document.documentElement.dataset.theme).toMatch(/^(dark|light)$/);
+  });
+
   it("shows only login and register for public guests", () => {
-    render(<StorefrontHeader />);
+    renderWithTheme(<StorefrontHeader />);
 
     const nav = screen.getByRole("navigation", { name: "เมนูหน้าร้าน" });
     expect(within(nav).getByRole("link", { name: "เข้าสู่ระบบ" })).toHaveAttribute("href", "/login");
@@ -34,7 +59,7 @@ describe("StorefrontHeader navigation", () => {
   });
 
   it("shows the approved image logo without changing the home link name or destination", () => {
-    render(<StorefrontHeader />);
+    renderWithTheme(<StorefrontHeader />);
     const home = screen.getByRole("link", { name: "UniStore Hub หน้าร้าน" });
     expect(home).toHaveAttribute("href", "/");
     expect(home).toHaveTextContent("UniStore Hub");
@@ -45,13 +70,14 @@ describe("StorefrontHeader navigation", () => {
     expect(logo?.getAttribute("src")).toContain("unistore-hub-logo");
   });
 
-  it("shows one workspace shortcut for authenticated users without duplicate links", () => {
+  it("shows organization signup and the customer workspace separately", () => {
     mocks.useAuthSession.mockReturnValue({ status: "authenticated" });
 
-    render(<StorefrontHeader />);
+    renderWithTheme(<StorefrontHeader />);
 
     const nav = screen.getByRole("navigation", { name: "เมนูหน้าร้าน" });
-    expect(within(nav).getAllByRole("link")).toHaveLength(1);
+    expect(within(nav).getAllByRole("link")).toHaveLength(2);
+    expect(within(nav).getByRole("link", { name: "เปิดร้าน" })).toHaveAttribute("href", "/org/select");
     const shortcut = within(nav).getByRole("link", { name: "พื้นที่ของฉัน" });
     expect(shortcut).toHaveAttribute("href", "/shops");
     expect(shortcut.querySelectorAll("svg")).toHaveLength(2);
@@ -61,7 +87,7 @@ describe("StorefrontHeader navigation", () => {
 
   it("does not flash guest links while the session is loading", () => {
     mocks.useAuthSession.mockReturnValue({ status: "loading" });
-    render(<StorefrontHeader />);
+    renderWithTheme(<StorefrontHeader />);
 
     expect(screen.getByRole("status")).toHaveTextContent("กำลังตรวจสอบบัญชี");
     expect(screen.getByRole("navigation", { name: "เมนูหน้าร้าน" }).querySelector("a")).toBeNull();

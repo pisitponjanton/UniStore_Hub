@@ -48,6 +48,11 @@ export function organizationLandingHref(
   return `${path}?${params.toString()}`;
 }
 
+export function applicationHref(organizationId: string): string {
+  const params = new URLSearchParams({ organizationId });
+  return `/org/application/?${params.toString()}`;
+}
+
 export function settingsHref(organizationId: string): string {
   const params = new URLSearchParams({ organizationId });
   return `/org/settings/?${params.toString()}`;

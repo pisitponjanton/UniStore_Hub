@@ -97,6 +97,15 @@ describe("organization access", () => {
 });
 
 describe("role-aware navigation", () => {
+  it("provides a self-service organization entry for buyers without memberships", () => {
+    const groups = buildNavigationGroups({ user: session.user, memberships: [] });
+    expect(groups[0]?.items).toContainEqual({
+      label: "เปิดร้าน / สมัครหน่วยงาน",
+      href: "/org/select/",
+    });
+    expect(groups).toHaveLength(1);
+  });
+
   it("keeps production and management links away from Staff navigation", () => {
     const group = buildOrganizationNavigation("org-staff", "STAFF");
     const labels = group.items.map((item) => item.label);

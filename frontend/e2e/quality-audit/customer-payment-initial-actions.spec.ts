@@ -85,6 +85,34 @@ test("initial payment: load 503 manual retry, first invalid submit, simulated up
   await expect(heading).toBeFocused();
   await proof(page,"FE-UX-10-02","manual-retry-focus","User-initiated retry recovers initial PAYMENT_NOT_FOUND and focuses new content");
   const submit=page.getByRole("button",{name:"ส่งหลักฐานการชำระเงิน"});
+  await expect(submit.locator("svg.lucide-arrow-right")).toHaveCount(1);
+  await expect(submit.locator("svg.lucide-arrow-up-right")).toHaveCount(0);
+  await expect(page.getByText("฿170.00")).toHaveCount(1);
+  await expect(page.locator('[aria-label="ข้อมูลการชำระเงิน"]')).toHaveCount(0);
+  await expect(page.getByRole("region",{name:"สถานะการชำระเงิน"})).toBeVisible();
+  for (const mode of ["dark","light"] as const) {
+    await page.emulateMedia({ colorScheme: mode });
+    for (const width of [320,390,768,1440]) {
+      await page.setViewportSize({width,height:900});
+      expect(await page.evaluate(() => Math.max(0, document.documentElement.scrollWidth - innerWidth))).toBeLessThanOrEqual(1);
+      const arrowVerticalOffset = await submit.evaluate(button => {
+        const svg = button.querySelector("svg.lucide-arrow-right");
+        const label = svg?.parentElement;
+        const textNode = Array.from(label?.childNodes ?? []).find(node => node.nodeType === Node.TEXT_NODE && node.textContent?.trim());
+        if (!svg || !textNode) return 999;
+        const range = document.createRange();
+        range.selectNodeContents(textNode);
+        const textRect = range.getBoundingClientRect();
+        const arrowRect = svg.getBoundingClientRect();
+        return Math.abs((textRect.top + textRect.bottom - arrowRect.top - arrowRect.bottom) / 2);
+      });
+      expect(arrowVerticalOffset).toBeLessThan(12);
+      if (width === 390 || width === 1440) {
+        await page.screenshot({path:join(dir,"payment-compact-"+mode+"-"+width+".png"),fullPage:true,animations:"disabled"});
+      }
+    }
+  }
+  await page.setViewportSize({width:390,height:844});
   const file=page.locator("#payment-slip");
   await submit.click();
   await expect(page.getByText("กรุณาเลือกไฟล์หลักฐานการชำระเงิน")).toBeVisible();

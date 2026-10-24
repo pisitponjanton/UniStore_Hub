@@ -1,0 +1,40 @@
+
+.switcher { min-width: 0; position: relative; }
+.switcher summary {
+  min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+  padding: 9px 12px; border: 1px solid var(--line); border-radius: 10px;
+  background: var(--surface); color: var(--ink-secondary);
+  font-size: .83rem; font-weight: 660; cursor: pointer; list-style: none;
+}
+.switcher summary::-webkit-details-marker { display: none; }
+.switcher summary:hover, .switcher[open] summary { background: var(--surface-hover); color: var(--ink); }
+.switcher summary:focus-visible, .menu button:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.menu {
+  position: absolute; right: 0; z-index: var(--z-overlay);
+  width: 178px; padding: 6px; display: grid; gap: 3px;
+  background: var(--surface-raised); border: 1px solid var(--line);
+  border-radius: 11px; box-shadow: var(--shadow-raised);
+}
+.switcher[data-placement="up"] .menu { bottom: calc(100% + 8px); }
+.switcher[data-placement="down"] .menu { top: calc(100% + 8px); }
+.menu button {
+  min-height: 40px; width: 100%; padding: 8px 11px;
+  display: flex; align-items: center; gap: 9px;
+  border: none; border-radius: 8px; background: transparent;
+  color: var(--ink); font: inherit; font-size: .86rem; text-align: left; cursor: pointer;
+}
+.menu button:hover { background: var(--surface-hover); }
+.menu button[aria-pressed="true"] { background: var(--brand-soft); color: var(--brand-strong); }
+.menu button span { flex: 1; }
+.check { flex: none; }
+@media (max-width: 900px) { .switcher { width: fit-content; } }
+
+/* A single 44px icon trigger in public and authenticated headers. */
+.switcher[data-compact="true"] > summary {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  gap: 0;
+}

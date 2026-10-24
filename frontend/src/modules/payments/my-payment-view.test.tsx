@@ -116,8 +116,8 @@ describe("MyPaymentView", () => {
         exact: false,
       }),
     ).toBeInTheDocument();
-    expect(screen.getByText("สถานะหลักฐาน")).toBeInTheDocument();
-    expect(screen.getByText("ไม่ผ่านการตรวจสอบ")).toBeInTheDocument();
+    expect(screen.getByText("หลักฐาน:", { exact: false })).toBeInTheDocument();
+    expect(screen.getByText("หลักฐาน: ไม่ผ่านการตรวจสอบ")).toBeInTheDocument();
 
     expect(mocks.getMyOrder).toHaveBeenCalledWith(
       "order-1",
@@ -158,6 +158,23 @@ describe("MyPaymentView", () => {
     expect(
       screen.getByRole("button", { name: "ส่งหลักฐานการชำระเงิน" }),
     ).toBeEnabled();
+  });
+
+  it("shows a single authoritative amount, compact status and a rightward submit arrow", async () => {
+    mocks.getMyOrder.mockResolvedValue(makeOrder({ status: "PENDING_PAYMENT" }));
+    mocks.getMyPayment.mockRejectedValue(new ApiClientError({
+      status: 404, code: "PAYMENT_NOT_FOUND", kind: "notFound",
+    }));
+    const { container } = render(<MyPaymentView />);
+    await screen.findByRole("heading", { name: "ชำระและส่งหลักฐาน" });
+    expect(screen.getAllByText("฿190.00")).toHaveLength(1);
+    expect(screen.getByRole("region", { name: "สถานะการชำระเงิน" })).toHaveTextContent("อัปเดตล่าสุด");
+    expect(container.querySelector('[aria-label="ข้อมูลการชำระเงิน"]')).not.toBeInTheDocument();
+    expect(screen.queryByText("ยังไม่ได้เลือกไฟล์หลักฐาน")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("หลักฐานการชำระเงิน")).toHaveAttribute("accept", "image/jpeg,image/png,image/webp");
+    const submit = screen.getByRole("button", { name: "ส่งหลักฐานการชำระเงิน" });
+    expect(submit.querySelector("svg.lucide-arrow-right")).toBeInTheDocument();
+    expect(submit.querySelector("svg.lucide-arrow-up-right")).not.toBeInTheDocument();
   });
 
   it("keeps submit available and focuses the file field when no proof is selected", async () => {

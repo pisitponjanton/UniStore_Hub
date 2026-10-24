@@ -1,3 +1,5 @@
+import type { ReactElement } from "react";
+import { ThemeProvider } from "@/components/theme/theme-provider";
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -11,6 +13,10 @@ vi.mock("next/navigation", () => ({
 
 import { ApplicationShell } from "./application-shell";
 
+function renderWithTheme(element: ReactElement) {
+  return render(<ThemeProvider>{element}</ThemeProvider>);
+}
+
 describe("ApplicationShell accessibility", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -22,7 +28,7 @@ describe("ApplicationShell accessibility", () => {
   });
 
   it("exposes a skip link to the focusable main content target", () => {
-    render(
+    renderWithTheme(
       <ApplicationShell
         groups={[
           {
@@ -53,7 +59,7 @@ describe("ApplicationShell accessibility", () => {
   });
 
   it("keeps a technical organization identifier collapsed in accessible details", () => {
-    render(
+    renderWithTheme(
       <ApplicationShell
         groups={[{
           label: "งานของหน่วยงาน",
@@ -76,7 +82,7 @@ describe("ApplicationShell accessibility", () => {
   });
 
   it("returns focus to the mobile menu trigger when Escape closes the disclosure", () => {
-    render(
+    renderWithTheme(
       <ApplicationShell
         groups={[
           {
@@ -116,7 +122,7 @@ describe("ApplicationShell accessibility", () => {
   });
 
   it("keeps focus inside the mobile navigation while it is open", () => {
-    render(
+    renderWithTheme(
       <ApplicationShell
         groups={[
           {
@@ -196,7 +202,7 @@ describe("ApplicationShell accessibility", () => {
       }),
     );
 
-    render(
+    renderWithTheme(
       <ApplicationShell
         groups={[
           {
@@ -232,7 +238,7 @@ describe("ApplicationShell accessibility", () => {
   it("closes the mobile navigation before logging out", () => {
     const onLogout = vi.fn();
 
-    render(
+    renderWithTheme(
       <ApplicationShell
         groups={[
           {
@@ -265,7 +271,7 @@ describe("ApplicationShell accessibility", () => {
   });
 
   it("marks the active destination and exposes organization context without changing route authority", () => {
-    const { container } = render(
+    const { container } = renderWithTheme(
       <ApplicationShell
         groups={[
           {
@@ -305,7 +311,7 @@ describe("ApplicationShell accessibility", () => {
   });
   it("shows only permitted workspace areas and keeps the current area identifiable", () => {
     mocks.usePathname.mockReturnValue("/platform/summary/");
-    render(
+    renderWithTheme(
       <ApplicationShell
         groups={[{
           label: "ผู้ดูแลแพลตฟอร์ม",
@@ -324,11 +330,17 @@ describe("ApplicationShell accessibility", () => {
     );
 
     const workspaceNav = screen.getByRole("navigation", { name: "เปลี่ยนพื้นที่ใช้งาน" });
-    expect(within(workspaceNav).getAllByRole("link")).toHaveLength(2);
+    expect(within(workspaceNav).getAllByRole("link")).toHaveLength(1);
     expect(within(workspaceNav).getByRole("link", { name: "ดูแลแพลตฟอร์ม" }))
       .toHaveAttribute("aria-current", "location");
     expect(within(workspaceNav).queryByRole("link", { name: "จัดการหน่วยงาน" }))
       .not.toBeInTheDocument();
+    expect(within(workspaceNav).queryByRole("link", { name: "ซื้อสินค้า" }))
+      .not.toBeInTheDocument();
+    expect(screen.getAllByLabelText("เปลี่ยนธีม")).toHaveLength(1);
+    const header = document.querySelector('[aria-label="ตำแหน่งในระบบ"]');
+    expect(header).toContainElement(screen.getByLabelText("เปลี่ยนธีม"));
+    expect(document.querySelector("footer")).not.toContainElement(screen.getByLabelText("เปลี่ยนธีม"));
     expect(screen.getByRole("link", { name: "ภาพรวมระบบ" }))
       .toHaveAttribute("aria-current", "page");
   });

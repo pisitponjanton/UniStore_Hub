@@ -71,6 +71,31 @@ describe("NotificationsView", () => {
     expect(screen.getByRole("button", { name: "ยังไม่อ่าน" })).toBeInTheDocument();
   });
 
+  it("uses an accessible spinning refresh icon and concise manual refresh hint", async () => {
+    let resolveRefresh!: (value: { items: NotificationDTO[]; nextCursor: null }) => void;
+    mocks.listNotifications
+      .mockResolvedValueOnce({ items: [], nextCursor: null })
+      .mockImplementationOnce(() => new Promise(resolve => { resolveRefresh = resolve; }));
+
+    render(<NotificationsView />);
+    await screen.findByRole("heading", { name: "ไม่มีการแจ้งเตือน" });
+    const refresh = screen.getByRole("button", { name: "รีเฟรชรายการ" });
+    expect(refresh).toHaveAttribute("title", "รีเฟรชรายการ");
+    expect(refresh.querySelector("svg.lucide-refresh-cw")).toBeInTheDocument();
+    expect(refresh).toHaveAttribute("type", "button");
+    expect(screen.getByText("กดรีเฟรชเพื่ออัปเดต")).toBeInTheDocument();
+    expect(screen.queryByText(/รายการไม่อัปเดตอัตโนมัติ/)).not.toBeInTheDocument();
+
+    fireEvent.click(refresh);
+    const busy = screen.getByRole("button", { name: "กำลังรีเฟรชรายการ" });
+    expect(busy).toBeDisabled();
+    expect(busy).toHaveAttribute("aria-busy", "true");
+    expect(busy.querySelector("svg.lucide-refresh-cw")).toBeInTheDocument();
+    resolveRefresh({ items: [makeNotification()], nextCursor: null });
+    await screen.findByText("การชำระเงินถูกปฏิเสธ");
+    expect(screen.getByRole("button", { name: "รีเฟรชรายการ" })).not.toBeDisabled();
+  });
+
   it("renders unread presentation and updates the item after mark-read", async () => {
     const notification = makeNotification();
     const updated = {

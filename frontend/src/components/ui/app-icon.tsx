@@ -53,7 +53,7 @@ export function AppIcon({
       className={className}
       style={{ flexShrink: 0, verticalAlign: "-0.125em" }}
       size={size}
-      strokeWidth={1.8}
+      strokeWidth={name === "arrow-up-right" ? 3 : 1.8}
       absoluteStrokeWidth
     />
   );

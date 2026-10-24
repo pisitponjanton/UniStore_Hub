@@ -908,3 +908,25 @@
 .page[data-page="organization-entry"] .organizationRow:hover { background: var(--surface-hover); }
 .page[data-page="organization-entry"] .createPanel { border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); }
 @media (max-width: 620px) { .workspaceHeader, .settingsHeader, .page[data-page="organization-entry"] .workspaceHeader { padding: 0 0 var(--space-4); } }
+
+/* First-time campus organization registration and application status. */
+.page[data-page="organization-entry"][data-onboarding="true"] .main{max-width:1000px}
+.page[data-page="organization-entry"][data-onboarding="true"] .workspaceHeader{grid-template-columns:minmax(0,1fr)}
+.page[data-page="organization-entry"][data-onboarding="true"] .workspaceGrid{display:block;max-width:710px;margin-inline:auto;width:100%}
+.page[data-page="organization-entry"][data-onboarding="true"] .createPanel{position:static;padding:clamp(20px,3vw,34px)}
+.page[data-page="organization-entry"][data-onboarding="true"] .createPanel .sectionTitle{font-size:clamp(1.25rem,2.5vw,1.65rem)}
+.createdApplicationLink a{display:inline-flex;min-height:44px;align-items:center;color:var(--brand-strong);font-weight:760}
+.applicationMain{width:min(100%,860px);margin-inline:auto;padding:clamp(20px,4vw,54px) var(--page-gutter) var(--page-block-end);display:grid;gap:18px}
+.applicationBack{width:fit-content;min-height:44px;display:inline-flex;align-items:center;color:var(--ink-secondary);font-size:.85rem;font-weight:700}
+.applicationBack:hover{color:var(--brand-strong)}
+.applicationCard{display:grid;justify-items:start;gap:18px;padding:clamp(20px,3.5vw,42px);border:1px solid var(--line);border-radius:17px;background:var(--surface)}
+.applicationEyebrow{color:var(--brand-strong);font-size:.73rem;letter-spacing:.045em;font-weight:780}
+.applicationCard h1{font-size:clamp(1.6rem,3vw,2.3rem);letter-spacing:-.03em;line-height:1.2;color:var(--ink);overflow-wrap:anywhere}
+.applicationMessage{width:100%;display:grid;gap:8px;padding:18px;border:1px solid var(--line-soft);border-radius:11px;background:var(--surface-muted)}
+.applicationMessage strong{font-size:1rem;color:var(--ink)}
+.applicationMessage p{font-size:.9rem;color:var(--ink-secondary);line-height:1.65}
+.applicationActions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.applicationPrimary{min-height:44px;padding:10px 16px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;background:var(--action-primary);color:var(--action-primary-on);font-size:.87rem;font-weight:740;text-decoration:none}
+.applicationPrimary:hover{background:var(--action-primary-hover);color:var(--action-primary-on);text-decoration:none}
+.applicationMain a:focus-visible,.applicationMain button:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+@media(max-width:620px){.applicationActions,.applicationActions>*{width:100%}.applicationCard{gap:14px}.page[data-page="organization-entry"][data-onboarding="true"] .createPanel{padding:18px}}

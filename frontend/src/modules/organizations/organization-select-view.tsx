@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { LoadedDirectoryControls } from "@/modules/organization-directory/loaded-directory-controls";
 import { searchLoadedItems, visibleLoadedItems } from "@/modules/organization-directory/loaded-directory-helpers";
@@ -8,7 +9,6 @@ import { searchLoadedItems, visibleLoadedItems } from "@/modules/organization-di
 import {
   Badge,
   Button,
-  EmptyState,
   ErrorState,
   ErrorSummary,
   useErrorSummaryFocus,
@@ -28,8 +28,8 @@ import type { OrganizationDTO } from "@/types";
 
 import {
   joinAccessibleOrganizations,
+  applicationHref,
   organizationLandingHref,
-  settingsHref,
   validateOrganizationForm,
 } from "./organization-helpers";
 import { organizationService } from "./organization-service";
@@ -89,6 +89,7 @@ export function OrganizationSelectView() {
   const [nameError, setNameError] = useState<string | undefined>();
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
+  const [createdOrganizationId, setCreatedOrganizationId] = useState<string | null>(null);
 
   // Only relocate focus following an explicit user action, not hydration.
   useEffect(() => {
@@ -161,6 +162,8 @@ export function OrganizationSelectView() {
     );
   }, [auth, loadState]);
 
+  const newApplicant = loadState.status === "success" && accessible.length === 0;
+
   const directoryMatches = searchLoadedItems(accessible, directoryQuery, entry => [
     entry.organization.name, entry.organization.description,
     entry.organization.organizationId, entry.membership.role,
@@ -170,6 +173,7 @@ export function OrganizationSelectView() {
   function handleSelect(
     organizationId: string,
     role: "STAFF" | "ORGANIZATION_ADMIN",
+    status: OrganizationDTO["status"],
   ) {
     if (
       auth.status !== "authenticated" ||
@@ -182,7 +186,11 @@ export function OrganizationSelectView() {
       return;
     }
 
-    router.push(organizationLandingHref(organizationId, role));
+    router.push(
+      status !== "ACTIVE" && role === "ORGANIZATION_ADMIN"
+        ? applicationHref(organizationId)
+        : organizationLandingHref(organizationId, role),
+    );
   }
 
   async function handleCreate(event: FormEvent<HTMLFormElement>) {
@@ -212,22 +220,22 @@ export function OrganizationSelectView() {
       const organization = await organizationService.create(
         validation.values,
       );
-      const refreshed = await authSession.restore();
-
-      if (
-        refreshed.status !== "authenticated" ||
-        !rememberActiveOrganizationId(
-          organization.organizationId,
-          refreshed.memberships,
-        )
-      ) {
-        setSubmitError(
-          "สร้างหน่วยงานสำเร็จแล้ว แต่ยังรีเฟรชสิทธิ์ไม่สำเร็จ กรุณาโหลดหน้าใหม่อีกครั้ง",
-        );
+      setCreatedOrganizationId(organization.organizationId);
+      try {
+        const refreshed = await authSession.restore();
+        if (
+          refreshed.status !== "authenticated" ||
+          !rememberActiveOrganizationId(organization.organizationId, refreshed.memberships)
+        ) {
+          setSubmitError("ส่งคำขอหน่วยงานแล้ว แต่ระบบยังรีเฟรชสิทธิ์ไม่สำเร็จ กรุณาโหลดหน้าใหม่เพื่อตรวจสอบสถานะ");
+          return;
+        }
+      } catch (error) {
+        if (isDefinitiveSessionFailure(error)) { authSession.logout(); return; }
+        setSubmitError("ส่งคำขอหน่วยงานแล้ว แต่ยังรีเฟรชสิทธิ์ไม่สำเร็จ กรุณาเข้าสู่ระบบอีกครั้งเพื่อตรวจสอบสถานะ");
         return;
       }
-
-      router.push(settingsHref(organization.organizationId));
+      router.push(applicationHref(organization.organizationId));
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();
@@ -245,18 +253,20 @@ export function OrganizationSelectView() {
   }
 
   return (
-    <div className={styles.page} data-page="organization-entry">
+    <div className={styles.page} data-page="organization-entry" data-onboarding={newApplicant ? "true" : undefined}>
       <main className={styles.main}>
         <header className={styles.workspaceHeader} data-workspace-state={loadState.status}>
           <div className={styles.headerCopy}>
-            <span className={styles.entryEyebrow}>พื้นที่ทำงาน / หน่วยงานที่ได้รับสิทธิ์</span>
-            <h1 id="organization-select-heading" tabIndex={-1} className={styles.title}>วันนี้จะทำงานกับหน่วยงานไหน?</h1>
+            <span className={styles.entryEyebrow}>{newApplicant ? "UNISTORE / START SELLING" : "พื้นที่ทำงาน / หน่วยงานที่ได้รับสิทธิ์"}</span>
+            <h1 id="organization-select-heading" tabIndex={-1} className={styles.title}>{newApplicant ? "เริ่มต้นสร้างหน่วยงานของคุณ" : "วันนี้จะทำงานกับหน่วยงานไหน?"}</h1>
             <p className={styles.description}>
-              เลือกหน่วยงานของคุณเพื่อเปิดงานที่ได้รับมอบหมาย แต่ละแห่งมีบทบาทและสิทธิ์แยกจากกัน
+              {newApplicant
+                ? "ใช้บัญชีเดิมสมัครให้ชมรม คณะ หรือหน่วยงานของคุณ หลังส่งคำขอให้รอการอนุมัติจากผู้ดูแลแพลตฟอร์มก่อนเปิดขาย"
+                : "เลือกหน่วยงานของคุณเพื่อเปิดงานที่ได้รับมอบหมาย แต่ละแห่งมีบทบาทและสิทธิ์แยกจากกัน"}
             </p>
           </div>
 
-          {loadState.status === "success" ? (
+          {loadState.status === "success" && !newApplicant ? (
             <div
               className={styles.headerSummary}
               role="status"
@@ -279,8 +289,14 @@ export function OrganizationSelectView() {
           </div>
         ) : null}
 
+        {createdOrganizationId && submitError ? (
+          <div className={styles.createdApplicationLink}>
+            <Link href={applicationHref(createdOrganizationId)}>เปิดหน้าติดตามคำขอหน่วยงาน</Link>
+          </div>
+        ) : null}
+
         <div className={styles.workspaceGrid}>
-          <section
+          {!newApplicant ? <section
             className={styles.organizationSection}
             aria-labelledby="organizations"
           >
@@ -317,13 +333,6 @@ export function OrganizationSelectView() {
                     ลองโหลดอีกครั้ง
                   </Button>
                 }
-              />
-            ) : null}
-
-            {loadState.status === "success" && accessible.length === 0 ? (
-              <EmptyState
-                title="ยังไม่มีหน่วยงานที่เข้าถึงได้"
-                description="หากต้องการเริ่มพื้นที่ใหม่ สามารถสร้างหน่วยงานได้จากแบบฟอร์มด้านข้าง"
               />
             ) : null}
 
@@ -384,15 +393,17 @@ export function OrganizationSelectView() {
 
                     <div className={styles.organizationAction}>
                       <Button
-                        aria-label={`เข้าใช้งาน ${organization.name}`}
+                        aria-label={organization.status !== "ACTIVE" && membership.role === "ORGANIZATION_ADMIN" ? `ดูสถานะคำขอ ${organization.name}` : `เข้าใช้งาน ${organization.name}`}
+                        disabled={organization.status !== "ACTIVE" && membership.role === "STAFF"}
                         onClick={() =>
                           handleSelect(
                             organization.organizationId,
                             membership.role,
+                            organization.status,
                           )
                         }
                       >
-                        เข้าใช้งาน
+                        {organization.status !== "ACTIVE" ? membership.role === "ORGANIZATION_ADMIN" ? "ดูสถานะคำขอ" : "ยังไม่เปิดใช้งาน" : "เข้าใช้งาน"}
                       </Button>
                     </div>
                   </li>
@@ -400,15 +411,17 @@ export function OrganizationSelectView() {
                 </ul>
               </>
             ) : null}
-          </section>
+          </section> : null}
 
           <aside className={styles.createPanel} aria-labelledby="create-organization">
             <div className={styles.createPanelHeading}>
               <h2 className={styles.sectionTitle} id="create-organization">
-                ต้องการพื้นที่ใหม่?
+                {newApplicant ? "สมัครหน่วยงาน" : "ต้องการพื้นที่ใหม่?"}
               </h2>
               <p className={styles.sectionDescription}>
-                สร้างหน่วยงานเฉพาะเมื่อยังไม่มีพื้นที่ที่ต้องการ ผู้สร้างจะเป็นผู้ดูแลและต้องรออนุมัติจากส่วนกลาง
+                {newApplicant
+                  ? "ระบุชื่อหน่วยงานที่ต้องการใช้เปิดร้าน เช่น ชมรมหรือคณะ ผู้สมัครจะเป็นผู้ดูแลหน่วยงานและต้องรออนุมัติ"
+                  : "สร้างหน่วยงานเฉพาะเมื่อยังไม่มีพื้นที่ที่ต้องการ ผู้สร้างจะเป็นผู้ดูแลและต้องรออนุมัติจากส่วนกลาง"}
               </p>
             </div>
 
@@ -461,10 +474,10 @@ export function OrganizationSelectView() {
                   pending={creating}
                   pendingLabel="กำลังสร้างหน่วยงาน"
                 >
-                  สร้างหน่วยงาน
+                  {newApplicant ? "ส่งคำขอสมัครหน่วยงาน" : "สร้างหน่วยงาน"}
                 </Button>
                 <span className={styles.createHint}>
-                  หลังสร้างสำเร็จ ระบบจะพาไปตั้งค่าหน่วยงานต่อ
+                  หลังส่งคำขอสำเร็จ ระบบจะพาไปหน้าติดตามสถานะการอนุมัติ
                 </span>
               </div>
             </form>

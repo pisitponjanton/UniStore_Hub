@@ -94,15 +94,13 @@ export function AuthEntryState({ children }: { children: ReactNode }) {
           <WorkspaceIcon name="notifications" size={20} />
         </Link>
 
-        {hasOrganizationAccess ? (
-          <Link href="/org/select/" className={styles.accountActionSecondary} aria-label="จัดการหน่วยงาน">
+        <Link href="/org/select/" className={styles.accountActionSecondary} aria-label={hasOrganizationAccess ? "จัดการหน่วยงาน" : "เปิดร้าน / สมัครหน่วยงาน"}>
             <span>
-              <strong>จัดการหน่วยงาน</strong>
-              <small>เลือกหน่วยงานที่บัญชีนี้มีสิทธิ์ทำงาน</small>
+              <strong>{hasOrganizationAccess ? "จัดการหน่วยงาน" : "เปิดร้าน / สมัครหน่วยงาน"}</strong>
+              <small>{hasOrganizationAccess ? "เลือกหน่วยงานหรือสร้างหน่วยงานเพิ่มเติม" : "สำหรับชมรม คณะ หรือหน่วยงานที่ต้องการเปิดร้าน"}</small>
             </span>
             <WorkspaceIcon name="organization" size={20} />
           </Link>
-        ) : null}
 
         {hasPlatformAccess ? (
           <Link href="/platform/summary/" className={styles.accountActionSecondary} aria-label="ดูแลแพลตฟอร์ม">

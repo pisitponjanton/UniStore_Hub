@@ -96,7 +96,7 @@ test("Customer payment slip: invalid selection, PUT 403/retry, submit 409/retry,
   await expect(page.getByText("ไฟล์หลักฐานต้องมีขนาดไม่เกิน 10 MiB")).toBeVisible();
   await proof(page,"FE-UX-10-03","oversized","Oversize file is rejected without signing");
   await file.setInputFiles({name:"new-proof.png",mimeType:"image/png",buffer:Buffer.from("test-only-png-content")});
-  await expect(page.getByText("new-proof.png")).toBeVisible();
+  await expect(page.getByText("new-proof.png",{exact:true})).toBeVisible();
   await proof(page,"FE-UX-10-03","valid-selection","Accepted synthetic PNG displays filename and size");
 
   await submit.click();

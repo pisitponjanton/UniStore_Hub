@@ -4,15 +4,15 @@
 import { PageLoadingRows, PageStateHeading } from "@/components/ui/async-page";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import { ArrowRight, UploadCloud, FileImage } from "lucide-react";
 import {
   Button,
   ErrorState,
-  FileField,
   ForbiddenState,
   LoadingState,
   Notice,
-  TaskStatus,
   UnauthorizedState,
 } from "@/components";
 import {
@@ -107,6 +107,8 @@ export function MyPaymentView() {
     status: "loading",
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const previewUrlRef = useRef<string | null>(null);
   const [loadAttempt, setLoadAttempt] = useState(0);
   const [fileError, setFileError] = useState<string | null>(null);
   const [serverError, setServerError] = useState<string | null>(null);
@@ -117,6 +119,23 @@ export function MyPaymentView() {
   const resultFeedbackRef = useRef<HTMLDivElement>(null);
 
   const focusAfterUserRetry = useRef(false);
+
+  useEffect(() => () => {
+    if (previewUrlRef.current && typeof URL.revokeObjectURL === "function") {
+      URL.revokeObjectURL(previewUrlRef.current);
+    }
+  }, []);
+
+  function updatePreview(file: File | null) {
+    if (previewUrlRef.current && typeof URL.revokeObjectURL === "function") {
+      URL.revokeObjectURL(previewUrlRef.current);
+    }
+    const nextUrl = file && typeof URL.createObjectURL === "function"
+      ? URL.createObjectURL(file)
+      : null;
+    previewUrlRef.current = nextUrl;
+    setPreviewUrl(nextUrl);
+  }
 
   function retryLoad() {
     focusAfterUserRetry.current = true;
@@ -242,6 +261,7 @@ export function MyPaymentView() {
     input?: HTMLInputElement,
   ) {
     setSelectedFile(file);
+    updatePreview(null);
     setFileError(null);
     setServerError(null);
     setSubmitFeedback(null);
@@ -262,6 +282,8 @@ export function MyPaymentView() {
           ? "รองรับเฉพาะไฟล์ JPEG, PNG หรือ WebP"
           : "ไฟล์หลักฐานต้องมีขนาดไม่เกิน 10 MiB",
       );
+    } else {
+      updatePreview(file);
     }
   }
 
@@ -322,6 +344,7 @@ export function MyPaymentView() {
       ]);
 
       setSelectedFile(null);
+      updatePreview(null);
       setLatestPayment(refreshedPayment);
       setState({ status: "success", order: refreshedOrder });
       setSubmitFeedback("ส่งหลักฐานแล้ว ระบบกำลังรอเจ้าหน้าที่ตรวจสอบ");
@@ -420,56 +443,29 @@ export function MyPaymentView() {
         <header className={styles.header} data-order-status={order.status}>
           <div className={styles.headerCopy}>
             <h1 className={styles.title}>ชำระและส่งหลักฐาน</h1>
-            <p className={styles.description}>
-              ตรวจสอบสถานะล่าสุดก่อนทุกครั้ง จากนั้นส่งหลักฐานเฉพาะเมื่อรายการนี้เปิดให้ส่งได้
-            </p>
+            <p className={styles.headerOrderId}>คำสั่งซื้อ <span className={styles.orderCode}>{order.orderId}</span></p>
           </div>
           <div className={styles.headerAmount}>
-            <span className={styles.metaLabel}>ยอดที่ระบบบันทึก</span>
-            <strong className={styles.amount} data-numeric>
-              {formatSatang(order.total)}
-            </strong>
-            <span className={styles.headerAmountNote}>ชำระตามยอดของคำสั่งซื้อนี้</span>
+            <span className={styles.metaLabel}>ยอดที่ต้องชำระ</span>
+            <strong className={styles.amount} data-numeric>{formatSatang(order.total)}</strong>
           </div>
         </header>
-        <TaskStatus
-          tone={paymentState.tone}
-          label={<OrderStatusBadge status={order.status} />}
-          title={paymentState.title}
-          description={paymentState.description}
-          metadata={
-            <span className={styles.orderCode}>
-              คำสั่งซื้อ {order.orderId}
-            </span>
-          }
-        />
 
-        <dl className={styles.paymentFacts} aria-label="ข้อมูลการชำระเงิน">
-          <div>
-            <dt className={styles.metaLabel}>ยอดคำสั่งซื้อ</dt>
-            <dd className={styles.metaValue} data-numeric>
-              {formatSatang(order.total)}
-            </dd>
+        <section className={styles.paymentStatusStrip} data-tone={paymentState.tone} aria-label="สถานะการชำระเงิน">
+          <span className={styles.statusMarker} aria-hidden="true" />
+          <div className={styles.paymentStatusBody}>
+            <div className={styles.paymentStatusHeading}>
+              <strong>{paymentState.title}</strong>
+              <OrderStatusBadge status={order.status} />
+            </div>
+            <p className={styles.paymentStatusDescription}>{paymentState.description}</p>
+            <p className={styles.paymentStatusMeta}>
+              <span>หลักฐาน: {latestPayment ? getPaymentStatusLabel(latestPayment.status) : "ยังไม่ได้ส่ง"}</span>
+              <span aria-hidden="true">·</span>
+              <span>อัปเดตล่าสุด <time dateTime={latestPayment?.updatedAt ?? order.updatedAt}>{formatIsoDateTime(latestPayment?.updatedAt ?? order.updatedAt)}</time></span>
+            </p>
           </div>
-          <div>
-            <dt className={styles.metaLabel}>สถานะหลักฐาน</dt>
-            <dd className={styles.metaValue}>
-              {latestPayment
-                ? getPaymentStatusLabel(latestPayment.status)
-                : "ยังไม่ได้ส่ง"}
-            </dd>
-          </div>
-          <div>
-            <dt className={styles.metaLabel}>อัปเดตล่าสุด</dt>
-            <dd className={styles.metaValue}>
-              <time dateTime={latestPayment?.updatedAt ?? order.updatedAt}>
-                {latestPayment
-                  ? formatIsoDateTime(latestPayment.updatedAt)
-                  : formatIsoDateTime(order.updatedAt)}
-              </time>
-            </dd>
-          </div>
-        </dl>
+        </section>
 
         {order.status === "PAYMENT_REJECTED" && latestPayment ? (
           <Notice
@@ -489,63 +485,60 @@ export function MyPaymentView() {
         {canSubmit ? (
           <section className={styles.uploadSection} aria-labelledby="payment-upload-title">
             <div className={styles.sectionHeading}>
-              <div>
-                <h2 className={styles.sectionTitle} id="payment-upload-title">
-                  {order.status === "PAYMENT_REJECTED"
-                    ? "เลือกหลักฐานใหม่เพื่อส่งตรวจอีกครั้ง"
-                    : "เลือกไฟล์หลักฐานการชำระเงิน"}
-                </h2>
-              </div>
-              <p className={styles.sectionDescription}>
-                รองรับ JPEG, PNG หรือ WebP ขนาดไม่เกิน 10 MiB
-              </p>
+              <h2 className={styles.sectionTitle} id="payment-upload-title">
+                {order.status === "PAYMENT_REJECTED" ? "ส่งหลักฐานใหม่" : "อัปโหลดหลักฐานการชำระเงิน"}
+              </h2>
             </div>
 
-            <form
-              className={styles.uploadForm}
-              onSubmit={handleSubmit}
-              aria-busy={stage !== "idle"}
-              noValidate
-            >
-              <FileField
-                id="payment-slip"
-                label="หลักฐานการชำระเงิน"
-                hint="เลือกรูปที่เห็นยอด วันเวลา และรายละเอียดการชำระเงินชัดเจน"
-                error={fileError ?? undefined}
-                accept="image/jpeg,image/png,image/webp"
-                onChange={(event) =>
-                  handleFileChange(
-                    event.target.files?.[0] ?? null,
-                    event.currentTarget,
-                  )
-                }
-                disabled={stage !== "idle"}
-                required
-              />
-
-              {selectedFile ? (
-                <div
-                  className={styles.selectedFile}
-                  role="status"
-                  aria-atomic="true"
-                >
-                  <div>
-                    <span className={styles.selectedFileLabel}>
-                      ไฟล์ที่เลือก
-                    </span>
-                    <strong className={styles.selectedFileName}>
-                      {selectedFile.name}
-                    </strong>
+            <form className={styles.uploadForm} onSubmit={handleSubmit} aria-busy={stage !== "idle"} noValidate>
+              <div className={styles.proofField}>
+                <label htmlFor="payment-slip" className={styles.proofLabel}>
+                  หลักฐานการชำระเงิน <span aria-hidden="true">*</span>
+                </label>
+                <div className={styles.proofDropzone} data-selected={selectedFile ? "true" : undefined}>
+                  <input
+                    id="payment-slip"
+                    className={styles.proofInput}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    aria-label="หลักฐานการชำระเงิน"
+                    aria-invalid={fileError ? true : undefined}
+                    aria-describedby={fileError ? "payment-slip-hint payment-slip-error" : "payment-slip-hint"}
+                    aria-errormessage={fileError ? "payment-slip-error" : undefined}
+                    required
+                    disabled={stage !== "idle"}
+                    onChange={event => handleFileChange(event.target.files?.[0] ?? null, event.currentTarget)}
+                  />
+                  <div className={styles.proofDropzoneVisual} aria-hidden="true">
+                    {selectedFile ? (
+                      <>
+                        {previewUrl
+                          ? <Image className={styles.proofPreview} src={previewUrl} alt="" width={76} height={76} unoptimized onError={() => setPreviewUrl(null)} />
+                          : <FileImage size={30} strokeWidth={1.7} />}
+                        <div className={styles.proofSelected}>
+                          <strong>{selectedFile.name}</strong>
+                          <span>{formatUploadFileSize(selectedFile.size)} · กดเพื่อเปลี่ยนไฟล์</span>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <UploadCloud size={27} strokeWidth={1.7} />
+                        <strong>เลือกไฟล์สลิปการชำระเงิน</strong>
+                        <span className={styles.proofChoose}>เลือกไฟล์</span>
+                      </>
+                    )}
                   </div>
-                  <span className={styles.selectedFileSize}>
-                    {formatUploadFileSize(selectedFile.size)}
-                  </span>
                 </div>
-              ) : (
-                <div className={styles.noFileState}>
-                  ยังไม่ได้เลือกไฟล์หลักฐาน
-                </div>
-              )}
+                <p id="payment-slip-hint" className={styles.proofHint}>
+                  JPEG, PNG หรือ WebP · สูงสุด 10 MiB · กรุณาให้เห็นยอด วันเวลา และรายละเอียดชัดเจน
+                </p>
+                {selectedFile ? (
+                  <p className={styles.proofSelectionAccessible} role="status">
+                    ไฟล์ที่เลือก: {selectedFile.name} ({formatUploadFileSize(selectedFile.size)})
+                  </p>
+                ) : null}
+                {fileError ? <p id="payment-slip-error" className={styles.proofError} role="alert">{fileError}</p> : null}
+              </div>
 
               {activeStage ? (
                 <div
@@ -602,19 +595,10 @@ export function MyPaymentView() {
               ) : null}
 
               <div className={styles.actions}>
-                <Button
-                  type="submit"
-                  size="large"
-                  pending={stage !== "idle"}
-                  pendingLabel="กำลังส่งหลักฐาน"
-                >
-                  {order.status === "PAYMENT_REJECTED"
-                    ? "ส่งหลักฐานใหม่"
-                    : "ส่งหลักฐานการชำระเงิน"}
+                <Button type="submit" size="large" pending={stage !== "idle"} pendingLabel="กำลังส่งหลักฐาน">
+                  {order.status === "PAYMENT_REJECTED" ? "ส่งหลักฐานใหม่" : "ส่งหลักฐานการชำระเงิน"}
+                  <ArrowRight size={19} strokeWidth={2.6} aria-hidden="true" />
                 </Button>
-                <span className={styles.submitHint}>
-                  หลังส่งสำเร็จ สถานะจะเปลี่ยนเป็นรอตรวจสอบ
-                </span>
               </div>
             </form>
           </section>
@@ -626,28 +610,6 @@ export function MyPaymentView() {
               {submitFeedback}
             </Notice>
           </div>
-        ) : null}
-
-        {!canSubmit && latestPayment ? (
-          <section className={styles.reviewSummary} aria-label="สถานะหลักฐานล่าสุด">
-            <div className={styles.sectionHeading}>
-              <div>
-                <h2 className={styles.sectionTitle}>
-                  หลักฐานล่าสุด · {getPaymentStatusLabel(latestPayment.status)}
-                </h2>
-              </div>
-              <span className={styles.paymentId}>
-                {latestPayment.paymentId}
-              </span>
-            </div>
-            <p className={styles.reviewDescription}>
-              {latestPayment.status === "PENDING_REVIEW"
-                ? "ระบบได้รับหลักฐานแล้ว ขณะนี้กำลังรอเจ้าหน้าที่ตรวจสอบ"
-                : latestPayment.status === "APPROVED"
-                  ? "หลักฐานได้รับการอนุมัติแล้ว ไม่ต้องส่งหลักฐานเพิ่มเติม"
-                  : "หลักฐานล่าสุดไม่ผ่านการตรวจสอบ"}
-            </p>
-          </section>
         ) : null}
 
         {serverError && !canSubmit ? (

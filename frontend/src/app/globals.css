@@ -254,8 +254,7 @@
   --z-skip-link: 100;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
+:root[data-theme="dark"] {
     color-scheme: dark;
 
     --canvas: #161312;
@@ -372,7 +371,6 @@
     --shadow-media-strong: 0 10px 28px rgb(0 0 0 / 28%);
     --shadow-media-soft: 0 4px 14px rgb(0 0 0 / 20%);
     --drop-shadow-media: drop-shadow(0 20px 28px rgb(0 0 0 / 30%));
-  }
 }
 
 *,
@@ -517,10 +515,8 @@ select:not([multiple]):not([size]):not([data-custom-chevron]) {
   background-size: 16px 16px;
 }
 
-@media (prefers-color-scheme: dark) {
-  select:not([multiple]):not([size]):not([data-custom-chevron]) {
+[data-theme="dark"] select:not([multiple]):not([size]):not([data-custom-chevron]) {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23c7beb9' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-  }
 }
 
 input::placeholder,

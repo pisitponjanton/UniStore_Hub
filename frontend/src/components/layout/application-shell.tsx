@@ -7,6 +7,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import brandLogo from "@/assets/unistore-hub-logo.png";
 import { Button } from "@/components/ui";
+import { ThemeSwitcher } from "@/components/theme/theme-switcher";
 import {
   isNavigationItemActive,
   type NavigationGroup,
@@ -74,6 +75,8 @@ export function ApplicationShell({
   const contentRef = useRef<HTMLDivElement>(null);
   const menuOpen = openMenuPath === pathname;
   const shellScope = resolveShellScope(pathname);
+  // The storefront remains in the sidebar; no redundant Buy Products topbar shortcut.
+  const secondaryWorkAreas = workAreas.filter((area) => area.id !== "customer");
 
   const activeNavigation =
     groups
@@ -427,25 +430,27 @@ export function ApplicationShell({
             <WorkspaceIcon name="chevron" size={13} />
             <strong>{activeNavigation?.item.label ?? "หน้าหลัก"}</strong>
           </div>
-          <nav className={styles.workAreaNavigation} aria-label="เปลี่ยนพื้นที่ใช้งาน">
-            {workAreas.map((area) => (
-              <Link
-                key={area.id}
-                href={area.href}
-                aria-current={area.id === shellScope ? "location" : undefined}
-                className={[
-                  styles.workAreaLink,
-                  area.id === shellScope ? styles.workAreaLinkCurrent : "",
-                ].filter(Boolean).join(" ")}
-              >
-                <WorkspaceIcon
-                  name={area.id === "customer" ? "store" : area.id === "organization" ? "organization" : "platform"}
-                  size={16}
-                />
-                <span>{area.label}</span>
-              </Link>
-            ))}
-          </nav>
+          <div className={styles.topbarActions}>
+            {secondaryWorkAreas.length > 0 ? (
+              <nav className={styles.workAreaNavigation} aria-label="เปลี่ยนพื้นที่ใช้งาน">
+                {secondaryWorkAreas.map((area) => (
+                  <Link
+                    key={area.id}
+                    href={area.href}
+                    aria-current={area.id === shellScope ? "location" : undefined}
+                    className={[
+                      styles.workAreaLink,
+                      area.id === shellScope ? styles.workAreaLinkCurrent : "",
+                    ].filter(Boolean).join(" ")}
+                  >
+                    <WorkspaceIcon name={area.id === "organization" ? "organization" : "platform"} size={16} />
+                    <span>{area.label}</span>
+                  </Link>
+                ))}
+              </nav>
+            ) : null}
+            <ThemeSwitcher placement="down" compact />
+          </div>
         </div>
         {children}
       </div>

@@ -97,6 +97,7 @@ export function buildCustomerNavigation(): NavigationGroup {
         activePaths: ["/my/order/", "/my/payment/", "/my/pickup/"],
       },
       { label: "การแจ้งเตือน", href: "/notifications/" },
+      { label: "เปิดร้าน / สมัครหน่วยงาน", href: "/org/select/" },
     ],
   };
 }

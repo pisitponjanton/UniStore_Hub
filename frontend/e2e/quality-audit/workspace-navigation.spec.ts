@@ -16,13 +16,13 @@ const cases: {
   current: string;
   options: string[];
 }[] = [
-  { role: "customer", path: "/my/orders/", current: "ซื้อสินค้า", options: ["ซื้อสินค้า"] },
+  { role: "customer", path: "/my/orders/", current: "", options: [] },
   { role: "staff", path: `/org/orders/?organizationId=${ids.organizationId}`,
-    current: "จัดการหน่วยงาน", options: ["ซื้อสินค้า", "จัดการหน่วยงาน"] },
+    current: "จัดการหน่วยงาน", options: ["จัดการหน่วยงาน"] },
   { role: "organizationAdmin", path: `/org/dashboard/?organizationId=${ids.organizationId}`,
-    current: "จัดการหน่วยงาน", options: ["ซื้อสินค้า", "จัดการหน่วยงาน"] },
+    current: "จัดการหน่วยงาน", options: ["จัดการหน่วยงาน"] },
   { role: "platformAdmin", path: "/platform/summary/", current: "ดูแลแพลตฟอร์ม",
-    options: ["ซื้อสินค้า", "ดูแลแพลตฟอร์ม"] },
+    options: ["ดูแลแพลตฟอร์ม"] },
 ];
 
 for (const scenario of cases) {
@@ -49,12 +49,21 @@ for (const scenario of cases) {
     try {
       await page.goto(frontend + scenario.path, { waitUntil: "domcontentloaded" });
       const workArea = page.getByRole("navigation", { name: "เปลี่ยนพื้นที่ใช้งาน" });
-      await expect(workArea).toBeVisible({ timeout: 20000 });
-      await expect(workArea.getByRole("link")).toHaveCount(scenario.options.length);
-      for (const label of scenario.options) {
-        await expect(workArea.getByRole("link", { name: label })).toBeVisible();
+      const themeButton = page.getByLabel("เปลี่ยนธีม");
+      await expect(themeButton).toBeVisible({ timeout: 20000 });
+      await expect(page.locator('[aria-label="ตำแหน่งในระบบ"]').getByLabel("เปลี่ยนธีม")).toHaveCount(1);
+      await expect(page.locator("footer").getByLabel("เปลี่ยนธีม")).toHaveCount(0);
+      await expect(page.getByRole("link", { name: "ซื้อสินค้า", exact: true })).toHaveCount(0);
+      if (scenario.options.length > 0) {
+        await expect(workArea).toBeVisible();
+        await expect(workArea.getByRole("link")).toHaveCount(scenario.options.length);
+        for (const label of scenario.options) {
+          await expect(workArea.getByRole("link", { name: label })).toBeVisible();
+        }
+        await expect(workArea.getByRole("link", { name: scenario.current })).toHaveAttribute("aria-current", "location");
+      } else {
+        await expect(workArea).toHaveCount(0);
       }
-      await expect(workArea.getByRole("link", { name: scenario.current })).toHaveAttribute("aria-current", "location");
       const menu = page.getByRole("button", { name: "เปิดเมนูหลัก" });
       await expect(menu).toBeVisible();
       await menu.click();
@@ -65,7 +74,8 @@ for (const scenario of cases) {
       await expect(menu).toBeFocused();
       for (const width of [320, 390, 768, 1440]) {
         await page.setViewportSize({ width, height: 900 });
-        await expect(workArea).toBeVisible();
+        if (scenario.options.length > 0) await expect(workArea).toBeVisible();
+        await expect(themeButton).toBeVisible();
         const overflow = await page.evaluate(() => Math.max(0, document.documentElement.scrollWidth - innerWidth));
         expect(overflow, `${scenario.role} at ${width}px`).toBeLessThanOrEqual(1);
         if (width === 390 || width === 1440) {

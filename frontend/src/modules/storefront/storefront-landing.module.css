@@ -563,3 +563,18 @@
     margin-top: 0;
   }
 }
+
+/* Optional campus organization onboarding, subordinate to the shopping hero. */
+.organizationInvite {
+ width:min(calc(100% - (var(--page-gutter) * 2)),var(--content-marketplace));
+ margin:14px auto 0; padding:16px clamp(16px,2vw,24px);
+ display:flex;align-items:center;justify-content:space-between;gap:14px 24px;
+ border:1px solid var(--line);border-radius:12px;background:var(--surface);
+}
+.organizationInvite>div{min-width:0;display:grid;gap:4px}
+.organizationInvite strong{color:var(--ink);font-size:.94rem;font-weight:760}
+.organizationInvite p{color:var(--ink-secondary);font-size:.8rem;line-height:1.5}
+.organizationInvite a{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:8px 14px;flex:none;border-radius:9px;background:var(--brand-soft);color:var(--brand-strong);font-size:.85rem;font-weight:750;text-decoration:none}
+.organizationInvite a:hover{background:var(--surface-selected);text-decoration:none}
+.organizationInvite a:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+@media(max-width:650px){.organizationInvite{flex-direction:column;align-items:stretch}.organizationInvite a{width:100%}}

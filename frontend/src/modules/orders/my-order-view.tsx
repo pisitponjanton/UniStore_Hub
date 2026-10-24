@@ -4,6 +4,7 @@
 import { PageLoadingRows, PageStateHeading } from "@/components/ui/async-page";
 
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import {
@@ -14,7 +15,6 @@ import {
   ForbiddenState,
   LoadingState,
   Notice,
-  TaskStatus,
   UnauthorizedState,
 } from "@/components";
 import {
@@ -268,6 +268,7 @@ export function MyOrderView() {
         {order.status === "PAYMENT_REJECTED"
           ? "เปิดการชำระเงินและส่งใหม่"
           : "ไปชำระเงิน"}
+        <ArrowRight size={18} strokeWidth={2.5} aria-hidden="true" />
       </Link>
     ) : guidance.action === "PICKUP" ? (
       <Link
@@ -275,12 +276,13 @@ export function MyOrderView() {
         className={styles.primaryActionLink}
       >
         เปิดข้อมูลรับสินค้า
+        <ArrowRight size={18} strokeWidth={2.5} aria-hidden="true" />
       </Link>
     ) : undefined;
 
   return (
     <div className={styles.page}>
-      <main className={styles.main}>
+      <main className={`${styles.main} ${styles.customerDetailPage}`}>
         <Link href="/my/orders/" className={styles.backLink}>
           กลับรายการคำสั่งซื้อ
         </Link>
@@ -288,59 +290,30 @@ export function MyOrderView() {
         <header className={styles.detailHero} data-order-status={order.status}>
           <div className={styles.detailHeroCopy}>
             <h1 className={styles.title}>รายละเอียดคำสั่งซื้อ</h1>
-            <span className={styles.orderCode} data-technical>
-              {order.orderId}
-            </span>
+            <span className={styles.orderCode} data-technical>#{order.orderId}</span>
+            <div className={styles.detailHeaderMetadata}>
+              <span>สั่งซื้อ <time dateTime={order.createdAt}>{formatIsoDateTime(order.createdAt)}</time></span>
+              <span>อัปเดต <time dateTime={order.updatedAt}>{formatIsoDateTime(order.updatedAt)}</time></span>
+            </div>
           </div>
-
           <div className={styles.detailAmount}>
-            <span className={styles.summaryLabel}>ยอดรวมที่บันทึก</span>
-            <strong className={styles.totalValue} data-numeric>
-              {formatSatang(order.total)}
-            </strong>
-            <time className={styles.detailUpdated} dateTime={order.updatedAt}>
-              อัปเดตล่าสุด {formatIsoDateTime(order.updatedAt)}
-            </time>
+            <span className={styles.summaryLabel}>ยอดรวมคำสั่งซื้อ</span>
+            <strong className={styles.totalValue} data-numeric>{formatSatang(order.total)}</strong>
           </div>
         </header>
 
-        <section className={styles.currentState} aria-label="สถานะและขั้นตอนถัดไป">
-          <TaskStatus
-            tone={getOrderStatusTone(order.status)}
-            label={<OrderStatusBadge status={order.status} />}
-            title={guidance.title}
-            description={guidance.description}
-            metadata={
-              <span>
-                สถานะนี้มาจากข้อมูลล่าสุดของคำสั่งซื้อ
-              </span>
-            }
-            actions={primaryAction}
-          />
+        <section className={styles.detailStatusBar} data-tone={getOrderStatusTone(order.status)} aria-label="สถานะและขั้นตอนถัดไป">
+          <div className={styles.detailStatusContent}>
+            <div className={styles.detailStatusHeading}>
+              <OrderStatusBadge status={order.status} />
+            </div>
+            <p>{guidance.description}</p>
+          </div>
         </section>
 
-        {order.status === "CANCELLED" ? (
-          <Notice tone="warning" title="คำสั่งซื้อนี้สิ้นสุดแล้ว">
-            รายการถูกยกเลิกและไม่มีขั้นตอนการชำระเงิน การผลิต หรือการรับสินค้าต่อ
-          </Notice>
-        ) : null}
-
         {journey.length > 0 ? (
-          <section
-            className={styles.journeySection}
-            aria-labelledby="order-journey"
-          >
-            <div className={styles.sectionHeading}>
-              <div>
-                <h2 className={styles.sectionTitle} id="order-journey">
-                  ขั้นตอนคำสั่งซื้อ
-                </h2>
-              </div>
-              <span className={styles.sectionMeta}>
-                สถานะจะเปลี่ยนตามการชำระเงิน การยืนยัน การผลิต และการรับสินค้า
-              </span>
-            </div>
-
+          <section className={styles.journeySection} aria-labelledby="order-journey">
+            <h2 className={styles.sectionTitle} id="order-journey">ความคืบหน้าคำสั่งซื้อ</h2>
             <ol className={styles.journeyList} aria-label="ขั้นตอนคำสั่งซื้อ">
               {journey.map((step, index) => (
                 <li
@@ -349,17 +322,11 @@ export function MyOrderView() {
                   key={step.key}
                   aria-current={step.state === "current" ? "step" : undefined}
                 >
-                  <div className={styles.journeyIndex} aria-hidden="true">
-                    {index + 1}
-                  </div>
+                  <div className={styles.journeyIndex} aria-hidden="true">{index + 1}</div>
                   <div className={styles.journeyCopy}>
                     <strong>{step.label}</strong>
                     <span className={styles.journeyStateLabel}>
-                      {step.state === "done"
-                        ? "เสร็จแล้ว"
-                        : step.state === "current"
-                          ? "ขั้นตอนปัจจุบัน"
-                          : "ขั้นตอนถัดไป"}
+                      {step.state === "done" ? "เสร็จแล้ว" : step.state === "current" ? "ขั้นตอนปัจจุบัน" : "ขั้นตอนถัดไป"}
                     </span>
                   </div>
                 </li>
@@ -368,30 +335,6 @@ export function MyOrderView() {
           </section>
         ) : null}
 
-        <section className={styles.orderContext} aria-label="ข้อมูลคำสั่งซื้อ">
-          <div className={styles.contextLead}>
-            <h2 className={styles.sectionTitle}>ข้อมูลของรายการนี้</h2>
-          </div>
-          <dl className={styles.orderFacts}>
-            <div>
-              <dt>สร้างเมื่อ</dt>
-              <dd>
-                <time dateTime={order.createdAt}>
-                  {formatIsoDateTime(order.createdAt)}
-                </time>
-              </dd>
-            </div>
-            <div>
-              <dt>จำนวนรายการสินค้า</dt>
-              <dd data-numeric>{order.items.length} รายการ</dd>
-            </div>
-            <div>
-              <dt>สถานะปัจจุบัน</dt>
-              <dd>{guidance.title}</dd>
-            </div>
-          </dl>
-        </section>
-
         <section className={styles.section} aria-labelledby="order-items">
           <div className={styles.sectionHeading}>
             <div>
@@ -399,9 +342,7 @@ export function MyOrderView() {
                 สินค้าในคำสั่งซื้อ
               </h2>
             </div>
-            <span className={styles.sectionMeta}>
-              ราคาในรายการเป็นราคาที่บันทึกไว้ตอนสร้างคำสั่งซื้อ
-            </span>
+            <span className={styles.detailItemCount}>{order.items.length} รายการ</span>
           </div>
 
           <div className={styles.itemList}>
@@ -434,20 +375,11 @@ export function MyOrderView() {
           </div>
         </section>
 
-        <section className={styles.totalPanel} aria-label="สรุปยอดคำสั่งซื้อ">
-          <div>
-            <span className={styles.summaryLabel}>ยอดสินค้า</span>
-            <span className={styles.summaryValue} data-numeric>
-              {formatSatang(order.subtotal)}
-            </span>
-          </div>
-          <div className={styles.totalRowPrimary}>
-            <strong>ยอดรวม</strong>
-            <span className={styles.totalValue} data-numeric>
-              {formatSatang(order.total)}
-            </span>
-          </div>
-        </section>
+        {order.subtotal !== order.total ? (
+          <p className={styles.detailSubtotal} aria-label="ยอดสินค้าก่อนปรับยอด">
+            ยอดสินค้า <strong data-numeric>{formatSatang(order.subtotal)}</strong>
+          </p>
+        ) : null}
 
         {actionError || actionSuccess ? (
           <div ref={cancelFeedbackRef} tabIndex={-1} data-customer-order-action-feedback className={styles.focusableOrderFeedback}>
@@ -464,19 +396,8 @@ export function MyOrderView() {
           </div>
         ) : null}
 
-        <section className={styles.orderTools} aria-labelledby="order-tools">
-          <div className={styles.orderToolsHeading}>
-            <div>
-              <h2 className={styles.sectionTitle} id="order-tools">
-                ดูข้อมูลที่เกี่ยวข้อง
-              </h2>
-            </div>
-            <p>
-              ปุ่มด้านล่างเป็นทางลัดไปยังข้อมูลของคำสั่งซื้อนี้
-              การยกเลิกจะปรากฏเฉพาะสถานะที่ระบบอนุญาต
-            </p>
-          </div>
-
+        {(primaryAction || cancellable || order.status !== "CANCELLED") ? (
+        <section className={styles.orderTools} aria-label="การดำเนินการคำสั่งซื้อ">
           <ActionBar className={styles.orderActions}>
             {guidance.action !== "PAYMENT" && order.status !== "CANCELLED" ? (
               <Link
@@ -513,7 +434,7 @@ export function MyOrderView() {
                   onCloseAutoFocus={(event) => {
                     if (actionError || actionSuccess) event.preventDefault();
                   }}
-                  trigger={<Button variant="danger">ยกเลิกคำสั่งซื้อ</Button>}
+                  trigger={<Button variant="quiet" className={styles.cancelTextAction}>ยกเลิกคำสั่งซื้อ</Button>}
                   title="ยืนยันการยกเลิกคำสั่งซื้อ"
                   description="ยกเลิกได้เฉพาะก่อนการชำระเงินได้รับอนุมัติ เมื่อยืนยันแล้วคำสั่งซื้อจะเปลี่ยนเป็นสถานะยกเลิก"
                   confirmLabel="ยืนยันยกเลิก"
@@ -524,8 +445,10 @@ export function MyOrderView() {
                 />
               </div>
             ) : null}
+            {primaryAction}
           </ActionBar>
         </section>
+        ) : null}
       </main>
     </div>
   );

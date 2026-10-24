@@ -2,9 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight, LayoutDashboard } from "lucide-react";
+import { LayoutDashboard } from "lucide-react";
+import { AppIcon } from "@/components/ui/app-icon";
 
 import brandLogo from "@/assets/unistore-hub-logo.png";
+import { ThemeSwitcher } from "@/components/theme/theme-switcher";
 import { useAuthSession } from "@/modules/auth";
 
 import styles from "./storefront-view.module.css";
@@ -32,6 +34,7 @@ export function StorefrontHeader() {
         </Link>
 
         <nav className={styles.topbarNav} aria-label="เมนูหน้าร้าน">
+          <ThemeSwitcher placement="down" compact />
           {auth.status === "loading" ? (
             <span
               className={styles.topbarSessionStatus}
@@ -41,11 +44,14 @@ export function StorefrontHeader() {
               กำลังตรวจสอบบัญชี
             </span>
           ) : auth.status === "authenticated" ? (
-            <Link href="/shops/" className={styles.topbarWorkspace}>
-              <LayoutDashboard size={17} aria-hidden="true" />
-              <span>พื้นที่ของฉัน</span>
-              <ArrowUpRight size={15} aria-hidden="true" />
-            </Link>
+            <>
+              <Link href="/org/select/" className={styles.topbarLink}>เปิดร้าน</Link>
+              <Link href="/shops/" className={styles.topbarWorkspace}>
+                <LayoutDashboard size={17} aria-hidden="true" />
+                <span>พื้นที่ของฉัน</span>
+                <AppIcon name="arrow-up-right" size={15} />
+              </Link>
+            </>
           ) : (
             <>
               <Link href="/login/" className={styles.topbarLink}>

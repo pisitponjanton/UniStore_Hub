@@ -7,6 +7,8 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
 import { SessionBootstrap } from "@/modules/auth";
+import { ThemeProvider } from "@/components/theme/theme-provider";
+import { THEME_INIT_SCRIPT } from "@/components/theme/theme-script";
 
 export const metadata: Metadata = {
   title: "UniStore Hub",
@@ -15,9 +17,14 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <html lang="th">
+    <html lang="th" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body>
-        <SessionBootstrap>{children}</SessionBootstrap>
+        <ThemeProvider>
+          <SessionBootstrap>{children}</SessionBootstrap>
+        </ThemeProvider>
       </body>
     </html>
   );

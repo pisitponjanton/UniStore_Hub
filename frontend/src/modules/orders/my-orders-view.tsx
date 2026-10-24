@@ -2,6 +2,7 @@
 
 
 import Link from "next/link";
+import { AppIcon } from "@/components/ui/app-icon";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
@@ -52,7 +53,7 @@ export function MyOrdersView() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [loadAttempt, setLoadAttempt] = useState(0);
   const [loadMoreError, setLoadMoreError] = useState<string | null>(null);
-  const [viewFilter, setViewFilter] = useState<CustomerOrderViewFilter>("action");
+  const [viewFilter, setViewFilter] = useState<CustomerOrderViewFilter>("all");
 
   const focusAfterRetry = useRef(false);
   const cursorErrorRef = useRef<HTMLDivElement>(null);
@@ -177,16 +178,6 @@ export function MyOrdersView() {
     }
   }
 
-  const attentionCount = useMemo(() => {
-    if (state.status !== "success") {
-      return 0;
-    }
-
-    return state.items.filter(
-      (order) => getCustomerOrderGuidance(order.status).action !== null,
-    ).length;
-  }, [state]);
-
   const loadedOrders = useMemo(
     () => state.status === "success" ? prioritizeLoadedOrders(state.items) : [],
     [state],
@@ -204,7 +195,6 @@ export function MyOrdersView() {
     { value: "action", label: "ต้องทำต่อ" },
     { value: "progress", label: "กำลังดำเนินการ" },
     { value: "finished", label: "เสร็จสิ้น" },
-    { value: "all", label: "ทั้งหมด" },
   ];
 
   if (state.status !== "success") {
@@ -265,47 +255,47 @@ export function MyOrdersView() {
           </Link>
         </header>
 
-        <section
-          className={styles.orderOverview}
-          aria-label="ภาพรวมคำสั่งซื้อที่โหลดอยู่"
-        >
-          <div
-            className={styles.overviewPrimary}
-            data-has-attention={attentionCount > 0 || undefined}
-          >
-            <span className={styles.summaryLabel}>รายการที่ต้องทำต่อ</span>
-            <strong data-numeric>{attentionCount}</strong>
-          </div>
-          <p className={styles.overviewDescription}>
-            {attentionCount > 0
-              ? "รายการที่มีขั้นตอนให้คุณดำเนินการจะถูกทำให้เห็นเด่นขึ้นด้านล่าง"
-              : "ยังไม่มีงานที่ต้องทำต่อในรายการที่โหลดอยู่ เลือกแท็บอื่นเพื่อดูรายการที่เหลือ"}
-          </p>
-          <div
-            className={styles.overviewLoaded}
-            role="status"
-            aria-live="polite"
-            aria-atomic="true"
-          >
-            <span className={styles.summaryLabel}>รายการที่แสดง</span>
-            <strong data-numeric>{state.items.length} รายการ</strong>
-          </div>
-        </section>
-
         <section className={styles.orderLedger} aria-label="รายการคำสั่งซื้อ">
-          <div className={styles.customerOrderFilters} role="group" aria-label="กรองคำสั่งซื้อที่โหลดแล้ว">
-            {orderFilters.map(option => (
-              <button
-                key={option.value}
-                type="button"
-                aria-pressed={viewFilter === option.value}
-                className={styles.customerOrderFilter}
-                data-active={viewFilter === option.value || undefined}
-                onClick={() => setViewFilter(option.value)}
+          <div className={styles.customerFilterToolbar} role="group" aria-label="กรองคำสั่งซื้อที่โหลดแล้ว">
+            <div className={styles.customerStatusFilterGroup}>
+              <span className={styles.customerFilterLabel}>สถานะคำสั่งซื้อ</span>
+              <div className={styles.customerOrderFilters}>
+                {orderFilters.map(option => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    aria-pressed={viewFilter === option.value}
+                    className={styles.customerOrderFilter}
+                    data-active={viewFilter === option.value || undefined}
+                    onClick={() => setViewFilter(option.value)}
+                  >
+                    {option.label} <span data-numeric>{filterCounts[option.value]}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <button
+              type="button"
+              className={styles.customerOrderShowAll}
+              data-active={viewFilter === "all" || undefined}
+              aria-pressed={viewFilter === "all"}
+              onClick={() => setViewFilter("all")}
+            >
+              ดูทั้งหมด <span data-numeric>{filterCounts.all}</span>
+            </button>
+            <label className={styles.customerMobileFilter}>
+              สถานะคำสั่งซื้อ
+              <select
+                aria-label="เลือกสถานะคำสั่งซื้อ"
+                value={viewFilter}
+                onChange={event => setViewFilter(event.target.value as CustomerOrderViewFilter)}
               >
-                {option.label} <span data-numeric>{filterCounts[option.value]}</span>
-              </button>
-            ))}
+                {orderFilters.map(option => (
+                  <option value={option.value} key={option.value}>{option.label} ({filterCounts[option.value]})</option>
+                ))}
+                <option value="all">ดูทั้งหมด ({filterCounts.all})</option>
+              </select>
+            </label>
           </div>
           <div className={styles.ledgerHeading}>
             <div>
@@ -374,9 +364,9 @@ export function MyOrdersView() {
                     ) : null}
                     <Link
                       href={myOrderHref(order.orderId)}
-                      className={styles.detailLink}
+                      className={`${styles.detailLink} ${styles.customerDetailLink}`}
                       aria-label={"ดูรายละเอียด คำสั่งซื้อ " + order.orderId}
-                    >ดูรายละเอียด</Link>
+                    ><span className={styles.customerDetailLabel}>ดูรายละเอียด</span> <AppIcon name="arrow-up-right" size={17} /></Link>
                   </div>
                 </article>
               );

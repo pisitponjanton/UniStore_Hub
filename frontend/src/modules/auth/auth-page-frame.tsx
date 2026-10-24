@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import brandLogo from "@/assets/unistore-hub-logo.png";
+import { ThemeSwitcher } from "@/components/theme/theme-switcher";
 
 import styles from "./auth-form.module.css";
 
@@ -18,7 +19,8 @@ export function AuthPageFrame({
   return (
     <main className={styles.page}>
       <section className={styles.intro} aria-label="UniStore Hub">
-        <Link href="/" className={styles.brand} aria-label="UniStore Hub หน้าร้าน">
+        <div className={styles.brandRow}>
+          <Link href="/" className={styles.brand} aria-label="UniStore Hub หน้าร้าน">
           <Image
             src={brandLogo}
             alt=""
@@ -32,7 +34,9 @@ export function AuthPageFrame({
           <span className={styles.brandCopy}>
             <strong>UniStore Hub</strong>
           </span>
-        </Link>
+          </Link>
+          <ThemeSwitcher placement="down" compact />
+        </div>
 
         <div className={styles.introBody}>
           <div className={styles.introCopy}>

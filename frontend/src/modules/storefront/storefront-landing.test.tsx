@@ -36,6 +36,25 @@ describe("StorefrontLanding", () => {
     vi.unstubAllEnvs();
   });
 
+  it("offers public organization sign-up with a return to onboarding", async () => {
+    mocks.getLanding.mockResolvedValue([]);
+    render(<StorefrontLanding />);
+    await screen.findByRole("heading", { name: "ยังไม่มีร้านค้าที่เปิดให้เข้าชม" });
+    const link = screen.getByRole("link", { name: /เปิดร้าน \/ สมัครหน่วยงาน/ });
+    const destination = new URL(link.getAttribute("href") ?? "", "http://localhost");
+    expect(destination.pathname).toMatch(/^\/register\/?$/);
+    expect(destination.searchParams.get("returnTo")).toBe("/org/select/");
+  });
+
+  it("lets a logged-in buyer open organization enrollment without another account", async () => {
+    mocks.useAuthSession.mockReturnValue({ status: "authenticated" });
+    mocks.getLanding.mockResolvedValue([]);
+    render(<StorefrontLanding />);
+    await screen.findByRole("heading", { name: "ยังไม่มีร้านค้าที่เปิดให้เข้าชม" });
+    expect(screen.getByRole("link", { name: /เปิดร้าน \/ สมัครหน่วยงาน/ }))
+      .toHaveAttribute("href", "/org/select");
+  });
+
   it("shows the customer directory without the landing hero and restores search filters", async () => {
     mocks.useAuthSession.mockReturnValue({ status: "authenticated" });
     mocks.getLanding.mockResolvedValue([]);

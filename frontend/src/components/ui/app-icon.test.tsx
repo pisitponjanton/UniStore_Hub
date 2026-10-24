@@ -15,7 +15,7 @@ describe("Campus Commerce A functional icon system", () => {
     expect(icon).not.toBeNull();
     expect(icon).toHaveAttribute("aria-hidden", "true");
     expect(icon).toHaveAttribute("focusable", "false");
-    expect(Number(icon?.getAttribute("stroke-width")) * 17 / 24).toBeCloseTo(1.8, 4);
+    expect(Number(icon?.getAttribute("stroke-width")) * 17 / 24).toBeCloseTo(3, 4);
     expect(icon).toHaveAttribute("width", "17");
     expect(container.textContent).toBe("เปิดหน้าร้าน ");
     expect(container.querySelectorAll("svg")).toHaveLength(1);

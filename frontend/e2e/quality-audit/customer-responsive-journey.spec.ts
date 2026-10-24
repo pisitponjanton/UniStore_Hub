@@ -60,10 +60,11 @@ test("safe customer journey, actionable orders and visual breakpoints", async ({
       }
       if (c.name === "my-orders") {
         await expect(page.getByRole("group", { name: "กรองคำสั่งซื้อที่โหลดแล้ว" })).toBeVisible({ timeout: 18000 });
-        await expect(page.getByRole("button", { name: /^ต้องทำต่อ/ })).toHaveAttribute("aria-pressed", "true");
+        const statusSelect = page.getByRole("combobox", { name: "เลือกสถานะคำสั่งซื้อ" });
+        await expect(statusSelect).toHaveValue("all");
         await expect(page.getByRole("link", { name: /ชำระเงิน คำสั่งซื้อ|เปิดข้อมูลรับสินค้า คำสั่งซื้อ/ }).first()).toBeVisible();
-        await page.getByRole("button", { name: /^ทั้งหมด/ }).click();
-        await expect(page.getByRole("button", { name: /^ทั้งหมด/ })).toHaveAttribute("aria-pressed", "true");
+        await statusSelect.selectOption("all");
+        await expect(statusSelect).toHaveValue("all");
       }
       if (c.name === "product") {
         await expect(page.getByRole("heading", { name: "เลือกรายละเอียดที่ต้องการ" })).toBeVisible({ timeout: 18000 });
@@ -86,6 +87,13 @@ test("safe customer journey, actionable orders and visual breakpoints", async ({
         await page.screenshot({ path: join(evidenceDir, c.name + "-" + width + ".png"), animations: "disabled" });
       }
       if (c.name === "notifications") {
+        const refresh = page.getByRole("button", { name: "รีเฟรชรายการ" });
+        await expect(refresh).toBeVisible();
+        await expect(refresh.locator("svg.lucide-refresh-cw")).toHaveCount(1);
+        await expect(refresh).toHaveCSS("min-width", "44px");
+        await expect(page.getByText("กดรีเฟรชเพื่ออัปเดต")).toBeVisible();
+        await refresh.click();
+        await expect(page.getByRole("button", { name: "รีเฟรชรายการ" })).toBeEnabled();
         await page.getByRole("button", { name: "ยังไม่อ่าน" }).click();
         await expect(page.getByRole("button", { name: "ยังไม่อ่าน" })).toHaveAttribute("aria-pressed", "true");
         await expect(page.getByRole("navigation", { name: "เส้นทางผู้ซื้อ" })).toHaveCount(0);

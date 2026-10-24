@@ -141,12 +141,20 @@ for (const theme of ["light", "dark"] as const) {
         expect(headerSkin?.image, theme + " " + route.name + " should use formal surface, not gradient").toBe("none");
         expect(headerSkin?.background, theme + " " + route.name + " must not use historic teal").not.toBe("rgb(25, 59, 57)");
         if (route.name === "orders") {
+          const detail = page.getByRole("link", { name: "ดูรายละเอียด คำสั่งซื้อ " + orderA });
+          await expect(detail.locator("svg.lucide-arrow-up-right")).toHaveCount(1);
+          expect(await detail.innerText()).not.toContain("↗");
           await expect(page.getByRole("link", { name: "ชำระเงิน คำสั่งซื้อ " + orderA })).toBeVisible();
           await page.getByRole("button", { name: /เสร็จสิ้น 1/ }).click();
           await expect(page.getByText("อ้างอิง " + orderC.slice(0, 8))).toBeVisible();
-          await page.getByRole("button", { name: /ทั้งหมด 3/ }).click();
+          await page.getByRole("button", { name: /ดูทั้งหมด 3/ }).click();
         }
         if (route.name === "order-detail") {
+          await expect(page.getByRole("region", { name: "สถานะและขั้นตอนถัดไป" })).toBeVisible();
+          await expect(page.getByRole("list", { name: "ขั้นตอนคำสั่งซื้อ" }).locator("li")).toHaveCount(4);
+          await expect(page.locator('[aria-label="ข้อมูลคำสั่งซื้อ"]')).toHaveCount(0);
+          await expect(page.locator('[aria-label="สรุปยอดคำสั่งซื้อ"]')).toHaveCount(0);
+          await expect(page.getByRole("region", { name: "การดำเนินการคำสั่งซื้อ" }).getByRole("link", { name: "ไปชำระเงิน" }).locator("svg.lucide-arrow-right")).toHaveCount(1);
           await page.getByRole("button", { name: "ยกเลิกคำสั่งซื้อ" }).click();
           await expect(page.getByRole("dialog", { name: "ยืนยันการยกเลิกคำสั่งซื้อ" })).toBeVisible();
           await page.keyboard.press("Escape");
@@ -214,4 +222,62 @@ for (const theme of ["light", "dark"] as const) {
   });
 
 }
+
+
+test("Public login/register can switch and retain appearance", async ({ browser }) => {
+  const context = await browser.newContext({ colorScheme: "light", viewport: { width: 390, height: 844 } });
+  const page = await context.newPage();
+  try {
+    await page.goto(base + "/login/", { waitUntil: "domcontentloaded" });
+    await expect(page.getByLabel("เปลี่ยนธีม")).toBeVisible();
+    await page.getByLabel("เปลี่ยนธีม").click();
+    await page.getByRole("button", { name: "Dark", exact: true }).click();
+    await expect.poll(() => page.evaluate(() => document.documentElement.dataset.theme)).toBe("dark");
+    await page.goto(base + "/register/", { waitUntil: "domcontentloaded" });
+    await expect(page.getByLabel("เปลี่ยนธีม")).toBeVisible();
+    await expect.poll(() => page.evaluate(() => document.documentElement.dataset.theme)).toBe("dark");
+    await page.setViewportSize({ width: 1440, height: 920 });
+    await expect(page.getByLabel("เปลี่ยนธีม")).toBeVisible();
+    expect(await page.evaluate(() => Math.max(0,document.documentElement.scrollWidth-innerWidth))).toBeLessThanOrEqual(1);
+  } finally { await context.close(); }
+});
+
+test("Global theme: Light, Dark, System persist across customer and storefront routes", async ({ browser }) => {
+  const context = await browser.newContext({ colorScheme: "dark", viewport: { width: 390, height: 844 } });
+  await context.addInitScript(() => sessionStorage.setItem("unistoreHub.accessToken", "browser-only-theme-test"));
+  const counters = await install(context);
+  const page = await context.newPage();
+  try {
+    await page.goto(base + "/my/orders/", { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("heading", { name: "คำสั่งซื้อของฉัน" })).toBeVisible();
+    await expect.poll(() => page.evaluate(() => document.documentElement.dataset.theme)).toBe("dark");
+    await expect(page.locator('[aria-label="ภาพรวมคำสั่งซื้อที่โหลดอยู่"]')).toHaveCount(0);
+    await expect(page.getByRole("combobox", { name: "เลือกสถานะคำสั่งซื้อ" })).toHaveValue("all");
+
+    // Theme is in the visible topbar; no need to open the mobile sidebar.
+    await expect(page.locator('[aria-label="ตำแหน่งในระบบ"]').getByLabel("เปลี่ยนธีม")).toBeVisible();
+    await expect(page.locator("footer").getByLabel("เปลี่ยนธีม")).toHaveCount(0);
+    await page.getByLabel("เปลี่ยนธีม").click();
+    await page.getByRole("button", { name: "Light", exact: true }).click();
+    await expect.poll(() => page.evaluate(() => document.documentElement.dataset.theme)).toBe("light");
+    await page.reload();
+    await expect.poll(() => page.evaluate(() => document.documentElement.dataset.theme)).toBe("light");
+    expect(await page.evaluate(() => localStorage.getItem("unistore-theme"))).toBe("light");
+
+    await page.goto(base + "/", { waitUntil: "domcontentloaded" });
+    await expect.poll(() => page.evaluate(() => document.documentElement.dataset.theme)).toBe("light");
+    await page.getByLabel("เปลี่ยนธีม").click();
+    await page.getByRole("button", { name: "Dark", exact: true }).click();
+    await expect.poll(() => page.evaluate(() => document.documentElement.dataset.theme)).toBe("dark");
+
+    await page.getByLabel("เปลี่ยนธีม").click();
+    await page.getByRole("button", { name: "System", exact: true }).click();
+    expect(await page.evaluate(() => localStorage.getItem("unistore-theme"))).toBeNull();
+    await page.emulateMedia({ colorScheme: "light" });
+    await expect.poll(() => page.evaluate(() => document.documentElement.dataset.theme)).toBe("light");
+    await page.emulateMedia({ colorScheme: "dark" });
+    await expect.poll(() => page.evaluate(() => document.documentElement.dataset.theme)).toBe("dark");
+    expect(counters.unmockedWrites).toBe(0);
+  } finally { await context.close(); }
+});
 });

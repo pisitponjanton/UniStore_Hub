@@ -3,6 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { RefreshCw } from "lucide-react";
 import { myOrderHref } from "@/modules/orders/order-tracking-helpers";
 import { myPaymentHref } from "@/modules/payments/payment-helpers";
 import { myPickupHref } from "@/modules/pickups/pickup-helpers";
@@ -344,16 +345,22 @@ export function NotificationsView() {
               ความคืบหน้าคำสั่งซื้อของคุณ
             </p>
           </div>
-          <Button
-            variant="secondary"
-            aria-label="รีเฟรชรายการ"
-            pending={refreshing}
-            disabled={filterPending}
-            pendingLabel="กำลังรีเฟรช"
+          <button
+            type="button"
+            className={styles.refreshButton}
+            aria-label={refreshing ? "กำลังรีเฟรชรายการ" : "รีเฟรชรายการ"}
+            title={refreshing ? "กำลังรีเฟรชรายการ" : "รีเฟรชรายการ"}
+            aria-busy={refreshing || undefined}
+            disabled={refreshing || filterPending}
             onClick={handleRefresh}
           >
-            ตรวจเหตุการณ์ล่าสุด
-          </Button>
+            <RefreshCw
+              aria-hidden="true"
+              size={20}
+              strokeWidth={2.1}
+              className={refreshing ? styles.refreshIconSpinning : undefined}
+            />
+          </button>
         </header>
 
         <section className={styles.controlPanel} aria-label="ตัวกรองและภาพรวมการแจ้งเตือน">
@@ -362,7 +369,7 @@ export function NotificationsView() {
             <div className={styles.refreshNote} role="status" aria-live="polite">
               {filterPending
                 ? "กำลังอัปเดตรายการตามตัวกรอง..."
-                : "รายการไม่อัปเดตอัตโนมัติ กดรีเฟรชเพื่อดูข้อมูลล่าสุด"}
+                : "กดรีเฟรชเพื่ออัปเดต"}
             </div>
           </div>
 

@@ -218,6 +218,20 @@ export function StorefrontLanding({ workspace = false }: { workspace?: boolean }
         </section>
         ) : null}
 
+        {!workspace ? (
+          <aside className={styles.organizationInvite} aria-label="สำหรับหน่วยงานที่ต้องการเปิดร้าน">
+            <div>
+              <strong>มีชมรม คณะ หรือหน่วยงานที่อยากเปิดร้าน?</strong>
+              <p>ใช้บัญชีเดิมสมัครหน่วยงานได้ รออนุมัติก่อนเริ่มเปิดขายสินค้า</p>
+            </div>
+            {auth.status !== "loading" ? (
+              <Link href={auth.status === "authenticated" ? "/org/select/" : buildAuthPagePath("/register/", "/org/select/")}>
+                เปิดร้าน / สมัครหน่วยงาน <AppIcon name="arrow-up-right" size={17} />
+              </Link>
+            ) : null}
+          </aside>
+        ) : null}
+
         <section className={styles.finder} aria-label="ค้นหาและกรองร้านค้า">
           {!workspace ? (
             <div className={styles.finderHeading}>

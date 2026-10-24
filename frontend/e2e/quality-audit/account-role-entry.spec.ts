@@ -128,7 +128,7 @@ for (const scenario of roleCases) {
       await expect(page.getByRole("link", { name: "กลับไปตรวจสอบคำสั่งซื้อ" }))
         .toHaveAttribute("href", /orders\/new\/?\?productId=fixture-only/);
       await expect(page.getByRole("link", { name: "คำสั่งซื้อของฉัน" })).toBeVisible();
-      await expect(page.getByRole("link", { name: "จัดการหน่วยงาน" })).toHaveCount(scenario.org ? 1 : 0);
+      await expect(page.getByRole("link", { name: scenario.org ? "จัดการหน่วยงาน" : "เปิดร้าน / สมัครหน่วยงาน" })).toHaveAttribute("href", "/org/select/");
       await expect(page.getByRole("link", { name: "ดูแลแพลตฟอร์ม" })).toHaveCount(scenario.platform ? 1 : 0);
       await checkWidths(page, fixture.evidence, "account-" + scenario.role);
       expect(fixture.nonRead()).toBe(0);
@@ -141,6 +141,7 @@ test("Organization entry lists only membership-backed workspaces, with clear sel
   const fixture = await readOnlyContext(browser, "staff");
   try {
     const { page, frontend } = fixture;
+    await page.emulateMedia({ colorScheme: "dark" });
     await page.goto(frontend + "/org/select/", { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("heading", { name: "วันนี้จะทำงานกับหน่วยงานไหน?" }))
       .toBeVisible({ timeout: 20000 });
@@ -159,6 +160,47 @@ test("Organization entry lists only membership-backed workspaces, with clear sel
     await expect(page.getByRole("button", { name: "เข้าใช้งาน ชมรมดนตรี (ทดสอบเบราว์เซอร์)" })).toBeVisible();
     await page.getByRole("searchbox", { name: "ค้นหาหน่วยงานที่เข้าถึงได้" }).fill("");
     await checkWidths(page, fixture.evidence, "org-select-staff");
+    expect(fixture.nonRead()).toBe(0);
+  } finally { await fixture.context.close(); }
+});
+
+
+test("Customer without an organization can reach the first-time application form", async ({ browser }) => {
+  const fixture = await readOnlyContext(browser, "customer");
+  try {
+    const { page, frontend } = fixture;
+    await page.emulateMedia({ colorScheme: "dark" });
+    await page.goto(frontend + "/org/select/", { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("heading", { name: "เริ่มต้นสร้างหน่วยงานของคุณ" }))
+      .toBeVisible({ timeout: 18000 });
+    await expect(page.getByRole("heading", { name: "สมัครหน่วยงาน" })).toBeVisible();
+    await expect(page.getByRole("textbox", { name: "ชื่อหน่วยงาน" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "เลือกพื้นที่เพื่อเริ่มงาน" })).toHaveCount(0);
+    await checkWidths(page, fixture.evidence, "first-organization");
+    expect(fixture.nonRead()).toBe(0);
+  } finally { await fixture.context.close(); }
+});
+
+test("Pending organization remains in review until API confirms approval", async ({ browser }) => {
+  const fixture = await readOnlyContext(browser, "organizationAdmin");
+  try {
+    const { page, frontend } = fixture;
+    await page.emulateMedia({ colorScheme: "dark" });
+    let status: "PENDING" | "ACTIVE" = "PENDING";
+    await page.route("**/api/v1/organizations/" + ORG, route => {
+      if (route.request().method() !== "GET") return route.abort("blockedbyclient");
+      const value = { ...organizations[0], status };
+      return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ success: true, data: value }) });
+    });
+    await page.goto(frontend + "/org/application/?organizationId=" + ORG, { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("heading", { name: /สถานะคำขอของ/ })).toBeVisible({ timeout: 18000 });
+    await expect(page.getByText("รอการอนุมัติ")).toBeVisible();
+    await expect(page.getByRole("link", { name: /Dashboard/ })).toHaveCount(0);
+    await checkWidths(page, fixture.evidence, "pending-organization");
+    status = "ACTIVE";
+    await page.getByRole("button", { name: "ตรวจสอบสถานะล่าสุด" }).click();
+    await expect(page.getByRole("link", { name: /เข้าสู่ Dashboard/ }))
+      .toHaveAttribute("href", /\/org\/dashboard\/\?organizationId=/);
     expect(fixture.nonRead()).toBe(0);
   } finally { await fixture.context.close(); }
 });

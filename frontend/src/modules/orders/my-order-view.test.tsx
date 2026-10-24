@@ -72,7 +72,7 @@ describe("MyOrderView", () => {
       name: "รายละเอียดคำสั่งซื้อ",
       level: 1,
     })).toBeInTheDocument();
-    expect(screen.getAllByText("กำลังผลิตสินค้า").length).toBeGreaterThan(0);
+    expect(screen.getByRole("region", { name: "สถานะและขั้นตอนถัดไป" })).toHaveTextContent("ร้านกำลังเตรียมสินค้า");
     expect(screen.getByText("เสื้อชมรม")).toBeInTheDocument();
     expect(screen.getAllByText("฿500.00").length).toBeGreaterThan(0);
 
@@ -82,6 +82,38 @@ describe("MyOrderView", () => {
     expect(screen.getByText("ขั้นตอนปัจจุบัน")).toBeInTheDocument();
     expect(screen.getAllByText("เสร็จแล้ว")).toHaveLength(2);
     expect(screen.queryByText("✓")).not.toBeInTheDocument();
+  });
+
+  it("shows a single order total, no redundant fact cards, and a slim status-led layout", async () => {
+    mocks.getMyOrder.mockResolvedValue(makeOrder({ status: "PENDING_PAYMENT" }));
+    render(<MyOrderView />);
+    await screen.findByText("เสื้อชมรม");
+    const header = document.querySelector("header[class*=detailHero]");
+    expect(header).toHaveTextContent("ยอดรวมคำสั่งซื้อ");
+    expect(header).toHaveTextContent("฿500.00");
+    expect(header).toHaveTextContent("สั่งซื้อ");
+    expect(header).toHaveTextContent("อัปเดต");
+    expect(screen.queryByRole("region", { name: "ข้อมูลคำสั่งซื้อ" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "สรุปยอดคำสั่งซื้อ" })).not.toBeInTheDocument();
+    expect(screen.queryByText("สถานะนี้มาจากข้อมูลล่าสุดของคำสั่งซื้อ")).not.toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "สถานะและขั้นตอนถัดไป" })).toHaveTextContent("รอชำระเงิน");
+    const steps = screen.getAllByRole("listitem");
+    expect(steps).toHaveLength(4);
+    const footer = screen.getByRole("region", { name: "การดำเนินการคำสั่งซื้อ" });
+    const paymentLink = screen.getByRole("link", { name: "ไปชำระเงิน" });
+    expect(footer).toContainElement(paymentLink);
+    expect(paymentLink.querySelector("svg.lucide-arrow-right")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "ยกเลิกคำสั่งซื้อ" })).toBeInTheDocument();
+  });
+
+  it("keeps the backend-defined journey and does not offer further actions for cancelled orders", async () => {
+    mocks.getMyOrder.mockResolvedValue(makeOrder({ status: "CANCELLED" }));
+    render(<MyOrderView />);
+    await screen.findByText("เสื้อชมรม");
+    expect(screen.getByRole("region", { name: "สถานะและขั้นตอนถัดไป" })).toHaveTextContent("คำสั่งซื้อนี้สิ้นสุดแล้ว");
+    expect(screen.queryByRole("list", { name: "ขั้นตอนคำสั่งซื้อ" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "ไปชำระเงิน" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "ยกเลิกคำสั่งซื้อ" })).not.toBeInTheDocument();
   });
 
   it("retries loading order detail in place after a recoverable error", async () => {
@@ -130,9 +162,8 @@ describe("MyOrderView", () => {
     ).toHaveTextContent(
       "สถานะคำสั่งซื้อเปลี่ยนไปแล้ว จึงไม่สามารถยกเลิกจากสถานะปัจจุบันได้",
     );
-    expect(
-      screen.getAllByText("กำลังตรวจสอบการชำระเงิน").length,
-    ).toBeGreaterThan(0);
+    expect(screen.getByRole("region", { name: "สถานะและขั้นตอนถัดไป" }))
+      .toHaveTextContent("ร้านได้รับหลักฐานแล้ว กรุณารอผลการตรวจสอบ");
     expect(
       screen.queryByRole("button", { name: "ยกเลิกคำสั่งซื้อ" }),
     ).not.toBeInTheDocument();
@@ -170,6 +201,7 @@ describe("MyOrderView", () => {
     expect(
       await screen.findByRole("status"),
     ).toHaveTextContent("ยกเลิกคำสั่งซื้อแล้ว");
-    expect(screen.getByText("คำสั่งซื้อนี้สิ้นสุดแล้ว")).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "สถานะและขั้นตอนถัดไป" })).toHaveTextContent("คำสั่งซื้อนี้สิ้นสุดแล้ว");
+    expect(screen.queryByRole("region", { name: "การดำเนินการคำสั่งซื้อ" })).not.toBeInTheDocument();
   });
 });

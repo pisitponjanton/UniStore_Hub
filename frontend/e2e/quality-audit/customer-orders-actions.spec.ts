@@ -60,7 +60,7 @@ test("My Orders links, filters, cursor 503/retry, initial 503/retry and focus",a
   initialFail=true;
   await page.goto(href,{waitUntil:"domcontentloaded"});
   await expect(page.getByText("ไม่สามารถโหลดคำสั่งซื้อได้")).toBeVisible({timeout:20000});
-  await expect(page.getByRole("link",{name:"กลับหน้าร้าน"})).toHaveAttribute("href","/");
+  await expect(page.getByRole("link",{name:"กลับหน้าร้าน"})).toHaveAttribute("href","/shops/");
   await proof(page,"FE-UX-08-02","initial-503","Persistent synthetic 503 shows retry and safe store return");
   initialFail=false;
   await page.getByRole("button",{name:"ลองโหลดอีกครั้ง"}).click();
@@ -70,9 +70,9 @@ test("My Orders links, filters, cursor 503/retry, initial 503/retry and focus",a
   await expect(heading).toBeFocused();
   await proof(page,"FE-UX-08-02","retry-success-focus","Explicit Retry displays Order list and focuses new page heading");
   const chooseMore=page.getByRole("link",{name:"เลือกสินค้าเพิ่ม"});
-  await expect(chooseMore).toHaveAttribute("href","/");
+  await expect(chooseMore).toHaveAttribute("href","/shops/");
   await chooseMore.click();
-  await expect(page).toHaveURL(frontend+"/");
+  await expect(page).toHaveURL(frontend+"/shops/");
   await proof(page,"FE-UX-08-01","choose-more-navigation","Customer returns to storefront from My Orders");
 
   await page.goto(href,{waitUntil:"domcontentloaded"});
@@ -89,11 +89,11 @@ test("My Orders links, filters, cursor 503/retry, initial 503/retry and focus",a
   await page.goto(href,{waitUntil:"domcontentloaded"});
   // This view has a real empty category on the first page.
   const filtersOnFirstPage=page.getByRole("group",{name:"กรองคำสั่งซื้อที่โหลดแล้ว"});
-  await filtersOnFirstPage.getByRole("button",{name:/เสร็จสิ้น/}).click();
+  await filtersOnFirstPage.getByRole("combobox",{name:"เลือกสถานะคำสั่งซื้อ"}).selectOption("finished");
   await expect(page.getByText("ยังไม่มีคำสั่งซื้อในกลุ่มนี้จากรายการที่โหลดแล้ว")).toBeVisible();
   await proof(page,"FE-UX-08-04","local-no-match","Local finished filter empty state shows return-to-all action");
   await page.getByRole("button",{name:"ดูคำสั่งซื้อทั้งหมด"}).click();
-  await expect(filtersOnFirstPage.getByRole("button",{name:/ทั้งหมด/})).toHaveAttribute("aria-pressed","true");
+  await expect(filtersOnFirstPage.getByRole("combobox",{name:"เลือกสถานะคำสั่งซื้อ"})).toHaveValue("all");
   // Customer list deliberately defaults to action-only; switch to All
   // before asserting non-action progress and completed rows remain preserved.
   const more=page.getByRole("button",{name:"โหลดคำสั่งซื้อเพิ่มเติม"});
@@ -118,10 +118,10 @@ test("My Orders links, filters, cursor 503/retry, initial 503/retry and focus",a
     .toHaveAttribute("href","/my/pickup/?orderId="+order3.orderId);
   await proof(page,"FE-UX-08-03","pickup-contextual","Ready pickup contextual action links to corresponding Order pickup");
   const filters=page.getByRole("group",{name:"กรองคำสั่งซื้อที่โหลดแล้ว"});
-  await filters.getByRole("button",{name:/กำลังดำเนินการ/}).click();
-  await expect(filters.getByRole("button",{name:/กำลังดำเนินการ/})).toHaveAttribute("aria-pressed","true");
+  await filters.getByRole("combobox",{name:"เลือกสถานะคำสั่งซื้อ"}).selectOption("progress");
+  await expect(filters.getByRole("combobox",{name:"เลือกสถานะคำสั่งซื้อ"})).toHaveValue("progress");
   await proof(page,"FE-UX-08-04","local-filter-progress","Loaded-only progress filter retains matching order");
-  await filters.getByRole("button",{name:/เสร็จสิ้น/}).click();
+  await filters.getByRole("combobox",{name:"เลือกสถานะคำสั่งซื้อ"}).selectOption("finished");
   await expect(page.getByRole("article",{name:"คำสั่งซื้อ "+order4.orderId})).toBeVisible();
   await proof(page,"FE-UX-08-04","local-filter-completed","Loaded-only finished filter shows completed order");
   await page.close();
@@ -134,7 +134,7 @@ test("My Orders links, filters, cursor 503/retry, initial 503/retry and focus",a
   const emptyPage=await emptyCtx.newPage();
   await emptyPage.goto(href,{waitUntil:"domcontentloaded"});
   await expect(emptyPage.getByText("ยังไม่มีคำสั่งซื้อ")).toBeVisible();
-  await expect(emptyPage.getByRole("link",{name:"เลือกสินค้า"})).toHaveAttribute("href","/");
+  await expect(emptyPage.getByRole("link",{name:"เลือกสินค้า"})).toHaveAttribute("href","/shops/");
   await proof(emptyPage,"FE-UX-08-04","server-empty","Server empty state offers discoverable store navigation");
   await emptyCtx.close();
  }finally{await ctx.close();}

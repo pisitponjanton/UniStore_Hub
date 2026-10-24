@@ -280,3 +280,6 @@
 @media (prefers-reduced-motion: reduce) {
   .brand, .passwordToggle, .accountActionPrimary, .accountActionSecondary { transition: none; }
 }
+
+/* Theme control accessible before sign-in on desktop and mobile. */
+.brandRow { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-width: 0; }
