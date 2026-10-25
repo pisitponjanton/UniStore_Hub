@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
+import { ManagementModal } from "@/components/ui/management-modal";
 
 import {
   Badge,
@@ -49,14 +50,17 @@ function operationErrorMessage(error: unknown): string {
 export function VariantManagement({
   organizationId,
   product,
-  onProductRefreshed,
+  onProductRefreshed, compact = false, onDirtyChange,
 }: {
   organizationId: string;
   product: ProductDTO;
   onProductRefreshed: (product: ProductDTO) => void;
+  compact?: boolean;
+  onDirtyChange?: (dirty: boolean) => void;
 }) {
   const focusErrorSummary = useErrorSummaryFocus();
   const [createName, setCreateName] = useState("");
+  const [createOpen, setCreateOpen] = useState(false);
   const [createPrice, setCreatePrice] = useState("");
   const [createNameError, setCreateNameError] = useState<
     string | undefined
@@ -83,6 +87,14 @@ export function VariantManagement({
 
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+
+  const formDirty = compact && ((createOpen && Boolean(createName.trim() || createPrice.trim())) ||
+    (editingVariant !== null &&
+      (editName !== editingVariant.name || editPrice !== satangToThbInput(editingVariant.price))));
+  useEffect(() => {
+    onDirtyChange?.(formDirty);
+    return () => onDirtyChange?.(false);
+  }, [formDirty, onDirtyChange]);
 
   const variants = product.variants ?? [];
   const activeCount = variants.filter(
@@ -132,6 +144,7 @@ export function VariantManagement({
       await refreshProduct();
       setCreateName("");
       setCreatePrice("");
+      setCreateOpen(false);
       setNotice(
         `สร้างตัวเลือก ${created.name} ราคา ${formatSatang(created.price)} แล้ว`,
       );
@@ -248,7 +261,7 @@ export function VariantManagement({
   }
 
   return (
-    <section className={styles.root} aria-labelledby={`variant-title-${product.productId}`}>
+    <section className={compact ? styles.compactRoot : styles.root} aria-labelledby={`variant-title-${product.productId}`}>
       <div className={styles.header}>
         <div className={styles.headerCopy}>
           <h3 className={styles.title} id={`variant-title-${product.productId}`}>
@@ -258,10 +271,14 @@ export function VariantManagement({
             เพิ่มขนาด สี หรือรูปแบบที่ลูกค้าเลือกได้ โดยกรอกราคาเป็นหน่วยบาท
           </p>
         </div>
-        <div className={styles.headerStats}>
-          <span>{activeCount} ใช้งาน</span>
-          <span>{variants.length} ทั้งหมด</span>
-        </div>
+        {compact ? (
+          <Button onClick={() => setCreateOpen(true)}>+ เพิ่มตัวเลือก</Button>
+        ) : (
+          <div className={styles.headerStats}>
+            <span>{activeCount} ใช้งาน</span>
+            <span>{variants.length} ทั้งหมด</span>
+          </div>
+        )}
       </div>
 
       {error ? (
@@ -355,7 +372,7 @@ export function VariantManagement({
                       ) : null}
                     </div>
 
-                    {editing ? (
+                    {editing && !compact ? (
                       <form
                         className={styles.editForm}
                         onSubmit={handleSave}
@@ -437,7 +454,7 @@ export function VariantManagement({
           )}
         </div>
 
-        <form className={styles.createForm} onSubmit={handleCreate} noValidate>
+        {!compact ? <form className={styles.createForm} onSubmit={handleCreate} noValidate>
           <div className={styles.createHeading}>
             <strong>เพิ่มตัวเลือกใหม่</strong>
           </div>
@@ -499,8 +516,91 @@ export function VariantManagement({
           >
             เพิ่มตัวเลือก
           </Button>
-        </form>
+        </form> : null}
       </div>
+      {compact && createOpen ? <ManagementModal title="เพิ่มตัวเลือกสินค้า" formId="variant-create-form"
+        submitLabel="เพิ่มตัวเลือก" size="small" submitting={creating}
+        dirty={Boolean(createName.trim() || createPrice.trim())}
+        onClose={() => { setCreateOpen(false); setCreateName(""); setCreatePrice(""); setCreateNameError(undefined); setCreatePriceError(undefined); }}>
+        {error ? <Notice tone="danger" role="alert" title="ดำเนินการไม่สำเร็จ">{error}</Notice> : null}
+        <form id="variant-create-form" className={styles.compactForm} onSubmit={handleCreate} noValidate>
+          <ErrorSummary id={`variant-create-error-summary-${product.productId}`}
+            items={[
+              ...(createNameError ? [{fieldId:`variant-create-name-${product.productId}`,message:createNameError}] : []),
+              ...(createPriceError ? [{fieldId:`variant-create-price-${product.productId}`,message:createPriceError}] : []),
+            ]}/>
+          <TextField id={`variant-create-name-${product.productId}`} label="ชื่อตัวเลือก" required
+            placeholder="เช่น Size M" value={createName} error={createNameError} announceError={false}
+            disabled={creating} onChange={event => {setCreateName(event.target.value);setCreateNameError(undefined);}} />
+          <TextField id={`variant-create-price-${product.productId}`} label="ราคา (บาท)" required
+            hint="ใส่ทศนิยมได้ไม่เกิน 2 ตำแหน่ง" inputMode="decimal" placeholder="250.00"
+            value={createPrice} error={createPriceError} announceError={false}
+            disabled={creating} onChange={event => {setCreatePrice(event.target.value);setCreatePriceError(undefined);}} />
+        </form>
+      </ManagementModal> : null}
+      {compact && editingVariant ? <ManagementModal title="แก้ไขตัวเลือกสินค้า" formId="variant-edit-form"
+        submitLabel="บันทึกตัวเลือก" size="small" submitting={Boolean(savingVariantId)}
+        dirty={editName !== editingVariant.name || editPrice !== satangToThbInput(editingVariant.price)}
+        onClose={() => setEditingVariant(null)}>
+        {error ? <Notice tone="danger" role="alert" title="ดำเนินการไม่สำเร็จ">{error}</Notice> : null}
+                              <form
+                        className={styles.editForm} id="variant-edit-form"
+                        onSubmit={handleSave}
+                        noValidate
+                      >
+                        <ErrorSummary
+                          id={`variant-edit-error-summary-${editingVariant.variantId}`}
+                          items={[
+                            ...(editNameError
+                              ? [
+                                  {
+                                    fieldId: `variant-edit-name-${editingVariant.variantId}`,
+                                    message: editNameError,
+                                  },
+                                ]
+                              : []),
+                            ...(editPriceError
+                              ? [
+                                  {
+                                    fieldId: `variant-edit-price-${editingVariant.variantId}`,
+                                    message: editPriceError,
+                                  },
+                                ]
+                              : []),
+                          ]}
+                        />
+                        <TextField
+                          id={`variant-edit-name-${editingVariant.variantId}`}
+                          label="ชื่อตัวเลือก"
+                          value={editName}
+                          onChange={(event) => {
+                            setEditName(event.target.value);
+                            setEditNameError(undefined);
+                          }}
+                          error={editNameError}
+                          announceError={false}
+                          required
+                          disabled={savingVariantId === editingVariant.variantId}
+                        />
+                        <TextField
+                          id={`variant-edit-price-${editingVariant.variantId}`}
+                          label="ราคา (บาท)"
+                          inputMode="decimal"
+                          value={editPrice}
+                          onChange={(event) => {
+                            setEditPrice(event.target.value);
+                            setEditPriceError(undefined);
+                          }}
+                          error={editPriceError}
+                          announceError={false}
+                          hint="ใส่ทศนิยมได้ไม่เกิน 2 ตำแหน่ง"
+                          required
+                          disabled={savingVariantId === editingVariant.variantId}
+                        />
+
+                        </form>
+
+      </ManagementModal> : null}
     </section>
   );
 }

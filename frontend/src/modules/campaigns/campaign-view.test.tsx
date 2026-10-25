@@ -15,6 +15,7 @@ const mocks = vi.hoisted(() => ({
   get: vi.fn(),
   update: vi.fn(),
   listStores: vi.fn(),
+  getStore: vi.fn(),
   logout: vi.fn(),
 }));
 
@@ -28,6 +29,7 @@ vi.mock("@/modules/auth", () => ({
 vi.mock("@/modules/stores", () => ({
   storeService: {
     list: mocks.listStores,
+    get: mocks.getStore,
   },
 }));
 
@@ -72,9 +74,29 @@ function campaign(
 }
 
 describe("CampaignManagementView", () => {
+
+  it("uses the Store workspace context for campaign list and creation", async () => {
+    mocks.create.mockResolvedValue(campaign({ campaignId: "new", name: "Scoped Campaign" }));
+    render(<CampaignManagementView organizationId="org-1" fixedStoreId="store-1" storeName="Main Store" />);
+    await screen.findByText("Faculty Shirt Pre-order");
+    expect(mocks.getStore).toHaveBeenCalledWith("org-1", "store-1", expect.any(Object));
+    expect(mocks.listStores).not.toHaveBeenCalled();
+    expect(mocks.listCampaigns).toHaveBeenCalledWith("org-1", expect.objectContaining({storeId:"store-1"}));
+    expect(screen.queryByLabelText("ร้านค้า")).toBeNull();
+    fireEvent.click(screen.getByRole("button", {name:"+ สร้างแคมเปญ"}));
+    expect(screen.queryByLabelText("ร้านค้า")).toBeNull();
+    fireEvent.change(screen.getByLabelText("ชื่อแคมเปญ"), {target:{value:"Scoped Campaign"}});
+    fireEvent.click(screen.getByRole("button", {name:"สร้างแคมเปญ"}));
+    await waitFor(() => expect(mocks.create).toHaveBeenCalledWith("org-1", {
+      storeId:"store-1", name:"Scoped Campaign", openAt:null, closeAt:null, paymentDeadline:null, pickupAt:null
+    }));
+  });
+
+
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.listStores.mockResolvedValue([store]);
+    mocks.getStore.mockResolvedValue(store);
     mocks.listCampaigns.mockResolvedValue({
       items: [campaign()],
       nextCursor: null,
@@ -85,6 +107,7 @@ describe("CampaignManagementView", () => {
     render(<CampaignManagementView organizationId="org-1" />);
 
     await screen.findByText("Faculty Shirt Pre-order");
+    fireEvent.click(screen.getByRole("button", { name: "+ สร้างแคมเปญ" }));
 
     fireEvent.click(
       screen.getByRole("button", { name: "สร้างแคมเปญ" }),
@@ -138,6 +161,7 @@ describe("CampaignManagementView", () => {
     render(<CampaignManagementView organizationId="org-1" />);
 
     await screen.findByText("Faculty Shirt Pre-order");
+    fireEvent.click(screen.getByRole("button", { name: "+ สร้างแคมเปญ" }));
 
     fireEvent.change(
       screen.getByLabelText(/ชื่อแคมเปญ/, {

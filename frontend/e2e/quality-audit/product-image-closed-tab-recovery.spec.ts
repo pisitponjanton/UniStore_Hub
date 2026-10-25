@@ -49,10 +49,10 @@ test("closing tab loses per-tab PATCH marker but a new tab offers explicit GET-o
   await page.screenshot({path:join(dir,image),animations:"disabled"});
   proof.push({id:"FE-UX-18-15",role:"organizationAdmin",state,image,note,viewport:"390x844"});
  }
- const url=frontend+"/org/products/?organizationId="+ids.organizationId;
+ const url=frontend+"/org/stores/view/?organizationId="+ids.organizationId+"&storeId="+ids.storeId+"&tab=products";
  async function editor(page:Page){
   const card=page.getByRole("heading",{name:product.name,exact:true}).first().locator("xpath=ancestor::article");
-  await expect(card).toBeVisible();await card.getByRole("button",{name:"แก้ไขข้อมูล"}).click();
+  await expect(card).toBeVisible();await card.getByRole("link",{name:"แก้ไขสินค้า"}).click();
   await expect(page.locator("#product-image-"+ids.productId)).toBeVisible();
  }
  try{

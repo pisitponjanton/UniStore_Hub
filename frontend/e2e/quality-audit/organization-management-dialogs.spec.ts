@@ -30,7 +30,10 @@ test("live Local organization management confirm dialogs open and cancel without
   try {
     for (const c of cases) {
       const page = await context.newPage();
-      await page.goto(frontend + c.path + "?organizationId=" + encodeURIComponent(ids.organizationId), { waitUntil: "domcontentloaded" });
+      const path = c.name === "products-status"
+        ? "/org/stores/view/?organizationId=" + encodeURIComponent(ids.organizationId) + "&storeId=" + encodeURIComponent(ids.storeId) + "&tab=products"
+        : c.path + "?organizationId=" + encodeURIComponent(ids.organizationId);
+      await page.goto(frontend + path, { waitUntil: "domcontentloaded" });
       const search = page.getByRole("searchbox", { name: /ค้นหา(สมาชิก|ร้านค้า|สินค้า)/ });
       await expect(search).toBeVisible({ timeout: 20000 });
       const buttons = page.getByRole("button", { name: c.label, exact: true });

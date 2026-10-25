@@ -10,15 +10,13 @@ const cases = [
   { name: "Staff Pickups", role: "staff", path: "/org/pickups/" + org, title: "จุดรับสินค้า" },
   { name: "Org Staff", role: "organizationAdmin", path: "/org/staff/" + org, title: "บุคลากรและสิทธิ์" },
   { name: "Org Stores", role: "organizationAdmin", path: "/org/stores/" + org, title: "ร้านค้า" },
-  { name: "Org Products", role: "organizationAdmin", path: "/org/products/" + org, title: "สินค้าและตัวเลือก" },
-  { name: "Org Campaigns", role: "organizationAdmin", path: "/org/campaigns/" + org, title: "แคมเปญ" },
   { name: "Org Audit", role: "organizationAdmin", path: "/org/audit/" + org, title: "ประวัติการทำรายการ" },
   { name: "Platform Summary", role: "platformAdmin", path: "/platform/summary/", title: "ภาพรวม Platform" },
   { name: "Platform Orgs", role: "platformAdmin", path: "/platform/organizations/", title: "จัดการหน่วยงาน" },
   { name: "Platform Users", role: "platformAdmin", path: "/platform/users/", title: "ผู้ใช้ระดับ Platform" },
 ] as const;
 
-test("11 failed routes retain heading + explicit retry/back; recover without re-login", async ({ browser, request }) => {
+test("nine management routes retain heading + explicit retry/back; recover without re-login", async ({ browser, request }) => {
   test.setTimeout(210_000);
   for (const c of cases) {
     const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: "reduce" });
@@ -73,4 +71,36 @@ test("shared fallback skeleton and semantic heading stable on small viewport", a
   await expect(page.getByTestId("page-loading-skeleton")).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(1);
   await ctx.close();
+});
+
+
+test("Store Workspace retries a transient Store GET failure without changing organization", async ({ browser, request }) => {
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await establishSeedRoleSession(ctx, request, "organizationAdmin");
+  let count = 0;
+  let unavailable = true;
+  await ctx.route("**/organizations/" + ids.organizationId + "/stores/" + ids.storeId, async route => {
+    count++;
+    if (unavailable) {
+      await route.fulfill({status: 503, contentType:"application/json", body:JSON.stringify({
+        success:false, error:{code:"SERVICE_UNAVAILABLE",message:"Temporary outage"}
+      })});
+    } else await route.continue();
+  });
+  const page = await ctx.newPage();
+  try {
+    await page.goto("http://localhost:3000/org/stores/view/?organizationId=" + ids.organizationId +
+      "&storeId=" + ids.storeId + "&tab=products");
+    const error = page.locator('[data-page-status="error"]');
+    await expect(error).toBeVisible({ timeout: 20000 });
+    await expect(error.getByRole("button", {name:"ลองใหม่"})).toBeVisible();
+    await expect(error.getByRole("link", {name:"กลับไปรายการร้านค้า"})).toHaveAttribute("href", /organizationId=/);
+    const token = await page.evaluate(() => sessionStorage.getItem("unistoreHub.accessToken"));
+    unavailable = false;
+    await error.getByRole("button", {name:"ลองใหม่"}).click();
+    await expect(page.getByRole("navigation", {name:"เมนูจัดการร้านค้า"})).toBeVisible({ timeout:20000 });
+    await expect(page).toHaveURL(/tab=products/);
+    expect(await page.evaluate(() => sessionStorage.getItem("unistoreHub.accessToken"))).toBe(token);
+    expect(count).toBeGreaterThanOrEqual(2);
+  } finally { await ctx.close(); }
 });

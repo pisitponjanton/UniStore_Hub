@@ -49,10 +49,10 @@ test("image upload signing/PUT/PATCH negative states + focused recovery at 320px
  }
  try{
   const page=await ctx.newPage();
-  await page.goto(frontend+"/org/products/?organizationId="+ids.organizationId,{waitUntil:"domcontentloaded"});
+  await page.goto(frontend+"/org/stores/view/?organizationId="+ids.organizationId+"&storeId="+ids.storeId+"&tab=products",{waitUntil:"domcontentloaded"});
   const card=page.getByRole("heading",{name:product.name,exact:true}).first().locator("xpath=ancestor::article");
   await expect(card).toBeVisible();
-  await card.getByRole("button",{name:"แก้ไขข้อมูล"}).click();
+  await card.getByRole("link",{name:"แก้ไขสินค้า"}).click();
   const input=page.locator("#product-image-"+ids.productId),upload=page.getByRole("button",{name:"อัปโหลดรูปสินค้า"});
   await expect(input).toBeEnabled();
   await input.setInputFiles({name:"too-large.png",mimeType:"image/png",buffer:Buffer.alloc(5*1024*1024+1,0)});

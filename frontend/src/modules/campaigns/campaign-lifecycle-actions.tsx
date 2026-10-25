@@ -69,11 +69,12 @@ function lifecycleStepState(
 export function CampaignLifecycleActions({
   organizationId,
   campaign,
-  onCampaignChanged,
+  onCampaignChanged, compact = false,
 }: {
   organizationId: string;
   campaign: CampaignDTO;
   onCampaignChanged: (campaign: CampaignDTO) => void;
+  compact?: boolean;
 }) {
   const [pendingAction, setPendingAction] = useState<string | null>(
     null,
@@ -129,8 +130,12 @@ export function CampaignLifecycleActions({
   }
 
   return (
-    <div className={styles.root}>
-      <div
+    <div className={compact ? styles.compactRoot : styles.root}>
+      {compact ? <p className={styles.compactSummary}>
+        {nextAction ? `ขั้นตอนถัดไป: ${nextAction.label}`
+          : campaign.status === "CANCELLED" ? "แคมเปญยกเลิกแล้ว ไม่มีขั้นตอนถัดไป"
+          : "ไม่มีการดำเนินการถัดไป"}
+      </p> : <div
         className={styles.currentState}
         aria-label="สถานะและขั้นตอนถัดไป"
       >
@@ -164,9 +169,9 @@ export function CampaignLifecycleActions({
                 : "ไม่มีการดำเนินการถัดไป"}
           </strong>
         </div>
-      </div>
+      </div>}
 
-      {campaign.status === "CANCELLED" ? (
+      {!compact && campaign.status === "CANCELLED" ? (
         <div className={styles.cancelledPath} role="status">
           <div>
             <strong>วงจรแคมเปญสิ้นสุดด้วยการยกเลิก</strong>
@@ -175,7 +180,7 @@ export function CampaignLifecycleActions({
             </span>
           </div>
         </div>
-      ) : (
+      ) : !compact && campaign.status !== "CANCELLED" ? (
         <ol className={styles.lifecycleRail} aria-label="ลำดับสถานะแคมเปญ">
           {LIFECYCLE.map((step, index) => {
             const stepState = lifecycleStepState(step, campaign.status);
@@ -206,7 +211,7 @@ export function CampaignLifecycleActions({
             );
           })}
         </ol>
-      )}
+      ) : null}
 
       {error ? (
         <Notice tone="danger" role="alert" title="เปลี่ยนสถานะไม่สำเร็จ">
@@ -221,7 +226,7 @@ export function CampaignLifecycleActions({
       ) : null}
 
       {actions.length === 0 ? (
-        <div className={styles.none}>
+        compact ? null : <div className={styles.none}>
           <strong>ไม่มีขั้นตอนถัดไปจากสถานะนี้</strong>
           <span>
             {campaign.status === "COMPLETED"
@@ -231,12 +236,12 @@ export function CampaignLifecycleActions({
         </div>
       ) : (
         <div className={styles.actionArea}>
-          <div className={styles.actionCopy}>
+          {!compact ? <div className={styles.actionCopy}>
             <strong>การดำเนินการที่ทำได้</strong>
             <span>
               ระบบจะแสดงเฉพาะการเปลี่ยนสถานะที่รองรับจากสถานะปัจจุบัน และตรวจสอบเงื่อนไขอีกครั้งเมื่อยืนยัน
             </span>
-          </div>
+          </div> : null}
 
           <div className={styles.actions}>
             {actions.map((action, index) => {

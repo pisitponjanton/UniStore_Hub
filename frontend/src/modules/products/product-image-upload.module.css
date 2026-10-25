@@ -221,3 +221,9 @@
 .progressStep[data-state="current"] .progressMarker { border-color: var(--brand); background: var(--brand-soft); box-shadow: none; }
 .progressStep[data-state="current"] .progressStateLabel { color: var(--brand-strong); }
 .actions button { min-height: 44px; }
+
+.compactRoot { display:grid; gap:14px; min-width:0; padding:0; border:0; border-radius:0; background:transparent; box-shadow:none; }
+.compactRoot .header { padding:0 0 10px; gap:10px; }
+.compactRoot .description { font-size:.8rem; }
+.compactRoot .currentMedia { aspect-ratio:4/3; border:1px solid var(--line); border-radius:var(--radius-control); background:var(--surface-muted); }
+.compactRoot .actions { gap:10px; }

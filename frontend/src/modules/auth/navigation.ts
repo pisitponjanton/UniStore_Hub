@@ -134,14 +134,6 @@ export function buildOrganizationNavigation(
         label: "ร้านค้า",
         href: withOrganization("/org/stores/", organizationId),
       },
-      {
-        label: "สินค้า",
-        href: withOrganization("/org/products/", organizationId),
-      },
-      {
-        label: "แคมเปญ",
-        href: withOrganization("/org/campaigns/", organizationId),
-      },
       ...operationalItems,
       {
         label: "สรุปการผลิต",
@@ -185,8 +177,6 @@ export function buildOrganizationNavigationGroups(
       label: "ร้านค้าและพรีออเดอร์",
       items: [
         { label: "ร้านค้า", href: withOrganization("/org/stores/", organizationId) },
-        { label: "สินค้า", href: withOrganization("/org/products/", organizationId) },
-        { label: "แคมเปญ", href: withOrganization("/org/campaigns/", organizationId) },
       ],
     },
     {

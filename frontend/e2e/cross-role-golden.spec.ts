@@ -314,7 +314,7 @@ test("golden cross-role flow propagates Platform approval, Customer payment reje
 
   // Organization Admin: publish the Campaign through the UI.
   await page.goto(
-    `/org/campaigns/?organizationId=${organizationId}`,
+    `/org/stores/view/?organizationId=${organizationId}&storeId=${store.storeId}&tab=campaigns`,
   );
 
   let campaignCard = page
@@ -609,7 +609,7 @@ test("golden cross-role flow propagates Platform approval, Customer payment reje
   // Organization Admin: close, start production, and mark ready through UI.
   await switchBrowserSession(page, adminToken, organizationId);
   await page.goto(
-    `/org/campaigns/?organizationId=${organizationId}`,
+    `/org/stores/view/?organizationId=${organizationId}&storeId=${store.storeId}&tab=campaigns`,
   );
 
   campaignCard = page
@@ -787,7 +787,7 @@ test("golden cross-role flow propagates Platform approval, Customer payment reje
   // Organization Admin: complete the Campaign and inspect lifecycle Audit.
   await switchBrowserSession(page, adminToken, organizationId);
   await page.goto(
-    `/org/campaigns/?organizationId=${organizationId}`,
+    `/org/stores/view/?organizationId=${organizationId}&storeId=${store.storeId}&tab=campaigns`,
   );
 
   campaignCard = page

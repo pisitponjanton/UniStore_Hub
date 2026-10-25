@@ -51,10 +51,10 @@ test("repeated stale/mismatched GET never triggers duplicate upload or false suc
   const image="FE-UX-18-15-"+state+".png";await page.screenshot({path:join(dir,image),animations:"disabled"});
   proofs.push({id:"FE-UX-18-15",state,image,role:"organizationAdmin",viewport:"390x844",note});
  }
- const url=frontend+"/org/products/?organizationId="+ids.organizationId;
+ const url=frontend+"/org/stores/view/?organizationId="+ids.organizationId+"&storeId="+ids.storeId+"&tab=products";
  async function edit(page:Page){
   const card=page.getByRole("heading",{name:product.name,exact:true}).first().locator("xpath=ancestor::article");
-  await expect(card).toBeVisible();await card.getByRole("button",{name:"แก้ไขข้อมูล"}).click();
+  await expect(card).toBeVisible();await card.getByRole("link",{name:"แก้ไขสินค้า"}).click();
   await expect(page.locator("#product-image-"+ids.productId)).toBeVisible();
  }
  try{
@@ -92,7 +92,7 @@ test("repeated stale/mismatched GET never triggers duplicate upload or false suc
   await snap(page,"GET-503-after-stale","Subsequent GET 503 does not clear pending key or allow duplicate write");
   mode="stale";
   await page.reload({waitUntil:"domcontentloaded"});
-  await edit(page);
+  await expect(page.locator("#product-image-"+ids.productId)).toBeVisible();
   const retryAfterReload=page.getByRole("button",{name:"ตรวจสอบข้อมูลล่าสุดอีกครั้ง"});
   await expect(retryAfterReload).toBeEnabled();
   await expect(page.getByText(/สถานะการบันทึกรูปยังไม่ชัดเจน/)).toBeVisible();

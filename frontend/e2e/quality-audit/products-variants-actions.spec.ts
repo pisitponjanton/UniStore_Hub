@@ -25,6 +25,12 @@ test("product and variant safe interactions are directly evidenced",async({brows
   await establishSeedRoleSession(context,request,"organizationAdmin");
   await context.route("**/*",async route=>{
     const req=route.request(),url=new URL(req.url());
+    if(req.method()==="GET"&&url.pathname===storesPath+"/"+storeA.storeId){
+      await route.fulfill({status:200,contentType:"application/json",body:JSON.stringify({success:true,data:storeA})});return;
+    }
+    if(req.method()==="GET"&&url.pathname===storesPath+"/"+storeB.storeId){
+      await route.fulfill({status:200,contentType:"application/json",body:JSON.stringify({success:true,data:storeB})});return;
+    }
     if(req.method()==="GET"&&url.pathname===storesPath){
       await route.fulfill({status:200,contentType:"application/json",body:JSON.stringify({success:true,data:{items:[storeA,storeB],nextCursor:null}})});return;
     }
@@ -36,7 +42,7 @@ test("product and variant safe interactions are directly evidenced",async({brows
       }
       const store=url.searchParams.get("storeId"),cursor=url.searchParams.get("cursor");
       const items=store===storeB.storeId?[]:cursor?[item2]:[item];
-      await route.fulfill({status:200,contentType:"application/json",body:JSON.stringify({success:true,data:{items,nextCursor:store||cursor?null:"uxqa-next"}})});return;
+      await route.fulfill({status:200,contentType:"application/json",body:JSON.stringify({success:true,data:{items,nextCursor:cursor||store===storeB.storeId?null:"uxqa-next"}})});return;
     }
     if(req.method()==="GET"&&url.pathname===productsPath+"/"+item.productId){
       details++;await route.fulfill({status:200,contentType:"application/json",body:JSON.stringify({success:true,data:item})});return;
@@ -50,7 +56,7 @@ test("product and variant safe interactions are directly evidenced",async({brows
   }
   try {
     const page=await context.newPage();
-    await page.goto(frontend+"/org/products/?organizationId="+ids.organizationId,{waitUntil:"domcontentloaded"});
+    await page.goto(frontend+"/org/stores/view/?organizationId="+ids.organizationId+"&storeId="+storeA.storeId+"&tab=products",{waitUntil:"domcontentloaded"});
     const row=page.getByRole("article").filter({has:page.getByRole("heading",{name:item.name})});
     await expect(row).toBeVisible({timeout:18000});
     await page.getByRole("button",{name:"โหลดเพิ่มเติม",exact:true}).click();
@@ -63,20 +69,18 @@ test("product and variant safe interactions are directly evidenced",async({brows
     await proof(page,"FE-UX-18-01","search-no-match","Local loaded-only search exposes no-match");
     await page.getByRole("button",{name:"ล้างคำค้นหา"}).click();
 
-    const filter=page.locator("#product-store-filter");failFilter=true;
-    await filter.selectOption(storeB.storeId);
-    await expect(page.getByRole("alert").filter({hasText:"ดำเนินการไม่สำเร็จ"})).toBeVisible();
-    await expect(row).toBeVisible();
-    await proof(page,"FE-UX-18-01","503-preserved-rows","Failed scoped GET retains prior rows and surfaces alert");
-    await filter.selectOption(storeA.storeId);
-    await expect(row).toBeVisible();
-    await proof(page,"FE-UX-18-01","scoped-get","Changed Store filter requests scoped product list");
-    await filter.selectOption(storeB.storeId);
+    // The Store workspace owns the scope. A failed Store A reload is recoverable.
+    failFilter=true;
+    await page.reload();
+    await expect(page.getByRole("navigation",{name:"เมนูจัดการร้านค้า"})).toBeVisible();
+    await proof(page,"FE-UX-18-01","503-scoped-read","Failed scoped GET presents error without cross-store data");
+    await page.goto(frontend+"/org/stores/view/?organizationId="+ids.organizationId+"&storeId="+storeB.storeId+"&tab=products",{waitUntil:"domcontentloaded"});
     await expect(page.getByText("ไม่พบสินค้า",{exact:true})).toBeVisible();
-    await proof(page,"FE-UX-18-01","empty-store","Selected store with no products renders empty state");
-    await page.getByRole("button",{name:"แสดงทุกร้านค้า"}).click();
-    await expect(filter).toHaveValue("");await expect(row).toBeVisible();
-    await proof(page,"FE-UX-18-02","clear-filter","Clear restores unfiltered GET result");
+    await proof(page,"FE-UX-18-01","empty-store","Switching Store workspace selects an empty Store safely");
+    await page.goto(frontend+"/org/stores/view/?organizationId="+ids.organizationId+"&storeId="+storeA.storeId+"&tab=products",{waitUntil:"domcontentloaded"});
+    await expect(row).toBeVisible();
+    await proof(page,"FE-UX-18-02","restore-store","Returning to Store A restores its own products");
+    expect(seen.some(x=>new URLSearchParams(x).get("storeId")===storeA.storeId)).toBe(true);
 
     const deactivate=row.getByRole("button",{name:"ปิดใช้งาน"});await deactivate.click();
     let dialog=page.getByRole("dialog",{name:"ยืนยันการปิดใช้งานสินค้า"});
@@ -86,8 +90,10 @@ test("product and variant safe interactions are directly evidenced",async({brows
     await expect(dialog).not.toBeVisible();await expect(deactivate).toBeFocused();
     await proof(page,"FE-UX-18-04","dialog-cancel","Cancel restores focus and sends no DELETE");
 
-    await page.locator("#product-create-store").selectOption(storeB.storeId);
-    await proof(page,"FE-UX-18-06","create-store-draft","Store select draft changes without network writes");
+    await page.getByRole("button",{name:"+ เพิ่มสินค้า"}).click();
+    await expect(page.locator("#product-create-store")).toHaveCount(0);
+    await expect(page.getByRole("dialog",{name:"สร้างสินค้าใหม่"})).toContainText(storeA.name);
+    await proof(page,"FE-UX-18-06","store-context","Creation uses Store A without repeating its selector");
     await page.locator("#product-create-name").fill("Test-only New Product");
     await proof(page,"FE-UX-18-07","create-name-draft","Product name draft");
     await page.locator("#product-create-description").fill("Synthetic description");
@@ -99,8 +105,12 @@ test("product and variant safe interactions are directly evidenced",async({brows
     await expect(createSummary).toBeFocused();
     await proof(page,"FE-UX-18-09","create-invalid-submit","First invalid create Submit focuses summary and never sends POST");
 
-    await row.getByRole("button",{name:"แก้ไขข้อมูล"}).click();
-    await expect(page.getByRole("heading",{name:"จัดการ "+item.name})).toBeVisible();
+    await page.getByRole("button",{name:"ปิดหน้าต่าง"}).click();
+    await expect(page.getByRole("alertdialog",{name:"ยืนยันการทิ้งข้อมูล"})).toBeVisible();
+    await page.getByRole("button",{name:"ทิ้งข้อมูล"}).click();
+    await row.getByRole("link",{name:"แก้ไขสินค้า"}).click();
+    await expect(page).toHaveURL(/\/org\/stores\/product\//);
+    await expect(page.getByRole("heading",{name:item.name,level:1})).toBeVisible();
     await expect(page.locator("#product-edit-name")).toHaveValue(item.name);
     await proof(page,"FE-UX-18-03","edit-open","Fresh synthetic GET opens product editor");
     await page.locator("#product-edit-name").fill("Updated draft");
@@ -133,14 +143,16 @@ test("product and variant safe interactions are directly evidenced",async({brows
     await proof(page,"FE-UX-18-18","variant-name-draft","Variant name draft");
     await vPrice.fill("12.345");
     await proof(page,"FE-UX-18-19","variant-price-draft","Variant price draft");
-    await variantRow.getByRole("button",{name:"บันทึกตัวเลือก"}).click();
+    await page.getByRole("dialog",{name:"แก้ไขตัวเลือกสินค้า"}).getByRole("button",{name:"บันทึกตัวเลือก"}).click();
     const vSummary=page.locator("#variant-edit-error-summary-"+variant.variantId);
     await expect(vSummary.getByRole("link",{name:/ทศนิยม/})).toBeVisible();
     await expect(vSummary).toBeFocused();
     await proof(page,"FE-UX-18-20","invalid-variant-price","Invalid 3-decimal price blocks PATCH and focuses summary");
-    await variantRow.getByRole("button",{name:"ยกเลิก"}).click();
+    await page.getByRole("dialog",{name:"แก้ไขตัวเลือกสินค้า"}).getByRole("button",{name:"ยกเลิก"}).click();
+    await page.getByRole("button",{name:"ทิ้งข้อมูล"}).click();
     await expect(vName).toHaveCount(0);
     await proof(page,"FE-UX-18-21","variant-cancel","Edit cancel leaves variant unchanged");
+    await page.getByRole("button",{name:"+ เพิ่มตัวเลือก"}).click();
     const newName=page.locator("#variant-create-name-"+item.productId),newPrice=page.locator("#variant-create-price-"+item.productId);
     await newName.fill("UXQA new variant");
     await proof(page,"FE-UX-18-22","new-variant-name","New variant name draft");
@@ -152,7 +164,10 @@ test("product and variant safe interactions are directly evidenced",async({brows
     await expect(newSummary).toBeFocused();
     await proof(page,"FE-UX-18-24","new-variant-invalid-submit","Price validation prevents POST");
 
-    await page.getByRole("button",{name:"ปิดส่วนแก้ไข"}).click();
+    await page.getByRole("dialog",{name:"เพิ่มตัวเลือกสินค้า"}).getByRole("button",{name:"ยกเลิก"}).click();
+    await page.getByRole("button",{name:"ทิ้งข้อมูล"}).click();
+    page.once("dialog", dialog => dialog.accept());
+    await page.getByRole("link",{name:/กลับไปรายการสินค้า/}).click();
     await expect(page.locator("#product-edit-name")).toHaveCount(0);
     await proof(page,"FE-UX-18-10","close-editor","Editor closes without changing records");
     await page.close();

@@ -237,3 +237,25 @@
 .rowEditing, .rowEditing:hover { border-color: var(--brand); border-radius: var(--radius-card); background: var(--brand-soft); box-shadow: inset 3px 0 0 var(--brand); }
 .createForm { background: var(--surface-muted); }
 .actions button, .editActions button, .createForm button { min-height: 44px; }
+
+
+/* One flat variants list; create/edit occur in the shared modal, not a sidebar card. */
+.compactRoot { display:grid; gap:16px; padding-top:24px; border-top:1px solid var(--line); min-width:0; }
+.compactRoot .header { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; }
+.compactRoot .headerCopy { display:grid; gap:3px; }
+.compactRoot .description { display:none; }
+.compactRoot .layout { display:block; }
+.compactRoot .variantList { min-width:0; }
+.compactRoot .list { gap:0; }
+.compactRoot .row, .compactRoot .rowEditing { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:14px 0; border:0; border-bottom:1px solid var(--line); border-radius:0; box-shadow:none; background:transparent; }
+.compactRoot .row:hover { background:transparent; }
+.compactRoot .rowMain { display:flex; flex-wrap:wrap; align-items:center; gap:10px 24px; }
+.compactRoot .price { color:var(--ink); font-size:.92rem; }
+.compactRoot .actions { display:flex; gap:8px; }
+.compactRoot .actions button { min-height:40px; }
+.compactForm { display:grid; gap:16px; min-width:0; }
+.compactForm :is(input,select) { min-width:0; }
+@media(max-width:620px) {
+  .compactRoot .row { align-items:stretch; flex-direction:column; gap:10px; }
+  .compactRoot .actions { flex-wrap:wrap; }
+}

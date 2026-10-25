@@ -56,6 +56,7 @@ describe("StoreManagementView", () => {
     render(<StoreManagementView organizationId="org-1" />);
 
     await screen.findByText("Main Store");
+    fireEvent.click(screen.getByRole("button", { name: "+ สร้างร้านค้า" }));
 
     fireEvent.change(screen.getByLabelText(/ชื่อร้านค้า/), {
       target: { value: "  Second Store  " },
@@ -126,6 +127,7 @@ describe("StoreManagementView", () => {
     render(<StoreManagementView organizationId="org-1" />);
 
     await screen.findByText("Main Store");
+    fireEvent.click(screen.getByRole("button", { name: "+ สร้างร้านค้า" }));
 
     fireEvent.click(
       screen.getByRole("button", { name: "สร้างร้านค้า" }),

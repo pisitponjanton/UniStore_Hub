@@ -178,6 +178,14 @@ for (const theme of ["light", "dark"] as const) {
         await page.setViewportSize({ width, height: 900 });
         await page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
         expect(await page.evaluate(() => Math.max(0, document.documentElement.scrollWidth - innerWidth))).toBeLessThanOrEqual(1);
+        const headerBox = await page.locator('main [class*="header"]').first().boundingBox();
+        const controlsBox = await page.locator('main [class*="campaignControls"]').first().boundingBox();
+        expect(headerBox).not.toBeNull();
+        expect(controlsBox).not.toBeNull();
+        if (headerBox && controlsBox) {
+          expect(Math.abs(controlsBox.width - headerBox.width)).toBeLessThanOrEqual(2);
+          expect(Math.abs(controlsBox.x - headerBox.x)).toBeLessThanOrEqual(2);
+        }
         if ([390, 1440].includes(width)) await page.screenshot({
           path: resolve(evidence, theme + "-admin-production-" + width + ".png"), animations: "disabled",
         });

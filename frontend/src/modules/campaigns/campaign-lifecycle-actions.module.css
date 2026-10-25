@@ -251,3 +251,9 @@
 .actionArea { border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface-muted); }
 .none { border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--surface-muted); }
 .actions button { min-height: 44px; }
+
+
+.compactRoot { display:grid; gap:12px; min-width:0; }
+.compactSummary { margin:0; color:var(--ink-secondary); font-size:.87rem; line-height:1.5; }
+.compactRoot .actionArea { padding:0; border:0; border-radius:0; background:transparent; box-shadow:none; }
+.compactRoot .actions { gap:10px; }

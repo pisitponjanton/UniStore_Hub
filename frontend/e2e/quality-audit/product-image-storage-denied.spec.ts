@@ -69,10 +69,10 @@ test("image PATCH committed with sessionStorage blocked: warning and GET-only re
  }
  try{
   const page=await ctx.newPage();
-  await page.goto(frontend+"/org/products/?organizationId="+ids.organizationId,{waitUntil:"domcontentloaded"});
-  await expect(page.getByRole("heading",{level:1,name:"สินค้าและตัวเลือก"})).toBeVisible();
+  await page.goto(frontend+"/org/stores/view/?organizationId="+ids.organizationId+"&storeId="+ids.storeId+"&tab=products",{waitUntil:"domcontentloaded"});
+  await expect(page.getByRole("heading",{level:2,name:"สินค้าและตัวเลือก",exact:true})).toBeVisible();
   const card=page.getByRole("heading",{name:product.name,exact:true}).first().locator("xpath=ancestor::article");
-  await card.getByRole("button",{name:"แก้ไขข้อมูล"}).click();
+  await card.getByRole("link",{name:"แก้ไขสินค้า"}).click();
   const input=page.locator("#product-image-"+ids.productId);
   await expect(input).toBeEnabled();
   await input.setInputFiles({name:"uxqa-denied-storage.png",mimeType:"image/png",buffer:png});

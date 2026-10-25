@@ -63,11 +63,11 @@ test("image PATCH in-flight during page navigation preserves GET-only recovery",
   await page.screenshot({path:join(dir,image),animations:"disabled"});
   proof.push({id:"FE-UX-18-15",state,image,note,role:"organizationAdmin",viewport:"390x844"});
  }
- const productUrl=frontend+"/org/products/?organizationId="+ids.organizationId;
+ const productUrl=frontend+"/org/stores/view/?organizationId="+ids.organizationId+"&storeId="+ids.storeId+"&tab=products";
  async function edit(page:Page){
   const card=page.getByRole("heading",{name:product.name,exact:true}).first().locator("xpath=ancestor::article");
   await expect(card).toBeVisible();
-  await card.getByRole("button",{name:"แก้ไขข้อมูล"}).click();
+  await card.getByRole("link",{name:"แก้ไขสินค้า"}).click();
   await expect(page.locator("#product-image-"+ids.productId)).toBeVisible();
  }
  try{

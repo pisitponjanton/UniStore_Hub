@@ -1,7 +1,11 @@
 "use client";
 
 
+import Link from "next/link";
+import { storeWorkspaceHref } from "./store-workspace";
+import { ManagementModal } from "@/components/ui/management-modal";
 import { AsyncPageFallback } from "@/components/ui/async-page";
+import { ManagementDrawer } from "@/components/ui/management-drawer";
 import { LoadedDirectoryControls } from "@/modules/organization-directory/loaded-directory-controls";
 import { searchLoadedItems, visibleLoadedItems } from "@/modules/organization-directory/loaded-directory-helpers";
 
@@ -64,6 +68,7 @@ export function StoreManagementView({
   const [directoryLimit, setDirectoryLimit] = useState(24);
   const [state, setState] = useState<StoreState>({ status: "loading" });
 
+  const [showCreate, setShowCreate] = useState(false);
   const [createName, setCreateName] = useState("");
   const [createDescription, setCreateDescription] = useState("");
   const [createNameError, setCreateNameError] = useState<string | undefined>();
@@ -154,6 +159,7 @@ export function StoreManagementView({
       setCreateName("");
       setCreateDescription("");
       setNotice(`สร้างร้านค้า ${created.name} แล้ว`);
+      setShowCreate(false);
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();
@@ -328,6 +334,16 @@ export function StoreManagementView({
     (editName !== selectedStore.name ||
       editDescription !== selectedStore.description);
 
+  const createDirty = Boolean(createName.trim() || createDescription.trim());
+
+  function closeCreate() {
+    setShowCreate(false);
+    setCreateName("");
+    setCreateDescription("");
+    setCreateNameError(undefined);
+    setInlineError(null);
+  }
+
   const directoryMatches = searchLoadedItems(state.stores, directoryQuery, store => [store.name, store.description, store.storeId, store.status]);
   const directoryVisible = visibleLoadedItems(directoryMatches, directoryLimit);
 
@@ -341,9 +357,10 @@ export function StoreManagementView({
               จัดการพื้นที่ขายภายในหน่วยงาน และกำหนดว่าร้านค้าใดพร้อมใช้งาน
             </p>
           </div>
+          <Button onClick={() => setShowCreate(true)}>+ สร้างร้านค้า</Button>
         </header>
 
-        <section className={styles.summaryStrip} aria-label="สรุปร้านค้า">
+        {state.stores.length > 0 ? <section className={styles.summaryStrip} aria-label="สรุปร้านค้า">
           <div>
             <span className={styles.summaryLabel}>ร้านค้าทั้งหมด</span>
             <strong>{state.stores.length}</strong>
@@ -356,9 +373,9 @@ export function StoreManagementView({
             <span className={styles.summaryLabel}>ปิดใช้งาน</span>
             <strong>{inactiveCount}</strong>
           </div>
-        </section>
+        </section> : null}
 
-        {inlineError ? (
+        {inlineError && !showCreate ? (
           <Notice tone="danger" role="alert" title="ดำเนินการไม่สำเร็จ">
             {inlineError}
           </Notice>
@@ -386,7 +403,7 @@ export function StoreManagementView({
               </span>
             </div>
 
-          <LoadedDirectoryControls
+          {state.stores.length > 0 ? <LoadedDirectoryControls
             id="stores-directory-search"
             label="ค้นหาร้านค้า"
             query={directoryQuery}
@@ -395,12 +412,12 @@ export function StoreManagementView({
             matchingCount={directoryMatches.length}
             visibleCount={directoryVisible.length}
             onShowMore={() => setDirectoryLimit(limit => limit + 24)}
-          />
+          /> : null}
 
             {state.stores.length === 0 ? (
               <EmptyState
                 title="ยังไม่มีร้านค้า"
-                description="สร้างร้านค้าแรกจากแบบฟอร์มด้านข้าง"
+                description="กดสร้างร้านค้าเพื่อเพิ่มร้านค้าแรกของหน่วยงาน"
               />
             ) : (
               <div className={styles.list}>
@@ -441,6 +458,9 @@ export function StoreManagementView({
                       </div>
 
                       <div className={styles.cardActions}>
+                        <Link className={styles.openWorkspace} href={storeWorkspaceHref(organizationId, store.storeId)}>
+                          จัดการร้านค้า
+                        </Link>
                         <Button
                           variant="secondary"
                           pending={loading}
@@ -497,15 +517,13 @@ export function StoreManagementView({
             )}
           </section>
 
-          <aside className={styles.panel}>
-            <div className={styles.panelHeading}>
-              <h2 className={styles.sectionTitle}>สร้างร้านค้าใหม่</h2>
-              <p className={styles.sectionDescription}>
-                ร้านค้าใหม่จะพร้อมใช้งานทันทีหลังสร้างสำเร็จ
-              </p>
-            </div>
-
-            <form className={styles.form} onSubmit={handleCreate} noValidate>
+          {showCreate ? <ManagementModal title="สร้างร้านค้าใหม่" description="เพิ่มร้านค้าสำหรับจำหน่ายสินค้าภายในหน่วยงาน"
+            size="small" formId="store-create-form"
+            submitLabel="สร้างร้านค้า" submitting={creating}
+            dirty={createDirty} onClose={closeCreate}><div className={styles.modalContents}>
+            {inlineError ? <Notice tone="danger" role="alert" title="ดำเนินการไม่สำเร็จ">{inlineError}</Notice> : null}
+            <aside className={styles.panel}>
+            <form id="store-create-form" className={styles.form} onSubmit={handleCreate} noValidate>
               <ErrorSummary
                 id="store-create-error-summary"
                 items={
@@ -540,20 +558,13 @@ export function StoreManagementView({
                 disabled={creating}
               />
 
-              <Button
-                type="submit"
-                size="large"
-                pending={creating}
-                pendingLabel="กำลังสร้างร้านค้า"
-              >
-                สร้างร้านค้า
-              </Button>
+
             </form>
-          </aside>
+          </aside></div></ManagementModal> : null}
         </div>
 
         {selectedStore ? (
-          <section className={styles.editPanel} aria-labelledby="store-edit-title">
+          <ManagementDrawer title={"แก้ไข " + selectedStore.name} onClose={() => setSelectedStore(null)}><section className={styles.editPanel} aria-labelledby="store-edit-title">
             <div className={styles.editHeader}>
               <div className={styles.editMeta}>
                 <div className={styles.editTitleRow}>
@@ -622,7 +633,7 @@ export function StoreManagementView({
                 ) : null}
               </div>
             </form>
-          </section>
+          </section></ManagementDrawer>
         ) : null}
       </main>
     </div>

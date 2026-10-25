@@ -74,11 +74,12 @@ function stageLabel(stage: UploadStage): string {
 export function ProductImageUploadView({
   organizationId,
   product,
-  onProductRefreshed,
+  onProductRefreshed, compact = false,
 }: {
   organizationId: string;
   product: ProductDTO;
   onProductRefreshed: (product: ProductDTO) => void;
+  compact?: boolean;
 }) {
   const [file, setFile] = useState<File | null>(null);
   const [contentType, setContentType] = useState<
@@ -395,7 +396,7 @@ export function ProductImageUploadView({
   }
 
   return (
-    <div className={styles.root}>
+    <div className={compact ? styles.compactRoot : styles.root}>
       <div className={styles.header}>
         <div className={styles.headerCopy}>
           <h3 className={styles.title}>รูปสินค้า</h3>

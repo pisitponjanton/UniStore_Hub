@@ -1,11 +1,13 @@
 "use client";
 
 
+import { ManagementModal } from "@/components/ui/management-modal";
 import { AsyncPageFallback } from "@/components/ui/async-page";
 import { LoadedDirectoryControls } from "@/modules/organization-directory/loaded-directory-controls";
 import { searchLoadedItems, visibleLoadedItems } from "@/modules/organization-directory/loaded-directory-helpers";
 
 import Link from "next/link";
+import { campaignDetailHref, storeWorkspaceHref } from "@/modules/stores/store-workspace";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 
 import {
@@ -186,9 +188,15 @@ function formChanged(
 }
 
 export function CampaignManagementView({
-  organizationId,
+  organizationId, fixedStoreId, storeName, storeActive = true, detailCampaignId, standaloneDetail = false, onDirtyChange,
 }: {
   organizationId: string;
+  fixedStoreId?: string;
+  storeName?: string;
+  storeActive?: boolean;
+  detailCampaignId?: string;
+  standaloneDetail?: boolean;
+  onDirtyChange?: (dirty: boolean) => void;
 }) {
   const focusErrorSummary = useErrorSummaryFocus();
   const [directoryQuery, setDirectoryQuery] = useState("");
@@ -197,15 +205,16 @@ export function CampaignManagementView({
     status: "loading",
   });
 
-  const [filterStoreId, setFilterStoreId] = useState("");
+  const [filterStoreId, setFilterStoreId] = useState(fixedStoreId ?? "");
   const [filterStatus, setFilterStatus] = useState<
     CampaignStatus | ""
   >("");
   const [listLoading, setListLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
 
+  const [showCreate, setShowCreate] = useState(false);
   const [createValues, setCreateValues] =
-    useState<CampaignFormValues>(EMPTY_FORM);
+    useState<CampaignFormValues>({ ...EMPTY_FORM, storeId: fixedStoreId ?? "" });
   const [createErrors, setCreateErrors] =
     useState<CampaignFormErrors>({});
   const [creating, setCreating] = useState(false);
@@ -231,10 +240,15 @@ export function CampaignManagementView({
     async function load() {
       try {
         const [stores, campaigns] = await Promise.all([
-          storeService.list(organizationId, {
-            signal: controller.signal,
-          }),
-          campaignService.list(organizationId, {
+          fixedStoreId
+            ? storeService.get(organizationId, fixedStoreId, {
+                signal: controller.signal,
+              }).then(store => [store])
+            : storeService.list(organizationId, {
+                signal: controller.signal,
+              }),
+          detailCampaignId ? Promise.resolve({ items: [], nextCursor: null }) : campaignService.list(organizationId, {
+            storeId: fixedStoreId ?? null,
             signal: controller.signal,
           }),
         ]);
@@ -246,7 +260,7 @@ export function CampaignManagementView({
         setState({
           status: "success",
           stores,
-          campaigns: campaigns.items,
+          campaigns: fixedStoreId ? campaigns.items.filter(campaign => campaign.storeId === fixedStoreId) : campaigns.items,
           nextCursor: campaigns.nextCursor,
         });
 
@@ -256,7 +270,7 @@ export function CampaignManagementView({
 
         setCreateValues((current) => ({
           ...current,
-          storeId: firstStore?.storeId ?? "",
+          storeId: fixedStoreId ?? firstStore?.storeId ?? "",
         }));
       } catch (error) {
         if (
@@ -278,7 +292,7 @@ export function CampaignManagementView({
     void load();
 
     return () => controller.abort();
-  }, [organizationId]);
+  }, [organizationId, fixedStoreId, detailCampaignId]);
 
   const storeNames = useMemo(() => {
     if (state.status !== "success") {
@@ -336,13 +350,13 @@ export function CampaignManagementView({
 
     try {
       const result = await campaignService.list(organizationId, {
-        storeId: storeId || null,
+        storeId: (fixedStoreId ?? storeId) || null,
         status: status || null,
       });
 
       setState({
         ...state,
-        campaigns: result.items,
+        campaigns: fixedStoreId ? result.items.filter(campaign => campaign.storeId === fixedStoreId) : result.items,
         nextCursor: result.nextCursor,
       });
       setSelectedCampaign(null);
@@ -382,7 +396,7 @@ export function CampaignManagementView({
 
     try {
       const result = await campaignService.list(organizationId, {
-        storeId: filterStoreId || null,
+        storeId: (fixedStoreId ?? filterStoreId) || null,
         status: filterStatus || null,
         cursor: state.nextCursor,
       });
@@ -391,7 +405,7 @@ export function CampaignManagementView({
 
       setState({
         ...state,
-        campaigns: nextCampaigns,
+        campaigns: fixedStoreId ? nextCampaigns.filter(campaign => campaign.storeId === fixedStoreId) : nextCampaigns,
         nextCursor: result.nextCursor,
       });
       setListFeedback(
@@ -416,7 +430,7 @@ export function CampaignManagementView({
       return;
     }
 
-    const validation = validateCampaignForm(createValues);
+    const validation = validateCampaignForm({ ...createValues, storeId: fixedStoreId ?? createValues.storeId });
     setCreateErrors(validation.errors);
     setInlineError(null);
     setNotice(null);
@@ -451,6 +465,7 @@ export function CampaignManagementView({
       }));
       setCreateErrors({});
       setNotice(`สร้างแคมเปญ ${created.name} เป็นฉบับร่างแล้ว`);
+      setShowCreate(false);
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();
@@ -477,6 +492,7 @@ export function CampaignManagementView({
         organizationId,
         campaign.campaignId,
       );
+      if (fixedStoreId && fresh.storeId !== fixedStoreId) throw new Error("Campaign does not belong to current store");
 
       setSelectedCampaign(fresh);
       setEditValues(campaignToFormValues(fresh));
@@ -568,6 +584,33 @@ export function CampaignManagementView({
     }
   }
 
+  useEffect(() => {
+    if (!detailCampaignId || state.status !== "success") return;
+    const controller = new AbortController();
+    campaignService.get(organizationId, detailCampaignId, { signal: controller.signal }).then(campaign => {
+      if (controller.signal.aborted) return;
+      if (fixedStoreId && campaign.storeId !== fixedStoreId) {
+        setInlineError("แคมเปญนี้ไม่ได้อยู่ในร้านที่เลือก");
+        return;
+      }
+      setSelectedCampaign(campaign);
+      setEditValues(campaignToFormValues(campaign));
+      setEditErrors({});
+    }).catch(error => {
+      if (controller.signal.aborted) return;
+      if (isDefinitiveSessionFailure(error)) { authSession.logout(); return; }
+      setInlineError(operationErrorMessage(error));
+    });
+    return () => controller.abort();
+  }, [organizationId, fixedStoreId, detailCampaignId, state.status]);
+
+  const editDirtyForWorkspace = selectedCampaign?.status === "DRAFT" &&
+    formChanged(editValues, selectedCampaign);
+  useEffect(() => {
+    onDirtyChange?.(Boolean(editDirtyForWorkspace));
+    return () => onDirtyChange?.(false);
+  }, [editDirtyForWorkspace, onDirtyChange]);
+
   if (state.status !== "success") {
     return (
       <div className={styles.page}>
@@ -597,27 +640,45 @@ export function CampaignManagementView({
   const finishedCount = state.campaigns.filter((campaign) =>
     ["COMPLETED", "CANCELLED"].includes(campaign.status),
   ).length;
-  const hasFilters = Boolean(filterStoreId || filterStatus);
+  const hasFilters = Boolean((!fixedStoreId && filterStoreId) || filterStatus);
   const selectedDirty =
     selectedCampaign?.status === "DRAFT" &&
     formChanged(editValues, selectedCampaign);
 
-  const directoryMatches = searchLoadedItems(state.campaigns, directoryQuery, campaign => [campaign.name, campaign.campaignId, storeNames.get(campaign.storeId), campaign.status]);
+  const defaultCreateStoreId = fixedStoreId ?? ((state.stores.find(store => store.status === "ACTIVE") ?? state.stores[0])?.storeId ?? "");
+  const createDirty = Object.entries(createValues).some(([field, value]) =>
+    field === "storeId" ? value !== defaultCreateStoreId : Boolean(value.trim()),
+  );
+
+  function closeCreate() {
+    setShowCreate(false);
+    setCreateValues({ ...EMPTY_FORM, storeId: defaultCreateStoreId });
+    setCreateErrors({});
+    setInlineError(null);
+  }
+
+  const directoryMatches = searchLoadedItems(state.campaigns.filter(campaign => !fixedStoreId || campaign.storeId === fixedStoreId), directoryQuery, campaign => [campaign.name, campaign.campaignId, storeNames.get(campaign.storeId), campaign.status]);
   const directoryVisible = visibleLoadedItems(directoryMatches, directoryLimit);
 
   return (
-    <div className={styles.page}>
+    <div className={standaloneDetail ? styles.standalonePage : styles.page}>
       <main className={styles.main}>
-        <header className={styles.header}>
+        {!standaloneDetail ? <header className={styles.header}>
           <div className={styles.headerCopy}>
-            <h1 className={styles.title}>แคมเปญ</h1>
+            {detailCampaignId ? <h2 className={styles.title}>รายละเอียดแคมเปญ</h2> : fixedStoreId ? <h2 className={styles.title}>แคมเปญ</h2> : <h1 className={styles.title}>แคมเปญ</h1>}
             <p className={styles.description}>
               กำหนดรอบการขายของร้านค้า วางแผนวันสำคัญ และควบคุมการเดินสถานะตั้งแต่ฉบับร่างจนถึงรับสินค้าเสร็จสิ้น
             </p>
           </div>
-        </header>
+          <div className={styles.headerActions}>
+            {selectedCampaign && !detailCampaignId ? (
+              <Button variant="secondary" onClick={() => setSelectedCampaign(null)}>กลับไปรายการ</Button>
+            ) : null}
+            {!detailCampaignId ? <Button onClick={() => setShowCreate(true)}>+ สร้างแคมเปญ</Button> : null}
+          </div>
+        </header> : null}
 
-        <section className={styles.summaryStrip} aria-label="สรุปแคมเปญที่โหลด">
+        {!detailCampaignId && !selectedCampaign && state.campaigns.length > 0 ? <section className={styles.summaryStrip} aria-label="สรุปแคมเปญที่โหลด">
           <div>
             <span className={styles.summaryLabel}>รายการที่โหลด</span>
             <strong>{state.campaigns.length}</strong>
@@ -634,13 +695,9 @@ export function CampaignManagementView({
             <span className={styles.summaryLabel}>สิ้นสุดแล้ว</span>
             <strong>{finishedCount}</strong>
           </div>
-        </section>
+        </section> : null}
 
-
-
-
-
-        {inlineError ? (
+        {inlineError && !showCreate ? (
           <Notice tone="danger" role="alert" title="ดำเนินการไม่สำเร็จ">
             {inlineError}
           </Notice>
@@ -652,7 +709,7 @@ export function CampaignManagementView({
           </Notice>
         ) : null}
 
-        <div className={styles.grid}>
+        {!detailCampaignId && !selectedCampaign ? <div className={styles.grid}>
           <section className={styles.section} aria-labelledby="campaign-list">
             <div className={styles.sectionHeading}>
               <div>
@@ -669,7 +726,7 @@ export function CampaignManagementView({
             </div>
 
             <div className={styles.toolbar} aria-busy={listLoading}>
-              <SelectField
+              {!fixedStoreId ? <SelectField
                 id="campaign-store-filter"
                 label="ร้านค้า"
                 value={filterStoreId}
@@ -689,7 +746,7 @@ export function CampaignManagementView({
                       : ""}
                   </option>
                 ))}
-              </SelectField>
+              </SelectField> : null}
 
               <SelectField
                 id="campaign-status-filter"
@@ -716,9 +773,9 @@ export function CampaignManagementView({
                 variant="quiet"
                 disabled={!hasFilters || listLoading}
                 onClick={() => {
-                  setFilterStoreId("");
+                  setFilterStoreId(fixedStoreId ?? "");
                   setFilterStatus("");
-                  void replaceList("", "");
+                  void replaceList(fixedStoreId ?? "", "");
                 }}
               >
                 แสดงทั้งหมด
@@ -736,7 +793,7 @@ export function CampaignManagementView({
               </p>
             ) : null}
 
-          <LoadedDirectoryControls
+          {state.campaigns.length > 0 ? <LoadedDirectoryControls
             id="campaigns-directory-search"
             label="ค้นหาแคมเปญ"
             query={directoryQuery}
@@ -745,7 +802,7 @@ export function CampaignManagementView({
             matchingCount={directoryMatches.length}
             visibleCount={directoryVisible.length}
             onShowMore={() => setDirectoryLimit(limit => limit + 24)}
-          />
+          /> : null}
 
             {listLoading ? (
               <LoadingState
@@ -758,14 +815,13 @@ export function CampaignManagementView({
                 description={
                   hasFilters
                     ? "ไม่มีแคมเปญที่ตรงกับตัวกรองนี้"
-                    : "สร้างแคมเปญแรกจากแบบฟอร์มด้านข้าง"
+                    : "กดสร้างแคมเปญเพื่อเริ่มรอบขายแรก"
                 }
               />
             ) : (
               <div className={styles.list}>
                 {directoryVisible.map((campaign) => {
-                  const selected =
-                    selectedCampaign?.campaignId === campaign.campaignId;
+                  const selected = false;
                   const loading =
                     loadingCampaignId === campaign.campaignId;
                   const nextAction = lifecycleActionsForStatus(
@@ -821,6 +877,12 @@ export function CampaignManagementView({
                       </div>
 
                       <div className={styles.actions}>
+                        {fixedStoreId ? (
+                          <Link className={styles.detailLink}
+                            href={campaignDetailHref(organizationId, fixedStoreId, campaign.campaignId)}>
+                            {campaign.status === "DRAFT" ? "ดูและแก้ไข" : "ดูรายละเอียด"}
+                          </Link>
+                        ) : (
                         <Button
                           variant="secondary"
                           pending={loading}
@@ -836,6 +898,7 @@ export function CampaignManagementView({
                               ? "ดูและแก้ไข"
                               : "ดูรายละเอียด"}
                         </Button>
+                        )}
                         {["PRODUCING", "READY_FOR_PICKUP", "COMPLETED"].includes(campaign.status) ? (
                           <Link
                             className={styles.productionLink}
@@ -866,25 +929,30 @@ export function CampaignManagementView({
             ) : null}
           </section>
 
-          <aside className={styles.panel}>
-            <div className={styles.panelHeading}>
-              <h2 className={styles.sectionTitle}>สร้างแคมเปญ</h2>
-              <p className={styles.sectionDescription}>
-                แคมเปญใหม่จะเริ่มเป็นฉบับร่าง และยังไม่เปิดรับคำสั่งซื้อจนกว่าจะสั่งเปิด
-              </p>
-            </div>
+          </div> : null}
 
-            {state.stores.length === 0 ? (
+          {showCreate ? <ManagementModal title="สร้างแคมเปญ"
+            description="สร้างรอบขายใหม่เป็นฉบับร่าง ก่อนเปิดรับคำสั่งซื้อ"
+            size="large" formId="campaign-create-form" submitLabel="สร้างแคมเปญ"
+            submitting={creating} submitDisabled={!fixedStoreId && state.stores.length === 0}
+            dirty={createDirty} onClose={closeCreate}><div className={styles.modalContents}>
+            {inlineError ? <Notice tone="danger" role="alert" title="ดำเนินการไม่สำเร็จ">{inlineError}</Notice> : null}
+            {fixedStoreId && !storeActive ? <Notice tone="neutral" title="ร้านค้าปิดใช้งาน">
+              สามารถเตรียมข้อมูลภายในร้านได้ แต่ลูกค้าจะยังไม่เห็นร้านนี้จนกว่าจะเปิดใช้งาน
+            </Notice> : null}
+            <aside className={styles.panel}>
+            {!fixedStoreId && state.stores.length === 0 ? (
               <Notice tone="warning" title="ยังสร้างแคมเปญไม่ได้">
                 ต้องมีร้านค้าในหน่วยงานอย่างน้อยหนึ่งร้านก่อน
               </Notice>
             ) : null}
 
-            <form className={styles.form} onSubmit={handleCreate} noValidate>
+            <form id="campaign-create-form" className={styles.form} onSubmit={handleCreate} noValidate>
               <ErrorSummary
                 id="campaign-create-error-summary"
                 items={campaignErrorItems("campaign-create", createErrors)}
               />
+              {fixedStoreId ? <p className={styles.sectionDescription}>สร้างแคมเปญในร้าน {storeName ?? fixedStoreId}</p> : (
               <SelectField
                 id="campaign-create-store"
                 label="ร้านค้า"
@@ -907,6 +975,7 @@ export function CampaignManagementView({
                   </option>
                 ))}
               </SelectField>
+              )}
 
               <TextField
                 id="campaign-create-name"
@@ -964,20 +1033,12 @@ export function CampaignManagementView({
                 />
               </div>
 
-              <Button
-                type="submit"
-                size="large"
-                pending={creating}
-                pendingLabel="กำลังสร้างแคมเปญ"
-                disabled={state.stores.length === 0}
-              >
-                สร้างแคมเปญ
-              </Button>
-            </form>
-          </aside>
-        </div>
 
-        {selectedCampaign ? (
+            </form>
+          </aside></div></ManagementModal> : null}
+
+        {detailCampaignId && !selectedCampaign && !inlineError ? <LoadingState title="กำลังโหลดรายละเอียดแคมเปญ" /> : null}
+        {selectedCampaign && !showCreate ? (
           <section
             className={styles.detailPanel}
             aria-labelledby="campaign-detail-title"
@@ -985,33 +1046,23 @@ export function CampaignManagementView({
             <div className={styles.detailHeader}>
               <div className={styles.detailMeta}>
                 <div className={styles.detailTitleRow}>
-                  <h2
-                    className={styles.sectionTitle}
-                    id="campaign-detail-title"
-                  >
-                    {selectedCampaign.name}
-                  </h2>
+                  {standaloneDetail ? <h1 className={styles.detailPageTitle} id="campaign-detail-title">{selectedCampaign.name}</h1> :
+                    <h2 className={styles.sectionTitle} id="campaign-detail-title">{selectedCampaign.name}</h2>}
                   <Badge tone={statusTone(selectedCampaign.status)}>
                     {campaignStatusLabel(selectedCampaign.status)}
                   </Badge>
                 </div>
-                <div className={styles.metaRow}>
-                  <span className={styles.meta}>
-                    ร้านค้า:{" "}
-                    {storeNames.get(selectedCampaign.storeId) ??
-                      selectedCampaign.storeId}
-                  </span>
-                  <span className={styles.meta}>
-                    รหัสแคมเปญ: {selectedCampaign.campaignId}
-                  </span>
-                  <time
-                    className={styles.meta}
-                    dateTime={selectedCampaign.updatedAt}
-                  >
+                {!standaloneDetail ? <div className={styles.metaRow}>
+                  <span className={styles.meta}>ร้านค้า: {storeNames.get(selectedCampaign.storeId) ?? selectedCampaign.storeId}</span>
+                  <span className={styles.meta}>รหัสแคมเปญ: {selectedCampaign.campaignId}</span>
+                  <time className={styles.meta} dateTime={selectedCampaign.updatedAt}>
                     อัปเดตล่าสุด {formatIsoDateTime(selectedCampaign.updatedAt)}
                   </time>
-                </div>
+                </div> : null}
               </div>
+              {standaloneDetail ? null : detailCampaignId && fixedStoreId ? (
+                <Link className={styles.detailLink} href={storeWorkspaceHref(organizationId, fixedStoreId, "campaigns")}>← กลับไปรายการแคมเปญ</Link>
+              ) : (
               <Button
                 variant="quiet"
                 size="small"
@@ -1019,6 +1070,7 @@ export function CampaignManagementView({
               >
                 ปิดรายละเอียด
               </Button>
+              )}
             </div>
 
             {selectedCampaign.status === "DRAFT" ? (
@@ -1038,7 +1090,7 @@ export function CampaignManagementView({
                       id="campaign-edit-error-summary"
                       items={campaignErrorItems("campaign-edit", editErrors)}
                     />
-                    <SelectField
+                    {!fixedStoreId ? (<SelectField
                       id="campaign-edit-store"
                       label="ร้านค้า"
                       value={editValues.storeId}
@@ -1066,7 +1118,7 @@ export function CampaignManagementView({
                             : ""}
                         </option>
                       ))}
-                    </SelectField>
+                    </SelectField>) : !standaloneDetail ? <p className={styles.sectionDescription}>ร้านค้า: {storeName ?? fixedStoreId}</p> : null}
 
                     <TextField
                       id="campaign-edit-name"
@@ -1165,6 +1217,7 @@ export function CampaignManagementView({
                   </div>
 
                   <CampaignLifecycleActions
+                    compact={standaloneDetail}
                     organizationId={organizationId}
                     campaign={selectedCampaign}
                     onCampaignChanged={(updated) => {
@@ -1237,6 +1290,7 @@ export function CampaignManagementView({
                   </div>
 
                   <CampaignLifecycleActions
+                    compact={standaloneDetail}
                     organizationId={organizationId}
                     campaign={selectedCampaign}
                     onCampaignChanged={(updated) => {
@@ -1259,10 +1313,16 @@ export function CampaignManagementView({
                 </section>
               </div>
             )}
+            {standaloneDetail ? <details className={styles.technicalDetails}>
+              <summary>ข้อมูลระบบ</summary>
+              <p>รหัสแคมเปญ: {selectedCampaign.campaignId}</p>
+              <p>อัปเดตล่าสุด: <time dateTime={selectedCampaign.updatedAt}>
+                {formatIsoDateTime(selectedCampaign.updatedAt)}</time></p>
+            </details> : null}
           </section>
         ) : null}
         {/** Optional explainer and scheduling caveat follow the actual campaign workspace. */}
-        <section
+        {!standaloneDetail ? <section
           className={styles.flowContext}
           aria-labelledby="campaign-flow-context"
         >
@@ -1283,11 +1343,11 @@ export function CampaignManagementView({
               <span>หลังปิดรอบ ระบบเดินผ่านการผลิตและพร้อมรับสินค้าโดยใช้การยืนยันสถานะจริง</span>
             </li>
           </ul>
-        </section>
+        </section> : null}
 
-        <Notice tone="info" title="วันเวลาเป็นข้อมูลวางแผน">
+        {!standaloneDetail ? <Notice tone="info" title="วันเวลาเป็นข้อมูลวางแผน">
           การถึงวันเวลาเปิด ปิด ชำระเงิน หรือรับสินค้า จะไม่เปลี่ยนสถานะแคมเปญอัตโนมัติ การเปลี่ยนสถานะเกิดขึ้นเมื่อผู้ดูแลสั่งดำเนินการและระบบยืนยันเท่านั้น
-        </Notice>
+        </Notice> : null}
       </main>
     </div>
   );

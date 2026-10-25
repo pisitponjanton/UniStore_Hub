@@ -64,6 +64,7 @@ test("store create/edit validation, status confirmation and cancel without backe
     await expect(activate).toBeFocused();
     await proof(page,"FE-UX-17-02","activate-escape","ESC dismisses inactive-store activation confirmation without PATCH");
 
+    await page.getByRole("button",{name:"+ สร้างร้านค้า"}).click();
     const createName=page.locator("#store-create-name");
     const createDescription=page.locator("#store-create-description");
     await createName.fill("UXQA test store draft");
@@ -77,6 +78,9 @@ test("store create/edit validation, status confirmation and cancel without backe
     await expect(page.locator("#store-create-error-summary")).toBeFocused();
     await proof(page,"FE-UX-17-05","create-empty-validation","Invalid create submit blocks POST and focuses ErrorSummary");
 
+    await page.getByRole("button",{name:"ปิดหน้าต่าง"}).click();
+    await expect(page.getByRole("alertdialog",{name:"ยืนยันการทิ้งข้อมูล"})).toBeVisible();
+    await page.getByRole("button",{name:"ทิ้งข้อมูล"}).click();
     const edit=active.getByRole("button",{name:"แก้ไขข้อมูล"});
     await edit.click();
     await expect(page.getByRole("heading",{name:"แก้ไข "+a.name})).toBeVisible();

@@ -34,21 +34,26 @@ test("Campaign filter, create/edit and lifecycle modal states are safe and state
   await establishSeedRoleSession(ctx,request,"organizationAdmin");
   await ctx.route("**/*",async route=>{
     const req=route.request(),url=new URL(req.url());
+    if(req.method()==="GET"&&url.pathname===stores+"/"+storeA.storeId){
+      await route.fulfill({status:200,contentType:"application/json",body:JSON.stringify({success:true,data:storeA})});return;
+    }
+    if(req.method()==="GET"&&url.pathname===stores+"/"+storeB.storeId){
+      await route.fulfill({status:200,contentType:"application/json",body:JSON.stringify({success:true,data:storeB})});return;
+    }
     if(req.method()==="GET"&&url.pathname===stores){
       await route.fulfill({status:200,contentType:"application/json",body:JSON.stringify({success:true,data:{items:[storeA,storeB],nextCursor:null}})});return;
     }
     if(req.method()==="GET"&&url.pathname===campaigns){
       filteredGets++;getQueries.push(url.search);
-      const scoped=url.searchParams.has("storeId")||url.searchParams.has("status");
       if(url.searchParams.get("status")==="OPEN"&&!failedFilteredGet){
         failedFilteredGet=true;
         await route.fulfill({status:503,contentType:"application/json",body:JSON.stringify({success:false,error:{code:"SERVICE_UNAVAILABLE",message:"UXQA simulated list error"}})});return;
       }
       const filtered=campaignList.filter(c=>!url.searchParams.get("storeId")||c.storeId===url.searchParams.get("storeId"))
         .filter(c=>!url.searchParams.get("status")||c.status===url.searchParams.get("status"));
-      const pageItems=url.searchParams.has("cursor")?filtered.slice(5):scoped?filtered:filtered.slice(0,5);
+      const pageItems=url.searchParams.has("cursor")?filtered.slice(5):url.searchParams.has("status")?filtered:filtered.slice(0,5);
       await route.fulfill({status:200,contentType:"application/json",body:JSON.stringify({
-        success:true,data:{items:pageItems,nextCursor:scoped||url.searchParams.has("cursor")?null:"uxqa-cursor-page2"}
+        success:true,data:{items:pageItems,nextCursor:url.searchParams.has("status")||url.searchParams.has("cursor")?null:"uxqa-cursor-page2"}
       })});return;
     }
     if(req.method()==="GET"&&url.pathname.startsWith(campaigns+"/")){
@@ -65,8 +70,8 @@ test("Campaign filter, create/edit and lifecycle modal states are safe and state
   }
   try{
     const page=await ctx.newPage();
-    await page.goto(frontend+"/org/campaigns/?organizationId="+ids.organizationId,{waitUntil:"domcontentloaded"});
-    await expect(page.getByRole("heading",{name:"แคมเปญ",level:1})).toBeVisible({timeout:16000});
+    await page.goto(frontend+"/org/stores/view/?organizationId="+ids.organizationId+"&storeId="+storeA.storeId+"&tab=campaigns",{waitUntil:"domcontentloaded"});
+    await expect(page.getByRole("heading",{name:"แคมเปญ",level:2,exact:true})).toBeVisible({timeout:16000});
     await page.getByRole("button",{name:"โหลดเพิ่มเติม",exact:true}).click();
     await expect(page.getByRole("heading",{name:"UXQA Campaign COMPLETED"})).toBeVisible();
     expect(getQueries.some(x=>new URLSearchParams(x).get("cursor")==="uxqa-cursor-page2")).toBe(true);
@@ -77,27 +82,29 @@ test("Campaign filter, create/edit and lifecycle modal states are safe and state
     await record(page,"FE-UX-19-01","search-no-match","Local search no-match UI without API write");
     await page.getByRole("button",{name:"ล้างคำค้นหา"}).click();
 
-    const storeFilter=page.locator("#campaign-store-filter"),statusFilter=page.locator("#campaign-status-filter");
-    await storeFilter.selectOption(storeB.storeId);
+    await page.goto(frontend+"/org/stores/view/?organizationId="+ids.organizationId+"&storeId="+storeB.storeId+"&tab=campaigns",{waitUntil:"domcontentloaded"});
     await expect(page.getByText("ไม่พบแคมเปญ",{exact:true})).toBeVisible();
-    await record(page,"FE-UX-19-01","store-empty","Scoped store GET renders empty state");
-    await storeFilter.selectOption("");
+    await record(page,"FE-UX-19-01","store-empty","Switching workspace reveals no campaigns in Store B");
+    await page.goto(frontend+"/org/stores/view/?organizationId="+ids.organizationId+"&storeId="+storeA.storeId+"&tab=campaigns",{waitUntil:"domcontentloaded"});
     await expect(page.getByRole("heading",{name:"UXQA Campaign DRAFT"})).toBeVisible();
+    const statusFilter=page.locator("#campaign-status-filter");
     await statusFilter.selectOption("OPEN");
     await expect(page.getByRole("alert").filter({hasText:"ดำเนินการไม่สำเร็จ"})).toBeVisible();
     await expect(page.getByRole("heading",{name:"UXQA Campaign DRAFT"})).toBeVisible();
-    await record(page,"FE-UX-19-02","status-get-503","Failed filtered GET displays error and preserves previous list");
+    await record(page,"FE-UX-19-02","status-get-503","Failed status GET preserves original rows");
     await statusFilter.selectOption("CLOSED");
     await expect(page.getByRole("heading",{name:"UXQA Campaign CLOSED"})).toBeVisible();
-    await record(page,"FE-UX-19-02","status-filter","Status-scoped GET shows expected row");
+    await record(page,"FE-UX-19-02","status-filter","Scoped status GET returns only matching campaign");
     await page.getByRole("button",{name:"แสดงทั้งหมด"}).click();
-    await expect(storeFilter).toHaveValue("");await expect(statusFilter).toHaveValue("");
+    await expect(statusFilter).toHaveValue("");
     await expect(page.getByRole("heading",{name:"UXQA Campaign DRAFT"})).toBeVisible();
-    await record(page,"FE-UX-19-03","clear-filters","Reset store and status uses all-campaign GET");
+    await record(page,"FE-UX-19-03","clear-filter","Clearing status keeps Store A context");
 
-    const selectCreate=page.locator("#campaign-create-store");
-    await selectCreate.selectOption(storeB.storeId);
-    await record(page,"FE-UX-19-06","create-store-draft","Store selection editable in create form");
+    await page.getByRole("button",{name:"+ สร้างแคมเปญ"}).click();
+    await expect(page.locator("#campaign-create-store")).toHaveCount(0);
+    await expect(page.getByRole("dialog",{name:"สร้างแคมเปญ"})).toContainText(storeA.name);
+    await record(page,"FE-UX-19-06","store-context","Create campaign already knows Store A");
+
     const name=page.locator("#campaign-create-name");
     await name.fill("UXQA Upcoming Campaign");
     await record(page,"FE-UX-19-07","create-name-draft","Campaign name draft editable");
@@ -115,12 +122,14 @@ test("Campaign filter, create/edit and lifecycle modal states are safe and state
     await expect(createSummary).toBeFocused();
     await record(page,"FE-UX-19-12","create-invalid-submit","First invalid submit focuses validation summary and sends no POST");
 
+    await page.getByRole("button",{name:"ปิดหน้าต่าง"}).click();
+    await expect(page.getByRole("alertdialog",{name:"ยืนยันการทิ้งข้อมูล"})).toBeVisible();
+    await page.getByRole("button",{name:"ทิ้งข้อมูล"}).click();
     const draftRow=page.getByRole("article").filter({has:page.getByRole("heading",{name:"UXQA Campaign DRAFT"})});
-    await draftRow.getByRole("button",{name:"ดูและแก้ไข"}).click();
+    await draftRow.getByRole("link",{name:"ดูและแก้ไข"}).click();
     await expect(page.locator("#campaign-edit-name")).toHaveValue("UXQA Campaign DRAFT");
     await record(page,"FE-UX-19-04","open-draft-detail","Detail loaded by fresh synthetic GET");
     const draftInputs=[
-      ["FE-UX-19-14","#campaign-edit-store",storeB.storeId],
       ["FE-UX-19-15","#campaign-edit-name","UXQA Changed Campaign"],
       ["FE-UX-19-16","#campaign-edit-open","2026-11-01T09:00"],
       ["FE-UX-19-17","#campaign-edit-close","2026-11-05T09:00"],
@@ -128,7 +137,7 @@ test("Campaign filter, create/edit and lifecycle modal states are safe and state
       ["FE-UX-19-19","#campaign-edit-pickup","2026-11-12T09:00"],
     ] as const;
     for(const [id,selector,value] of draftInputs) {
-      if(selector.endsWith("-store"))await page.locator(selector).selectOption(value);else await page.locator(selector).fill(value);
+      await page.locator(selector).fill(value);
       await expect(page.locator(selector)).toHaveValue(value);
       await record(page,id,"edit-field-draft","Draft editor field changed locally");
     }
@@ -139,7 +148,8 @@ test("Campaign filter, create/edit and lifecycle modal states are safe and state
     await expect(editSummary).toBeFocused();
     await record(page,"FE-UX-19-20","edit-invalid-submit","Invalid draft save focuses summary without PATCH");
 
-    await page.getByRole("button",{name:"ปิดรายละเอียด"}).click();
+    page.once("dialog", dialog => dialog.accept());
+    await page.getByRole("link",{name:/กลับไปรายการแคมเปญ/}).click();
     await expect(page.locator("#campaign-edit-name")).toHaveCount(0);
     await record(page,"FE-UX-19-13","close-detail","Closing detail leaves list unchanged");
 
@@ -150,7 +160,7 @@ test("Campaign filter, create/edit and lifecycle modal states are safe and state
         await page.getByRole("button",{name:"โหลดเพิ่มเติม",exact:true}).click();
       }
       const row=page.getByRole("article").filter({has:page.getByRole("heading",{name:"UXQA Campaign "+m.status,exact:true})});
-      await row.getByRole("button",{name:m.status==="DRAFT"?"ดูและแก้ไข":"ดูรายละเอียด"}).click();
+      await row.getByRole("link",{name:m.status==="DRAFT"?"ดูและแก้ไข":"ดูรายละเอียด"}).click();
       const scope=page.locator('[aria-labelledby="campaign-detail-title"]');
       await expect(scope).toBeVisible();
       const trigger=scope.getByRole("button",{name:m.button,exact:true});
@@ -161,7 +171,8 @@ test("Campaign filter, create/edit and lifecycle modal states are safe and state
       await dialog.getByRole("button",{name:"ยกเลิก",exact:true}).click();
       await expect(dialog).not.toBeVisible();await expect(trigger).toBeFocused();
       await record(page,m.id,"dialog-cancel-"+m.status,"Cancel restores focus and never sends transition POST");
-      await page.getByRole("button",{name:"ปิดรายละเอียด"}).click();
+      page.once("dialog", dialog => dialog.accept());
+    await page.getByRole("link",{name:/กลับไปรายการแคมเปญ/}).click();
     }
     await page.close();
   }finally{await ctx.close();}

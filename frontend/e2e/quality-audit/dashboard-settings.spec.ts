@@ -90,8 +90,7 @@ test("Organization Dashboard and Settings links, validation and mocked save life
       ["FE-UX-14-03","เปิดคิวตรวจการชำระเงิน","/org/payments/"],
       ["FE-UX-14-04","เปิดรายการคำสั่งซื้อ","/org/orders/"],
       ["FE-UX-14-05","ร้านค้า","/org/stores/"],
-      ["FE-UX-14-06","สินค้า","/org/products/"],
-      ["FE-UX-14-11","แคมเปญ","/org/campaigns/"],
+      ["FE-UX-14-11","จัดการแคมเปญ","/org/campaigns/"],
       ["FE-UX-14-12","เปิดคำสั่งซื้อ","/org/orders/"],
     ] as const;
     for(const [id,label,dest] of links){
@@ -195,7 +194,7 @@ test("Organization Dashboard and Settings links, validation and mocked save life
     await page.close();
   }finally{await ctx.close();}
   expect(writes).toBe(0);
-  expect(proof.length).toBe(21);
+  expect(proof.length).toBe(20);
   const baseline=JSON.parse(await readFile("quality-audit/coverage-baseline.json","utf8")) as {
     actions:Array<{id:string;roles:string[];statesToTest:string[]}>;
     shellActions:Array<{id:string;roles:string[];statesToTest:string[]}>;

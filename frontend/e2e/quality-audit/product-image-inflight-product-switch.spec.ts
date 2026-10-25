@@ -56,12 +56,12 @@ test("late image GET response cannot replace a different selected Product",async
  async function edit(page:Page,name:string){
   const heading=page.getByRole("heading",{name,exact:true}).first();
   await expect(heading).toBeVisible();
-  await heading.locator("xpath=ancestor::article").getByRole("button",{name:"แก้ไขข้อมูล"}).click();
+  await heading.locator("xpath=ancestor::article").getByRole("link",{name:"แก้ไขสินค้า"}).click();
   await expect(page.getByRole("heading",{name:"รูปสินค้า"})).toBeVisible();
  }
  try{
   const page=await ctx.newPage();
-  await page.goto(frontend+"/org/products/?organizationId="+ids.organizationId,{waitUntil:"domcontentloaded"});
+  await page.goto(frontend+"/org/stores/view/?organizationId="+ids.organizationId+"&storeId="+ids.storeId+"&tab=products",{waitUntil:"domcontentloaded"});
   await edit(page,a.name);
   await page.locator("#product-image-"+ids.productId).setInputFiles({name:"uxqa-inflight.png",mimeType:"image/png",buffer:png});
   await page.getByRole("button",{name:"อัปโหลดรูปสินค้า"}).click();
@@ -69,6 +69,7 @@ test("late image GET response cannot replace a different selected Product",async
   await expect(page.getByRole("button",{name:"กำลังตรวจสอบข้อมูลล่าสุด"})).toBeDisabled();
   await snap(page,"inflight-readback-pending","Readback GET is intentionally held after a single acknowledged PATCH");
 
+  await page.getByRole("link",{name:/กลับไปรายการสินค้า/}).click();
   await edit(page,b.name);
   await expect(page.locator("#product-image-"+idB)).toBeEnabled();
   await expect(page.getByRole("button",{name:"ตรวจสอบข้อมูลล่าสุดอีกครั้ง"})).toHaveCount(0);
@@ -81,6 +82,7 @@ test("late image GET response cannot replace a different selected Product",async
   await expect(page.locator("#product-image-"+ids.productId)).toHaveCount(0);
   await snap(page,"late-A-result-ignored-for-B","Late successful GET for A cannot replace B's editor after unmount");
 
+  await page.getByRole("link",{name:/กลับไปรายการสินค้า/}).click();
   await edit(page,a.name);
   await expect(page.getByText("มีรูปสินค้าแล้ว").last()).toBeVisible();
   await expect(page.getByRole("button",{name:"ตรวจสอบข้อมูลล่าสุดอีกครั้ง"})).toHaveCount(0);

@@ -55,10 +55,10 @@ test("ambiguous image PATCH HTTP 503 after commit offers GET-only verification",
  }
  try{
   const page=await ctx.newPage();
-  await page.goto(frontend+"/org/products/?organizationId="+ids.organizationId,{waitUntil:"domcontentloaded"});
+  await page.goto(frontend+"/org/stores/view/?organizationId="+ids.organizationId+"&storeId="+ids.storeId+"&tab=products",{waitUntil:"domcontentloaded"});
   const card=page.getByRole("heading",{name:product.name,exact:true}).first().locator("xpath=ancestor::article");
   await expect(card).toBeVisible();
-  await card.getByRole("button",{name:"แก้ไขข้อมูล"}).click();
+  await card.getByRole("link",{name:"แก้ไขสินค้า"}).click();
   const file=page.locator("#product-image-"+ids.productId),action=page.getByRole("button",{name:"อัปโหลดรูปสินค้า"});
   await expect(file).toBeEnabled();
   await file.setInputFiles({name:"uxqa-saved-image.png",mimeType:"image/png",buffer:png});

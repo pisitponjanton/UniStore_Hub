@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { useEffect, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
 
 import {
   Button,
   ErrorState,
   ForbiddenState,
   LoadingState,
-  UnauthorizedState,
 } from "@/components";
 import type { MembershipRole } from "@/types";
 
@@ -22,14 +22,13 @@ import { OrderAccessRecovery } from "./auth-recovery";
 import { useAuthSession } from "./use-auth-session";
 import { useCurrentLoginHref } from "./use-auth-navigation-context";
 
-function LoginAction() {
+function LoginRedirect() {
   const href = useCurrentLoginHref();
-
-  return (
-    <Link href={href}>
-      <Button>เข้าสู่ระบบ</Button>
-    </Link>
-  );
+  const router = useRouter();
+  useEffect(() => { router.replace(href); }, [href, router]);
+  return <main aria-label="กำลังไปหน้าเข้าสู่ระบบ">
+    <LoadingState headingLevel={1} title="กำลังไปหน้าเข้าสู่ระบบ" />
+  </main>;
 }
 
 export function AuthenticatedBoundary({
@@ -68,7 +67,7 @@ export function AuthenticatedBoundary({
   if (apiFailure === "unauthorized" || auth.status === "anonymous") {
     return recoveryKind === "order" ? (
       <OrderAccessRecovery state="unauthorized" />
-    ) : <UnauthorizedState headingLevel={1} actions={<LoginAction />} />;
+    ) : <LoginRedirect />;
   }
 
   return children;
@@ -100,10 +99,7 @@ export function OrganizationBoundary({
 
   if (apiFailure === "unauthorized") {
     return (
-      <UnauthorizedState
-        headingLevel={1}
-        actions={<LoginAction />}
-      />
+      <LoginRedirect />
     );
   }
 
@@ -119,12 +115,7 @@ export function OrganizationBoundary({
   }
 
   if (auth.status === "anonymous") {
-    return (
-      <UnauthorizedState
-        headingLevel={1}
-        actions={<LoginAction />}
-      />
-    );
+    return <LoginRedirect />;
   }
 
   const access = resolveOrganizationAccess(
@@ -176,12 +167,7 @@ export function PlatformAdminBoundary({
   }
 
   if (apiFailure === "unauthorized") {
-    return (
-      <UnauthorizedState
-        headingLevel={1}
-        actions={<LoginAction />}
-      />
-    );
+    return <LoginRedirect />;
   }
 
   if (auth.status === "loading") {
@@ -194,12 +180,7 @@ export function PlatformAdminBoundary({
   }
 
   if (auth.status === "anonymous") {
-    return (
-      <UnauthorizedState
-        headingLevel={1}
-        actions={<LoginAction />}
-      />
-    );
+    return <LoginRedirect />;
   }
 
   if (auth.user.platformRole !== "PLATFORM_ADMIN") {

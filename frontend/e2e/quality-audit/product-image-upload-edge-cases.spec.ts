@@ -58,11 +58,11 @@ test("Product Image validation, pending, signed PUT 403 and synthetic success",a
  }
  try{
   const page=await ctx.newPage();
-  await page.goto(frontend+"/org/products/?organizationId="+ids.organizationId,{waitUntil:"domcontentloaded"});
-  await expect(page.getByRole("heading",{level:1,name:"สินค้าและตัวเลือก"})).toBeVisible();
+  await page.goto(frontend+"/org/stores/view/?organizationId="+ids.organizationId+"&storeId="+ids.storeId+"&tab=products",{waitUntil:"domcontentloaded"});
+  await expect(page.getByRole("heading",{level:2,name:"สินค้าและตัวเลือก",exact:true})).toBeVisible();
   const item=page.getByRole("heading",{name:product.name,exact:true}).first();
   await expect(item).toBeVisible();
-  await item.locator("xpath=ancestor::article").getByRole("button",{name:"แก้ไขข้อมูล"}).click();
+  await item.locator("xpath=ancestor::article").getByRole("link",{name:"แก้ไขสินค้า"}).click();
   await expect(page.getByRole("heading",{name:"รูปสินค้า"})).toBeVisible();
   const input=page.locator("#product-image-"+ids.productId);
   const action=page.getByRole("button",{name:"อัปโหลดรูปสินค้า"});

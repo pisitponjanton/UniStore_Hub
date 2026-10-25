@@ -26,8 +26,8 @@ test("nine Organization Admin routes and local search are responsive without wri
     { name: "settings", path: "/org/settings/" + org, h1: "ตั้งค่าหน่วยงาน" },
     { name: "staff", path: "/org/staff/" + org, h1: "บุคลากรและสิทธิ์", search: "staff-directory-search" },
     { name: "stores", path: "/org/stores/" + org, h1: "ร้านค้า", search: "stores-directory-search" },
-    { name: "products", path: "/org/products/" + org, h1: "สินค้าและตัวเลือก", search: "products-directory-search" },
-    { name: "campaigns", path: "/org/campaigns/" + org, h1: "แคมเปญ", search: "campaigns-directory-search" },
+    { name: "products", path: "/org/products/" + org, h1: "เลือกร้านค้าสำหรับจัดการสินค้า" },
+    { name: "campaigns", path: "/org/campaigns/" + org, h1: "เลือกร้านค้าสำหรับจัดการแคมเปญ" },
     { name: "production", path: "/org/production/" + org, h1: "สรุปงานผลิต" },
     { name: "audit", path: "/org/audit/" + org, h1: "ประวัติการทำรายการ", search: "audit-directory-search" },
   ] as const;
@@ -65,7 +65,7 @@ test("nine Organization Admin routes and local search are responsive without wri
         }
       }
       if (route.name === "production") {
-        await expect(page.getByRole("link", { name: /เปิดรายการรอบขายเพื่อดูรหัส/ }))
+        await expect(page.getByRole("link", { name: /จัดการรอบขาย/ }))
           .toHaveAttribute("href", /\/org\/campaigns\/\?organizationId=/);
       }
       if (route.name === "audit") {
@@ -89,7 +89,7 @@ test("nine Organization Admin routes and local search are responsive without wri
         await reset.click();
         await expect(name).toHaveValue(prior);
       }
-      for (const [width, height] of [[320, 700], [390, 844], [768, 1024], [1440, 900]] as const) {
+      for (const [width, height] of [[320, 700], [390, 844], [768, 1024], [1024, 773], [1440, 900]] as const) {
         await page.setViewportSize({ width, height });
         await page.waitForTimeout(100);
         await page.evaluate(() => window.scrollTo(0, 0));
@@ -123,11 +123,14 @@ test("nine Organization Admin routes and local search are responsive without wri
         await page.screenshot({ path: join(dir, route.name + "-" + width + ".png"), animations: "disabled" });
       }
       if (route.name === "stores") {
-        await page.locator('nav[aria-label="เมนูหลัก"] a[href*="/org/products/"]').click();
-        await expect(page.getByRole("heading", { name: "สินค้าและตัวเลือก", level: 1 })).toBeVisible();
+        await page.locator("article").getByRole("link", { name: "จัดการร้านค้า" }).first().click();
+        const storeNav = page.getByRole("navigation", { name: "เมนูจัดการร้านค้า" });
+        await expect(storeNav).toBeVisible();
+        await storeNav.getByRole("link", { name: "สินค้า" }).click();
+        await expect(page.getByRole("heading", { name: "สินค้าและตัวเลือก", level: 2 })).toBeVisible();
         expect(new URL(page.url()).searchParams.get("organizationId")).toBe(ids.organizationId);
-        await page.locator('nav[aria-label="เมนูหลัก"] a[href*="/org/campaigns/"]').click();
-        await expect(page.getByRole("heading", { name: "แคมเปญ", level: 1 })).toBeVisible();
+        await storeNav.getByRole("link", { name: "แคมเปญ" }).click();
+        await expect(page.getByRole("heading", { name: "แคมเปญ", level: 2, exact: true })).toBeVisible();
         expect(new URL(page.url()).searchParams.get("organizationId")).toBe(ids.organizationId);
       }
       if (route.name === "dashboard") {
@@ -183,7 +186,7 @@ test("nine Organization Admin routes and local search are responsive without wri
     scope: "local read only",
     routes: routes.length, captures: observations.length, blockedWrites, observations,
   }, null, 2) + "\n");
-  expect(observations).toHaveLength(36);
+  expect(observations).toHaveLength(45);
   expect(blockedWrites).toBe(0);
 });
 

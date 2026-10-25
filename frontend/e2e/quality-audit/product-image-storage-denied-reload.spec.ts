@@ -52,10 +52,10 @@ test("reload without Session Storage warns and offers safe Product GET before re
   proofs.push({id:"FE-UX-18-15",role:"organizationAdmin",viewport:"390x844",state,image,note});
  }
  try{
-  const page=await ctx.newPage(),url=frontend+"/org/products/?organizationId="+ids.organizationId;
+  const page=await ctx.newPage(),url=frontend+"/org/stores/view/?organizationId="+ids.organizationId+"&storeId="+ids.storeId+"&tab=products";
   async function editor(){
    const card=page.getByRole("heading",{name:product.name,exact:true}).first().locator("xpath=ancestor::article");
-   await expect(card).toBeVisible();await card.getByRole("button",{name:"แก้ไขข้อมูล"}).click();
+   await expect(card).toBeVisible();await card.getByRole("link",{name:"แก้ไขสินค้า"}).click();
    await expect(page.locator("#product-image-"+ids.productId)).toBeVisible();
   }
   await page.goto(url,{waitUntil:"domcontentloaded"});
@@ -66,7 +66,7 @@ test("reload without Session Storage warns and offers safe Product GET before re
   await expect(page.getByText(/เบราว์เซอร์ไม่อนุญาตให้บันทึกสถานะชั่วคราว/)).toBeVisible();
   expect([signed,put,patch,afterPatchGets]).toEqual([1,1,1,1]);
   await page.reload({waitUntil:"domcontentloaded"});
-  await editor();
+  await expect(page.locator("#product-image-"+ids.productId)).toBeVisible();
   const safe=page.getByRole("button",{name:"โหลดข้อมูลสินค้าล่าสุด"});
   await expect(safe).toBeEnabled();
   await expect(page.getByText(/เบราว์เซอร์ไม่อนุญาตให้จำสถานะตรวจสอบรูปสินค้า/)).toBeVisible();

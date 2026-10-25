@@ -25,6 +25,14 @@ test("production ID submission, loading, search and GET failures are visible wit
   await establishSeedRoleSession(context,request,"organizationAdmin");
   await context.route("**/*",async route=>{
     const req=route.request(),url=new URL(req.url());
+    if(req.method()==="GET"&&url.pathname==="/api/v1/organizations/"+ids.organizationId+"/campaigns"){
+      const choices=[{organizationId:ids.organizationId,campaignId:"uxqa-campaign-good",
+        storeId:"uxqa-store",name:"UXQA Production Shirt",status:"CLOSED",
+        openAt:null,closeAt:null,paymentDeadline:null,pickupAt:null,
+        createdAt:"2026-10-01T00:00:00Z",updatedAt:"2026-10-01T00:00:00Z"}];
+      await route.fulfill({status:200,contentType:"application/json",
+        body:JSON.stringify({success:true,data:{items:choices,nextCursor:null}})});return;
+    }
     if(req.method()==="GET"&&url.pathname===api){
       const id=url.searchParams.get("campaignId");
       queries.push(id??"");
@@ -49,25 +57,25 @@ test("production ID submission, loading, search and GET failures are visible wit
     await page.goto(frontend+"/org/production/?organizationId="+ids.organizationId,{waitUntil:"domcontentloaded"});
     await expect(page.getByRole("heading",{name:"สรุปงานผลิต",level:1})).toBeVisible({timeout:16000});
     const field=page.locator("#production-campaign-id");
-    const submit=page.getByRole("button",{name:"โหลดสรุปการผลิต",exact:true});
-    await expect(page.getByText("ยังไม่ได้เลือกแคมเปญ")).toBeVisible();
+    await expect(page.getByText("เลือกแคมเปญเพื่อดูยอดผลิต")).toBeVisible();
+    await expect(field).toBeVisible();
     await evidence(page,"FE-UX-23-01","idle","No Campaign ID displays meaningful idle guidance");
-    await submit.click();
-    const invalid=page.locator("#production-campaign-error-summary");
-    await expect(invalid.getByRole("link",{name:"กรุณาระบุ Campaign ID"})).toBeVisible();
-    await expect(invalid).toBeFocused();
+    await field.press("Enter");
+    const invalid=page.locator("#production-campaign-error");
+    await expect(invalid).toContainText("กรุณาเลือกแคมเปญหรือระบุ Campaign ID");
+    await expect(field).toBeFocused();
     expect(queries).toHaveLength(0);
     await evidence(page,"FE-UX-23-02","first-invalid-submit","Empty Campaign ID blocks GET and focuses ErrorSummary");
 
     await field.fill("  uxqa-campaign-503  ");
     await evidence(page,"FE-UX-23-01","editable-id","Campaign ID draft editable before submit");
-    await submit.click();
+    await field.press("Enter");
     await expect(page.getByRole("heading",{name:"ไม่สามารถโหลดสรุปการผลิตได้"})).toBeVisible();
     expect(queries.at(-1)).toBe("uxqa-campaign-503");
     await evidence(page,"FE-UX-23-02","503-feedback","Synthetic 503 shows recoverable failure, no URL update");
     failUntilRetry=false;
-    await submit.click();
-    await expect(page.getByRole("heading",{name:"รายการผลิตตามสินค้า"})).toBeVisible();
+    await field.press("Enter");
+    await expect(page.getByRole("heading",{name:"รายการที่ต้องผลิต"})).toBeVisible();
     await expect(page).toHaveURL(/campaignId=uxqa-campaign-503/);
     await expect(page.locator("#production-product-search")).toBeVisible();
     await evidence(page,"FE-UX-23-02","retry-loaded","Retry same ID retrieves report and preserves URL campaign scope");
@@ -86,13 +94,22 @@ test("production ID submission, loading, search and GET failures are visible wit
     await evidence(page,"FE-UX-23-02","show-more","Client-side Show More reveals all 27 product groups");
 
     await field.fill("uxqa-campaign-not-found");
-    await submit.click();
+    await field.press("Enter");
     await expect(page.getByRole("heading",{name:"ไม่พบแคมเปญ"})).toBeVisible();
     await evidence(page,"FE-UX-23-02","not-found","404 Campaign ID renders not-found state");
     await field.fill("uxqa-campaign-good");
-    await submit.click();
-    await expect(page.getByRole("heading",{name:"รายการผลิตตามสินค้า"})).toBeVisible();
+    await field.press("Enter");
+    await expect(page.getByRole("heading",{name:"รายการที่ต้องผลิต"})).toBeVisible();
     await evidence(page,"FE-UX-23-02","recover-after-404","New valid ID recovers from not-found");
+
+    await field.fill("Production Shirt");
+    await expect(page.getByRole("option",{name:/UXQA Production Shirt/})).toBeVisible();
+    await evidence(page,"FE-UX-23-01","campaign-choices","Searchable campaign choices use readable names, not memorized IDs");
+    await page.getByRole("option",{name:/UXQA Production Shirt/}).click();
+    await expect(page.getByRole("heading",{name:"รายการที่ต้องผลิต"})).toBeVisible();
+    await expect(field).toHaveValue("UXQA Production Shirt");
+    await expect(page).toHaveURL(/campaignId=uxqa-campaign-good/);
+    await evidence(page,"FE-UX-23-02","campaign-autoload","Selecting campaign loads read-only production immediately");
     await page.close();
   }finally{await context.close();}
   expect(writes).toBe(0);

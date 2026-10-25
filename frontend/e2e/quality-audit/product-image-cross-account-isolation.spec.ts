@@ -71,14 +71,14 @@ test("same-tab Account A logout → Staff login → Admin login isolates pending
   await page.getByRole("button",{name:"เปิดเมนูหลัก"}).click();
   const drawer=page.getByRole("dialog",{name:"เมนูหลัก"});
   await drawer.getByRole("button",{name:"ออกจากระบบ"}).click();
-  await expect(page).toHaveURL(frontend+"/");
+  await expect(page).toHaveURL(/\/(?:login\/?(?:\?.*)?)?$/);
   await expect.poll(()=>page.evaluate(()=>window.sessionStorage.getItem("unistoreHub.accessToken"))).toBeNull();
  }
- const target=frontend+"/org/products/?organizationId="+ids.organizationId;
+ const target=frontend+"/org/stores/view/?organizationId="+ids.organizationId+"&storeId="+ids.storeId+"&tab=products";
  async function edit(page:Page){
   const card=page.getByRole("heading",{name:product.name,exact:true}).first().locator("xpath=ancestor::article");
   await expect(card).toBeVisible();
-  await card.getByRole("button",{name:"แก้ไขข้อมูล"}).click();
+  await card.getByRole("link",{name:"แก้ไขสินค้า"}).click();
   try {
    await expect(page.locator("#product-image-"+ids.productId)).toBeVisible();
   } catch(error) {

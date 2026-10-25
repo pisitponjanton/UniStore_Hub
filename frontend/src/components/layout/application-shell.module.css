@@ -416,7 +416,7 @@
   transform: translateY(0);
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1279px) {
   .shell {
     display: block;
     background: var(--canvas);
@@ -913,7 +913,7 @@
 .workAreaLinkCurrent { border-color: var(--brand-line); color: var(--brand-strong); background: var(--brand-soft); }
 .workAreaLinkCurrent:hover { color: var(--brand-strong); background: var(--brand-soft-strong); }
 
-@media (max-width: 900px) {
+@media (max-width: 1279px) {
   .sidebar { border-bottom-color: var(--line); background: var(--surface); }
   .sidebarTop { min-height: 65px; padding-block: 8px; background: var(--surface); }
   .mobileCurrent { background: var(--surface); color: var(--ink); }
@@ -952,7 +952,7 @@
 .brand:focus-visible, .navLink:focus-visible, .workAreaLink:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 .sidebarTop { border-bottom: 1px solid var(--line-soft); }
 .navLinkActive { border-color: var(--brand-line); }
-@media (max-width: 900px) {
+@media (max-width: 1279px) {
   .menuButton:focus-visible, .drawerClose:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
   .sidebarPanel { background: var(--surface); }
   .mobilePanelHeader { background: var(--surface); }
@@ -971,7 +971,7 @@
 .topbarActions > :last-child { flex: none; }
 
 /* One shared sidebar rhythm across Customer, Staff, Org Admin and Platform Admin. */
-@media (min-width: 901px) {
+@media (min-width: 1280px) {
   .sidebarTop {
     min-height: 0;
     padding: 24px 22px 18px;
@@ -986,7 +986,7 @@
   .groupList { gap: 4px; }
   .sidebarFooter { gap: 16px; padding-top: 16px; }
 }
-@media (max-width: 900px) {
+@media (max-width: 1279px) {
   .topbarActions { width: 100%; gap: 10px; }
   .topbarActions .workAreaNavigation {
     min-width: 0;
@@ -1005,7 +1005,7 @@
 }
 
 /* On mobile the topbar carries the breadcrumb and theme in the same row. */
-@media (max-width: 900px) {
+@media (max-width: 1279px) {
   .mobileCurrent { display: none; }
   .orientation { min-height: 56px; padding: 6px var(--page-gutter); }
   .orientationPath { display: flex; min-width: 0; flex: 1 1 auto; font-size: .77rem; }

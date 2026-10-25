@@ -12,7 +12,6 @@ type Proof={id:string;role:Role;state:string;image:string;note:string;viewport:s
 const orgPages=[
  ["03","แดชบอร์ด","/org/dashboard/"],["04","ข้อมูลหน่วยงาน","/org/settings/"],
  ["05","บุคลากร","/org/staff/"],["06","ร้านค้า","/org/stores/"],
- ["07","สินค้า","/org/products/"],["08","แคมเปญ","/org/campaigns/"],
  ["09","คำสั่งซื้อ","/org/orders/"],["10","ตรวจสอบการชำระเงิน","/org/payments/"],
  ["11","รับสินค้า","/org/pickups/"],["12","สรุปการผลิต","/org/production/"],
  ["13","ประวัติการทำรายการ","/org/audit/"],

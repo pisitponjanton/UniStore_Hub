@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
   update: vi.fn(),
   deactivate: vi.fn(),
   listStores: vi.fn(),
+  getStore: vi.fn(),
   logout: vi.fn(),
 }));
 
@@ -23,6 +24,7 @@ vi.mock("@/modules/auth", () => ({
 vi.mock("@/modules/stores", () => ({
   storeService: {
     list: mocks.listStores,
+    get: mocks.getStore,
   },
 }));
 
@@ -62,9 +64,30 @@ const product: ProductDTO = {
 };
 
 describe("ProductManagementView", () => {
+
+  it("uses the selected Store as the only source of truth for create and list", async () => {
+    mocks.listProducts.mockResolvedValue({ items: [product], nextCursor: null });
+    mocks.create.mockResolvedValue({ ...product, productId: "new", name: "Scoped Product" });
+    render(<ProductManagementView organizationId="org-1" fixedStoreId="store-1" storeName="Main Store" />);
+    await screen.findByText("Faculty Shirt");
+    expect(mocks.getStore).toHaveBeenCalledWith("org-1", "store-1", expect.any(Object));
+    expect(mocks.listStores).not.toHaveBeenCalled();
+    expect(mocks.listProducts).toHaveBeenCalledWith("org-1", expect.objectContaining({storeId:"store-1"}));
+    expect(screen.queryByLabelText("กรองตามร้านค้า")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "+ เพิ่มสินค้า" }));
+    expect(screen.queryByLabelText("ร้านค้า")).toBeNull();
+    fireEvent.change(screen.getByLabelText("ชื่อสินค้า"), {target:{value:"Scoped Product"}});
+    fireEvent.click(screen.getByRole("button", {name:"สร้างสินค้า"}));
+    await waitFor(() => expect(mocks.create).toHaveBeenCalledWith("org-1", {
+      storeId:"store-1", name:"Scoped Product", description:""
+    }));
+  });
+
+
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.listStores.mockResolvedValue([store]);
+    mocks.getStore.mockResolvedValue(store);
     mocks.listProducts.mockResolvedValue({
       items: [product],
       nextCursor: null,
@@ -104,6 +127,7 @@ describe("ProductManagementView", () => {
     render(<ProductManagementView organizationId="org-1" />);
 
     await screen.findByText("Faculty Shirt");
+    fireEvent.click(screen.getByRole("button", { name: "+ เพิ่มสินค้า" }));
 
     fireEvent.change(
       screen.getByLabelText(/ชื่อสินค้า/),
@@ -184,6 +208,7 @@ describe("ProductManagementView", () => {
     render(<ProductManagementView organizationId="org-1" />);
 
     await screen.findByText("Faculty Shirt");
+    fireEvent.click(screen.getByRole("button", { name: "+ เพิ่มสินค้า" }));
 
     fireEvent.click(
       screen.getByRole("button", { name: "สร้างสินค้า" }),

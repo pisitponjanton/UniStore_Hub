@@ -1,0 +1,9 @@
+.page { min-width:0; width:100%; padding:clamp(20px,2.3vw,34px) var(--page-gutter) var(--page-block-end); display:grid; align-content:start; gap:18px; }
+.breadcrumb { display:flex; min-width:0; flex-wrap:wrap; align-items:center; gap:10px; font-size:.85rem; color:var(--ink-secondary); }
+.back { display:inline-flex; align-items:center; gap:7px; min-height:40px; color:var(--ink-secondary); text-decoration:none; }
+.back:hover { color:var(--brand-strong); }
+.storeName { min-width:0; overflow-wrap:anywhere; }
+.errorActions { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+.errorActions button { cursor:pointer; min-height:42px; border-radius:var(--radius-control); border:1px solid var(--line-strong); color:var(--ink); background:var(--surface); padding:9px 17px; font:inherit; }
+.breadcrumb :is(a,button):focus-visible,.errorActions button:focus-visible { outline:3px solid var(--focus); outline-offset:2px; }
+@media(max-width:767px) { .page { padding-inline:var(--page-gutter-compact); } }
