@@ -27,6 +27,7 @@ services:
       DEBUG: "${LOCALSTACK_DEBUG:-0}"
     volumes:
       - "./scripts/dev/.state/localstack:/var/lib/localstack"
+      - "./scripts/dev/localstack-files-ready.sh:/etc/localstack/init/ready.d/10-files-bucket.sh:ro"
     healthcheck:
       test:
         - CMD-SHELL
@@ -76,6 +77,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile.dev
+    command: ["node", "src/dev-watch.js"]
     environment:
       <<: *backend-env
       PORT: "4000"

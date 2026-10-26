@@ -10,7 +10,7 @@
   },
   "scripts": {
     "start": "node src/local.js",
-    "dev": "node --watch src/local.js",
+    "dev": "node src/dev-watch.js",
     "worker:dev": "node src/local-worker.js",
     "test": "node --test",
     "check": "node scripts/check-syntax.js",

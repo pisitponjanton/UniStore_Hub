@@ -62,6 +62,14 @@ function createStorefrontService(options = {}) {
     return fileService;
   }
 
+  const createStoreImageUrl = options.createStoreImageUrl ||
+    ((input) => getFileService().createStoredStoreImageUrl(input));
+  async function mapPublicStore(store) {
+    if (!store.imageKey) return toStorefrontStoreDto(store);
+    const imageUrl = await createStoreImageUrl({ organizationId: store.organizationId, storeId: store.storeId, imageKey: store.imageKey });
+    return toStorefrontStoreDto({ ...store, imageUrl });
+  }
+
   const createProductImageUrl =
     options.createProductImageUrl ||
     ((input) =>
@@ -266,14 +274,13 @@ function createStorefrontService(options = {}) {
           const stores = await getStoreRepository().listByOrganization(
             organization.organizationId,
           );
+          const publicStores = await Promise.all(stores.filter(store => {
+            requireTenantMatch(store, organization.organizationId);
+            return store.status === STORE_STATUS.ACTIVE;
+          }).map(mapPublicStore));
           entries[index] = {
             organization: toStorefrontOrganizationDto(organization),
-            stores: stores
-              .filter((store) => {
-                requireTenantMatch(store, organization.organizationId);
-                return store.status === STORE_STATUS.ACTIVE;
-              })
-              .map(toStorefrontStoreDto),
+            stores: publicStores,
           };
         }
       };
@@ -305,18 +312,14 @@ function createStorefrontService(options = {}) {
           organizationId,
         );
 
-      return stores
-        .filter((store) => {
-          requireTenantMatch(store, organizationId);
-          return store.status === STORE_STATUS.ACTIVE;
-        })
-        .map(toStorefrontStoreDto);
+      return Promise.all(stores.filter((store) => {
+        requireTenantMatch(store, organizationId);
+        return store.status === STORE_STATUS.ACTIVE;
+      }).map(mapPublicStore));
     },
 
     async getStore(organizationId, storeId) {
-      return toStorefrontStoreDto(
-        await requireActiveStore(organizationId, storeId),
-      );
+      return mapPublicStore(await requireActiveStore(organizationId, storeId));
     },
 
     async listProducts(organizationId, storeId) {

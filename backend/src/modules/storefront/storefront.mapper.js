@@ -20,6 +20,7 @@ function toStorefrontStoreDto(store) {
     organizationId: store.organizationId,
     name: store.name,
     description: store.description,
+    imageUrl: store.imageUrl ?? null,
     status: store.status,
     createdAt: store.createdAt,
     updatedAt: store.updatedAt,

@@ -37,6 +37,16 @@ function createFileController(options = {}) {
       }
     },
 
+    async storeImageUploadUrl(req, res, next) {
+      try {
+        return sendSuccess(res, await fileService.createStoreImageUploadUrl({
+          organizationId: req.params.organizationId,
+          storeId: req.params.storeId,
+          contentType: requireBodyString(req.body?.contentType, 'contentType'),
+        }));
+      } catch (error) { return next(error); }
+    },
+
     async paymentSlipUploadUrl(req, res, next) {
       try {
         const data =

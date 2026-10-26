@@ -77,50 +77,27 @@ describe("StoreManagementView", () => {
     ).toBeInTheDocument();
   });
 
-  it("loads a fresh StoreDTO before editing and submits only editable text fields", async () => {
-    mocks.get.mockResolvedValue(store);
-    mocks.update.mockResolvedValue({
-      ...store,
-      name: "Updated Store",
-      description: "Updated description",
-    });
-
+  it("shows uploaded store covers and a fallback for stores without one", async () => {
+    mocks.list.mockResolvedValue([
+      { ...store, imageUrl: "/test-store-cover.png" },
+      { ...store, storeId: "store-2", name: "Without Cover", imageUrl: null },
+    ]);
     render(<StoreManagementView organizationId="org-1" />);
+    await screen.findByText("Without Cover");
+    expect(screen.getByRole("img", { name: "รูปหน้าร้าน Main Store" }))
+      .toHaveAttribute("src", "/test-store-cover.png");
+    expect(screen.getByText("ยังไม่มีรูปหน้าร้าน")).toBeInTheDocument();
+  });
 
+  it("uses the store workspace as the single editing location", async () => {
+    render(<StoreManagementView organizationId="org-1" />);
     await screen.findByText("Main Store");
-
-    fireEvent.click(
-      screen.getByRole("button", { name: "แก้ไขข้อมูล" }),
-    );
-
-    expect(mocks.get).toHaveBeenCalledWith("org-1", "store-1");
-
-    const editName = await screen.findByDisplayValue("Main Store");
-    const editDescription =
-      screen.getByDisplayValue("Faculty merchandise");
-
-    fireEvent.change(editName, {
-      target: { value: "Updated Store" },
-    });
-    fireEvent.change(editDescription, {
-      target: { value: "Updated description" },
-    });
-    fireEvent.click(
-      screen.getByRole("button", { name: "บันทึกข้อมูล" }),
-    );
-
-    expect(mocks.update).toHaveBeenCalledWith(
-      "org-1",
-      "store-1",
-      {
-        name: "Updated Store",
-        description: "Updated description",
-      },
-    );
-
-    expect(
-      await screen.findByText("บันทึกข้อมูลร้านค้า Updated Store แล้ว"),
-    ).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "แก้ไขข้อมูล" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "ปิดใช้งาน" })).toBeNull();
+    const manage = screen.getByRole("link", { name: "จัดการร้านค้า" });
+    expect(manage.getAttribute("href")).toContain("storeId=store-1");
+    expect(mocks.get).not.toHaveBeenCalled();
+    expect(mocks.update).not.toHaveBeenCalled();
   });
 
   it("focuses a validation summary when a store is submitted without a name", async () => {

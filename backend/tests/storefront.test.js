@@ -623,7 +623,7 @@ test('aggregate public directory includes active stores only and maps safe field
   assert.deepEqual(items[0].stores, [{
     storeId: 'store-1', organizationId: 'org-1', name: 'Main Store',
     description: 'Faculty merchandise', status: STORE_STATUS.ACTIVE,
-    createdAt: FIXED_TIME, updatedAt: FIXED_TIME,
+    imageUrl: null, createdAt: FIXED_TIME, updatedAt: FIXED_TIME,
   }]);
   assert.deepEqual(items[1].stores, []);
   assert.equal(JSON.stringify(items).includes('privateNote'), false);

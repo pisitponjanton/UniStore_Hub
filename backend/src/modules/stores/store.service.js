@@ -8,6 +8,8 @@ const { createId } = require('../../utils/id');
 const { nowIsoUtc } = require('../../utils/time');
 const { STORE_STATUS } = require('./store.constants');
 const { toStoreDto } = require('./store.mapper');
+const { createFileService } = require('../files/file.service');
+const { assertStoreImageKey, createStoreImageAssociationValidator } = require('../files/file.validation');
 const { createStoreRepository } = require('./store.repository');
 
 function storeNotFound() {
@@ -21,6 +23,19 @@ function storeNotFound() {
 function createStoreService(options = {}) {
   const idFactory = options.idFactory || createId;
   const clock = options.clock || nowIsoUtc;
+  const validateStoreImageAssociation = options.validateStoreImageAssociation || createStoreImageAssociationValidator({ s3Adapter: options.s3Adapter });
+  let fileService = options.fileService;
+  function getFileService() {
+    if (!fileService) fileService = createFileService({ s3Adapter: options.s3Adapter });
+    return fileService;
+  }
+  const createImageUrl = options.createStoreImageUrl || ((input) => getFileService().createStoredStoreImageUrl(input));
+  async function mapStore(store) {
+    if (!store.imageKey) return toStoreDto(store);
+    assertStoreImageKey({ organizationId: store.organizationId, storeId: store.storeId, objectKey: store.imageKey });
+    const imageUrl = await createImageUrl({ organizationId: store.organizationId, storeId: store.storeId, imageKey: store.imageKey });
+    return toStoreDto({ ...store, imageUrl });
+  }
 
   let repository = options.repository;
   let storeRepository = options.storeRepository;
@@ -72,10 +87,10 @@ function createStoreService(options = {}) {
       const stores =
         await getStoreRepository().listByOrganization(organizationId);
 
-      return stores.map((store) => {
+      return Promise.all(stores.map((store) => {
         requireTenantMatch(store, organizationId);
-        return toStoreDto(store);
-      });
+        return mapStore(store);
+      }));
     },
 
     async createStore({ organizationId, actorId, name, description }) {
@@ -88,6 +103,7 @@ function createStoreService(options = {}) {
         name,
         description,
         status: STORE_STATUS.ACTIVE,
+        imageKey: null,
         createdAt: timestamp,
         updatedAt: timestamp,
       };
@@ -126,7 +142,7 @@ function createStoreService(options = {}) {
         ],
       });
 
-      return toStoreDto(store);
+      return mapStore(store);
     },
 
     async getStore({ organizationId, storeId }) {
@@ -139,7 +155,7 @@ function createStoreService(options = {}) {
 
       requireTenantMatch(store, organizationId);
 
-      return toStoreDto(store);
+      return mapStore(store);
     },
 
     async updateStore({
@@ -156,6 +172,9 @@ function createStoreService(options = {}) {
       }
 
       requireTenantMatch(existing, organizationId);
+      if (Object.prototype.hasOwnProperty.call(changes, 'imageKey')) {
+        await validateStoreImageAssociation({ organizationId, storeId, imageKey: changes.imageKey });
+      }
 
       const timestamp = clock();
       const names = {
@@ -176,6 +195,12 @@ function createStoreService(options = {}) {
         names['#description'] = 'description';
         values[':description'] = changes.description;
         assignments.push('#description = :description');
+      }
+
+      if (Object.prototype.hasOwnProperty.call(changes, 'imageKey')) {
+        names['#imageKey'] = 'imageKey';
+        values[':imageKey'] = changes.imageKey;
+        assignments.push('#imageKey = :imageKey');
       }
 
       if (Object.prototype.hasOwnProperty.call(changes, 'status')) {
@@ -217,7 +242,7 @@ function createStoreService(options = {}) {
         ],
       });
 
-      return toStoreDto({
+      return mapStore({
         ...existing,
         ...changes,
         updatedAt: timestamp,

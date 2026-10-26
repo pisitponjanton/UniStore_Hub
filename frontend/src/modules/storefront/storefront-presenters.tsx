@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { Badge, MediaFallback } from "@/components";
+import { ResilientImage } from "@/components/ui/resilient-image";
 import type {
   CampaignDTO,
   CampaignStatus,
@@ -182,23 +183,14 @@ export function ProductCard({
         <span className={styles.productMediaLabel} aria-hidden="true">
           สินค้า
         </span>
-        {product.imageUrl ? (
-          // Backend supplies this short-lived Storefront URL for display only.
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={product.imageUrl}
-            alt={product.name}
-            className={styles.productImage}
-            loading="lazy"
-            decoding="async"
-          />
-        ) : (
-          <MediaFallback
-            variant="product"
-            label="ยังไม่มีรูปสินค้า"
-            className={styles.productPlaceholder}
-          />
-        )}
+        <ResilientImage
+          src={product.imageUrl}
+          alt={product.name}
+          className={styles.productImage}
+          fallback={<MediaFallback variant="product"
+            label={product.imageUrl ? "ไม่สามารถแสดงรูปสินค้าได้" : "ยังไม่มีรูปสินค้า"}
+            className={styles.productPlaceholder} />}
+        />
       </div>
 
       <div className={styles.productIdentity}>

@@ -74,12 +74,16 @@ test("image upload signing/PUT/PATCH negative states + focused recovery at 320px
    expect([signs,puts,patches]).toEqual([step.signs,step.puts,step.patches]);
    const feedback=page.locator("[data-product-upload-feedback]");
    await expect(feedback).toBeFocused();
+   expect(await feedback.evaluate(el=>getComputedStyle(el).position)).toBe("fixed");
+   await expect(feedback).toHaveAttribute("data-tone","danger");
    await expect.poll(()=>feedback.evaluate(el=>{const b=el.getBoundingClientRect();return b.top<innerHeight&&b.bottom>0&&b.left>=-1&&b.right<=innerWidth+1;})).toBe(true);
    await snap(page,"FE-UX-18-15",step.state,"Terminal error focused and visible on 320 CSS pixel viewport");
   }
   await upload.click();
   await expect(page.getByText("อัปโหลดและบันทึกรูปสินค้าเรียบร้อยแล้ว")).toBeVisible();
   await expect(page.locator("[data-product-upload-feedback]")).toBeFocused();
+  await expect(page.locator("[data-product-upload-feedback]")).toHaveAttribute("data-tone","success");
+  expect(await page.locator("[data-product-upload-feedback]").evaluate(el=>getComputedStyle(el).position)).toBe("fixed");
   await expect(page.getByText("เปลี่ยนรูปสินค้า",{exact:true}).last()).toBeVisible();
   expect([signs,puts,patches]).toEqual([4,3,2]);
   await snap(page,"FE-UX-18-15","error-recovery-success","Intercepted POST/PUT/PATCH/GET success clears retry and focuses completion");

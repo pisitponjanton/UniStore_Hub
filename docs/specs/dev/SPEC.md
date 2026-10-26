@@ -70,6 +70,8 @@ Dev Mode uses Docker Compose for the complete local stack: Frontend, Backend, No
 
 Application containers must still run the same Frontend/Backend source and preserve fast development feedback such as source bind mounts and hot reload where practical.
 
+**Docker Desktop bind-mount reload reliability (2026-10-26):** The local Backend service uses `node src/dev-watch.js` (also `npm run dev`) instead of depending only on Node's filesystem events. It polls metadata of `backend/src/**/*.js` every ~1.2 seconds and restarts the Backend when a source file is added or changed. macOS Docker bind mounts can update the files in-container without reliably sending a watch event, leaving newly added HTTP routes missing until restart. This affects Dev only; Lambda production entry remains `src/lambda.js`. Restart just the Backend with `docker compose -f docker-compose.dev.yml up -d --no-deps --force-recreate backend` when updating its Compose command (not the data services).
+
 
 ---
 
@@ -392,6 +394,10 @@ start LocalStack
 Bootstrap must be idempotent.
 
 Running the canonical Compose command repeatedly must not destroy existing local data.
+
+**LocalStack restart note (PROJECT DECISION):** The one-shot Compose bootstrap may not rerun when only LocalStack restarts. Mount `scripts/dev/localstack-files-ready.sh` into LocalStack's `/etc/localstack/init/ready.d/` so the private Files bucket and GET/PUT/HEAD CORS origins (`localhost:3000` and `127.0.0.1:3000`) are always present after startup. The same CORS is applied by `compose-bootstrap.sh`. The local Files bucket stays private; Browser accesses objects through presigned URLs. This initialization does not delete existing DynamoDB items or S3 objects.
+
+**Persistence limitation:** On this LocalStack Community 3.8.1 Docker setup, a container recreation was observed to preserve DynamoDB records but not S3 objects or even the bucket. Recreating the bucket restores uploads but **cannot restore previously lost image bytes**: an existing Product `imageKey` can then point to a missing file. In that case the editor shows a usable missing-image fallback and the user must select the original file again. Do not promise persistent S3 objects across Compose recreation based on `PERSISTENCE=1` alone.
 
 ---
 

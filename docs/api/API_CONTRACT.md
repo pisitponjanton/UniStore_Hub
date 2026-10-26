@@ -166,6 +166,8 @@ storeId
 organizationId
 name
 description
+imageKey: string | null (authenticated management only)
+imageUrl: string | null (short-lived signed S3 GET URL)
 status: ACTIVE | INACTIVE
 createdAt
 updatedAt
@@ -781,11 +783,23 @@ Request may contain:
 {
   "name": "Main Store",
   "description": "Updated",
-  "status": "ACTIVE"
+  "status": "ACTIVE",
+  "imageKey": "stores/<organizationId>/<storeId>/<uuid>"
 }
 ```
 
-Returns `StoreDTO`.
+Returns `StoreDTO`. The `imageKey` is optional in a PATCH; provide it only after a successful signed PUT, and Backend verifies ownership, file type, size and S3 HEAD before associating.
+
+### 8.5 Store image upload
+
+```http
+POST /api/v1/organizations/:organizationId/stores/:storeId/image-upload-url
+```
+
+Role: Organization Admin in ACTIVE Organization. Request `{ "contentType": "image/png" }` (also `image/jpeg`, `image/webp`).
+Response contains `objectKey: "stores/<organizationId>/<storeId>/<uuid>"`, browser-accessible short-lived `url`, `method: "PUT"`, and `expiresInSeconds: 900`. Upload the raw file by PUT with the matching signed Content-Type, then PATCH Store with `imageKey` and reload the Store DTO. Maximum 5 MiB.
+
+**PROJECT DECISION:** Storefront Directory, Store list and Store detail return `imageUrl` (signed GET when available, otherwise null), but never expose the private Store `imageKey`. Missing/expired images display a neutral fallback. Store images can be selected while creating a store; UI creates the Store first, then uploads and associates the selected file with the generated storeId. If that subsequent upload fails, the Store remains created and its picture can be retried in Settings.
 
 ---
 
@@ -805,6 +819,8 @@ Optional query:
 storeId
 cursor
 ```
+
+**PROJECT DECISION — Product image URLs:** Products with a stored, tenant-scoped `imageKey` include a short-lived S3 pre-signed GET URL as `imageUrl` in list responses. Products without an image return `imageUrl: null`. The private Files S3 bucket is not made public. URLs must be regenerated on subsequent API reads after expiration.
 
 ### 9.2 Create Product
 
@@ -834,7 +850,7 @@ GET /api/v1/organizations/:organizationId/products/:productId
 
 Role: Organization Admin.
 
-Returns `ProductDTO`.
+Returns `ProductDTO`, including `imageUrl` signed for the stored `imageKey` when one exists; otherwise `imageUrl: null`. The URL is browser-accessible in local development via LocalStack (`S3_BROWSER_ENDPOINT_URL`) and in AWS Learner Lab via Amazon S3. Pre-signed URLs expire; re-read the Product rather than retaining them indefinitely. Tenant ownership is validated before signing.
 
 ### 9.4 Update Product
 

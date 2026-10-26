@@ -370,13 +370,19 @@ test('product detail rejects a Variant that points at another Product', async ()
   );
 });
 
-test('management Product DTO keeps imageKey but never exposes storage keys', async () => {
+test('management Product detail signs its stored imageKey without exposing database keys', async () => {
+  const signed = [];
+  const imageKey = 'products/org-1/product-1/11111111-1111-4111-8111-111111111111';
   const service = createProductService({
+    createProductImageUrl: async (input) => {
+      signed.push(input);
+      return 'https://signed.example.test/details-image';
+    },
     productRepository: {
       async getProduct() {
         return {
           ...makeProduct({
-            imageKey: 'products/org-1/product-1/file-1',
+            imageKey,
           }),
           PK: 'ORG#org-1',
           SK: 'PRODUCT#product-1',
@@ -395,14 +401,102 @@ test('management Product DTO keeps imageKey but never exposes storage keys', asy
     productId: 'product-1',
   });
 
-  assert.equal(
-    result.imageKey,
-    'products/org-1/product-1/file-1',
-  );
-  assert.equal(result.imageUrl, null);
+  assert.equal(result.imageKey, imageKey);
+  assert.equal(result.imageUrl, 'https://signed.example.test/details-image');
+  assert.deepEqual(signed, [{
+    organizationId: 'org-1', productId: 'product-1', imageKey,
+  }]);
   assert.equal('PK' in result, false);
   assert.equal('SK' in result, false);
   assert.equal('GSI1PK' in result, false);
+});
+
+test('management Product list signs only stored image keys from its organization', async () => {
+  const imageKey = 'products/org-1/product-1/11111111-1111-4111-8111-111111111111';
+  const signed = [];
+  const service = createProductService({
+    storeRepository: { async getById() { return makeStore(); } },
+    productRepository: {
+      async listProductsByStore() {
+        return {
+          items: [makeProduct({imageKey}), makeProduct({
+            productId: 'product-no-image', imageKey: null,
+          })],
+          lastEvaluatedKey: null,
+        };
+      },
+    },
+    createProductImageUrl: async input => {
+      signed.push(input);
+      return 'https://signed.example.test/list-image';
+    },
+  });
+  const response = await service.listProducts({organizationId:'org-1',storeId:'store-1'});
+  assert.deepEqual(response.items.map(item => item.imageUrl), [
+    'https://signed.example.test/list-image', null,
+  ]);
+  assert.deepEqual(signed, [{
+    organizationId:'org-1',productId:'product-1',imageKey,
+  }]);
+});
+
+test('management Product list does not sign or expose a cross-tenant image', async () => {
+  let signs = 0;
+  const service = createProductService({
+    productRepository: {async listProductsByOrganization() {
+      return { items: [makeProduct({
+        organizationId: 'another-org',
+        imageKey: 'products/another-org/product-1/11111111-1111-4111-8111-111111111111',
+      })], lastEvaluatedKey: null };
+    }},
+    createProductImageUrl: async () => { signs++; return 'https://signed.example.test/forbidden'; },
+  });
+  await assert.rejects(service.listProducts({organizationId:'org-1'}), e => e.code === 'TENANT_MISMATCH');
+  assert.equal(signs,0);
+});
+
+test('management Product update returns signed image URL for the persisted image key', async () => {
+  const repo = createRepositoryRecorder();
+  const oldKey = 'products/org-1/product-1/11111111-1111-4111-8111-111111111111';
+  const nextKey = 'products/org-1/product-1/22222222-2222-4222-8222-222222222222';
+  const signed = [];
+  const service = createProductService({
+    repository: repo,
+    productRepository: { async getProduct() {
+      return makeProduct({imageKey:oldKey});
+    }},
+    validateProductImageAssociation: async () => {},
+    idFactory: createIdFactory(['audit-image-update']),
+    clock:()=>FIXED_TIME,
+    createProductImageUrl: async input => {
+      signed.push(input);
+      return 'https://signed.example.test/latest-image';
+    },
+  });
+  const result = await service.updateProduct({
+    organizationId:'org-1',productId:'product-1',actorId:'admin-1',
+    changes:{imageKey:nextKey},
+  });
+  assert.equal(result.imageUrl,'https://signed.example.test/latest-image');
+  assert.equal(result.imageKey,nextKey);
+  assert.deepEqual(signed,[{organizationId:'org-1',productId:'product-1',imageKey:nextKey}]);
+  assert.equal(repo.transactions.length,1);
+});
+
+test('management Product image rejects a noncanonical or cross-tenant stored key before signing', async () => {
+  let signs = 0;
+  const service = createProductService({
+    productRepository: {
+      async getProduct() {return makeProduct({
+        imageKey: 'products/another-org/product-1/11111111-1111-4111-8111-111111111111',
+      });},
+      async listVariants() {return [];},
+    },
+    createProductImageUrl: async () => {signs++;return 'https://signed.example.test/unsafe';},
+  });
+  await assert.rejects(service.getProduct({organizationId:'org-1',productId:'product-1'}),
+    error => error.code === 'FILE_ACCESS_FORBIDDEN');
+  assert.equal(signs,0);
 });
 
 test('product image association hook receives the canonical tenant/product context', async () => {
@@ -419,6 +513,7 @@ test('product image association hook receives the canonical tenant/product conte
       validations.push(input);
     },
     idFactory: createIdFactory(['audit-image']),
+    createProductImageUrl: async () => 'https://signed.example.test/image',
     clock: () => FIXED_TIME,
   });
 
@@ -427,7 +522,7 @@ test('product image association hook receives the canonical tenant/product conte
     productId: 'product-1',
     actorId: 'admin-1',
     changes: {
-      imageKey: 'products/org-1/product-1/image-uuid',
+      imageKey: 'products/org-1/product-1/33333333-3333-4333-8333-333333333333',
     },
   });
 
@@ -435,7 +530,7 @@ test('product image association hook receives the canonical tenant/product conte
     {
       organizationId: 'org-1',
       productId: 'product-1',
-      imageKey: 'products/org-1/product-1/image-uuid',
+      imageKey: 'products/org-1/product-1/33333333-3333-4333-8333-333333333333',
     },
   ]);
   assert.equal(

@@ -19,6 +19,11 @@
   line-height: 1.5;
 }
 .icon { flex: 0 0 auto; color: var(--success); }
+.toast[data-tone="danger"] .icon { color: var(--danger); }
+.toast[data-tone="warning"] .icon { color: var(--brand-strong); }
+.title { display: block; margin-bottom: 2px; font-size: .84rem; font-weight: 680; }
+.toast:focus { outline: none; }
+.toast:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .message { min-width: 0; overflow-wrap: anywhere; }
 .dismiss {
   display: grid;

@@ -25,7 +25,7 @@ The Frontend owns:
 - session restoration
 - role-based UI visibility
 - loading / empty / error / unauthorized / forbidden states
-- Product Image and Payment Slip upload UX
+- Product Image, Store Cover Image and Payment Slip upload UX
 - Notification UX
 - responsive presentation
 
@@ -90,6 +90,10 @@ forbidden
 Frontend role visibility is for UX only.
 
 Backend remains the authoritative permission layer.
+
+**Product image read behavior:** Product management list/detail APIs return a short-lived, browser-accessible pre-signed `imageUrl` for the persisted `imageKey`. On image upload confirmation, refetch Product detail for the current URL; keep the image key internal to authenticated management, do not synthesize S3 URLs in the client, and refetch on expired links.
+
+**Store image and status UX decision:** Store creation modal supports optional JPEG/PNG/WebP cover selection (up to 5 MiB); after create, upload via short-lived signed S3 PUT and PATCH the generated Store imageKey. Store Settings is the single place for editing name/description, replacing cover and changing ACTIVE/INACTIVE with confirmation. The Store directory provides only Manage, not duplicate Edit/Status actions. Public store cards and Store detail use signed imageUrl with bounded layouts and broken-image fallbacks. Never expose imageKey to public clients.
 
 **Product editor UX decision:** Status is reversible through the existing Organization Admin `PATCH` Product and Variant endpoints (`ACTIVE` or `INACTIVE`). Confirm status transitions, re-read server-authoritative detail afterward, and preserve OrderItem history. Use a single media picker with a contextual save action, retaining GET-only recovery for uncertain image uploads rather than re-uploading blindly.
 

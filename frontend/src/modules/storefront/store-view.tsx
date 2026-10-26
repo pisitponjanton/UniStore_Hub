@@ -1,5 +1,6 @@
 "use client";
 
+import { ResilientImage } from "@/components/ui/resilient-image";
 import { PageLoadingRows, PageStateHeading, RecoveryActions } from "@/components/ui/async-page";
 
 import Link from "next/link";
@@ -185,6 +186,11 @@ export function StoreView() {
         </nav>
 
         <section className={`${styles.hero} ${styles.storeHero}`} aria-label="ข้อมูลร้านค้า">
+          {store.imageUrl ? <div className={styles.storeCover}>
+            <ResilientImage src={store.imageUrl} alt={`รูปหน้าร้าน ${store.name}`}
+              loading="eager" className={styles.storeCoverImage}
+              fallback={<div className={styles.storeCoverFallback}><Store size={30} aria-hidden="true" /> ไม่สามารถแสดงรูปหน้าร้านได้</div>} />
+          </div> : null}
           <div className={styles.storeIdentity}>
             <span className={styles.storeIdentityMark} aria-hidden="true"><Store size={27} strokeWidth={1.6} /></span>
             <div className={styles.storeIdentityCopy}>

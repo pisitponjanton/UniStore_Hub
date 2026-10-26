@@ -6,6 +6,7 @@ import type { ProductDTO, StoreDTO } from "@/types";
 const mocks = vi.hoisted(() => ({
   listProducts: vi.fn(),
   create: vi.fn(),
+  requestImageUploadUrl: vi.fn(),
   get: vi.fn(),
   update: vi.fn(),
   deactivate: vi.fn(),
@@ -32,6 +33,7 @@ vi.mock("./product-service", () => ({
   productService: {
     list: mocks.listProducts,
     create: mocks.create,
+    requestImageUploadUrl: mocks.requestImageUploadUrl,
     get: mocks.get,
     update: mocks.update,
     deactivate: mocks.deactivate,
@@ -154,6 +156,56 @@ describe("ProductManagementView", () => {
     expect(
       await screen.findByText("สร้างสินค้า Faculty Bag แล้ว"),
     ).toBeInTheDocument();
+  });
+
+  it("uploads a selected image after creating the product and reads back the saved cover", async () => {
+    const newProduct = { ...product, productId: "product-2", name: "With Picture" };
+    const imageKey = "products/org-1/product-2/11111111-1111-4111-8111-111111111111";
+    const ready = { ...newProduct, imageKey, imageUrl: "/cover.png" };
+    mocks.create.mockResolvedValue(newProduct);
+    mocks.requestImageUploadUrl.mockResolvedValue({
+      objectKey: imageKey, url: "/fake-put", method: "PUT", expiresInSeconds: 900,
+    });
+    mocks.update.mockResolvedValue(ready);
+    mocks.get.mockResolvedValue(ready);
+    const put = vi.fn().mockResolvedValue({ ok: true, status: 200 });
+    vi.stubGlobal("fetch", put);
+    Object.defineProperty(URL, "createObjectURL", { configurable: true, value: vi.fn(() => "blob:preview") });
+    Object.defineProperty(URL, "revokeObjectURL", { configurable: true, value: vi.fn() });
+    try {
+      render(<ProductManagementView organizationId="org-1" fixedStoreId="store-1" storeName="Main Store" />);
+      await screen.findByText("Faculty Shirt");
+      fireEvent.click(screen.getByRole("button", { name: "+ เพิ่มสินค้า" }));
+      fireEvent.change(screen.getByLabelText("ชื่อสินค้า"), { target: { value: "With Picture" } });
+      const file = new File(["image"], "cover.png", { type: "image/png" });
+      fireEvent.change(screen.getByLabelText("รูปสินค้า (ไม่บังคับ)"), { target: { files: [file] } });
+      expect(screen.getByText("cover.png")).toBeInTheDocument();
+      fireEvent.click(screen.getByRole("button", { name: "สร้างสินค้า" }));
+      await waitFor(() => expect(mocks.update).toHaveBeenCalledWith("org-1", "product-2", { imageKey }));
+      expect(mocks.requestImageUploadUrl).toHaveBeenCalledWith("org-1", "product-2", "image/png");
+      expect(put).toHaveBeenCalledWith("/fake-put", expect.objectContaining({ method: "PUT", body: file }));
+      expect(mocks.get).toHaveBeenCalledWith("org-1", "product-2");
+      expect(await screen.findByRole("img", { name: "รูปสินค้า With Picture" })).toHaveAttribute("src", "/cover.png");
+    } finally { vi.unstubAllGlobals(); }
+  });
+
+  it("keeps a newly created product and shows a retry path if the cover upload fails", async () => {
+    const newProduct = { ...product, productId: "product-3", name: "Needs Cover" };
+    mocks.create.mockResolvedValue(newProduct);
+    mocks.requestImageUploadUrl.mockRejectedValue(new Error("Signing failed"));
+    Object.defineProperty(URL, "createObjectURL", { configurable: true, value: vi.fn(() => "blob:preview") });
+    Object.defineProperty(URL, "revokeObjectURL", { configurable: true, value: vi.fn() });
+    render(<ProductManagementView organizationId="org-1" />);
+    await screen.findByText("Faculty Shirt");
+    fireEvent.click(screen.getByRole("button", { name: "+ เพิ่มสินค้า" }));
+    fireEvent.change(screen.getByLabelText("ชื่อสินค้า"), { target: { value: "Needs Cover" } });
+    fireEvent.change(screen.getByLabelText("รูปสินค้า (ไม่บังคับ)"), {
+      target: { files: [new File(["image"], "cover.png", { type: "image/png" })] },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "สร้างสินค้า" }));
+    expect(await screen.findByText("Needs Cover")).toBeInTheDocument();
+    expect(await screen.findByText(/สินค้า Needs Cover ถูกสร้างแล้ว แต่ยังบันทึกรูปไม่สำเร็จ/)).toBeInTheDocument();
+    expect(mocks.update).not.toHaveBeenCalled();
   });
 
   it("loads fresh product detail before editing and updates only text fields", async () => {

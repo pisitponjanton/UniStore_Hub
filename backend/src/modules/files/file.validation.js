@@ -63,6 +63,10 @@ function parseCanonicalFileKey(objectKey) {
     };
   }
 
+  if (segments[0] === 'stores') {
+    return { kind: 'STORE_IMAGE', organizationId: segments[1], resourceId: segments[2], objectId: segments[3], objectKey };
+  }
+
   if (segments[0] === 'payments') {
     return {
       kind: 'PAYMENT_SLIP',
@@ -93,6 +97,14 @@ function assertProductImageKey({
     );
   }
 
+  return parsed;
+}
+
+function assertStoreImageKey({ organizationId, storeId, objectKey }) {
+  const parsed = parseCanonicalFileKey(objectKey);
+  if (parsed.kind !== 'STORE_IMAGE' || parsed.organizationId !== organizationId || parsed.resourceId !== storeId) {
+    throw fileAccessForbidden('Store image key is outside the authorized resource path');
+  }
   return parsed;
 }
 
@@ -199,6 +211,16 @@ function createProductImageAssociationValidator(options = {}) {
   };
 }
 
+function createStoreImageAssociationValidator(options = {}) {
+  let s3Adapter = options.s3Adapter;
+  return async function ({ organizationId, storeId, imageKey }) {
+    if (imageKey === null) return null;
+    assertStoreImageKey({ organizationId, storeId, objectKey: imageKey });
+    if (!s3Adapter) s3Adapter = createS3Adapter();
+    return validateUploadedObject({ s3Adapter, objectKey: imageKey, maxBytes: PRODUCT_IMAGE_MAX_BYTES });
+  };
+}
+
 function createPaymentSlipObjectValidator(options = {}) {
   let s3Adapter = options.s3Adapter;
 
@@ -236,8 +258,10 @@ module.exports = {
   validateContentType,
   parseCanonicalFileKey,
   assertProductImageKey,
+  assertStoreImageKey,
   assertPaymentSlipKey,
   validateUploadedObject,
   createProductImageAssociationValidator,
+  createStoreImageAssociationValidator,
   createPaymentSlipObjectValidator,
 };

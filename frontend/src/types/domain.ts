@@ -126,6 +126,10 @@ export interface StoreDTO {
   organizationId: EntityId;
   name: string;
   description: string;
+  /** Saved private S3 object key, only exposed to authenticated management. */
+  imageKey?: string | null;
+  /** Short-lived presigned GET URL. Public Storefront returns only imageUrl. */
+  imageUrl?: string | null;
   status: ResourceStatus;
   createdAt: IsoDateTime;
   updatedAt: IsoDateTime;

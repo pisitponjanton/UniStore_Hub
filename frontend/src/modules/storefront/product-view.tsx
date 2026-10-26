@@ -1,6 +1,7 @@
 "use client";
 
 import { AppIcon } from "@/components/ui/app-icon";
+import { ResilientImage } from "@/components/ui/resilient-image";
 
 import { PageLoadingRows, PageStateHeading, RecoveryActions } from "@/components/ui/async-page";
 
@@ -267,22 +268,15 @@ export function ProductView() {
 
         <section className={styles.productDetail} data-has-image={product.imageUrl ? "true" : "false"}>
           <div className={styles.productDetailMedia} data-has-image={product.imageUrl ? "true" : "false"}>
-            {product.imageUrl ? (
-              // Backend supplies this short-lived Storefront URL for display only.
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={product.imageUrl}
-                alt={product.name}
-                className={styles.productDetailImage}
-                decoding="async"
-              />
-            ) : (
-              <MediaFallback
-                variant="product"
-                label="ยังไม่มีรูปสินค้า"
-                className={styles.productDetailPlaceholder}
-              />
-            )}
+            <ResilientImage
+              src={product.imageUrl}
+              alt={product.name}
+              className={styles.productDetailImage}
+              loading="eager"
+              fallback={<MediaFallback variant="product"
+                label={product.imageUrl ? "ไม่สามารถแสดงรูปสินค้าได้" : "ยังไม่มีรูปสินค้า"}
+                className={styles.productDetailPlaceholder} />}
+            />
           </div>
 
           <div className={styles.productDetailBody}>

@@ -30,7 +30,7 @@ The Backend owns:
 - business rules
 - lifecycle validation
 - DynamoDB repository access
-- S3 Pre-signed URL generation
+- S3 Pre-signed URL generation (private S3 Files bucket; Store and Product management list/detail include browser-accessible signed `imageUrl` for saved `imageKey`, with LocalStack browser endpoint in dev and S3 in Learner Lab). Store covers use canonical `stores/<organizationId>/<storeId>/<uuid>` keys; sign only tenant-owned records and validate S3 HEAD, content type and size before PATCH association. Storefront exposes the URL, not the private key.
 - SQS notification publishing
 - Notification Worker application logic
 - Audit creation

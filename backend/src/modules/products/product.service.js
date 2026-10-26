@@ -16,6 +16,7 @@ const {
   assertProductImageKey,
   createProductImageAssociationValidator,
 } = require('../files/file.validation');
+const { createFileService } = require('../files/file.service');
 const {
   createStoreRepository,
 } = require('../stores/store.repository');
@@ -67,6 +68,34 @@ function createProductService(options = {}) {
   let repository = options.repository;
   let productRepository = options.productRepository;
   let storeRepository = options.storeRepository;
+  let fileService = options.fileService;
+
+  function getFileService() {
+    if (!fileService) {
+      fileService = createFileService({ s3Adapter: options.s3Adapter });
+    }
+    return fileService;
+  }
+
+  const createProductImageUrl =
+    options.createProductImageUrl ||
+    ((input) => getFileService().createStoredProductImageUrl(input));
+
+  async function productDtoWithImage(product, extra = {}) {
+    if (!product.imageKey) return toProductDto(product, extra);
+    // Sign only the imageKey persisted on a tenant-verified Product.
+    assertProductImageKey({
+      organizationId: product.organizationId,
+      productId: product.productId,
+      objectKey: product.imageKey,
+    });
+    const imageUrl = await createProductImageUrl({
+      organizationId: product.organizationId,
+      productId: product.productId,
+      imageKey: product.imageKey,
+    });
+    return toProductDto(product, { ...extra, imageUrl });
+  }
 
   function getRepository() {
     if (!repository) {
@@ -206,10 +235,10 @@ function createProductService(options = {}) {
             { exclusiveStartKey },
           );
 
-      const items = result.items.map((product) => {
+      const items = await Promise.all(result.items.map(async (product) => {
         requireTenantMatch(product, organizationId);
-        return toProductDto(product);
-      });
+        return productDtoWithImage(product);
+      }));
 
       return {
         items,
@@ -311,7 +340,7 @@ function createProductService(options = {}) {
         }
       }
 
-      return toProductDto(product, { variants });
+      return productDtoWithImage(product, { variants });
     },
 
     async updateProduct({
@@ -400,7 +429,7 @@ function createProductService(options = {}) {
         ],
       });
 
-      return toProductDto({
+      return productDtoWithImage({
         ...existing,
         ...changes,
         updatedAt: timestamp,

@@ -2,6 +2,7 @@
 
 const { AppError } = require('../errors/app-error');
 const { STORE_STATUS } = require('../modules/stores/store.constants');
+const { assertStoreImageKey } = require('../modules/files/file.validation');
 
 function validationError(message) {
   return new AppError({
@@ -61,6 +62,14 @@ function validateUpdateStoreBody(body = {}) {
 
   if (Object.prototype.hasOwnProperty.call(body, 'status')) {
     changes.status = validateStoreStatus(body.status);
+  }
+
+  if (Object.prototype.hasOwnProperty.call(body, 'imageKey')) {
+    // Tenant and Store IDs must be checked at the service boundary before association.
+    if (body.imageKey !== null && (typeof body.imageKey !== 'string' || body.imageKey.length === 0)) {
+      throw validationError('Invalid store image key');
+    }
+    changes.imageKey = body.imageKey;
   }
 
   if (Object.keys(changes).length === 0) {

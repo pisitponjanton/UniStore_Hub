@@ -108,16 +108,16 @@ test("Open campaign shows deadline, timeline and jump; closed campaign never pro
     await fixture.page.goto(fixture.frontend + "/campaigns/view/?organizationId=" + org + "&campaignId=" + openId,
       { waitUntil: "domcontentloaded" });
     await expect(fixture.page.getByRole("heading", { name: openCampaign.name })).toBeVisible({ timeout: 20000 });
-    await expect(fixture.page.getByRole("link", { name: "เลือกสินค้าที่สั่งได้" })).toHaveAttribute("href", "#campaign-products");
+    await expect(fixture.page.getByRole("link", { name: "ดูสินค้าและตรวจสอบตัวเลือก" })).toHaveAttribute("href", "#campaign-products");
     await expect(fixture.page.getByText("ปิดรับคำสั่งซื้อ", { exact: true }).first()).toBeVisible();
-    await expect(fixture.page.getByRole("heading", { name: "เลือกสินค้าที่ต้องการ" })).toBeVisible();
+    await expect(fixture.page.getByRole("heading", { name: "สินค้าที่เปิดให้เข้าชม" })).toBeVisible();
     await expect(fixture.page.getByRole("navigation", { name: "เส้นทางรอบพรีออเดอร์" }).getByRole("link", { name: store.name })).toHaveAttribute("href", new RegExp("storeId=" + shop));
     await expect(fixture.page.locator('a[class*="productCard"]').first()).toHaveAttribute("href", new RegExp("campaignId=" + openId));
     await widths(fixture.page, "campaign-open", fixture.evidence);
     await fixture.page.goto(fixture.frontend + "/campaigns/view/?organizationId=" + org + "&campaignId=" + closedId,
       { waitUntil: "domcontentloaded" });
     await expect(fixture.page.getByRole("heading", { name: closedCampaign.name })).toBeVisible({ timeout: 20000 });
-    await expect(fixture.page.getByRole("link", { name: "เลือกสินค้าที่สั่งได้" })).toHaveCount(0);
+    await expect(fixture.page.getByRole("link", { name: "ดูสินค้าและตรวจสอบตัวเลือก" })).toHaveCount(0);
     await expect(fixture.page.getByText("รอบนี้ยังสั่งซื้อเพิ่มไม่ได้", { exact: false })).toBeVisible();
     expect(fixture.writes()).toBe(0);
   } finally { await fixture.context.close(); }
@@ -159,4 +159,73 @@ test("Product detail preserves real variant pricing and login-gated purchase sel
     await expect(fixture.page.getByRole("link", { name: "เข้าสู่ระบบเพื่อสั่งซื้อ" })).toHaveCount(0);
     expect(fixture.writes()).toBe(0);
   } finally { await fixture.context.close(); }
+});
+
+
+test("Product media with uploaded image stays inside detail, cards and mobile layout; broken URLs show fallback", async ({browser}) => {
+  test.setTimeout(75000);
+  const fixture = await guardedPage(browser);
+  const picture = fixture.frontend + "/__qa_media__/oversized.png";
+  const imageBytes = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y2A2SYAAAAASUVORK5CYII=", "base64");
+  const productPath = "/api/v1" + storeRoot + "/products/" + item;
+  const listPath = "/api/v1" + storeRoot + "/products";
+  let unavailable = false;
+  try {
+    await fixture.page.route("**/__qa_media__/oversized.png", async route => {
+      if(unavailable) return route.fulfill({status:404,body:"Image no longer exists"});
+      return route.fulfill({status:200,contentType:"image/png",body:imageBytes});
+    });
+    await fixture.page.route("**/api/v1/storefront/organizations/**", async route => {
+      const path = new URL(route.request().url()).pathname;
+      const json = (data:unknown) => route.fulfill({
+        status:200, contentType:"application/json", body:JSON.stringify({success:true,data}),
+      });
+      if(path === productPath) return json({...product,imageUrl:picture});
+      if(path === listPath) return json({items:[{...product,imageUrl:picture}],nextCursor:null});
+      return route.fallback();
+    });
+    await fixture.page.goto(fixture.frontend + "/products/view/?organizationId=" + org +
+      "&productId=" + item, {waitUntil:"domcontentloaded"});
+    await expect(fixture.page.getByRole("heading", {name:product.name,level:1})).toBeVisible();
+    const media=fixture.page.locator('[class*="productDetailMedia"]').first();
+    const photo=media.getByRole("img",{name:product.name});
+    await expect(photo).toBeVisible();
+    for(const width of [320,390,750,900,1024,1440,1920]){
+      await fixture.page.setViewportSize({width,height:870});
+      const geometry=await fixture.page.evaluate(()=>{
+        const root=document.querySelector('[class*="productDetail"]');
+        const stage=document.querySelector('[class*="productDetailMedia"]');
+        const img=stage?.querySelector("img");
+        const body=document.querySelector('[class*="productDetailBody"]');
+        if(!root||!stage||!img||!body) return null;
+        const m=stage.getBoundingClientRect(),i=img.getBoundingClientRect(),b=body.getBoundingClientRect();
+        return {
+          documentOverflow:document.documentElement.scrollWidth-innerWidth,
+          mediaHeight:m.height, mediaWidth:m.width,
+          inside:i.width<=m.width+2 && i.height<=m.height+2,
+          mediaRight:m.right, mediaBottom:m.bottom, bodyLeft:b.left, bodyTop:b.top,
+        };
+      });
+      expect(geometry,"geometry at "+width).not.toBeNull();
+      expect(geometry!.documentOverflow,"page overflow at "+width).toBeLessThanOrEqual(2);
+      expect(geometry!.mediaHeight,"image frame height at "+width).toBeLessThanOrEqual(462);
+      expect(geometry!.inside,"image within frame at "+width).toBe(true);
+      if(width>900) expect(geometry!.bodyLeft,"columns overlap at "+width).toBeGreaterThanOrEqual(geometry!.mediaRight-2);
+      else expect(geometry!.bodyTop,"mobile content overlaps image at "+width).toBeGreaterThanOrEqual(geometry!.mediaBottom-2);
+    }
+    await fixture.page.goto(fixture.frontend+"/stores/view/?organizationId="+org+"&storeId="+shop,
+      {waitUntil:"domcontentloaded"});
+    await expect(fixture.page.getByRole("heading",{name:store.name,level:1})).toBeVisible();
+    const card=fixture.page.locator('a[class*="productCard"]').first();
+    await expect(card.getByRole("img",{name:product.name})).toBeVisible();
+    const cardSize=await card.locator('[class*="productMedia"]').first().evaluate(el=>({
+      width:el.getBoundingClientRect().width,child:el.querySelector("img")?.getBoundingClientRect().width??0
+    }));
+    expect(cardSize.child).toBeLessThanOrEqual(cardSize.width+2);
+    unavailable=true;
+    await fixture.page.goto(fixture.frontend+"/products/view/?organizationId="+org+"&productId="+item,
+      {waitUntil:"domcontentloaded"});
+    await expect(fixture.page.getByText("ไม่สามารถแสดงรูปสินค้าได้")).toBeVisible();
+    await expect(fixture.page.getByRole("heading",{name:product.name,level:1})).toBeVisible();
+  }finally{await fixture.context.close();}
 });

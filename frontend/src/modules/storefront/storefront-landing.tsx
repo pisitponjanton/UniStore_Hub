@@ -1,6 +1,7 @@
 "use client";
 
 import { AppIcon } from "@/components/ui/app-icon";
+import { ResilientImage } from "@/components/ui/resilient-image";
 
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
@@ -355,9 +356,13 @@ export function StorefrontLanding({ workspace = false }: { workspace?: boolean }
                           data-qa-fixture={qaOrganizationIds.has(organization.organizationId) ? "true" : undefined}
                           aria-label={"เข้าร้าน " + store.name + " ของ " + organization.name}
                         >
-                          <div className={gridStyles.storeCardMedia} aria-hidden="true">
-                            <AppIcon name="store" size={32} />
-                            <span>ยังไม่มีรูปหน้าร้าน</span>
+                          <div className={gridStyles.storeCardMedia}>
+                            <ResilientImage src={store.imageUrl} alt={`รูปหน้าร้าน ${store.name}`}
+                              className={gridStyles.storeCardImage}
+                              fallback={<span className={gridStyles.storeCardFallback}>
+                                <AppIcon name="store" size={32} />
+                                <span>ยังไม่มีรูปหน้าร้าน</span>
+                              </span>} />
                           </div>
                           <div className={gridStyles.storeCardBody}>
                             <span className={gridStyles.storeCardOrganization}>{organization.name}</span>

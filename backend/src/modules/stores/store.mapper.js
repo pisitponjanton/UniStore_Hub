@@ -10,6 +10,8 @@ function toStoreDto(store) {
     organizationId: store.organizationId,
     name: store.name,
     description: store.description,
+    imageKey: store.imageKey ?? null,
+    imageUrl: store.imageUrl ?? null,
     status: store.status,
     createdAt: store.createdAt,
     updatedAt: store.updatedAt,

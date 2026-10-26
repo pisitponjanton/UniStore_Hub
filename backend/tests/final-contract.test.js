@@ -132,6 +132,7 @@ test('documented module routers expose only the canonical direct route surface',
     'POST /',
     'GET /:storeId',
     'PATCH /:storeId',
+    'POST /:storeId/image-upload-url',
   ]);
 
   assertSurface(createProductRouter({}), [

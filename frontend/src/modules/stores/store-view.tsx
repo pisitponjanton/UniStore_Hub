@@ -4,8 +4,8 @@
 import Link from "next/link";
 import { storeWorkspaceHref } from "./store-workspace";
 import { ManagementModal } from "@/components/ui/management-modal";
+import { ResilientImage } from "@/components/ui/resilient-image";
 import { AsyncPageFallback } from "@/components/ui/async-page";
-import { ManagementDrawer } from "@/components/ui/management-drawer";
 import { LoadedDirectoryControls } from "@/modules/organization-directory/loaded-directory-controls";
 import { searchLoadedItems, visibleLoadedItems } from "@/modules/organization-directory/loaded-directory-helpers";
 
@@ -14,7 +14,6 @@ import { useEffect, useState, type FormEvent } from "react";
 import {
   Badge,
   Button,
-  ConfirmDialog,
   EmptyState,
   ErrorSummary,
   useErrorSummaryFocus,
@@ -32,10 +31,11 @@ import { formatIsoDateTime } from "@/utils";
 
 import {
   storeStatusLabel,
-  toggledStoreStatus,
   validateStoreForm,
 } from "./store-helpers";
 import { storeService } from "./store-service";
+import { StoreCoverField } from "./store-cover-field";
+import { uploadStoreImage } from "./store-image-upload";
 import styles from "./store-view.module.css";
 
 type StoreState =
@@ -73,14 +73,8 @@ export function StoreManagementView({
   const [createDescription, setCreateDescription] = useState("");
   const [createNameError, setCreateNameError] = useState<string | undefined>();
   const [creating, setCreating] = useState(false);
-
-  const [selectedStore, setSelectedStore] = useState<StoreDTO | null>(null);
-  const [editName, setEditName] = useState("");
-  const [editDescription, setEditDescription] = useState("");
-  const [editNameError, setEditNameError] = useState<string | undefined>();
-  const [loadingStoreId, setLoadingStoreId] = useState<string | null>(null);
-  const [savingStoreId, setSavingStoreId] = useState<string | null>(null);
-  const [statusStoreId, setStatusStoreId] = useState<string | null>(null);
+  const [createFile, setCreateFile] = useState<File | null>(null);
+  const [createImageError, setCreateImageError] = useState("");
 
   const [inlineError, setInlineError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -143,22 +137,32 @@ export function StoreManagementView({
     setCreating(true);
 
     try {
-      const created = await storeService.create(
-        organizationId,
-        validation.values,
-      );
+      const created = await storeService.create(organizationId, validation.values);
+      let displayedStore = created;
+      let imageFailure: string | null = null;
+      if (createFile) {
+        try { displayedStore = await uploadStoreImage(organizationId, created.storeId, createFile); }
+        catch (error) {
+          imageFailure = error instanceof ApiClientError ? error.userMessage
+            : error instanceof Error ? error.message : "เกิดข้อผิดพลาดในการอัปโหลด";
+        }
+      }
 
       setState((current) =>
         current.status === "success"
           ? {
               status: "success",
-              stores: [created, ...current.stores],
+              stores: [displayedStore, ...current.stores],
             }
           : current,
       );
       setCreateName("");
       setCreateDescription("");
-      setNotice(`สร้างร้านค้า ${created.name} แล้ว`);
+      setCreateFile(null);
+      setCreateImageError("");
+      setNotice(imageFailure
+        ? `สร้างร้านค้า ${created.name} สำเร็จ แต่รูปหน้าร้านยังไม่ถูกบันทึก: ${imageFailure} สามารถลองใหม่ได้ที่แท็บตั้งค่า`
+        : `สร้างร้านค้า ${created.name} แล้ว`);
       setShowCreate(false);
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
@@ -169,141 +173,6 @@ export function StoreManagementView({
       setInlineError(operationErrorMessage(error));
     } finally {
       setCreating(false);
-    }
-  }
-
-  async function handleEdit(store: StoreDTO) {
-    if (loadingStoreId || savingStoreId || statusStoreId) {
-      return;
-    }
-
-    setLoadingStoreId(store.storeId);
-    setInlineError(null);
-    setNotice(null);
-
-    try {
-      const fresh = await storeService.get(
-        organizationId,
-        store.storeId,
-      );
-
-      setSelectedStore(fresh);
-      setEditName(fresh.name);
-      setEditDescription(fresh.description);
-      setEditNameError(undefined);
-    } catch (error) {
-      if (isDefinitiveSessionFailure(error)) {
-        authSession.logout();
-        return;
-      }
-
-      setInlineError(operationErrorMessage(error));
-    } finally {
-      setLoadingStoreId(null);
-    }
-  }
-
-  async function handleSaveEdit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    if (!selectedStore || savingStoreId) {
-      return;
-    }
-
-    const validation = validateStoreForm({
-      name: editName,
-      description: editDescription,
-    });
-
-    setEditNameError(validation.errors.name);
-    setInlineError(null);
-    setNotice(null);
-
-    if (!validation.valid) {
-      focusErrorSummary("store-edit-error-summary");
-      return;
-    }
-
-    setSavingStoreId(selectedStore.storeId);
-
-    try {
-      const updated = await storeService.update(
-        organizationId,
-        selectedStore.storeId,
-        validation.values,
-      );
-
-      setState((current) =>
-        current.status === "success"
-          ? {
-              status: "success",
-              stores: current.stores.map((store) =>
-                store.storeId === updated.storeId ? updated : store,
-              ),
-            }
-          : current,
-      );
-      setSelectedStore(updated);
-      setEditName(updated.name);
-      setEditDescription(updated.description);
-      setNotice(`บันทึกข้อมูลร้านค้า ${updated.name} แล้ว`);
-    } catch (error) {
-      if (isDefinitiveSessionFailure(error)) {
-        authSession.logout();
-        return;
-      }
-
-      setInlineError(operationErrorMessage(error));
-    } finally {
-      setSavingStoreId(null);
-    }
-  }
-
-  async function handleToggleStatus(store: StoreDTO) {
-    if (statusStoreId || savingStoreId || loadingStoreId) {
-      return;
-    }
-
-    const nextStatus = toggledStoreStatus(store.status);
-
-    setStatusStoreId(store.storeId);
-    setInlineError(null);
-    setNotice(null);
-
-    try {
-      const updated = await storeService.update(
-        organizationId,
-        store.storeId,
-        { status: nextStatus },
-      );
-
-      setState((current) =>
-        current.status === "success"
-          ? {
-              status: "success",
-              stores: current.stores.map((item) =>
-                item.storeId === updated.storeId ? updated : item,
-              ),
-            }
-          : current,
-      );
-
-      if (selectedStore?.storeId === updated.storeId) {
-        setSelectedStore(updated);
-      }
-
-      setNotice(
-        `${nextStatus === "ACTIVE" ? "เปิด" : "ปิด"}ใช้งานร้านค้า ${updated.name} แล้ว`,
-      );
-    } catch (error) {
-      if (isDefinitiveSessionFailure(error)) {
-        authSession.logout();
-        return;
-      }
-
-      setInlineError(operationErrorMessage(error));
-    } finally {
-      setStatusStoreId(null);
     }
   }
 
@@ -329,18 +198,15 @@ export function StoreManagementView({
     (store) => store.status === "ACTIVE",
   ).length;
   const inactiveCount = state.stores.length - activeCount;
-  const editDirty =
-    selectedStore !== null &&
-    (editName !== selectedStore.name ||
-      editDescription !== selectedStore.description);
-
-  const createDirty = Boolean(createName.trim() || createDescription.trim());
+  const createDirty = Boolean(createName.trim() || createDescription.trim() || createFile);
 
   function closeCreate() {
     setShowCreate(false);
     setCreateName("");
     setCreateDescription("");
     setCreateNameError(undefined);
+    setCreateFile(null);
+    setCreateImageError("");
     setInlineError(null);
   }
 
@@ -422,26 +288,19 @@ export function StoreManagementView({
             ) : (
               <div className={styles.list}>
                 {directoryVisible.map((store) => {
-                  const loading = loadingStoreId === store.storeId;
-                  const changingStatus = statusStoreId === store.storeId;
-                  const busy =
-                    loading ||
-                    changingStatus ||
-                    savingStoreId === store.storeId;
-                  const nextStatus = toggledStoreStatus(store.status);
-                  const selected = selectedStore?.storeId === store.storeId;
-
                   return (
                     <article
-                      className={[
-                        styles.row,
-                        selected ? styles.rowSelected : "",
-                      ]
-                        .filter(Boolean)
-                        .join(" ")}
+                      className={styles.row}
                       key={store.storeId}
-                      aria-current={selected ? "true" : undefined}
                     >
+                      <div className={styles.storeMedia}>
+                        <ResilientImage
+                          src={store.imageUrl}
+                          alt={`รูปหน้าร้าน ${store.name}`}
+                          className={styles.storeImage}
+                          fallback={<span className={styles.storeFallback}>ยังไม่มีรูปหน้าร้าน</span>}
+                        />
+                      </div>
                       <div className={styles.rowMain}>
                         <div className={styles.rowHeading}>
                           <h3 className={styles.cardTitle}>{store.name}</h3>
@@ -461,54 +320,6 @@ export function StoreManagementView({
                         <Link className={styles.openWorkspace} href={storeWorkspaceHref(organizationId, store.storeId)}>
                           จัดการร้านค้า
                         </Link>
-                        <Button
-                          variant="secondary"
-                          pending={loading}
-                          pendingLabel="กำลังโหลด"
-                          disabled={busy}
-                          onClick={() => {
-                            void handleEdit(store);
-                          }}
-                        >
-                          {selected ? "กำลังแก้ไข" : "แก้ไขข้อมูล"}
-                        </Button>
-
-                        <ConfirmDialog
-                          trigger={
-                            <Button
-                              variant={
-                                nextStatus === "ACTIVE"
-                                  ? "secondary"
-                                  : "danger"
-                              }
-                              disabled={busy}
-                            >
-                              {nextStatus === "ACTIVE"
-                                ? "เปิดใช้งาน"
-                                : "ปิดใช้งาน"}
-                            </Button>
-                          }
-                          title={
-                            nextStatus === "ACTIVE"
-                              ? "ยืนยันการเปิดใช้งานร้านค้า"
-                              : "ยืนยันการปิดใช้งานร้านค้า"
-                          }
-                          description={
-                            nextStatus === "ACTIVE"
-                              ? `เปิดใช้งานร้านค้า ${store.name} ใช่หรือไม่`
-                              : `ปิดใช้งานร้านค้า ${store.name} ใช่หรือไม่ สถานะนี้อาจทำให้ร้านค้าไม่พร้อมแสดงในหน้าลูกค้า`
-                          }
-                          confirmLabel={
-                            nextStatus === "ACTIVE"
-                              ? "เปิดใช้งาน"
-                              : "ปิดใช้งาน"
-                          }
-                          danger={nextStatus === "INACTIVE"}
-                          pending={changingStatus}
-                          onConfirm={() => {
-                            void handleToggleStatus(store);
-                          }}
-                        />
                       </div>
                     </article>
                   );
@@ -557,84 +368,13 @@ export function StoreManagementView({
                 }}
                 disabled={creating}
               />
-
-
+              <StoreCoverField id="store-create-cover" file={createFile}
+                onFileChange={setCreateFile} error={createImageError} onError={setCreateImageError}
+                disabled={creating} />
             </form>
           </aside></div></ManagementModal> : null}
         </div>
 
-        {selectedStore ? (
-          <ManagementDrawer title={"แก้ไข " + selectedStore.name} onClose={() => setSelectedStore(null)}><section className={styles.editPanel} aria-labelledby="store-edit-title">
-            <div className={styles.editHeader}>
-              <div className={styles.editMeta}>
-                <div className={styles.editTitleRow}>
-                  <h2 className={styles.sectionTitle} id="store-edit-title">
-                    แก้ไข {selectedStore.name}
-                  </h2>
-                  <Badge tone={statusTone(selectedStore.status)}>
-                    {storeStatusLabel(selectedStore.status)}
-                  </Badge>
-                </div>
-                <span className={styles.meta}>
-                  รหัสร้านค้า: {selectedStore.storeId}
-                </span>
-              </div>
-              <Button
-                variant="quiet"
-                size="small"
-                onClick={() => setSelectedStore(null)}
-              >
-                ปิดส่วนแก้ไข
-              </Button>
-            </div>
-
-            <form className={styles.editForm} onSubmit={handleSaveEdit} noValidate>
-              <ErrorSummary
-                id="store-edit-error-summary"
-                items={
-                  editNameError
-                    ? [{ fieldId: "store-edit-name", message: editNameError }]
-                    : []
-                }
-              />
-              <TextField
-                id="store-edit-name"
-                label="ชื่อร้านค้า"
-                value={editName}
-                onChange={(event) => {
-                  setEditName(event.target.value);
-                  setEditNameError(undefined);
-                }}
-                error={editNameError}
-                announceError={false}
-                required
-                disabled={savingStoreId === selectedStore.storeId}
-              />
-
-              <TextareaField
-                id="store-edit-description"
-                label="คำอธิบาย"
-                value={editDescription}
-                onChange={(event) => setEditDescription(event.target.value)}
-                disabled={savingStoreId === selectedStore.storeId}
-              />
-
-              <div className={styles.editActions}>
-                <Button
-                  type="submit"
-                  pending={savingStoreId === selectedStore.storeId}
-                  pendingLabel="กำลังบันทึก"
-                  disabled={!editDirty}
-                >
-                  บันทึกข้อมูล
-                </Button>
-                {!editDirty ? (
-                  <span className={styles.meta}>ยังไม่มีข้อมูลที่เปลี่ยนแปลง</span>
-                ) : null}
-              </div>
-            </form>
-          </section></ManagementDrawer>
-        ) : null}
       </main>
     </div>
   );

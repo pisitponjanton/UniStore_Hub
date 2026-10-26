@@ -14,7 +14,7 @@ export type StorefrontOrganizationDTO = Pick<
 
 export type StorefrontStoreDTO = Pick<
   StoreDTO,
-  "storeId" | "organizationId" | "name" | "description" | "status"
+  "storeId" | "organizationId" | "name" | "description" | "status" | "imageUrl"
 >;
 
 export interface StorefrontLandingOrganization {

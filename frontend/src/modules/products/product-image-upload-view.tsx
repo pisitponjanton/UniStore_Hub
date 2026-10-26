@@ -8,6 +8,8 @@ import {
   isDefinitiveSessionFailure,
 } from "@/modules/auth";
 import { ApiClientError } from "@/services";
+import { OperationToast } from "./operation-toast";
+import { ResilientImage } from "@/components/ui/resilient-image";
 import type { ProductDTO } from "@/types";
 import {
   validateUploadCandidate,
@@ -74,12 +76,13 @@ function stageLabel(stage: UploadStage): string {
 export function ProductImageUploadView({
   organizationId,
   product,
-  onProductRefreshed, compact = false,
+  onProductRefreshed, compact = false, onActivity,
 }: {
   organizationId: string;
   product: ProductDTO;
   onProductRefreshed: (product: ProductDTO) => void;
   compact?: boolean;
+  onActivity?: () => void;
 }) {
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -100,8 +103,6 @@ export function ProductImageUploadView({
   const [verificationUncertain, setVerificationUncertain] = useState(false);
   const [verificationRetries, setVerificationRetries] = useState(0);
   const mountedRef = useRef(false);
-  const resultFocusRequested = useRef(false);
-  const resultRef = useRef<HTMLDivElement>(null);
 
   const pending = stage !== "idle";
 
@@ -146,21 +147,10 @@ export function ProductImageUploadView({
     return () => window.cancelAnimationFrame(frame);
   }, [organizationId, product.productId, product.imageKey]);
 
-  useEffect(() => {
-    if (!resultFocusRequested.current || pending || (!serverError && !notice && !verificationError)) return;
-    const frame = window.requestAnimationFrame(() => {
-      if (!resultFocusRequested.current) return;
-      resultFocusRequested.current = false;
-      resultRef.current?.focus({ preventScroll: true });
-      resultRef.current?.scrollIntoView?.({ block: "nearest", behavior: "instant" });
-    });
-    return () => window.cancelAnimationFrame(frame);
-  }, [pending, serverError, notice, verificationError]);
-
   function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
+    onActivity?.();
     const candidate = event.target.files?.[0] ?? null;
 
-    resultFocusRequested.current = false;
     setFile(null);
     setPreviewUrl(null);
     setContentType(null);
@@ -217,6 +207,7 @@ export function ProductImageUploadView({
 
       if (ownerUserId) clearPendingProductImage(ownerUserId, organizationId, product.productId);
       onProductRefreshed(refreshed);
+      setPreviewUrl(null);
       setSavedImageKeyToVerify(null);
       setVerificationRetries(0);
       setVerificationStorageUnavailable(false);
@@ -243,7 +234,6 @@ export function ProductImageUploadView({
       return;
     }
 
-    resultFocusRequested.current = true;
     setVerificationRetries((value) => value + 1);
     setVerificationError(null);
     setNotice(null);
@@ -258,7 +248,6 @@ export function ProductImageUploadView({
   async function handleReadOnlyRefresh() {
     if (pending || savedImageKeyToVerify) return;
     const owner = currentUserId();
-    resultFocusRequested.current = true;
     setNotice(null);
     setServerError(null);
     setStage("refreshing");
@@ -288,7 +277,6 @@ export function ProductImageUploadView({
     setVerificationRetries(0);
     let patchResponsePendingKey: string | null = null;
     let markerStored = false;
-    resultFocusRequested.current = true;
     setServerError(null);
     setNotice(null);
     setVerificationError(null);
@@ -403,12 +391,23 @@ export function ProductImageUploadView({
 
   return (
     <div className={compact ? styles.compactRoot : styles.root}>
+      <OperationToast
+        message={verificationError ?? serverError ?? notice}
+        title={verificationError ? "ยังยืนยันผลการบันทึกไม่ได้" : serverError ? "อัปโหลดไม่สำเร็จ" : notice ? "อัปโหลดสำเร็จ" : undefined}
+        tone={verificationError ? "warning" : serverError ? "danger" : "success"}
+        feedback
+        onDismiss={() => {
+          setServerError(null);
+          setVerificationError(null);
+          setNotice(null);
+        }}
+      />
       <div className={styles.header}>
         <div className={styles.headerCopy}>
           <h3 className={styles.title}>รูปสินค้า</h3>
-          <p className={styles.description}>
+          {!compact ? <p className={styles.description}>
             ใช้ไฟล์ JPEG, PNG หรือ WebP ขนาดไม่เกิน 5 MiB
-          </p>
+          </p> : null}
         </div>
         {!compact ? <Badge tone={product.imageKey ? "success" : "neutral"}>
           {product.imageKey ? "มีรูปสินค้าแล้ว" : "ยังไม่มีรูปสินค้า"}
@@ -418,12 +417,14 @@ export function ProductImageUploadView({
       {compact ? (
         <div className={styles.compactImagePicker}>
           <label className={styles.mediaPicker} aria-disabled={!verificationReady || pending || savedImageKeyToVerify !== null}>
-            {(previewUrl || product.imageUrl) ? (
-              // Backend image URL or a browser-local preview of the selected file.
-              // eslint-disable-next-line @next/next/no-img-element
-              <img className={styles.currentImage} src={previewUrl || product.imageUrl || ""}
-                alt={previewUrl ? "รูปที่เลือกเพื่ออัปโหลด" : `รูปสินค้าปัจจุบันของ ${product.name}`} />
-            ) : <span className={styles.compactPlaceholder}>ยังไม่มีรูปสินค้า</span>}
+            <ResilientImage
+              src={previewUrl || product.imageUrl}
+              alt={previewUrl ? "รูปที่เลือกเพื่ออัปโหลด" : `รูปสินค้าปัจจุบันของ ${product.name}`}
+              className={styles.currentImage}
+              fallback={<span className={styles.compactPlaceholder}>
+                {previewUrl ? "ไม่สามารถแสดงไฟล์รูปที่เลือกได้" : product.imageKey ? "โหลดรูปเดิมไม่สำเร็จ เลือกรูปใหม่ได้" : "ยังไม่มีรูปสินค้า"}
+              </span>}
+            />
             <span className={styles.pickerLabel}>
               {file ? "เปลี่ยนไฟล์ที่เลือก" : product.imageKey ? "เปลี่ยนรูปสินค้า" : "เลือกรูปสินค้า"}
             </span>
@@ -441,21 +442,14 @@ export function ProductImageUploadView({
         </div>
       ) : (<>
         <div className={styles.currentMedia}>
-          {product.imageUrl ? (
-            // Backend supplies this short-lived Product image URL for display only.
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              className={styles.currentImage}
-              src={product.imageUrl}
-              alt={`รูปสินค้าปัจจุบันของ ${product.name}`}
-              loading="lazy"
-              decoding="async"
-            />
-          ) : (
-            <span className={styles.currentFallback}>
-              {compact ? "ยังไม่มีรูปสินค้า" : "ยังไม่มีรูปสินค้า อัปโหลดรูปเพื่อช่วยให้สินค้าจดจำได้ง่ายขึ้นในหน้าร้าน"}
-            </span>
-          )}
+          <ResilientImage
+            src={product.imageUrl}
+            alt={`รูปสินค้าปัจจุบันของ ${product.name}`}
+            className={styles.currentImage}
+            fallback={<span className={styles.currentFallback}>
+              {product.imageKey ? "ไม่สามารถแสดงรูปเดิมได้ เลือกรูปใหม่ได้" : "ยังไม่มีรูปสินค้า อัปโหลดรูปเพื่อช่วยให้สินค้าจดจำได้ง่ายขึ้นในหน้าร้าน"}
+            </span>}
+          />
         </div>
 
         <FileField
@@ -482,22 +476,6 @@ export function ProductImageUploadView({
       ) : null}
 
 
-      {serverError ? (
-        <div ref={resultRef} tabIndex={-1} data-product-upload-feedback>
-          <Notice tone="danger" role="alert" title="อัปโหลดไม่สำเร็จ">
-            {serverError}
-          </Notice>
-        </div>
-      ) : null}
-
-      {verificationError ? (
-        <div ref={resultRef} tabIndex={-1} data-product-upload-feedback>
-          <Notice tone="warning" role="alert" title={verificationUncertain ? "ยังยืนยันผลการบันทึกไม่ได้" : "รูปสินค้าบันทึกแล้ว"}>
-            {verificationError}
-          </Notice>
-        </div>
-      ) : null}
-
       {savedImageKeyToVerify && verificationRetries >= 3 && !pending ? (
         <Notice tone="warning" role="status" title="ตรวจสอบหลายครั้งแล้วยังไม่ยืนยันผล">
           ข้อมูลล่าสุดยังไม่ตรงกับรูปที่ส่งไป กรุณาติดต่อผู้ดูแลระบบพร้อมรหัสสินค้าและอย่าเพิ่งอัปโหลดรูปซ้ำ คุณสามารถกลับมาตรวจสอบข้อมูลล่าสุดอีกครั้งได้
@@ -516,15 +494,7 @@ export function ProductImageUploadView({
         </Notice>
       ) : null}
 
-      {notice ? (
-        <div ref={resultRef} tabIndex={-1} data-product-upload-feedback>
-          <Notice tone="success" role="status" title="อัปโหลดสำเร็จ">
-            {notice}
-          </Notice>
-        </div>
-      ) : null}
-
-      {pending ? (
+      {pending && !compact ? (
         <div className={styles.progress} aria-label="ขั้นตอนการอัปโหลดรูปสินค้า">
           <div
             className={styles.progressCurrent}

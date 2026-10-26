@@ -4,11 +4,13 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { ArrowLeft, RefreshCw } from "lucide-react";
-import { LoadingState, Notice } from "@/components";
+import { LoadingState, Notice, ConfirmDialog, Button } from "@/components";
 import { AuthenticatedShell, OrganizationBoundary, authSession, isDefinitiveSessionFailure } from "@/modules/auth";
 import { ApiClientError } from "@/services";
 import { storeService } from "./store-service";
-import { validateStoreForm, storeStatusLabel } from "./store-helpers";
+import { validateStoreForm, storeStatusLabel, toggledStoreStatus } from "./store-helpers";
+import { StoreCoverField } from "./store-cover-field";
+import { uploadStoreImage } from "./store-image-upload";
 import { ProductManagementView } from "@/modules/products/product-view";
 import { CampaignManagementView } from "@/modules/campaigns/campaign-view";
 import type { StoreDTO } from "@/types";
@@ -34,26 +36,38 @@ function StoreSettings({ organizationId, store, onUpdate, onDirtyChange }: {
 }) {
   const [name, setName] = useState(store.name);
   const [description, setDescription] = useState(store.description);
+  const [file, setFile] = useState<File | null>(null);
+  const [imageError, setImageError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [changingStatus, setChangingStatus] = useState(false);
+  const [statusDialogOpen, setStatusDialogOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const dirty = name !== store.name || description !== store.description;
+  const busy = saving || uploading || changingStatus;
+  const nextStatus = toggledStoreStatus(store.status);
   useEffect(() => {
-    onDirtyChange(dirty);
+    onDirtyChange(dirty || Boolean(file));
     return () => onDirtyChange(false);
-  }, [dirty, onDirtyChange]);
+  }, [dirty, file, onDirtyChange]);
 
   useEffect(() => {
     const listener = (event: BeforeUnloadEvent) => {
-      if (dirty) event.preventDefault();
+      if (dirty || file) event.preventDefault();
     };
     window.addEventListener("beforeunload", listener);
     return () => window.removeEventListener("beforeunload", listener);
-  }, [dirty]);
+  }, [dirty, file]);
+
+  function reportError(err: unknown, fallback: string) {
+    if (isDefinitiveSessionFailure(err)) { authSession.logout(); return; }
+    setError(err instanceof ApiClientError ? err.userMessage : err instanceof Error ? err.message : fallback);
+  }
 
   async function save(event: FormEvent) {
     event.preventDefault();
-    if (saving) return;
+    if (busy || !dirty) return;
     const form = validateStoreForm({ name, description });
     if (!form.valid) { setError(form.errors.name ?? "ข้อมูลไม่ถูกต้อง"); return; }
     setSaving(true);
@@ -62,29 +76,87 @@ function StoreSettings({ organizationId, store, onUpdate, onDirtyChange }: {
     try {
       const updated = await storeService.update(organizationId, store.storeId, form.values);
       onUpdate(updated);
+      setName(updated.name);
+      setDescription(updated.description);
       setMessage("บันทึกข้อมูลร้านค้าแล้ว");
-    } catch (err) {
-      if (isDefinitiveSessionFailure(err)) { authSession.logout(); return; }
-      setError(err instanceof ApiClientError ? err.userMessage : "บันทึกไม่สำเร็จ กรุณาลองใหม่");
-    } finally { setSaving(false); }
+    } catch (err) { reportError(err, "บันทึกไม่สำเร็จ กรุณาลองใหม่"); }
+    finally { setSaving(false); }
   }
 
-  return (
-    <form className={styles.form} onSubmit={save}>
-      <h2>ข้อมูลร้านค้า</h2>
-      {error ? <Notice tone="danger" role="alert" title="ไม่สามารถบันทึกได้">{error}</Notice> : null}
-      {message ? <Notice tone="success" role="status" title="บันทึกเรียบร้อย">{message}</Notice> : null}
-      <div className={styles.field}><label htmlFor="workspace-store-name">ชื่อร้านค้า</label>
-        <input id="workspace-store-name" required value={name} disabled={saving}
-          onChange={e => { setName(e.target.value); setError(""); }} /></div>
-      <div className={styles.field}><label htmlFor="workspace-store-description">คำอธิบาย</label>
-        <textarea id="workspace-store-description" value={description} disabled={saving}
-          onChange={e => setDescription(e.target.value)} /></div>
-      <div className={styles.formActions}><button type="submit" disabled={!dirty || saving}>
-        {saving ? "กำลังบันทึก…" : "บันทึกการเปลี่ยนแปลง"}
-      </button><span className={styles.message}>สถานะ: {storeStatusLabel(store.status)}</span></div>
-    </form>
-  );
+  async function saveCover() {
+    if (busy || !file) return;
+    setUploading(true);
+    setError("");
+    setMessage("");
+    try {
+      const updated = await uploadStoreImage(organizationId, store.storeId, file);
+      onUpdate(updated);
+      setFile(null);
+      setImageError("");
+      setMessage("อัปโหลดรูปหน้าร้านแล้ว");
+    } catch (err) { reportError(err, "ไม่สามารถอัปโหลดรูปได้ กรุณาลองอีกครั้ง"); }
+    finally { setUploading(false); }
+  }
+
+  async function toggleStatus() {
+    if (busy || dirty || file) return;
+    setChangingStatus(true);
+    setError("");
+    setMessage("");
+    try {
+      const updated = await storeService.update(organizationId, store.storeId, { status: nextStatus });
+      onUpdate(updated);
+      setStatusDialogOpen(false);
+      setMessage(nextStatus === "ACTIVE" ? "เปิดใช้งานร้านแล้ว" : "ปิดใช้งานร้านแล้ว");
+    } catch (err) { reportError(err, "เปลี่ยนสถานะร้านไม่สำเร็จ"); }
+    finally { setChangingStatus(false); }
+  }
+
+  return <div className={styles.settings}>
+    <div className={styles.settingsHeading}>
+      <div><h2>ตั้งค่าร้านค้า</h2><p>แก้ไขข้อมูล รูปหน้าร้าน และสถานะร้านได้จากหน้านี้</p></div>
+      <span className={styles.statusLabel}>{storeStatusLabel(store.status)}</span>
+    </div>
+    {error ? <Notice tone="danger" role="alert" title="ดำเนินการไม่สำเร็จ">{error}</Notice> : null}
+    {message ? <p className={styles.inlineNotice} role="status">{message}</p> : null}
+    <div className={styles.settingsLayout}>
+      <form className={styles.form} onSubmit={save}>
+        <div className={styles.field}><label htmlFor="workspace-store-name">ชื่อร้านค้า</label>
+          <input id="workspace-store-name" required value={name} disabled={busy}
+            onChange={e => { setName(e.target.value); setError(""); }} /></div>
+        <div className={styles.field}><label htmlFor="workspace-store-description">คำอธิบาย</label>
+          <textarea id="workspace-store-description" value={description} disabled={busy}
+            onChange={e => setDescription(e.target.value)} /></div>
+        <div className={styles.formActions}><button type="submit" disabled={!dirty || busy}>
+          {saving ? "กำลังบันทึก…" : "บันทึกข้อมูล"}
+        </button></div>
+      </form>
+      <div className={styles.coverSection}>
+        <StoreCoverField id="workspace-store-cover" file={file} store={store}
+          disabled={busy} onFileChange={setFile} error={imageError} onError={setImageError} />
+        <Button onClick={() => void saveCover()} disabled={!file || busy}>
+          {uploading ? "กำลังอัปโหลด…" : "บันทึกรูปหน้าร้าน"}
+        </Button>
+      </div>
+    </div>
+    <div className={styles.statusSection}>
+      <div><strong>สถานะร้าน</strong><p>ร้านที่ปิดใช้งานจะไม่ปรากฏให้ลูกค้าเข้าชม แต่ข้อมูลสินค้าและแคมเปญยังอยู่</p></div>
+      <ConfirmDialog open={statusDialogOpen} onOpenChange={setStatusDialogOpen}
+        trigger={<Button variant={nextStatus === "INACTIVE" ? "danger" : "secondary"}
+          disabled={busy || dirty || Boolean(file)}>
+          {nextStatus === "ACTIVE" ? "เปิดใช้งานร้าน" : "ปิดใช้งานร้าน"}
+        </Button>}
+        title={nextStatus === "ACTIVE" ? "ยืนยันเปิดใช้งานร้าน" : "ยืนยันปิดใช้งานร้าน"}
+        description={nextStatus === "ACTIVE"
+          ? `เปิดร้าน ${store.name} ให้ลูกค้าเข้าชมหรือไม่?`
+          : `ปิดร้าน ${store.name} ไม่ให้ลูกค้าเข้าชมชั่วคราวหรือไม่?`}
+        confirmLabel={nextStatus === "ACTIVE" ? "เปิดใช้งาน" : "ปิดใช้งาน"}
+        danger={nextStatus === "INACTIVE"}
+        pending={changingStatus}
+        onConfirm={() => void toggleStatus()}
+      />
+    </div>
+  </div>;
 }
 
 export function StoreWorkspaceRoute() {

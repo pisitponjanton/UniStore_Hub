@@ -43,7 +43,7 @@ else
 fi
 
 echo "[INFO] Applying local Files bucket CORS"
-aws_local s3api put-bucket-cors   --bucket "${FILES_BUCKET_NAME}"   --cors-configuration '{"CORSRules":[{"AllowedOrigins":["http://localhost:3000"],"AllowedMethods":["GET","PUT","HEAD"],"AllowedHeaders":["*"],"ExposeHeaders":["ETag"],"MaxAgeSeconds":3000}]}'   >/dev/null
+aws_local s3api put-bucket-cors   --bucket "${FILES_BUCKET_NAME}"   --cors-configuration '{"CORSRules":[{"AllowedOrigins":["http://localhost:3000","http://127.0.0.1:3000"],"AllowedMethods":["GET","PUT","HEAD"],"AllowedHeaders":["*"],"ExposeHeaders":["ETag"],"MaxAgeSeconds":3000}]}'   >/dev/null
 
 queue_url="$(
   aws_local sqs get-queue-url     --queue-name "${NOTIFICATION_QUEUE_NAME}"     --query QueueUrl     --output text 2>/dev/null || true

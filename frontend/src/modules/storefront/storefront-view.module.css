@@ -2285,3 +2285,92 @@
 /* Filtered catalog: compact feedback rather than a tall empty panel. */
 .storeMain .emptyBox { min-height: 138px; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 14px; padding: 16px; text-align: center; }
 .storeMain .emptyBox [data-empty-artwork] { max-width: 88px; }
+
+
+/* Product media bounds: image dimensions must never define the CSS grid track.
+   Keep genuine media restrained at desktop, tablet and phone widths. */
+.productDetail {
+  min-width: 0;
+  grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr);
+}
+.productDetailMedia {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  min-height: 0;
+  height: clamp(230px, 34vw, 460px);
+  max-height: min(65vh, 460px);
+  aspect-ratio: auto;
+}
+.productDetailImage {
+  display: block;
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  padding: clamp(12px, 2vw, 24px);
+}
+.productDetailPlaceholder {
+  min-width: 0;
+  width: min(80%, 240px);
+  max-height: 90%;
+  aspect-ratio: auto;
+}
+.productDetailBody { min-width: 0; width: 100%; }
+.productMedia {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+}
+.productMedia .productImage {
+  display: block;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+@media (max-width: 900px) {
+  .productDetail { grid-template-columns: minmax(0, 1fr); }
+  .productDetailMedia {
+    position: relative;
+    top: auto;
+    height: clamp(205px, 40vw, 330px);
+    max-height: 330px;
+  }
+  .productDetail[data-has-image="false"] .productDetailMedia {
+    min-height: 0;
+    height: clamp(116px, 18vw, 148px);
+    max-height: 148px;
+  }
+}
+@media (max-width: 620px) {
+  .productDetailMedia {
+    height: clamp(175px, 58vw, 230px);
+    max-height: 230px;
+  }
+  .productDetail[data-has-image="false"] .productDetailMedia {
+    height: 128px;
+    max-height: 128px;
+  }
+  .productDetailImage { padding: 10px; }
+}
+
+
+/* Images are absolutely fitted so intrinsic dimensions cannot size grid tracks. */
+.productDetailMedia { position: sticky; }
+.productDetailImage { position: absolute; inset: 0; }
+.productMedia { position: relative; }
+.productMedia .productImage { position: absolute; inset: 0; }
+@media (max-width: 900px) {
+  .productDetailMedia { position: relative; }
+}
+
+.storeCover { grid-column:1/-1;position:relative;width:100%;height:clamp(175px,26vw,340px);max-height:340px;min-width:0;overflow:hidden;border-radius:var(--radius-control);background:var(--surface-muted); }
+.storeCoverImage { position:absolute;inset:0;width:100%;height:100%;max-width:100%;max-height:100%;object-fit:cover;display:block; }
+.storeCoverFallback { display:flex;align-items:center;justify-content:center;gap:12px;height:100%;color:var(--ink-secondary); }
+@media(max-width:700px){ .storeCover {height:clamp(150px,55vw,220px);} }

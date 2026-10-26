@@ -69,6 +69,39 @@
 
 .row:hover { background: var(--surface-hover); }
 
+.storeMedia {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--line-soft);
+  background: var(--surface-secondary);
+}
+
+.storeImage {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.storeFallback {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 16px;
+  text-align: center;
+  color: var(--ink-tertiary);
+  font-size: var(--text-body-sm);
+}
+
 .rowSelected { border-left: 3px solid var(--brand); padding-left: 12px; background: var(--brand-soft); }
 
 .rowMain {

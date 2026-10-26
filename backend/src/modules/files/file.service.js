@@ -21,6 +21,7 @@ const {
 const {
   createProductRepository,
 } = require('../products/product.repository');
+const { createStoreRepository } = require('../stores/store.repository');
 const {
   PRESIGN_EXPIRES_SECONDS,
   PRODUCT_IMAGE_MAX_BYTES,
@@ -29,6 +30,7 @@ const {
 const {
   assertPaymentSlipKey,
   assertProductImageKey,
+  assertStoreImageKey,
   fileAccessForbidden,
   parseCanonicalFileKey,
   validateContentType,
@@ -48,6 +50,7 @@ function createFileService(options = {}) {
 
   let s3Adapter = options.s3Adapter;
   let productRepository = options.productRepository;
+  let storeRepository = options.storeRepository;
   let orderRepository = options.orderRepository;
   let memberRepository = options.memberRepository;
 
@@ -65,6 +68,18 @@ function createFileService(options = {}) {
     }
 
     return productRepository;
+  }
+
+  function getStoreRepository() {
+    if (!storeRepository) storeRepository = createStoreRepository();
+    return storeRepository;
+  }
+
+  async function requireStore(organizationId, storeId) {
+    const store = await getStoreRepository().getById(organizationId, storeId);
+    if (!store) throw resourceNotFound('STORE_NOT_FOUND', 'Store not found');
+    requireTenantMatch(store, organizationId);
+    return store;
   }
 
   function getOrderRepository() {
@@ -187,6 +202,14 @@ function createFileService(options = {}) {
       });
     },
 
+    async createStoreImageUploadUrl({ organizationId, storeId, contentType }) {
+      validateContentType(contentType);
+      await requireStore(organizationId, storeId);
+      const objectKey = `stores/${organizationId}/${storeId}/${idFactory()}`;
+      assertStoreImageKey({ organizationId, storeId, objectKey });
+      return createPutResponse({ objectKey, contentType });
+    },
+
     async createPaymentSlipUploadUrl({
       organizationId,
       orderId,
@@ -269,6 +292,11 @@ function createFileService(options = {}) {
           objectKey,
         });
         maxBytes = PRODUCT_IMAGE_MAX_BYTES;
+      } else if (parsed.kind === 'STORE_IMAGE') {
+        await requireStore(organizationId, parsed.resourceId);
+        await requireStaffOrAdmin(organizationId, userId);
+        assertStoreImageKey({ organizationId, storeId: parsed.resourceId, objectKey });
+        maxBytes = PRODUCT_IMAGE_MAX_BYTES;
       } else {
         throw fileAccessForbidden();
       }
@@ -289,6 +317,11 @@ function createFileService(options = {}) {
         method: 'GET',
         expiresInSeconds: PRESIGN_EXPIRES_SECONDS,
       };
+    },
+
+    async createStoredStoreImageUrl({ organizationId, storeId, imageKey }) {
+      assertStoreImageKey({ organizationId, storeId, objectKey: imageKey });
+      return getS3Adapter().createGetUrl({ objectKey: imageKey, expiresInSeconds: PRESIGN_EXPIRES_SECONDS });
     },
 
     async createStoredProductImageUrl({

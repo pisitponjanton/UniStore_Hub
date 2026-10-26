@@ -5,6 +5,7 @@ import Link from "next/link";
 import { productDetailHref, storeWorkspaceHref } from "@/modules/stores/store-workspace";
 import { ManagementModal } from "@/components/ui/management-modal";
 import { AsyncPageFallback } from "@/components/ui/async-page";
+import { ResilientImage } from "@/components/ui/resilient-image";
 import { LoadedDirectoryControls } from "@/modules/organization-directory/loaded-directory-controls";
 import { searchLoadedItems, visibleLoadedItems } from "@/modules/organization-directory/loaded-directory-helpers";
 
@@ -42,6 +43,8 @@ import {
   validateProductForm,
 } from "./product-helpers";
 import { ProductImageUploadView } from "./product-image-upload-view";
+import { ProductCreateImageField } from "./product-create-image-field";
+import { ProductImageUploadError, uploadImageForCreatedProduct } from "./product-image-upload";
 import { productService } from "./product-service";
 import { VariantManagement } from "./variant-management";
 import { OperationToast } from "./operation-toast";
@@ -111,6 +114,8 @@ export function ProductManagementView({
     string | undefined
   >();
   const [creating, setCreating] = useState(false);
+  const [createFile, setCreateFile] = useState<File | null>(null);
+  const [createImageError, setCreateImageError] = useState("");
 
   const [selectedProduct, setSelectedProduct] =
     useState<ProductDTO | null>(null);
@@ -291,6 +296,18 @@ export function ProductManagementView({
         organizationId,
         validation.values,
       );
+      let saved = created;
+      let imageFailure: string | null = null;
+      if (createFile) {
+        try {
+          saved = await uploadImageForCreatedProduct(organizationId, created.productId, createFile);
+        } catch (error) {
+          imageFailure = error instanceof ApiClientError ? error.userMessage
+            : error instanceof ProductImageUploadError
+              ? "การส่งไฟล์รูปถูกปฏิเสธ (HTTP " + error.status + ")"
+              : error instanceof Error ? error.message : "อัปโหลดรูปไม่สำเร็จ";
+        }
+      }
 
       if (
         state.status === "success" &&
@@ -298,13 +315,18 @@ export function ProductManagementView({
       ) {
         setState({
           ...state,
-          products: [created, ...state.products],
+          products: [saved, ...state.products],
         });
       }
 
       setCreateName("");
       setCreateDescription("");
+      setCreateFile(null);
+      setCreateImageError("");
       setNotice(`สร้างสินค้า ${created.name} แล้ว`);
+      if (imageFailure) setInlineError(
+        `สินค้า ${created.name} ถูกสร้างแล้ว แต่ยังบันทึกรูปไม่สำเร็จ: ${imageFailure} ตรวจสอบหรืออัปโหลดรูปใหม่ในหน้าแก้ไขสินค้า`,
+      );
       setShowCreate(false);
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
@@ -557,7 +579,7 @@ export function ProductManagementView({
 
   const defaultCreateStoreId = fixedStoreId ?? ((state.stores.find(store => store.status === "ACTIVE") ?? state.stores[0])?.storeId ?? "");
   const createDirty = Boolean(
-    createName.trim() || createDescription.trim() || createStoreId !== defaultCreateStoreId,
+    createName.trim() || createDescription.trim() || createStoreId !== defaultCreateStoreId || createFile,
   );
 
   function closeCreate() {
@@ -567,6 +589,8 @@ export function ProductManagementView({
     setCreateStoreId(defaultCreateStoreId);
     setCreateNameError(undefined);
     setCreateStoreError(undefined);
+    setCreateFile(null);
+    setCreateImageError("");
     setInlineError(null);
   }
 
@@ -711,21 +735,14 @@ export function ProductManagementView({
                       aria-current={selected ? "true" : undefined}
                     >
                       <div className={styles.productMedia}>
-                        {product.imageUrl ? (
-                          // Backend supplies this short-lived Product image URL for display only.
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            className={styles.productImage}
-                            src={product.imageUrl}
-                            alt={`รูปสินค้า ${product.name}`}
-                            loading="lazy"
-                            decoding="async"
-                          />
-                        ) : (
-                          <span className={styles.productFallback} aria-hidden="true">
+                        <ResilientImage
+                          src={product.imageUrl}
+                          alt={`รูปสินค้า ${product.name}`}
+                          className={styles.productImage}
+                          fallback={<span className={styles.productFallback} aria-hidden="true">
                             {product.name.trim().charAt(0) || "U"}
-                          </span>
-                        )}
+                          </span>}
+                        />
                       </div>
 
                       <div className={styles.rowMain}>
@@ -828,10 +845,10 @@ export function ProductManagementView({
             ) : null}
           </section> : null}
 
-          {showCreate ? <ManagementModal title="สร้างสินค้าใหม่" description="เพิ่มข้อมูลพื้นฐานก่อน แล้วจึงจัดการรูป ราคา และตัวเลือก"
+          {showCreate ? <ManagementModal title="สร้างสินค้าใหม่" description="เพิ่มข้อมูลพื้นฐานและเลือกรูปสินค้า จากนั้นจัดการราคาและตัวเลือก"
             size="medium" formId="product-create-form"
             submitLabel="สร้างสินค้า" submitting={creating}
-            submitDisabled={!fixedStoreId && state.stores.length === 0}
+            submitDisabled={(!fixedStoreId && state.stores.length === 0) || Boolean(createImageError)}
             dirty={createDirty} onClose={closeCreate}><div className={styles.modalContents}>
             {inlineError ? <Notice tone="danger" role="alert" title="ดำเนินการไม่สำเร็จ">{inlineError}</Notice> : null}
             {fixedStoreId && !storeActive ? <Notice tone="neutral" title="ร้านค้าปิดใช้งาน">
@@ -916,7 +933,9 @@ export function ProductManagementView({
                 disabled={creating}
               />
 
-
+              <ProductCreateImageField id="product-create-image" file={createFile}
+                disabled={creating} error={createImageError}
+                onFileChange={setCreateFile} onError={setCreateImageError} />
             </form>
           </aside></div></ManagementModal> : null}
         </div>
@@ -1062,6 +1081,7 @@ export function ProductManagementView({
               <section className={styles.editorSection}>
                 <ProductImageUploadView
                   compact={standaloneDetail}
+                  onActivity={() => setNotice(null)}
                   key={organizationId + ":" + selectedProduct.productId}
                   organizationId={organizationId}
                   product={selectedProduct}

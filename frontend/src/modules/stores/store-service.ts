@@ -4,6 +4,8 @@ import type {
   EntityId,
   ResourceStatus,
   StoreDTO,
+  PresignedUploadDTO,
+  AllowedUploadContentType,
 } from "@/types";
 
 export interface StoreClient {
@@ -42,6 +44,7 @@ export interface StoreUpdateInput {
   name?: string;
   description?: string;
   status?: ResourceStatus;
+  imageKey?: string | null;
 }
 
 export interface StoreService {
@@ -63,6 +66,7 @@ export interface StoreService {
     storeId: EntityId,
     input: StoreUpdateInput,
   ): Promise<StoreDTO>;
+  createImageUploadUrl(organizationId: EntityId, storeId: EntityId, contentType: AllowedUploadContentType): Promise<PresignedUploadDTO>;
 }
 
 function storesPath(organizationId: EntityId): string {
@@ -100,6 +104,13 @@ export function createStoreService(
           authenticated: true,
           signal: options.signal,
         },
+      );
+    },
+
+    createImageUploadUrl(organizationId, storeId, contentType) {
+      return client.post<PresignedUploadDTO>(
+        `${storesPath(organizationId)}/${encodeURIComponent(storeId)}/image-upload-url`,
+        { contentType }, { authenticated: true },
       );
     },
 
