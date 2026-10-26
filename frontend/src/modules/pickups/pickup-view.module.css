@@ -491,3 +491,13 @@
 .pickupFacts > div { border: 1px solid var(--line); background: var(--surface); box-shadow: none; }
 .receivedNote { border: 1px solid color-mix(in srgb, var(--success) 28%, var(--line)); box-shadow: none; }
 @media (max-width: 620px) { .header { padding: 16px; } .pickupCredential { padding: 14px; } }
+
+
+/* Locally generated QR must remain entirely visible on narrow screens. */
+.qrImage {
+  width: min(100%, 320px);
+  height: auto;
+  max-height: 320px;
+  aspect-ratio: 1;
+  object-fit: contain;
+}

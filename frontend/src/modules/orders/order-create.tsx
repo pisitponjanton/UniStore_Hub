@@ -2,6 +2,7 @@
 
 
 import { PageLoadingRows, PageStateHeading } from "@/components/ui/async-page";
+import { ResilientImage } from "@/components/ui/resilient-image";
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
@@ -515,22 +516,14 @@ export function OrderCreateView() {
           >
             <div className={styles.productOverview}>
               <div className={styles.productMedia}>
-                {product.imageUrl ? (
-                  // Backend supplies this short-lived Storefront URL for display only.
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={product.imageUrl}
-                    alt={product.name}
-                    className={styles.productImage}
-                    decoding="async"
-                  />
-                ) : (
-                  <MediaFallback
-                    variant="product"
-                    label="ยังไม่มีรูปสินค้า"
-                    className={styles.productPlaceholder}
-                  />
-                )}
+                <ResilientImage
+                  src={product.imageUrl}
+                  alt={product.name}
+                  className={styles.productImage}
+                  fallback={<MediaFallback variant="product"
+                    label={product.imageUrl ? "ไม่สามารถแสดงรูปสินค้าได้" : "ยังไม่มีรูปสินค้า"}
+                    className={styles.productPlaceholder} />}
+                />
               </div>
 
               <div className={styles.productSummary}>
