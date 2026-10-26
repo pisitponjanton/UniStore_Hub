@@ -193,3 +193,75 @@ test("Campaign filter, create/edit and lifecycle modal states are safe and state
     limitation:"No real POST, PATCH, lifecycle status transition or persisted Campaign. Only state-scoped read-only and cancelled dialogs.",
   },null,2)+"\n");
 });
+
+
+test("Compact campaign management list groups loaded statuses, keeps API status filtering and fits mobile", async ({ browser, request }) => {
+  const { frontend } = localAuditTargets();
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 }, reducedMotion: "reduce" });
+  await establishSeedRoleSession(ctx, request, "organizationAdmin");
+  let campaignReads = 0;
+  const campaignsInStore = [
+    { ...draft, campaignId: "compact-1", name: "Compact Draft", status: "DRAFT" },
+    { ...draft, campaignId: "compact-2", name: "Compact Open", status: "OPEN",
+      openAt: "2026-10-24T02:00:00.000Z", closeAt: "2026-10-31T02:00:00.000Z" },
+    { ...draft, campaignId: "compact-3", name: "Compact Cancelled", status: "CANCELLED" },
+  ];
+  await ctx.route("**/*", async route => {
+    const req = route.request(), url = new URL(req.url());
+    const ok = (data: unknown) => route.fulfill({
+      status: 200, contentType: "application/json", body: JSON.stringify({ success: true, data }),
+    });
+    if (req.method() === "GET" && url.pathname === stores + "/" + storeA.storeId) return ok(storeA);
+    if (req.method() === "GET" && url.pathname === campaigns) {
+      campaignReads++;
+      const status = url.searchParams.get("status");
+      return ok({ items: campaignsInStore.filter(item => !status || item.status === status), nextCursor: null });
+    }
+    return route.continue();
+  });
+  const page = await ctx.newPage();
+  try {
+    await page.goto(frontend + "/org/stores/view/?organizationId=" + ids.organizationId +
+      "&storeId=" + storeA.storeId + "&tab=campaigns");
+    await expect(page.getByRole("heading", { name: "แคมเปญ", exact: true, level: 2 })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "รายการแคมเปญ" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "ทั้งหมด 3" })).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByRole("button", { name: "สิ้นสุด 1" })).toBeVisible();
+    const readCount = campaignReads;
+    await page.getByRole("button", { name: "สิ้นสุด 1" }).click();
+    await expect(page.getByRole("heading", { name: "Compact Cancelled" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Compact Open" })).toHaveCount(0);
+    expect(campaignReads).toBe(readCount);
+    await page.getByRole("button", { name: "ทั้งหมด 3" }).click();
+    await expect(page.getByRole("heading", { name: "Compact Open" })).toBeVisible();
+    const row = page.getByRole("article").filter({
+      has: page.getByRole("heading", { name: "Compact Open" }),
+    });
+    await expect(row.getByText(/ต.ค./)).toBeVisible();
+    await expect(row.getByText("ขั้นตอนถัดไป")).toHaveCount(0);
+    const search = page.locator("#campaigns-directory-search");
+    await search.fill("no-matching-campaign");
+    await expect(page.getByText("ไม่พบรายการที่ตรงคำค้นหา ลองเปลี่ยนคำหรือกดล้าง")).toBeVisible();
+    await page.getByRole("button", { name: "ล้างคำค้นหา" }).click();
+    await page.locator("#campaign-status-filter").selectOption("OPEN");
+    await expect(page.getByRole("heading", { name: "Compact Open" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Compact Draft" })).toHaveCount(0);
+    await page.getByRole("button", { name: "แสดงทั้งหมด" }).click();
+    await expect(page.getByRole("heading", { name: "Compact Draft" })).toBeVisible();
+
+    for (const width of [320, 390, 768, 1024, 1440]) {
+      await page.setViewportSize({ width, height: 820 });
+      expect(await page.evaluate(() => Math.max(0, document.documentElement.scrollWidth - innerWidth)),
+        "horizontal overflow at " + width).toBeLessThanOrEqual(2);
+      await expect(page.getByRole("button", { name: "+ สร้างแคมเปญ" })).toBeVisible();
+    }
+    await page.getByRole("button", { name: "+ สร้างแคมเปญ" }).click();
+    const modal = page.getByRole("dialog", { name: "สร้างแคมเปญ" });
+    await expect(modal.getByText("วันเวลาเป็นข้อมูลวางแผน")).toBeVisible();
+    await modal.getByText("วันเวลาเป็นข้อมูลวางแผน").click();
+    await expect(modal.getByText(/ไม่ทำให้สถานะแคมเปญเปลี่ยนอัตโนมัติ/)).toBeVisible();
+    expect(campaignReads).toBeGreaterThan(readCount);
+  } finally {
+    await ctx.close();
+  }
+});

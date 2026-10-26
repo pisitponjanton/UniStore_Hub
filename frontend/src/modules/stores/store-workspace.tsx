@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from "react";
-import { ArrowLeft, RefreshCw } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { LoadingState, Notice, ConfirmDialog, Button } from "@/components";
 import { AuthenticatedShell, OrganizationBoundary, authSession, isDefinitiveSessionFailure } from "@/modules/auth";
 import { ApiClientError } from "@/services";
@@ -113,34 +113,63 @@ function StoreSettings({ organizationId, store, onUpdate, onDirtyChange }: {
   }
 
   return <div className={styles.settings}>
-    <div className={styles.settingsHeading}>
-      <div><h2>ตั้งค่าร้านค้า</h2><p>แก้ไขข้อมูล รูปหน้าร้าน และสถานะร้านได้จากหน้านี้</p></div>
+    <header className={styles.settingsHeading}>
+      <div>
+        <h2>ตั้งค่าร้านค้า</h2>
+        <p>จัดการรูปปกและข้อมูลที่ลูกค้าจะเห็นในร้าน</p>
+      </div>
       <span className={styles.statusLabel}>{storeStatusLabel(store.status)}</span>
-    </div>
+    </header>
+
     {error ? <Notice tone="danger" role="alert" title="ดำเนินการไม่สำเร็จ">{error}</Notice> : null}
     {message ? <p className={styles.inlineNotice} role="status">{message}</p> : null}
-    <div className={styles.settingsLayout}>
-      <form className={styles.form} onSubmit={save}>
-        <div className={styles.field}><label htmlFor="workspace-store-name">ชื่อร้านค้า</label>
-          <input id="workspace-store-name" required value={name} disabled={busy}
-            onChange={e => { setName(e.target.value); setError(""); }} /></div>
-        <div className={styles.field}><label htmlFor="workspace-store-description">คำอธิบาย</label>
-          <textarea id="workspace-store-description" value={description} disabled={busy}
-            onChange={e => setDescription(e.target.value)} /></div>
-        <div className={styles.formActions}><button type="submit" disabled={!dirty || busy}>
-          {saving ? "กำลังบันทึก…" : "บันทึกข้อมูล"}
-        </button></div>
-      </form>
-      <div className={styles.coverSection}>
-        <StoreCoverField id="workspace-store-cover" file={file} store={store}
-          disabled={busy} onFileChange={setFile} error={imageError} onError={setImageError} />
+
+    <section className={styles.coverSection} aria-labelledby="store-cover-title">
+      <div className={styles.settingsSectionHeading}>
+        <div>
+          <h3 id="store-cover-title">รูปหน้าร้าน</h3>
+          <p>รูปปกหน้าร้านสัดส่วน 16:9 แสดงให้ลูกค้าเห็นในหน้าร้าน</p>
+        </div>
+        <span className={styles.imageRequirement}>JPG, PNG, WebP · สูงสุด 5 MiB</span>
+      </div>
+      <StoreCoverField id="workspace-store-cover" file={file} store={store}
+        disabled={busy} onFileChange={setFile} error={imageError} onError={setImageError} />
+      <div className={styles.coverActions}>
         <Button onClick={() => void saveCover()} disabled={!file || busy}>
           {uploading ? "กำลังอัปโหลด…" : "บันทึกรูปหน้าร้าน"}
         </Button>
       </div>
-    </div>
-    <div className={styles.statusSection}>
-      <div><strong>สถานะร้าน</strong><p>ร้านที่ปิดใช้งานจะไม่ปรากฏให้ลูกค้าเข้าชม แต่ข้อมูลสินค้าและแคมเปญยังอยู่</p></div>
+    </section>
+
+    <form className={styles.settingsForm} onSubmit={save}>
+      <div className={styles.settingsSectionHeading}>
+        <div>
+          <h3>ข้อมูลร้านค้า</h3>
+          <p>แก้ไขชื่อร้านและคำอธิบายที่แสดงต่อลูกค้า</p>
+        </div>
+      </div>
+      <div className={styles.field}>
+        <label htmlFor="workspace-store-name">ชื่อร้านค้า</label>
+        <input id="workspace-store-name" required value={name} disabled={busy}
+          onChange={e => { setName(e.target.value); setError(""); }} />
+      </div>
+      <div className={styles.field}>
+        <label htmlFor="workspace-store-description">คำอธิบาย</label>
+        <textarea id="workspace-store-description" value={description} disabled={busy}
+          onChange={e => setDescription(e.target.value)} />
+      </div>
+      <div className={styles.formActions}>
+        <button type="submit" disabled={!dirty || busy}>
+          {saving ? "กำลังบันทึก…" : "บันทึกข้อมูล"}
+        </button>
+      </div>
+    </form>
+
+    <section className={styles.statusSection} aria-label="สถานะร้านค้า">
+      <div>
+        <h3>สถานะร้านค้า</h3>
+        <p>ร้านที่ปิดใช้งานจะไม่ปรากฏให้ลูกค้าเข้าชม แต่ข้อมูลสินค้าและแคมเปญยังอยู่</p>
+      </div>
       <ConfirmDialog open={statusDialogOpen} onOpenChange={setStatusDialogOpen}
         trigger={<Button variant={nextStatus === "INACTIVE" ? "danger" : "secondary"}
           disabled={busy || dirty || Boolean(file)}>
@@ -155,7 +184,7 @@ function StoreSettings({ organizationId, store, onUpdate, onDirtyChange }: {
         pending={changingStatus}
         onConfirm={() => void toggleStatus()}
       />
-    </div>
+    </section>
   </div>;
 }
 
@@ -271,7 +300,6 @@ function StoreWorkspaceContent({ organizationId, storeId, tab }: {
           {store.status === "INACTIVE" ? <span className={styles.inactive}>ปิดใช้งาน</span> : null}
         </div>
       </div>
-      <Link href={base} className={styles.switch}><RefreshCw size={16} aria-hidden="true"/> เปลี่ยนร้านค้า</Link>
     </header>
     {store.status === "INACTIVE" ? (
       <p className={styles.inactiveNotice} role="status">

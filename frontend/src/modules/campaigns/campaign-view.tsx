@@ -3,12 +3,12 @@
 
 import { ManagementModal } from "@/components/ui/management-modal";
 import { AsyncPageFallback } from "@/components/ui/async-page";
-import { LoadedDirectoryControls } from "@/modules/organization-directory/loaded-directory-controls";
 import { searchLoadedItems, visibleLoadedItems } from "@/modules/organization-directory/loaded-directory-helpers";
 
 import Link from "next/link";
 import { campaignDetailHref, storeWorkspaceHref } from "@/modules/stores/store-workspace";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { Info, Search, X } from "lucide-react";
 
 import {
   Badge,
@@ -38,7 +38,6 @@ import {
 import { formatIsoDateTime } from "@/utils";
 
 import { CampaignLifecycleActions } from "./campaign-lifecycle-actions";
-import { lifecycleActionsForStatus } from "./campaign-lifecycle";
 import {
   campaignStatusLabel,
   campaignToFormValues,
@@ -48,6 +47,35 @@ import {
 } from "./campaign-helpers";
 import { campaignService } from "./campaign-service";
 import styles from "./campaign-view.module.css";
+
+type CampaignGroup = "all" | "draft" | "active" | "ended";
+
+function inCampaignGroup(status: CampaignStatus, group: CampaignGroup) {
+  if (group === "all") return true;
+  if (group === "draft") return status === "DRAFT";
+  if (group === "ended") return status === "COMPLETED" || status === "CANCELLED";
+  return ["OPEN", "CLOSED", "PRODUCING", "READY_FOR_PICKUP"].includes(status);
+}
+
+const campaignDay = new Intl.DateTimeFormat("th-TH", {
+  day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Bangkok",
+});
+
+function campaignPeriod(campaign: CampaignDTO) {
+  const start = campaign.openAt ? campaignDay.format(new Date(campaign.openAt)) : null;
+  const end = campaign.closeAt ? campaignDay.format(new Date(campaign.closeAt)) : null;
+  if (start && end) return `${start} – ${end}`;
+  if (start) return `เปิดตามแผน ${start}`;
+  if (end) return `ปิดตามแผน ${end}`;
+  return "ยังไม่กำหนดช่วงขาย";
+}
+
+function PlanningHelp() {
+  return <details className={styles.planningHelp}>
+    <summary><Info size={15} aria-hidden="true" /> วันเวลาเป็นข้อมูลวางแผน</summary>
+    <p>วันเปิด ปิด ชำระเงิน และรับสินค้า ไม่ทำให้สถานะแคมเปญเปลี่ยนอัตโนมัติ ผู้ดูแลต้องยืนยันการเปลี่ยนสถานะเอง</p>
+  </details>;
+}
 
 type CampaignState =
   | { status: "loading" }
@@ -201,6 +229,7 @@ export function CampaignManagementView({
   const focusErrorSummary = useErrorSummaryFocus();
   const [directoryQuery, setDirectoryQuery] = useState("");
   const [directoryLimit, setDirectoryLimit] = useState(24);
+  const [statusGroup, setStatusGroup] = useState<CampaignGroup>("all");
   const [state, setState] = useState<CampaignState>({
     status: "loading",
   });
@@ -657,7 +686,14 @@ export function CampaignManagementView({
     setInlineError(null);
   }
 
-  const directoryMatches = searchLoadedItems(state.campaigns.filter(campaign => !fixedStoreId || campaign.storeId === fixedStoreId), directoryQuery, campaign => [campaign.name, campaign.campaignId, storeNames.get(campaign.storeId), campaign.status]);
+  // Group pills and search apply to the loaded slice; the exact status dropdown is API-backed.
+  const directoryMatches = searchLoadedItems(
+    state.campaigns.filter(campaign =>
+      (!fixedStoreId || campaign.storeId === fixedStoreId) && inCampaignGroup(campaign.status, statusGroup),
+    ),
+    directoryQuery,
+    campaign => [campaign.name, campaign.campaignId, storeNames.get(campaign.storeId), campaign.status],
+  );
   const directoryVisible = visibleLoadedItems(directoryMatches, directoryLimit);
 
   return (
@@ -667,7 +703,7 @@ export function CampaignManagementView({
           <div className={styles.headerCopy}>
             {detailCampaignId ? <h2 className={styles.title}>รายละเอียดแคมเปญ</h2> : fixedStoreId ? <h2 className={styles.title}>แคมเปญ</h2> : <h1 className={styles.title}>แคมเปญ</h1>}
             <p className={styles.description}>
-              กำหนดรอบการขายของร้านค้า วางแผนวันสำคัญ และควบคุมการเดินสถานะตั้งแต่ฉบับร่างจนถึงรับสินค้าเสร็จสิ้น
+              {fixedStoreId ? `จัดการรอบการขายของร้าน ${storeName ?? "ที่เลือก"}` : "จัดการรอบการขายของร้านค้าในหน่วยงาน"}
             </p>
           </div>
           <div className={styles.headerActions}>
@@ -678,24 +714,32 @@ export function CampaignManagementView({
           </div>
         </header> : null}
 
-        {!detailCampaignId && !selectedCampaign && state.campaigns.length > 0 ? <section className={styles.summaryStrip} aria-label="สรุปแคมเปญที่โหลด">
-          <div>
-            <span className={styles.summaryLabel}>รายการที่โหลด</span>
-            <strong>{state.campaigns.length}</strong>
+        {!detailCampaignId && !selectedCampaign && state.campaigns.length > 0 ? (
+          <div className={styles.summaryStrip} role="group" aria-label="กรองกลุ่มแคมเปญที่โหลด">
+            {([
+              ["all", "ทั้งหมด", state.campaigns.length],
+              ["draft", "ฉบับร่าง", draftCount],
+              ["active", "กำลังดำเนินงาน", inProgressCount],
+              ["ended", "สิ้นสุด", finishedCount],
+            ] as const).map(([group, label, count]) => (
+              <button type="button" key={group}
+                className={styles.groupButton}
+                aria-pressed={statusGroup === group}
+                disabled={listLoading}
+                onClick={() => {
+                  setStatusGroup(group);
+                  setDirectoryLimit(24);
+                  if (filterStatus) {
+                    setFilterStatus("");
+                    void replaceList(filterStoreId, "");
+                  }
+                }}>
+                {label} <strong>{count.toLocaleString("th-TH")}</strong>
+              </button>
+            ))}
+            <span className={styles.groupScope}>จากรายการที่โหลด</span>
           </div>
-          <div>
-            <span className={styles.summaryLabel}>ฉบับร่าง</span>
-            <strong>{draftCount}</strong>
-          </div>
-          <div>
-            <span className={styles.summaryLabel}>กำลังดำเนินงาน</span>
-            <strong>{inProgressCount}</strong>
-          </div>
-          <div>
-            <span className={styles.summaryLabel}>สิ้นสุดแล้ว</span>
-            <strong>{finishedCount}</strong>
-          </div>
-        </section> : null}
+        ) : null}
 
         {inlineError && !showCreate ? (
           <Notice tone="danger" role="alert" title="ดำเนินการไม่สำเร็จ">
@@ -710,99 +754,71 @@ export function CampaignManagementView({
         ) : null}
 
         {!detailCampaignId && !selectedCampaign ? <div className={styles.grid}>
-          <section className={styles.section} aria-labelledby="campaign-list">
-            <div className={styles.sectionHeading}>
-              <div>
-                <h2 className={styles.sectionTitle} id="campaign-list">
-                  รายการแคมเปญ
-                </h2>
-                <p className={styles.sectionDescription}>
-                  เลือกรายการเพื่อดูรายละเอียด แก้ไขฉบับร่าง หรือดำเนินสถานะถัดไป
-                </p>
-              </div>
-              <span className={styles.sectionMeta}>
-                {hasFilters ? "กำลังใช้ตัวกรอง" : "ทุกขอบเขตที่โหลด"}
-              </span>
-            </div>
-
+          <section className={styles.section} aria-label="รายการแคมเปญ">
             <div className={styles.toolbar} aria-busy={listLoading}>
-              {!fixedStoreId ? <SelectField
-                id="campaign-store-filter"
-                label="ร้านค้า"
-                value={filterStoreId}
-                disabled={listLoading}
-                onChange={(event) => {
-                  const value = event.target.value;
-                  setFilterStoreId(value);
-                  void replaceList(value, filterStatus);
-                }}
-              >
-                <option value="">ทุกร้านค้า</option>
-                {state.stores.map((store) => (
-                  <option key={store.storeId} value={store.storeId}>
-                    {store.name}
-                    {store.status === "INACTIVE"
-                      ? " (ปิดใช้งาน)"
-                      : ""}
-                  </option>
-                ))}
-              </SelectField> : null}
-
-              <SelectField
-                id="campaign-status-filter"
-                label="สถานะ"
-                value={filterStatus}
-                disabled={listLoading}
-                onChange={(event) => {
-                  const value = event.target.value as
-                    | CampaignStatus
-                    | "";
-                  setFilterStatus(value);
-                  void replaceList(filterStoreId, value);
-                }}
-              >
-                <option value="">ทุกสถานะ</option>
-                {CAMPAIGN_STATUSES.map((status) => (
-                  <option key={status} value={status}>
+              <label className={styles.searchBox} htmlFor="campaigns-directory-search">
+                <Search size={17} aria-hidden="true" />
+                <input id="campaigns-directory-search" type="search" autoComplete="off"
+                  placeholder="ค้นหาชื่อหรือรหัสแคมเปญ"
+                  aria-label="ค้นหาแคมเปญ"
+                  value={directoryQuery} disabled={listLoading}
+                  onChange={event => { setDirectoryQuery(event.target.value); setDirectoryLimit(24); }} />
+                {directoryQuery ? <button type="button" aria-label="ล้างคำค้นหา"
+                  disabled={listLoading}
+                  onClick={event => { event.preventDefault(); setDirectoryQuery(""); setDirectoryLimit(24); }}>
+                  <X size={15} aria-hidden="true" />
+                </button> : null}
+              </label>
+              {!fixedStoreId ? <label className={styles.selectBox}>
+                <span className={styles.filterLabel}>ร้านค้า</span>
+                <select id="campaign-store-filter" value={filterStoreId} aria-label="ร้านค้า"
+                  disabled={listLoading}
+                  onChange={event => {
+                    const value = event.target.value;
+                    setFilterStoreId(value);
+                    setDirectoryLimit(24);
+                    void replaceList(value, filterStatus);
+                  }}>
+                  <option value="">ทุกร้านค้า</option>
+                  {state.stores.map(store => <option key={store.storeId} value={store.storeId}>
+                    {store.name}{store.status === "INACTIVE" ? " (ปิดใช้งาน)" : ""}
+                  </option>)}
+                </select>
+              </label> : null}
+              <label className={styles.selectBox}>
+                <span className={styles.filterLabel}>สถานะ</span>
+                <select id="campaign-status-filter" aria-label="สถานะ" value={filterStatus}
+                  disabled={listLoading}
+                  onChange={event => {
+                    const value = event.target.value as CampaignStatus | "";
+                    setFilterStatus(value);
+                    setStatusGroup("all");
+                    setDirectoryLimit(24);
+                    void replaceList(filterStoreId, value);
+                  }}>
+                  <option value="">ทุกสถานะ</option>
+                  {CAMPAIGN_STATUSES.map(status => <option key={status} value={status}>
                     {campaignStatusLabel(status)}
-                  </option>
-                ))}
-              </SelectField>
-
-              <Button
-                variant="quiet"
-                disabled={!hasFilters || listLoading}
+                  </option>)}
+                </select>
+              </label>
+              {hasFilters ? <button className={styles.clearFilters} type="button"
+                disabled={listLoading}
                 onClick={() => {
                   setFilterStoreId(fixedStoreId ?? "");
                   setFilterStatus("");
+                  setStatusGroup("all");
+                  setDirectoryLimit(24);
                   void replaceList(fixedStoreId ?? "", "");
-                }}
-              >
-                แสดงทั้งหมด
-              </Button>
+                }}>แสดงทั้งหมด</button> : null}
             </div>
-
-            {listFeedback ? (
-              <p
-                className={styles.listFeedback}
-                role="status"
-                aria-live="polite"
-                aria-atomic="true"
-              >
-                {listFeedback}
+            {listFeedback ? <p className={styles.listFeedback} role="status" aria-live="polite">{listFeedback}</p> : null}
+            {directoryQuery || statusGroup !== "all" || state.nextCursor ? (
+              <p className={styles.resultsMeta} aria-live="polite">
+                แสดง {directoryVisible.length.toLocaleString("th-TH")} จาก {directoryMatches.length.toLocaleString("th-TH")} รายการที่ตรงเงื่อนไขในข้อมูลที่โหลดแล้ว
+                {state.nextCursor ? " · ยังมีรายการในหน้าถัดไป" : ""}
               </p>
             ) : null}
-
-          {state.campaigns.length > 0 ? <LoadedDirectoryControls
-            id="campaigns-directory-search"
-            label="ค้นหาแคมเปญ"
-            query={directoryQuery}
-            onQueryChange={value => { setDirectoryQuery(value); setDirectoryLimit(24); }}
-            loadedCount={state.campaigns.length}
-            matchingCount={directoryMatches.length}
-            visibleCount={directoryVisible.length}
-            onShowMore={() => setDirectoryLimit(limit => limit + 24)}
-          /> : null}
 
             {listLoading ? (
               <LoadingState
@@ -818,64 +834,27 @@ export function CampaignManagementView({
                     : "กดสร้างแคมเปญเพื่อเริ่มรอบขายแรก"
                 }
               />
+            ) : directoryMatches.length === 0 ? (
+              <EmptyState
+                title={directoryQuery ? "ไม่พบรายการที่ตรงคำค้นหา ลองเปลี่ยนคำหรือกดล้าง" : "ไม่มีแคมเปญในกลุ่มนี้"}
+                description={directoryQuery ? "ลองปรับคำค้นหา หรือเลือกกลุ่มและสถานะอื่น" : "เลือกกลุ่มหรือสถานะอื่นเพื่อดูแคมเปญ"}
+              />
             ) : (
               <div className={styles.list}>
-                {directoryVisible.map((campaign) => {
-                  const selected = false;
-                  const loading =
-                    loadingCampaignId === campaign.campaignId;
-                  const nextAction = lifecycleActionsForStatus(
-                    campaign.status,
-                  ).find((action) => !action.danger);
+                {directoryVisible.map(campaign => {
+                  const loading = loadingCampaignId === campaign.campaignId;
                   return (
-                    <article
-                      className={[
-                        styles.row,
-                        selected ? styles.rowSelected : "",
-                      ]
-                        .filter(Boolean)
-                        .join(" ")}
-                      key={campaign.campaignId}
-                      aria-current={selected ? "true" : undefined}
-                    >
+                    <article key={campaign.campaignId} className={styles.row}>
                       <div className={styles.rowMain}>
                         <div className={styles.rowHeading}>
-                          <h3 className={styles.cardTitle}>
-                            {campaign.name}
-                          </h3>
-                          <Badge tone={statusTone(campaign.status)}>
-                            {campaignStatusLabel(campaign.status)}
-                          </Badge>
+                          <h3 className={styles.cardTitle}>{campaign.name}</h3>
+                          <Badge tone={statusTone(campaign.status)}>{campaignStatusLabel(campaign.status)}</Badge>
                         </div>
-
                         <div className={styles.metaRow}>
-                          <span className={styles.meta}>
-                            ร้านค้า:{" "}
-                            {storeNames.get(campaign.storeId) ??
-                              campaign.storeId}
-                          </span>
-                          <span className={styles.meta}>
-                            เปิดตามแผน: <ScheduleValue value={campaign.openAt} />
-                          </span>
-                          <span className={styles.meta}>
-                            ปิดตามแผน: <ScheduleValue value={campaign.closeAt} />
-                          </span>
-                        </div>
-
-                        <div className={styles.nextAction}>
-                          <span className={styles.nextActionLabel}>ขั้นตอนถัดไป</span>
-                          <strong>
-                            {nextAction
-                              ? nextAction.label
-                              : campaign.status === "COMPLETED"
-                                ? "เสร็จสิ้นแล้ว"
-                                : campaign.status === "CANCELLED"
-                                  ? "ยกเลิกแล้ว"
-                                  : "ไม่มีขั้นตอนถัดไป"}
-                          </strong>
+                          {!fixedStoreId ? <span className={styles.meta}>{storeNames.get(campaign.storeId) ?? campaign.storeId}</span> : null}
+                          <span className={styles.meta}>{campaignPeriod(campaign)}</span>
                         </div>
                       </div>
-
                       <div className={styles.actions}>
                         {fixedStoreId ? (
                           <Link className={styles.detailLink}
@@ -883,30 +862,16 @@ export function CampaignManagementView({
                             {campaign.status === "DRAFT" ? "ดูและแก้ไข" : "ดูรายละเอียด"}
                           </Link>
                         ) : (
-                        <Button
-                          variant="secondary"
-                          pending={loading}
-                          pendingLabel="กำลังโหลด"
-                          disabled={savingCampaignId !== null}
-                          onClick={() => {
-                            void handleSelect(campaign);
-                          }}
-                        >
-                          {selected
-                            ? "กำลังดูรายละเอียด"
-                            : campaign.status === "DRAFT"
-                              ? "ดูและแก้ไข"
-                              : "ดูรายละเอียด"}
-                        </Button>
+                          <Button variant="secondary" pending={loading} pendingLabel="กำลังโหลด"
+                            disabled={savingCampaignId !== null}
+                            onClick={() => { void handleSelect(campaign); }}>
+                            {campaign.status === "DRAFT" ? "ดูและแก้ไข" : "ดูรายละเอียด"}
+                          </Button>
                         )}
                         {["PRODUCING", "READY_FOR_PICKUP", "COMPLETED"].includes(campaign.status) ? (
-                          <Link
-                            className={styles.productionLink}
+                          <Link className={styles.productionLink}
                             href={productionHref(organizationId, campaign.campaignId)}
-                            aria-label={"เปิดสรุปงานผลิต แคมเปญ " + campaign.name}
-                          >
-                            ดูยอดผลิต
-                          </Link>
+                            aria-label={"เปิดสรุปงานผลิต แคมเปญ " + campaign.name}>ดูยอดผลิต</Link>
                         ) : null}
                       </div>
                     </article>
@@ -914,6 +879,13 @@ export function CampaignManagementView({
                 })}
               </div>
             )}
+            {directoryMatches.length > directoryVisible.length ? (
+              <div className={styles.showMoreLoaded}>
+                <button type="button" onClick={() => setDirectoryLimit(limit => limit + 24)}>
+                  แสดงเพิ่มอีก {Math.min(24, directoryMatches.length - directoryVisible.length)} รายการที่โหลด
+                </button>
+              </div>
+            ) : null}
 
             {state.nextCursor && !listLoading ? (
               <div className={styles.loadMore}>
@@ -1032,7 +1004,7 @@ export function CampaignManagementView({
                   }
                 />
               </div>
-
+              <PlanningHelp />
 
             </form>
           </aside></div></ManagementModal> : null}
@@ -1185,6 +1157,7 @@ export function CampaignManagementView({
                         }
                       />
                     </div>
+                    <PlanningHelp />
 
                     <div className={styles.editActions}>
                       <Button
@@ -1321,33 +1294,6 @@ export function CampaignManagementView({
             </details> : null}
           </section>
         ) : null}
-        {/** Optional explainer and scheduling caveat follow the actual campaign workspace. */}
-        {!standaloneDetail ? <section
-          className={styles.flowContext}
-          aria-labelledby="campaign-flow-context"
-        >
-          <h2 className={styles.flowContextTitle} id="campaign-flow-context">
-            แคมเปญเชื่อมงานขายอย่างไร
-          </h2>
-          <ul className={styles.flowStrip}>
-            <li>
-              <strong>ร้านค้าและสินค้า</strong>
-              <span>แคมเปญอยู่ภายใต้ร้านค้า และเป็นบริบทของสินค้าที่เปิดขายในรอบนั้น</span>
-            </li>
-            <li>
-              <strong>คำสั่งซื้อ</strong>
-              <span>สถานะแคมเปญกำหนดว่ารอบนั้นรับคำสั่งซื้อใหม่ได้หรือกำลังเดินงานต่อจากรายการเดิม</span>
-            </li>
-            <li>
-              <strong>ผลิตและรับสินค้า</strong>
-              <span>หลังปิดรอบ ระบบเดินผ่านการผลิตและพร้อมรับสินค้าโดยใช้การยืนยันสถานะจริง</span>
-            </li>
-          </ul>
-        </section> : null}
-
-        {!standaloneDetail ? <Notice tone="info" title="วันเวลาเป็นข้อมูลวางแผน">
-          การถึงวันเวลาเปิด ปิด ชำระเงิน หรือรับสินค้า จะไม่เปลี่ยนสถานะแคมเปญอัตโนมัติ การเปลี่ยนสถานะเกิดขึ้นเมื่อผู้ดูแลสั่งดำเนินการและระบบยืนยันเท่านั้น
-        </Notice> : null}
       </main>
     </div>
   );

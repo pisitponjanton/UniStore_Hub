@@ -184,9 +184,23 @@ test("product creation uploads its selected cover after CREATE and displays pers
     await page.getByRole("button", { name: "+ เพิ่มสินค้า" }).click();
     const modal = page.getByRole("dialog", { name: "สร้างสินค้าใหม่" });
     await expect(modal.locator("#product-create-image")).toBeAttached();
+    const zone = modal.locator('label[class*="dropZone"]');
+    await expect(zone).toBeVisible();
+    await expect(zone.getByText("เลือกไฟล์รูปภาพ")).toBeVisible();
+    const dimensions = await zone.evaluate(el => {
+      const rect = el.getBoundingClientRect(), style = getComputedStyle(el);
+      return { ratio: rect.width / rect.height, borderWidth: parseFloat(style.borderTopWidth),
+        borderColor: style.borderTopColor, width: rect.width };
+    });
+    expect(dimensions.ratio).toBeCloseTo(16 / 9, 2);
+    expect(dimensions.borderWidth).toBeGreaterThanOrEqual(1);
+    expect(dimensions.borderColor).not.toBe("rgba(0, 0, 0, 0)");
     await modal.locator("#product-create-name").fill(created.name);
     await modal.locator("#product-create-image").setInputFiles({ name: "product.png", mimeType: "image/png", buffer: png });
-    await expect(modal.getByText("product.png")).toBeVisible();
+    await expect(modal.getByText("เลือกแล้ว: product.png")).toBeVisible();
+    const preview = zone.getByRole("img", { name: "ตัวอย่างรูปสินค้าที่เลือก" });
+    await expect(preview).toBeVisible();
+    await expect.poll(() => preview.evaluate(el => (el as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
     await modal.getByRole("button", { name: "สร้างสินค้า" }).click();
     await expect(modal).toHaveCount(0);
     await expect(page.getByRole("img", { name: "รูปสินค้า " + created.name })).toBeVisible();

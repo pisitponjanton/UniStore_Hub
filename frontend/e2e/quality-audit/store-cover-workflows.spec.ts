@@ -53,6 +53,7 @@ test("Store Settings is the only edit/status entry and saves selected cover thro
     await page.getByRole("button",{name:"บันทึกรูปหน้าร้าน"}).click();
     await expect(page.getByText("อัปโหลดรูปหน้าร้านแล้ว")).toBeVisible();
     await expect(page.getByRole("img",{name:"รูปหน้าร้าน Test Store"})).toBeVisible();
+    expect(stored.imageKey).toBe(pictureKey);
     expect(writes.slice(0,3)).toEqual(["SIGN","PUT","PATCH:imageKey"]);
     await page.getByRole("button",{name:"ปิดใช้งานร้าน"}).click();
     await expect(page.getByRole("dialog",{name:"ยืนยันปิดใช้งานร้าน"})).toBeVisible();
@@ -105,8 +106,35 @@ test("Create Store modal accepts optional cover and uploads only after store cre
     await page.goto(frontend+"/org/stores/?organizationId="+ids.organizationId);
     await page.getByRole("button",{name:"+ สร้างร้านค้า"}).click();
     const dialog=page.getByRole("dialog",{name:"สร้างร้านค้าใหม่"});
+    const dropZone=dialog.locator('label[class*="dropZone"]');
+    await expect(dropZone.getByText("เลือกไฟล์รูปภาพ")).toBeVisible();
+    await expect(dropZone.getByText("หรือวางรูปภาพลงในพื้นที่นี้")).toBeVisible();
+    await expect(dialog.locator("#store-create-cover")).toBeAttached();
+    const { width, height, borderWidth, borderColor } = await dropZone.evaluate(el => ({
+      width: el.getBoundingClientRect().width,
+      height: el.getBoundingClientRect().height,
+      borderWidth: parseFloat(getComputedStyle(el).borderTopWidth),
+      borderColor: getComputedStyle(el).borderTopColor,
+    }));
+    expect(width / height).toBeCloseTo(16 / 9, 2);
+    expect(borderWidth).toBeGreaterThanOrEqual(1);
+    expect(borderColor).not.toBe("rgba(0, 0, 0, 0)");
+    // Drag-and-drop uses the same validation and selection flow as the file picker.
+    await dropZone.evaluate((el,contents)=>{
+      const transfer=new DataTransfer();
+      transfer.items.add(new File([Uint8Array.from(contents)],"dropped.png",{type:"image/png"}));
+      el.dispatchEvent(new DragEvent("dragenter",{bubbles:true,cancelable:true,dataTransfer:transfer}));
+      el.dispatchEvent(new DragEvent("drop",{bubbles:true,cancelable:true,dataTransfer:transfer}));
+    },Array.from(PNG));
+    await expect(dropZone.getByText("เลือกแล้ว: dropped.png")).toBeVisible();
+    const preview = dropZone.getByRole("img", { name: "ตัวอย่างรูปหน้าร้านที่เลือก" });
+    await expect(preview).toBeVisible();
+    await expect.poll(() => preview.evaluate(el => (el as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
     await dialog.locator("#store-create-name").fill("New Cover Shop");
     await dialog.locator("#store-create-cover").setInputFiles(pngFile);
+    await expect(dropZone.getByText("เลือกแล้ว: shop.png")).toBeVisible();
+    await expect(preview).toBeVisible();
+    await expect.poll(() => preview.evaluate(el => (el as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
     await dialog.getByRole("button",{name:"สร้างร้านค้า"}).click();
     await expect(dialog).toHaveCount(0);
     await expect(page.getByText("New Cover Shop",{exact:true})).toBeVisible();
@@ -145,15 +173,19 @@ test("real local S3 store-cover upload from create and edit", async ({ browser, 
     if(!storeId)throw new Error("Missing new store ID");
     console.log("Create upload requests:",mutations.join(","));
     expect(mutations.slice(0,3)).toEqual(["SIGN","PUT","PATCH"]);
-    await page.goto(frontend+"/org/stores/view/?organizationId="+ids.organizationId+"&storeId="+storeId+"&tab=settings");
-    await expect(page.locator("#workspace-store-cover")).toBeVisible();
-    const image=page.getByRole("img",{name:"รูปหน้าร้าน "+name});
+    // The cover is rendered in both the 16:9 picker and the store directory.
+    const image=row.getByRole("img",{name:"รูปหน้าร้าน "+name});
     await expect(image).toBeVisible();
     await expect.poll(()=>image.evaluate(el=>(el as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
     const initialSrc=await image.getAttribute("src");
+    await page.goto(frontend+"/org/stores/view/?organizationId="+ids.organizationId+"&storeId="+storeId+"&tab=settings");
+    await expect(page.locator("#workspace-store-cover")).toBeVisible();
+    await expect(page.getByRole("img",{name:"รูปหน้าร้าน "+name})).toBeVisible();
     await page.locator("#workspace-store-cover").setInputFiles({name:"second.png",mimeType:"image/png",buffer:PNG});
     await page.getByRole("button",{name:"บันทึกรูปหน้าร้าน"}).click();
     await expect(page.getByText("อัปโหลดรูปหน้าร้านแล้ว")).toBeVisible();
+    await page.goto(frontend+"/org/stores/?organizationId="+ids.organizationId);
+    await expect(image).toBeVisible();
     await expect.poll(async()=>image.getAttribute("src")).not.toBe(initialSrc);
     await expect.poll(()=>image.evaluate(el=>(el as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
     console.log("Create + edit S3 requests:",mutations.join(","));

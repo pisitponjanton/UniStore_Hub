@@ -179,7 +179,7 @@ describe("ProductManagementView", () => {
       fireEvent.change(screen.getByLabelText("ชื่อสินค้า"), { target: { value: "With Picture" } });
       const file = new File(["image"], "cover.png", { type: "image/png" });
       fireEvent.change(screen.getByLabelText("รูปสินค้า (ไม่บังคับ)"), { target: { files: [file] } });
-      expect(screen.getByText("cover.png")).toBeInTheDocument();
+      expect(screen.getByText("เลือกแล้ว: cover.png")).toBeInTheDocument();
       fireEvent.click(screen.getByRole("button", { name: "สร้างสินค้า" }));
       await waitFor(() => expect(mocks.update).toHaveBeenCalledWith("org-1", "product-2", { imageKey }));
       expect(mocks.requestImageUploadUrl).toHaveBeenCalledWith("org-1", "product-2", "image/png");

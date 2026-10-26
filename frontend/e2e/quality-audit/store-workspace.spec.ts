@@ -33,7 +33,8 @@ test("Store workspace scopes tabs, forms, legacy links and responsive states", a
     const nav = page.getByRole("navigation", { name: "เมนูจัดการร้านค้า" });
     await expect(nav.getByRole("link", { name: "สินค้า" })).toHaveAttribute("aria-current", "page");
     await expect(nav.getByRole("link", { name: "ภาพรวม" })).toHaveCount(0);
-    await expect(page.getByRole("link", { name: "เปลี่ยนร้านค้า" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "เปลี่ยนร้านค้า" })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "ร้านค้าทั้งหมด" })).toBeVisible();
     await page.setViewportSize({ width: 1440, height: 768 });
     const sidebar = page.getByRole("navigation", { name: "เมนูหลัก" });
     await expect(sidebar.getByRole("link", { name: "ร้านค้า", exact: true })).toBeVisible();
@@ -259,4 +260,71 @@ test("Anonymous organization pages redirect to login and retain the exact return
     expect(url.searchParams.get("returnTo")).toBe(route);
     await expect(page.getByRole("heading", { name: "เข้าสู่ระบบ" })).toBeVisible();
   } finally { await ctx.close(); }
+});
+
+
+test("Store Profile settings uses a full-width 16:9 cover above its form across viewports", async ({ browser, request }) => {
+  const { frontend } = localAuditTargets();
+  const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: "reduce" });
+  await establishSeedRoleSession(context, request, "organizationAdmin");
+  const page = await context.newPage();
+  try {
+    await page.goto(frontend + "/org/stores/view/?organizationId=" + ids.organizationId
+      + "&storeId=" + ids.storeId + "&tab=settings");
+    const cover = page.locator("#workspace-store-cover").locator("xpath=parent::label");
+    const formName = page.locator("#workspace-store-name");
+    const status = page.getByRole("region", { name: "สถานะร้านค้า" });
+    await expect(cover).toBeVisible();
+    await expect(page.getByRole("heading", { name: "รูปหน้าร้าน" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "ข้อมูลร้านค้า" })).toBeVisible();
+    await expect(formName).toBeVisible();
+    await expect(status).toBeVisible();
+
+    for (const width of [320, 390, 768, 1024, 1440]) {
+      await page.setViewportSize({ width, height: 900 });
+      const geometry = await page.evaluate(() => {
+        const cover = document.querySelector("#workspace-store-cover")?.closest("label");
+        const section = cover?.closest("section");
+        const settings = section?.parentElement;
+        const content = settings?.parentElement;
+        const tabs = document.querySelector('nav[aria-label="เมนูจัดการร้านค้า"]');
+        const name = document.querySelector("#workspace-store-name");
+        const status = document.querySelector('[aria-label="สถานะร้านค้า"]');
+        if (!cover || !section || !settings || !content || !tabs || !name || !status)
+          throw new Error("Settings layout incomplete");
+        const c = cover.getBoundingClientRect(), s = section.getBoundingClientRect();
+        const settingsRect = settings.getBoundingClientRect();
+        const contentRect = content.getBoundingClientRect();
+        const tabsRect = tabs.getBoundingClientRect();
+        const n = name.getBoundingClientRect(), st = status.getBoundingClientRect();
+        return { ratio: c.width / c.height, width: c.width,
+          parentWidth: s.width, coverEnd: c.bottom, nameTop: n.top,
+          statusTop: st.top, settingsWidth: settingsRect.width,
+          contentWidth: contentRect.width, settingsLeft: settingsRect.left, tabsLeft: tabsRect.left,
+          over: Math.max(0, document.documentElement.scrollWidth - innerWidth) };
+      });
+      expect(geometry.ratio, "16:9 cover at " + width).toBeCloseTo(16 / 9, 2);
+      expect(geometry.width / geometry.parentWidth, "full-width cover at " + width).toBeGreaterThan(.98);
+      expect(Math.abs(geometry.settingsWidth - geometry.contentWidth),
+        "settings uses the same available width as the other tabs at " + width).toBeLessThanOrEqual(2);
+      expect(Math.abs(geometry.settingsLeft - geometry.tabsLeft),
+        "settings aligns with other tab content at " + width).toBeLessThanOrEqual(2);
+      expect(geometry.nameTop, "form after cover at " + width).toBeGreaterThan(geometry.coverEnd);
+      expect(geometry.statusTop, "status after cover at " + width).toBeGreaterThan(geometry.nameTop);
+      expect(geometry.over, "horizontal overflow at " + width).toBeLessThanOrEqual(2);
+    }
+    await page.setViewportSize({ width: 1440, height: 900 });
+    expect(await cover.evaluate(el => el.getBoundingClientRect().width)).toBeGreaterThan(1000);
+    const uploader = page.locator("#workspace-store-cover");
+    const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y2A2SYAAAAASUVORK5CYII=", "base64");
+    await uploader.setInputFiles({ name: "preview.png", mimeType: "image/png", buffer: png });
+    const preview = page.getByRole("img", { name: "ตัวอย่างรูปหน้าร้านที่เลือก" });
+    await expect(preview).toBeVisible();
+    await expect.poll(() => preview.evaluate(el => (el as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+    await expect(page.getByRole("button", { name: "บันทึกรูปหน้าร้าน" })).toBeEnabled();
+    await expect(page.getByRole("button", { name: "บันทึกข้อมูล" })).toBeDisabled();
+    await expect(status.getByRole("button", { name: /ปิดใช้งานร้าน|เปิดใช้งานร้าน/ })).toBeDisabled();
+  } finally {
+    await context.close();
+  }
 });

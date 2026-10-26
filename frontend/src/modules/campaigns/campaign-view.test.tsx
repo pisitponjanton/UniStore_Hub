@@ -290,7 +290,7 @@ describe("CampaignManagementView", () => {
     expect(mocks.update).not.toHaveBeenCalled();
   });
 
-  it("shows the next source-defined lifecycle action in the campaign list", async () => {
+  it("keeps the list compact and allows local status group filtering without a second API call", async () => {
     mocks.listCampaigns.mockResolvedValue({
       items: [
         campaign({
@@ -318,7 +318,16 @@ describe("CampaignManagementView", () => {
     }).closest("article");
     expect(openCard).not.toBeNull();
     expect(completedCard).not.toBeNull();
-    expect(within(openCard as HTMLElement).getByText("ปิดรับคำสั่งซื้อ")).toBeInTheDocument();
-    expect(within(completedCard as HTMLElement).getByText("เสร็จสิ้นแล้ว")).toBeInTheDocument();
+    expect(within(openCard as HTMLElement).queryByText("ปิดรับคำสั่งซื้อ")).toBeNull();
+    expect(within(completedCard as HTMLElement).queryByText("ขั้นตอนถัดไป")).toBeNull();
+    expect(within(openCard as HTMLElement).getByText(/ม.ค./)).toBeInTheDocument();
+    const originalCalls = mocks.listCampaigns.mock.calls.length;
+    fireEvent.click(screen.getByRole("button", { name: "สิ้นสุด 1" }));
+    expect(screen.queryByRole("heading", { name: "Open Campaign" })).toBeNull();
+    expect(screen.getByRole("heading", { name: "Completed Campaign" })).toBeInTheDocument();
+    expect(mocks.listCampaigns).toHaveBeenCalledTimes(originalCalls);
+    fireEvent.click(screen.getByRole("button", { name: "ทั้งหมด 2" }));
+    expect(screen.getByRole("heading", { name: "Open Campaign" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "ทั้งหมด 2" })).toHaveAttribute("aria-pressed", "true");
   });
 });
