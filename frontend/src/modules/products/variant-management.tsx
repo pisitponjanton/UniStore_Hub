@@ -29,6 +29,7 @@ import {
   variantStatusLabel,
 } from "./variant-helpers";
 import { productService } from "./product-service";
+import { OperationToast } from "./operation-toast";
 import styles from "./variant-management.module.css";
 
 function operationErrorMessage(error: unknown): string {
@@ -50,13 +51,14 @@ function operationErrorMessage(error: unknown): string {
 export function VariantManagement({
   organizationId,
   product,
-  onProductRefreshed, compact = false, onDirtyChange,
+  onProductRefreshed, compact = false, onDirtyChange, onNotice,
 }: {
   organizationId: string;
   product: ProductDTO;
   onProductRefreshed: (product: ProductDTO) => void;
   compact?: boolean;
   onDirtyChange?: (dirty: boolean) => void;
+  onNotice?: (message: string) => void;
 }) {
   const focusErrorSummary = useErrorSummaryFocus();
   const [createName, setCreateName] = useState("");
@@ -84,9 +86,15 @@ export function VariantManagement({
     useState<string | null>(null);
   const [deactivatingVariantId, setDeactivatingVariantId] =
     useState<string | null>(null);
+  const [activatingVariantId, setActivatingVariantId] = useState<string | null>(null);
 
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+
+  function showNotice(message: string) {
+    if (onNotice) onNotice(message);
+    else setNotice(message);
+  }
 
   const formDirty = compact && ((createOpen && Boolean(createName.trim() || createPrice.trim())) ||
     (editingVariant !== null &&
@@ -145,7 +153,7 @@ export function VariantManagement({
       setCreateName("");
       setCreatePrice("");
       setCreateOpen(false);
-      setNotice(
+      showNotice(
         `สร้างตัวเลือก ${created.name} ราคา ${formatSatang(created.price)} แล้ว`,
       );
     } catch (error) {
@@ -206,7 +214,7 @@ export function VariantManagement({
 
       await refreshProduct();
       setEditingVariant(null);
-      setNotice(
+      showNotice(
         `บันทึกตัวเลือก ${updated.name} ราคา ${formatSatang(updated.price)} แล้ว`,
       );
     } catch (error) {
@@ -247,7 +255,7 @@ export function VariantManagement({
         setEditingVariant(null);
       }
 
-      setNotice(`ปิดใช้งานตัวเลือก ${variant.name} แล้ว`);
+      showNotice(`ปิดใช้งานตัวเลือก ${variant.name} แล้ว`);
     } catch (error) {
       if (isDefinitiveSessionFailure(error)) {
         authSession.logout();
@@ -257,6 +265,25 @@ export function VariantManagement({
       setError(operationErrorMessage(error));
     } finally {
       setDeactivatingVariantId(null);
+    }
+  }
+
+  async function handleReactivate(variant: ProductVariantDTO) {
+    if (variant.status !== "INACTIVE" || activatingVariantId || deactivatingVariantId || savingVariantId) return;
+    setActivatingVariantId(variant.variantId);
+    setError(null);
+    setNotice(null);
+    try {
+      await productService.updateVariant(
+        organizationId, product.productId, variant.variantId, { status: "ACTIVE" },
+      );
+      await refreshProduct();
+      showNotice(`เปิดใช้งานตัวเลือก ${variant.name} แล้ว`);
+    } catch (error) {
+      if (isDefinitiveSessionFailure(error)) { authSession.logout(); return; }
+      setError(operationErrorMessage(error));
+    } finally {
+      setActivatingVariantId(null);
     }
   }
 
@@ -287,11 +314,7 @@ export function VariantManagement({
         </Notice>
       ) : null}
 
-      {notice ? (
-        <Notice tone="success" role="status" title="อัปเดตแล้ว">
-          {notice}
-        </Notice>
-      ) : null}
+      {!onNotice ? <OperationToast message={notice} onDismiss={() => setNotice(null)} /> : null}
 
       <div className={styles.layout}>
         <div className={styles.variantList}>
@@ -307,7 +330,8 @@ export function VariantManagement({
                   savingVariantId === variant.variantId;
                 const deactivating =
                   deactivatingVariantId === variant.variantId;
-                const busy = saving || deactivating;
+                const activating = activatingVariantId === variant.variantId;
+                const busy = saving || deactivating || activating;
                 const editing =
                   editingVariant?.variantId === variant.variantId;
 
@@ -351,7 +375,7 @@ export function VariantManagement({
                       </Button>
 
                       {variant.status === "ACTIVE" ? (
-                        <ConfirmDialog
+                        <ConfirmDialog key={variant.variantId + ":active"}
                           trigger={
                             <Button
                               variant="danger"
@@ -369,7 +393,18 @@ export function VariantManagement({
                             void handleDeactivate(variant);
                           }}
                         />
-                      ) : null}
+                      ) : (
+                        <ConfirmDialog key={variant.variantId + ":inactive"}
+                          trigger={<Button variant="secondary" disabled={busy || Boolean(editingVariant)}>
+                            เปิดใช้งาน
+                          </Button>}
+                          title="ยืนยันการเปิดใช้งานตัวเลือก"
+                          description={`เปิดใช้งานตัวเลือก ${variant.name} อีกครั้งใช่หรือไม่? ตัวเลือกจะขายได้เมื่อร้านค้าและสินค้าเปิดใช้งานด้วย`}
+                          confirmLabel="เปิดใช้งานตัวเลือก"
+                          pending={activating}
+                          onConfirm={() => { void handleReactivate(variant); }}
+                        />
+                      )}
                     </div>
 
                     {editing && !compact ? (
@@ -544,7 +579,7 @@ export function VariantManagement({
         onClose={() => setEditingVariant(null)}>
         {error ? <Notice tone="danger" role="alert" title="ดำเนินการไม่สำเร็จ">{error}</Notice> : null}
                               <form
-                        className={styles.editForm} id="variant-edit-form"
+                        className={styles.compactForm} id="variant-edit-form"
                         onSubmit={handleSave}
                         noValidate
                       >

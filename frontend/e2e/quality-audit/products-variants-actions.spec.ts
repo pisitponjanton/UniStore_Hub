@@ -118,7 +118,7 @@ test("product and variant safe interactions are directly evidenced",async({brows
     await page.locator("#product-edit-description").fill("Updated synthetic description");
     await proof(page,"FE-UX-18-12","edit-description-draft","Editor description changed locally");
     await page.locator("#product-edit-name").fill("");
-    await page.getByRole("button",{name:"บันทึกข้อมูล",exact:true}).click();
+    await page.getByRole("button",{name:"บันทึก",exact:true}).click();
     const editSummary=page.locator("#product-edit-error-summary");
     await expect(editSummary.getByRole("link",{name:"กรุณาระบุชื่อสินค้า"})).toBeVisible();
     await expect(editSummary).toBeFocused();
@@ -188,4 +188,171 @@ test("product and variant safe interactions are directly evidenced",async({brows
     states:evidence,distinctIds:[...new Set(evidence.map(x=>x.id))],writes,details,failures,queries:seen,
     limitation:"No product/variant/image persistence and no real backend mutation tested.",
   },null,2)+"\n");
+});
+
+
+test("Product and Variant can be reactivated from their detail page without recreating identifiers", async ({ browser, request }) => {
+  test.setTimeout(90000);
+  const { frontend } = localAuditTargets();
+  const context = await browser.newContext({ viewport: { width: 1280, height: 820 } });
+  await establishSeedRoleSession(context, request, "organizationAdmin");
+  const page = await context.newPage();
+  const productId = "uxqa-reactivation-product", variantId = "uxqa-reactivation-variant";
+  let productStatus: "INACTIVE" | "ACTIVE" = "INACTIVE";
+  let variantStatus: "INACTIVE" | "ACTIVE" = "INACTIVE";
+  const writes: Array<{ path: string; body: unknown }> = [];
+  await context.route("**/*", async route => {
+    const req = route.request(), url = new URL(req.url());
+    if (url.pathname === storesPath + "/" + storeA.storeId && req.method() === "GET") {
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ success: true, data: storeA }) }); return;
+    }
+    if (url.pathname === productsPath + "/" + productId) {
+      if (req.method() === "PATCH") {
+        const body = req.postDataJSON();
+        writes.push({ path: url.pathname, body });
+        if (body.status !== "ACTIVE") { await route.abort("blockedbyclient"); return; }
+        productStatus = "ACTIVE";
+      }
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({
+        success: true, data: { ...item, productId, name: "Reactivated Shirt", status: productStatus,
+          variants: [{ ...variant, productId, variantId, status: variantStatus }] },
+      }) }); return;
+    }
+    if (url.pathname === productsPath + "/" + productId + "/variants/" + variantId && req.method() === "PATCH") {
+      const body = req.postDataJSON();
+      writes.push({ path: url.pathname, body });
+      if (body.status !== "ACTIVE") { await route.abort("blockedbyclient"); return; }
+      variantStatus = "ACTIVE";
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({
+        success: true, data: { ...variant, productId, variantId, status: variantStatus },
+      }) }); return;
+    }
+    if (!["GET", "OPTIONS", "HEAD"].includes(req.method())) { await route.abort("blockedbyclient"); return; }
+    await route.continue();
+  });
+  try {
+    await page.goto(frontend + "/org/stores/product/?organizationId=" + ids.organizationId +
+      "&storeId=" + storeA.storeId + "&productId=" + productId);
+    await expect(page.getByRole("heading", { name: "Reactivated Shirt", level: 1 })).toBeVisible();
+    await expect(page.getByRole("button", { name: "เปิดใช้งาน", exact: true }).first()).toBeVisible();
+    await page.getByRole("button", { name: "เปิดใช้งาน", exact: true }).first().click();
+    await page.getByRole("dialog", { name: "ยืนยันการเปิดใช้งานสินค้า" })
+      .getByRole("button", { name: "เปิดใช้งานสินค้า" }).click();
+    await expect(page.getByText("เปิดใช้งานสินค้า Reactivated Shirt แล้ว")).toBeVisible();
+    await expect(page.getByRole("dialog", { name: "ยืนยันการเปิดใช้งานสินค้า" })).toHaveCount(0);
+    const variantRow = page.getByRole("article").filter({ hasText: "Size M" });
+    await variantRow.getByRole("button", { name: "เปิดใช้งาน", exact: true }).click();
+    await page.getByRole("dialog", { name: "ยืนยันการเปิดใช้งานตัวเลือก" })
+      .getByRole("button", { name: "เปิดใช้งานตัวเลือก" }).click();
+    await expect(page.getByText("เปิดใช้งานตัวเลือก Size M แล้ว")).toBeVisible();
+    await expect(page.getByRole("dialog", { name: "ยืนยันการเปิดใช้งานตัวเลือก" })).toHaveCount(0);
+    await expect(variantRow.getByRole("button", { name: "ปิดใช้งาน" })).toBeVisible();
+    const toast = page.locator("[data-operation-toast]");
+    await expect(toast).toContainText("เปิดใช้งานตัวเลือก Size M แล้ว");
+    expect(await toast.evaluate(node => getComputedStyle(node).position)).toBe("fixed");
+    await expect(page.getByText("ตรวจสอบรูปภาพ", { exact: true })).toHaveCount(0);
+
+    // Modal stays one clean column (no nested editing card), on desktop and mobile.
+    await variantRow.getByRole("button", { name: "แก้ไขตัวเลือก" }).click();
+    const editDialog = page.getByRole("dialog", { name: "แก้ไขตัวเลือกสินค้า" });
+    const form = editDialog.locator("#variant-edit-form");
+    await expect(form).toBeVisible();
+    for (const width of [1280, 390]) {
+      await page.setViewportSize({ width, height: 820 });
+      const layout = await form.evaluate(node => {
+        const inputs = Array.from(node.querySelectorAll("input")) as HTMLInputElement[];
+        const first = inputs[0]?.getBoundingClientRect();
+        const second = inputs[1]?.getBoundingClientRect();
+        const bounds = node.getBoundingClientRect();
+        return {
+          columns: getComputedStyle(node).gridTemplateColumns,
+          formWidth: bounds.width,
+          documentWidth: document.documentElement.scrollWidth,
+          viewportWidth: window.innerWidth,
+          separateRows: Boolean(first && second && second.top > first.bottom),
+          insideDialog: Array.from(inputs).every(input => {
+            const rect = input.getBoundingClientRect();
+            return rect.left >= bounds.left - 1 && rect.right <= bounds.right + 1;
+          }),
+        };
+      });
+      expect(layout.columns.split(" ").length).toBe(1);
+      expect(layout.separateRows).toBe(true);
+      expect(layout.insideDialog).toBe(true);
+      expect(layout.documentWidth).toBeLessThanOrEqual(layout.viewportWidth + 2);
+    }
+    await editDialog.getByRole("button", { name: "ยกเลิก" }).click();
+    await expect(editDialog).toHaveCount(0);
+
+    expect(writes).toEqual([
+      { path: productsPath + "/" + productId, body: { status: "ACTIVE" } },
+      { path: productsPath + "/" + productId + "/variants/" + variantId, body: { status: "ACTIVE" } },
+    ]);
+  } finally { await context.close(); }
+});
+
+
+test("saving Product text keeps existing Variant rows without a page refresh when PATCH omits variants", async ({ browser, request }) => {
+  test.setTimeout(90000);
+  const { frontend } = localAuditTargets();
+  const context = await browser.newContext({ viewport: { width: 1280, height: 820 } });
+  await establishSeedRoleSession(context, request, "organizationAdmin");
+  const page = await context.newPage();
+  let reads = 0;
+  const patches: unknown[] = [];
+  let updatedName = item.name;
+  let updatedDescription = item.description;
+  await context.route("**/*", async route => {
+    const req = route.request(), path = new URL(req.url()).pathname;
+    const reply = (data: unknown) => route.fulfill({
+      status: 200, contentType: "application/json", body: JSON.stringify({ success: true, data }),
+    });
+    if (path === storesPath + "/" + storeA.storeId && req.method() === "GET") {
+      await reply(storeA); return;
+    }
+    if (path === productsPath + "/" + item.productId) {
+      if (req.method() === "GET") {
+        reads += 1;
+        await reply({ ...item, name: updatedName, description: updatedDescription }); return;
+      }
+      if (req.method() === "PATCH") {
+        const body = req.postDataJSON();
+        patches.push(body);
+        updatedName = body.name;
+        updatedDescription = body.description;
+        // Real Backend updateProduct returns the Product entity without joined variants.
+        const withoutVariants = Object.fromEntries(
+          Object.entries(item).filter(([key]) => key !== "variants"),
+        );
+        await reply({ ...withoutVariants, name: updatedName, description: updatedDescription,
+          imageUrl: null, updatedAt: "2026-10-26T11:22:00.000Z" });
+        return;
+      }
+    }
+    if (!["GET", "OPTIONS", "HEAD"].includes(req.method())) {
+      await route.abort("blockedbyclient"); return;
+    }
+    await route.continue();
+  });
+  try {
+    await page.goto(frontend + "/org/stores/product/?organizationId=" + ids.organizationId +
+      "&storeId=" + storeA.storeId + "&productId=" + item.productId);
+    const variantRow = page.getByRole("article").filter({ hasText: variant.name });
+    await expect(variantRow).toContainText("฿350.00");
+    await page.locator("#product-edit-name").fill("UXQA Shirt Updated");
+    await page.locator("#product-edit-description").fill("Updated description");
+    await page.getByRole("button", { name: "บันทึก", exact: true }).click();
+    await expect(page.getByRole("heading", { name: "UXQA Shirt Updated", level: 1 })).toBeVisible();
+    await expect(page.locator("[data-operation-toast]")).toContainText("บันทึกข้อมูลสินค้า UXQA Shirt Updated แล้ว");
+    await expect(variantRow).toContainText(variant.name);
+    await expect(variantRow).toContainText("฿350.00");
+    await expect(variantRow.getByRole("button", { name: "แก้ไขตัวเลือก" })).toBeEnabled();
+    await variantRow.getByRole("button", { name: "แก้ไขตัวเลือก" }).click();
+    await expect(page.getByRole("dialog", { name: "แก้ไขตัวเลือกสินค้า" })).toBeVisible();
+    await expect(page.locator("#variant-edit-price-" + variant.variantId)).toHaveValue("350.00");
+    expect(reads).toBe(1);
+    expect(patches).toEqual([{ name: "UXQA Shirt Updated", description: "Updated description" }]);
+  } finally {
+    await context.close();
+  }
 });

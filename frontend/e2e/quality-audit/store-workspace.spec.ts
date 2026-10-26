@@ -204,9 +204,18 @@ test("Store grid and Product/Campaign detail links open dedicated pages without 
     await page.getByRole("link", { name: "แก้ไขสินค้า" }).first().click();
     await expect(page).toHaveURL(/\/org\/stores\/product\/.*productId=/);
     await expect(page.locator("#product-edit-name")).toBeVisible();
+    await expect(page.getByText("รหัสสินค้า:", {exact:false})).toBeVisible();
+    await expect(page.getByText("อัปเดตล่าสุด", {exact:false})).toBeVisible();
+    await expect(page.getByText("ข้อมูลระบบ", {exact:true})).toHaveCount(0);
     await expect(page.getByRole("heading", { name: "ตัวเลือกสินค้าและราคา" })).toBeVisible();
     await expect(page.getByRole("navigation", {name:"เมนูจัดการร้านค้า"})).toHaveCount(0);
     await expect(page.getByRole("link", { name: /กลับไปรายการสินค้า/ })).toBeVisible();
+    if (await page.getByRole("button", {name:"ปิดใช้งาน", exact:true}).count() > 0) {
+      await page.getByRole("button", {name:"ปิดใช้งาน", exact:true}).first().click();
+      await expect(page.getByRole("dialog", {name:"ยืนยันการปิดใช้งานสินค้า"})).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(page.getByRole("dialog", {name:"ยืนยันการปิดใช้งานสินค้า"})).toHaveCount(0);
+    }
     for (const theme of ["light", "dark"] as const) {
       await page.emulateMedia({ colorScheme: theme });
       for (const width of [320,390,768,1440]) {

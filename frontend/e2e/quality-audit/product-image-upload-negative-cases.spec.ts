@@ -53,11 +53,11 @@ test("image upload signing/PUT/PATCH negative states + focused recovery at 320px
   const card=page.getByRole("heading",{name:product.name,exact:true}).first().locator("xpath=ancestor::article");
   await expect(card).toBeVisible();
   await card.getByRole("link",{name:"แก้ไขสินค้า"}).click();
-  const input=page.locator("#product-image-"+ids.productId),upload=page.getByRole("button",{name:"อัปโหลดรูปสินค้า"});
+  const input=page.locator("#product-image-"+ids.productId),upload=page.getByRole("button",{name:"บันทึกรูป"});
   await expect(input).toBeEnabled();
   await input.setInputFiles({name:"too-large.png",mimeType:"image/png",buffer:Buffer.alloc(5*1024*1024+1,0)});
   await expect(page.getByText("รูปสินค้าต้องมีขนาดไม่เกิน 5 MiB")).toBeVisible();
-  await expect(upload).toBeDisabled();expect(signs).toBe(0);
+  await expect(upload).toHaveCount(0);expect(signs).toBe(0);
   await snap(page,"FE-UX-18-14","size-exceeded","5MiB+1 rejected before network");
   await input.setInputFiles({name:"small-safe.png",mimeType:"image/png",buffer:png});
   await expect(upload).toBeEnabled();
@@ -80,7 +80,7 @@ test("image upload signing/PUT/PATCH negative states + focused recovery at 320px
   await upload.click();
   await expect(page.getByText("อัปโหลดและบันทึกรูปสินค้าเรียบร้อยแล้ว")).toBeVisible();
   await expect(page.locator("[data-product-upload-feedback]")).toBeFocused();
-  await expect(page.getByText("มีรูปสินค้าแล้ว").last()).toBeVisible();
+  await expect(page.getByText("เปลี่ยนรูปสินค้า",{exact:true}).last()).toBeVisible();
   expect([signs,puts,patches]).toEqual([4,3,2]);
   await snap(page,"FE-UX-18-15","error-recovery-success","Intercepted POST/PUT/PATCH/GET success clears retry and focuses completion");
   const dims=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,viewport:innerWidth}));

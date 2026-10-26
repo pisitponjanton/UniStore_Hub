@@ -62,7 +62,7 @@ test("repeated stale/mismatched GET never triggers duplicate upload or false suc
   await page.goto(url,{waitUntil:"domcontentloaded"});
   await edit(page);
   await page.locator("#product-image-"+ids.productId).setInputFiles({name:"long-stale.png",mimeType:"image/png",buffer:png});
-  await page.getByRole("button",{name:"อัปโหลดรูปสินค้า"}).click();
+  await page.getByRole("button",{name:"บันทึกรูป"}).click();
   const retry=page.getByRole("button",{name:"ตรวจสอบข้อมูลล่าสุดอีกครั้ง"});
   await expect(retry).toBeEnabled();
   await expect(page.getByText(/ส่งคำขอบันทึกรูปไปแล้ว แต่ยังยืนยันผลไม่ได้/)).toBeVisible();
@@ -73,7 +73,7 @@ test("repeated stale/mismatched GET never triggers duplicate upload or false suc
    await expect.poll(()=>gets).toBe(before+1);
    await expect(page.getByText(/ยังยืนยันผลการบันทึกรูปไม่ได้/)).toBeVisible();
    await expect(retry).toBeEnabled();
-   await expect(page.getByRole("button",{name:"อัปโหลดรูปสินค้า"})).toHaveCount(0);
+   await expect(page.getByRole("button",{name:"บันทึกรูป"})).toHaveCount(0);
    expect([signs,puts,patches]).toEqual([1,1,1]);
   }
   await expect(page.getByText(/ตรวจสอบหลายครั้งแล้วยังไม่ยืนยันผล/)).toBeVisible();
@@ -101,7 +101,7 @@ test("repeated stale/mismatched GET never triggers duplicate upload or false suc
   await retryAfterReload.click();
   await expect(page.getByText("อัปโหลดและบันทึกรูปสินค้าเรียบร้อยแล้ว")).toBeVisible();
   await expect(page.getByText(/ตรวจสอบหลายครั้งแล้วยังไม่ยืนยันผล/)).toHaveCount(0);
-  await expect(page.getByText("มีรูปสินค้าแล้ว").last()).toBeVisible();
+  await expect(page.getByText("เปลี่ยนรูปสินค้า",{exact:true}).last()).toBeVisible();
   expect([signs,puts,patches,blocked]).toEqual([1,1,1,0]);
   await snap(page,"eventual-matching-key","Once matching GET arrives, recovery completes without any duplicate browser write");
   await page.close();

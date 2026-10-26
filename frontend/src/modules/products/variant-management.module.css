@@ -259,3 +259,30 @@
   .compactRoot .row { align-items:stretch; flex-direction:column; gap:10px; }
   .compactRoot .actions { flex-wrap:wrap; }
 }
+
+
+/* A light ledger rather than a stack of oversized variant containers. */
+.compactRoot { padding-top:16px; gap:8px; }
+.compactRoot .header { padding-bottom:8px; }
+.compactRoot .row, .compactRoot .rowEditing { padding:10px 0; min-height:58px; }
+.compactRoot .rowMain { gap:6px 14px; }
+.compactRoot .rowHeading { gap:7px; }
+.compactRoot .actions button { min-height:40px; }
+.compactRoot .empty { padding:18px 0; }
+
+/* Shared modal forms are not embedded row editors: single column and no inset card. */
+.compactForm {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.compactForm > * { min-width: 0; }
+.compactForm :is(input, select) { width: 100%; min-width: 0; }

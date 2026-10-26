@@ -75,7 +75,7 @@ test("image PATCH in-flight during page navigation preserves GET-only recovery",
   await page.goto(productUrl,{waitUntil:"domcontentloaded"});
   await edit(page);
   await page.locator("#product-image-"+ids.productId).setInputFiles({name:"inflight-patch.png",mimeType:"image/png",buffer:png});
-  await page.getByRole("button",{name:"อัปโหลดรูปสินค้า"}).click();
+  await page.getByRole("button",{name:"บันทึกรูป"}).click();
   await expect.poll(()=>patches).toBe(1);
   await expect.poll(()=>marker(page)).toEqual([key]);
   await expect(page.getByRole("button",{name:"กำลังบันทึกรูปสินค้า"})).toBeDisabled();
@@ -89,7 +89,7 @@ test("image PATCH in-flight during page navigation preserves GET-only recovery",
   const retry=page.getByRole("button",{name:"ตรวจสอบข้อมูลล่าสุดอีกครั้ง"});
   await expect(retry).toBeEnabled();
   await expect(page.getByText(/สถานะการบันทึกรูปยังไม่ชัดเจน/)).toBeVisible();
-  await expect(page.getByRole("button",{name:"อัปโหลดรูปสินค้า"})).toHaveCount(0);
+  await expect(page.getByRole("button",{name:"บันทึกรูป"})).toHaveCount(0);
   await expect(page.locator("#product-image-"+ids.productId)).toBeDisabled();
   expect([signs,puts,patches]).toEqual([1,1,1]);
   await snap(page,"reentry-unacknowledged","After navigating back, conservative marker blocks duplicate upload and offers GET-only retry");
@@ -102,7 +102,7 @@ test("image PATCH in-flight during page navigation preserves GET-only recovery",
   await retry.click();
   await expect(page.getByText("อัปโหลดและบันทึกรูปสินค้าเรียบร้อยแล้ว")).toBeVisible();
   await expect.poll(()=>marker(page)).toEqual([]);
-  await expect(page.getByText("มีรูปสินค้าแล้ว").last()).toBeVisible();
+  await expect(page.getByText("เปลี่ยนรูปสินค้า",{exact:true}).last()).toBeVisible();
   expect([signs,puts,patches,blocked], "Unexpected request(s): "+blockedRequests.join(" | ")).toEqual([1,1,1,0]);
   await snap(page,"readback-confirms-saved","Matching GET confirms image without a second signed PUT or PATCH");
   await page.close();

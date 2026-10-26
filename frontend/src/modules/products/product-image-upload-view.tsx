@@ -82,6 +82,10 @@ export function ProductImageUploadView({
   compact?: boolean;
 }) {
   const [file, setFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  useEffect(() => {
+    return () => { if (previewUrl) URL.revokeObjectURL(previewUrl); };
+  }, [previewUrl]);
   const [contentType, setContentType] = useState<
     "image/jpeg" | "image/png" | "image/webp" | null
   >(null);
@@ -158,6 +162,7 @@ export function ProductImageUploadView({
 
     resultFocusRequested.current = false;
     setFile(null);
+    setPreviewUrl(null);
     setContentType(null);
     setFileError(null);
     setServerError(null);
@@ -180,6 +185,7 @@ export function ProductImageUploadView({
     }
 
     setFile(candidate);
+    setPreviewUrl(URL.createObjectURL(candidate));
     setContentType(validation.contentType);
   }
 
@@ -404,39 +410,66 @@ export function ProductImageUploadView({
             ใช้ไฟล์ JPEG, PNG หรือ WebP ขนาดไม่เกิน 5 MiB
           </p>
         </div>
-        <Badge tone={product.imageKey ? "success" : "neutral"}>
+        {!compact ? <Badge tone={product.imageKey ? "success" : "neutral"}>
           {product.imageKey ? "มีรูปสินค้าแล้ว" : "ยังไม่มีรูปสินค้า"}
-        </Badge>
+        </Badge> : null}
       </div>
 
-      <div className={styles.currentMedia}>
-        {product.imageUrl ? (
-          // Backend supplies this short-lived Product image URL for display only.
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            className={styles.currentImage}
-            src={product.imageUrl}
-            alt={`รูปสินค้าปัจจุบันของ ${product.name}`}
-            loading="lazy"
-            decoding="async"
-          />
-        ) : (
-          <span className={styles.currentFallback}>
-            ยังไม่มีรูปสินค้า อัปโหลดรูปเพื่อช่วยให้สินค้าจดจำได้ง่ายขึ้นในหน้าร้าน
-          </span>
-        )}
-      </div>
+      {compact ? (
+        <div className={styles.compactImagePicker}>
+          <label className={styles.mediaPicker} aria-disabled={!verificationReady || pending || savedImageKeyToVerify !== null}>
+            {(previewUrl || product.imageUrl) ? (
+              // Backend image URL or a browser-local preview of the selected file.
+              // eslint-disable-next-line @next/next/no-img-element
+              <img className={styles.currentImage} src={previewUrl || product.imageUrl || ""}
+                alt={previewUrl ? "รูปที่เลือกเพื่ออัปโหลด" : `รูปสินค้าปัจจุบันของ ${product.name}`} />
+            ) : <span className={styles.compactPlaceholder}>ยังไม่มีรูปสินค้า</span>}
+            <span className={styles.pickerLabel}>
+              {file ? "เปลี่ยนไฟล์ที่เลือก" : product.imageKey ? "เปลี่ยนรูปสินค้า" : "เลือกรูปสินค้า"}
+            </span>
+            <input
+              id={`product-image-${product.productId}`} type="file"
+              className={styles.overlayFileInput}
+              aria-label={product.imageKey ? "เปลี่ยนรูปสินค้า" : "เลือกรูปสินค้า"}
+              accept="image/jpeg,image/png,image/webp"
+              disabled={!verificationReady || pending || savedImageKeyToVerify !== null}
+              onChange={handleFileChange}
+            />
+          </label>
+          <p className={styles.compactHint}>JPG, PNG, WebP · ไม่เกิน 5 MB</p>
+          {fileError ? <p role="alert" className={styles.compactFileError}>{fileError}</p> : null}
+        </div>
+      ) : (<>
+        <div className={styles.currentMedia}>
+          {product.imageUrl ? (
+            // Backend supplies this short-lived Product image URL for display only.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              className={styles.currentImage}
+              src={product.imageUrl}
+              alt={`รูปสินค้าปัจจุบันของ ${product.name}`}
+              loading="lazy"
+              decoding="async"
+            />
+          ) : (
+            <span className={styles.currentFallback}>
+              {compact ? "ยังไม่มีรูปสินค้า" : "ยังไม่มีรูปสินค้า อัปโหลดรูปเพื่อช่วยให้สินค้าจดจำได้ง่ายขึ้นในหน้าร้าน"}
+            </span>
+          )}
+        </div>
 
-      <FileField
-        id={`product-image-${product.productId}`}
-        label="เลือกรูปสินค้า"
-        hint="การอัปโหลดรูปใหม่จะใช้รูปนี้เป็นรูปปัจจุบันของสินค้า หากเพิ่งอัปโหลดแล้วเปิดหน้าใหม่ กรุณาโหลดข้อมูลสินค้าล่าสุดก่อนส่งไฟล์ซ้ำ"
-        error={fileError ?? undefined}
-        accept="image/jpeg,image/png,image/webp"
-        disabled={!verificationReady || pending || savedImageKeyToVerify !== null}
-        onChange={handleFileChange}
-      />
-      {file ? (
+        <FileField
+          id={`product-image-${product.productId}`}
+          label={compact ? product.imageKey ? "เปลี่ยนรูปสินค้า" : "เลือกรูปสินค้า" : "เลือกรูปสินค้า"}
+          hint={compact ? "JPG, PNG, WebP · ไม่เกิน 5 MB" :
+            "การอัปโหลดรูปใหม่จะใช้รูปนี้เป็นรูปปัจจุบันของสินค้า หากเพิ่งอัปโหลดแล้วเปิดหน้าใหม่ กรุณาโหลดข้อมูลสินค้าล่าสุดก่อนส่งไฟล์ซ้ำ"}
+          error={fileError ?? undefined}
+          accept="image/jpeg,image/png,image/webp"
+          disabled={!verificationReady || pending || savedImageKeyToVerify !== null}
+          onChange={handleFileChange}
+        />
+      </>)}
+      {file && !compact ? (
         <div className={styles.selected} role="status" aria-atomic="true">
           <div className={styles.selectedCopy}>
             <span className={styles.selectedLabel}>ไฟล์ที่เลือก</span>
@@ -538,7 +571,7 @@ export function ProductImageUploadView({
       ) : null}
 
       <div className={styles.actions}>
-        {!savedImageKeyToVerify ? (
+        {!savedImageKeyToVerify && (!compact || verificationStorageUnavailable || serverError) ? (
           <Button type="button" variant="secondary" disabled={!verificationReady || pending}
             onClick={() => { void handleReadOnlyRefresh(); }}>
             โหลดข้อมูลสินค้าล่าสุด
@@ -556,15 +589,20 @@ export function ProductImageUploadView({
           >
             ตรวจสอบข้อมูลล่าสุดอีกครั้ง
           </Button>
+        ) : compact ? (
+          file ? <div className={styles.compactUploadAction}>
+            <span className={styles.selectedFileName} title={file.name}>{file.name} · {formatBytes(file.size)}</span>
+            <Button type="button" pending={pending} pendingLabel={stageLabel(stage)}
+              disabled={!verificationReady || !contentType || pending}
+              onClick={() => { void handleUpload(); }}>บันทึกรูป</Button>
+          </div> : null
         ) : (
           <Button
             type="button"
             pending={pending}
             pendingLabel={stageLabel(stage)}
             disabled={!verificationReady || !file || !contentType || pending}
-            onClick={() => {
-              void handleUpload();
-            }}
+            onClick={() => { void handleUpload(); }}
           >
             อัปโหลดรูปสินค้า
           </Button>

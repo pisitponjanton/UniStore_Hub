@@ -65,11 +65,11 @@ test("Product Image validation, pending, signed PUT 403 and synthetic success",a
   await item.locator("xpath=ancestor::article").getByRole("link",{name:"แก้ไขสินค้า"}).click();
   await expect(page.getByRole("heading",{name:"รูปสินค้า"})).toBeVisible();
   const input=page.locator("#product-image-"+ids.productId);
-  const action=page.getByRole("button",{name:"อัปโหลดรูปสินค้า"});
-  await expect(action).toBeDisabled();
+  const action=page.getByRole("button",{name:"บันทึกรูป"});
+  await expect(action).toHaveCount(0);
   await input.setInputFiles({name:"invalid.txt",mimeType:"text/plain",buffer:Buffer.from("invalid-only")});
   await expect(page.getByText("รองรับเฉพาะ JPEG, PNG และ WebP")).toBeVisible();
-  await expect(action).toBeDisabled();
+  await expect(action).toHaveCount(0);
   await proof(page,"FE-UX-18-14","unsupported-file","Unsupported file type rejected before issuing signed POST");
   await input.setInputFiles({name:"uxqa-image.png",mimeType:"image/png",
    buffer:Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y2A2SYAAAAASUVORK5CYII=","base64")});
@@ -92,8 +92,8 @@ test("Product Image validation, pending, signed PUT 403 and synthetic success",a
   await proof(page,"FE-UX-18-15","synthetic-403-retry","Intercepted signed PUT 403 keeps file and offers retry without image PATCH");
   await action.click();
   await expect(page.getByText("อัปโหลดและบันทึกรูปสินค้าเรียบร้อยแล้ว")).toBeVisible();
-  await expect(page.getByText("มีรูปสินค้าแล้ว").last()).toBeVisible();
-  await expect(action).toBeDisabled();
+  await expect(page.getByText("เปลี่ยนรูปสินค้า",{exact:true}).last()).toBeVisible();
+  await expect(action).toHaveCount(0);
   await expect(page.getByText("uxqa-image.png")).toHaveCount(0);
   expect(signs).toBe(2);expect(puts).toBe(2);expect(patches).toBe(1);
   await proof(page,"FE-UX-18-15","synthetic-upload-success","Intercepted new signing POST, PUT 200, PATCH ImageKey and GET refresh");

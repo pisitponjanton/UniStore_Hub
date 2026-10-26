@@ -61,7 +61,7 @@ test("reload without Session Storage warns and offers safe Product GET before re
   await page.goto(url,{waitUntil:"domcontentloaded"});
   await editor();
   await page.locator("#product-image-"+ids.productId).setInputFiles({name:"old-commit.png",mimeType:"image/png",buffer:png});
-  await page.getByRole("button",{name:"อัปโหลดรูปสินค้า"}).click();
+  await page.getByRole("button",{name:"บันทึกรูป"}).click();
   await expect(page.getByText(/บันทึกรูปสินค้าแล้ว แต่ยังโหลดข้อมูลล่าสุดไม่สำเร็จ/)).toBeVisible();
   await expect(page.getByText(/เบราว์เซอร์ไม่อนุญาตให้บันทึกสถานะชั่วคราว/)).toBeVisible();
   expect([signed,put,patch,afterPatchGets]).toEqual([1,1,1,1]);
@@ -76,7 +76,7 @@ test("reload without Session Storage warns and offers safe Product GET before re
   showLatest=true;
   await safe.click();
   await expect(page.getByText(/โหลดข้อมูลสินค้าล่าสุดแล้ว/)).toBeVisible();
-  await expect(page.getByText("มีรูปสินค้าแล้ว").last()).toBeVisible();
+  await expect(page.getByText("เปลี่ยนรูปสินค้า",{exact:true}).last()).toBeVisible();
   await expect(page.locator("[data-product-upload-feedback]")).toBeFocused();
   expect([signed,put,patch,blocked]).toEqual([1,1,1,0]);
   await save(page,"storage-denied-reload-GET-only-check","Read-only recheck returns current imageKey without signing/PUT/PATCH");

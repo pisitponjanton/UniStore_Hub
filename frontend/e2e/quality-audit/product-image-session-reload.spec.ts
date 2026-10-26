@@ -68,7 +68,7 @@ test("imageKey post-PATCH pending survives product switch, page exit and reload"
   await page.goto(routeURL,{waitUntil:"domcontentloaded"});
   await edit(page,productA.name);
   await page.locator("#product-image-"+ids.productId).setInputFiles({name:"uxqa-original.png",mimeType:"image/png",buffer:png});
-  await page.getByRole("button",{name:"อัปโหลดรูปสินค้า"}).click();
+  await page.getByRole("button",{name:"บันทึกรูป"}).click();
   await expect(page.getByText(/บันทึกรูปสินค้าแล้ว แต่ยังโหลดข้อมูลล่าสุดไม่สำเร็จ/)).toBeVisible();
   await expect.poll(()=>markerCount(page)).toBe(1);
   await snap(page,"committed-session-marker","Acknowledged PATCH records scoped tab-session marker before failed readback");
@@ -78,14 +78,14 @@ test("imageKey post-PATCH pending survives product switch, page exit and reload"
   await page.getByRole("link",{name:/กลับไปรายการสินค้า/}).click();
   await edit(page,productB.name);
   await expect(page.locator("#product-image-"+otherId)).toBeEnabled();
-  await expect(page.getByRole("button",{name:"อัปโหลดรูปสินค้า"})).toBeDisabled();
+  await expect(page.getByRole("button",{name:"บันทึกรูป"})).toHaveCount(0);
   await expect(page.getByRole("button",{name:"ตรวจสอบข้อมูลล่าสุดอีกครั้ง"})).toHaveCount(0);
   await snap(page,"other-product-independent","Product B has clean upload state; Product A marker remains scoped");
   await page.getByRole("link",{name:/กลับไปรายการสินค้า/}).click();
   await edit(page,productA.name);
   await expect(page.getByRole("button",{name:"ตรวจสอบข้อมูลล่าสุดอีกครั้ง"})).toBeEnabled();
   await expect(page.locator("#product-image-"+ids.productId)).toBeDisabled();
-  await expect(page.getByRole("button",{name:"อัปโหลดรูปสินค้า"})).toHaveCount(0);
+  await expect(page.getByRole("button",{name:"บันทึกรูป"})).toHaveCount(0);
   await snap(page,"return-to-product-pending","Reselecting A restores readback-only recovery without re-upload");
 
   // Leave the page, return and open A, then reload the whole browser page.
@@ -112,8 +112,8 @@ test("imageKey post-PATCH pending survives product switch, page exit and reload"
   await retry.click();
   await expect(page.getByText("อัปโหลดและบันทึกรูปสินค้าเรียบร้อยแล้ว")).toBeVisible();
   await expect.poll(()=>markerCount(page)).toBe(0);
-  await expect(page.getByText("มีรูปสินค้าแล้ว").last()).toBeVisible();
-  await expect(page.getByRole("button",{name:"อัปโหลดรูปสินค้า"})).toBeDisabled();
+  await expect(page.getByText("เปลี่ยนรูปสินค้า",{exact:true}).last()).toBeVisible();
+  await expect(page.getByRole("button",{name:"บันทึกรูป"})).toHaveCount(0);
   await snap(page,"verified-clears-scoped-marker","Matching GET clears pending marker and restores normal editor");
   expect([signs,puts,patches,blockedWrites]).toEqual([1,1,1,0]);
   await page.close();

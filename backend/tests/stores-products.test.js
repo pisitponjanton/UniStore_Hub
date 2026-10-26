@@ -815,3 +815,76 @@ test('catalog mutations are blocked while Organization is not ACTIVE', async () 
 
   assert.equal(productResponse.body.error.code, 'FORBIDDEN');
 });
+
+
+test('soft-deactivated Product can be reactivated through PATCH with conditional audit and unchanged identity', async () => {
+  const repository = createRepositoryRecorder();
+  const service = createProductService({
+    repository,
+    productRepository: { async getProduct(organizationId, productId) {
+      assert.equal(organizationId, 'org-1');
+      assert.equal(productId, 'product-1');
+      return makeProduct({ status: PRODUCT_STATUS.INACTIVE });
+    }},
+    idFactory: createIdFactory(['audit-reactivate-product']),
+    clock: () => FIXED_TIME,
+  });
+  const result = await service.updateProduct({
+    organizationId:'org-1', productId:'product-1', actorId:'admin-1',
+    changes: { status: PRODUCT_STATUS.ACTIVE },
+  });
+  assert.equal(result.status, PRODUCT_STATUS.ACTIVE);
+  assert.equal(result.productId, 'product-1');
+  const [update, audit] = repository.transactions[0].TransactItems;
+  assert.equal(update.Update.ExpressionAttributeValues[':previousStatus'], PRODUCT_STATUS.INACTIVE);
+  assert.equal(update.Update.ExpressionAttributeValues[':status'], PRODUCT_STATUS.ACTIVE);
+  assert.match(update.Update.ConditionExpression, /#previousStatus = :previousStatus/);
+  assert.equal(audit.Put.Item.action, 'PRODUCT_REACTIVATED');
+  assert.deepEqual(audit.Put.Item.metadata, {
+    fields: ['status'], previousStatus: PRODUCT_STATUS.INACTIVE, nextStatus: PRODUCT_STATUS.ACTIVE,
+  });
+  assert.equal(JSON.stringify(repository.transactions).includes('ORDER#'), false);
+});
+
+test('soft-deactivated Variant can be reactivated only under its scoped Product and audited', async () => {
+  const repository = createRepositoryRecorder();
+  const service = createProductService({
+    repository,
+    productRepository: { async getVariant(organizationId, productId, variantId) {
+      assert.equal(organizationId, 'org-1');
+      assert.equal(productId, 'product-1');
+      assert.equal(variantId, 'variant-1');
+      return makeVariant({status: VARIANT_STATUS.INACTIVE});
+    }},
+    idFactory: createIdFactory(['audit-reactivate-variant']),
+    clock: () => FIXED_TIME,
+  });
+  const result = await service.updateVariant({
+    organizationId:'org-1', productId:'product-1', variantId:'variant-1', actorId:'admin-1',
+    changes: { status: VARIANT_STATUS.ACTIVE },
+  });
+  assert.equal(result.status, VARIANT_STATUS.ACTIVE);
+  const [update, audit] = repository.transactions[0].TransactItems;
+  assert.equal(update.Update.ExpressionAttributeValues[':previousStatus'], VARIANT_STATUS.INACTIVE);
+  assert.equal(update.Update.ExpressionAttributeValues[':status'], VARIANT_STATUS.ACTIVE);
+  assert.match(update.Update.ConditionExpression, /#previousStatus = :previousStatus/);
+  assert.equal(audit.Put.Item.action, 'VARIANT_REACTIVATED');
+  assert.equal(audit.Put.Item.metadata.productId, 'product-1');
+  assert.equal(audit.Put.Item.metadata.previousStatus, VARIANT_STATUS.INACTIVE);
+  assert.equal(audit.Put.Item.metadata.nextStatus, VARIANT_STATUS.ACTIVE);
+  assert.equal(JSON.stringify(repository.transactions).includes('ORDER#'), false);
+});
+
+test('Variant reactivation cannot target a variant belonging to another Product', async () => {
+  const repository = createRepositoryRecorder();
+  const service = createProductService({
+    repository, productRepository: { async getVariant() {
+      return makeVariant({ productId: 'product-other', status: VARIANT_STATUS.INACTIVE });
+    }},
+  });
+  await assert.rejects(service.updateVariant({
+    organizationId:'org-1', productId:'product-1', variantId:'variant-1', actorId:'admin-1',
+    changes:{status: VARIANT_STATUS.ACTIVE},
+  }), error => error.code === 'VARIANT_NOT_FOUND' && error.httpStatus === 404);
+  assert.equal(repository.transactions.length, 0);
+});

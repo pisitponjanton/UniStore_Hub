@@ -76,7 +76,7 @@ test("image PATCH committed with sessionStorage blocked: warning and GET-only re
   const input=page.locator("#product-image-"+ids.productId);
   await expect(input).toBeEnabled();
   await input.setInputFiles({name:"uxqa-denied-storage.png",mimeType:"image/png",buffer:png});
-  await page.getByRole("button",{name:"อัปโหลดรูปสินค้า"}).click();
+  await page.getByRole("button",{name:"บันทึกรูป"}).click();
   await expect(page.getByText(/บันทึกรูปสินค้าแล้ว แต่ยังโหลดข้อมูลล่าสุดไม่สำเร็จ/)).toBeVisible();
   await expect(page.getByText(/เบราว์เซอร์ไม่อนุญาตให้บันทึกสถานะชั่วคราว/)).toBeVisible();
   const retry=page.getByRole("button",{name:"ตรวจสอบข้อมูลล่าสุดอีกครั้ง"});
@@ -84,7 +84,7 @@ test("image PATCH committed with sessionStorage blocked: warning and GET-only re
   await expect(retry).toBeEnabled();
   await expect(feedback).toBeFocused();
   await expect(input).toBeDisabled();
-  await expect(page.getByRole("button",{name:"อัปโหลดรูปสินค้า"})).toHaveCount(0);
+  await expect(page.getByRole("button",{name:"บันทึกรูป"})).toHaveCount(0);
   expect([signs,puts,patches,postCommitGets]).toEqual([1,1,1,1]);
   await capture(page,"storage-denied-committed-503","Storage denied: truthful warning, focus and readback-only; no re-upload");
   await retry.click();
@@ -97,7 +97,7 @@ test("image PATCH committed with sessionStorage blocked: warning and GET-only re
   await expect(page.getByText("อัปโหลดและบันทึกรูปสินค้าเรียบร้อยแล้ว")).toBeVisible();
   await expect(feedback).toBeFocused();
   await expect(retry).toHaveCount(0);
-  await expect(page.getByText("มีรูปสินค้าแล้ว").last()).toBeVisible();
+  await expect(page.getByText("เปลี่ยนรูปสินค้า",{exact:true}).last()).toBeVisible();
   await expect(page.getByText(/เบราว์เซอร์ไม่อนุญาตให้บันทึกสถานะชั่วคราว/)).toHaveCount(0);
   expect([signs,puts,patches,postCommitGets,blockedWrites]).toEqual([1,1,1,3,0]);
   await capture(page,"storage-denied-get-recovered","Verified matching GET clears warning without duplicate writes");

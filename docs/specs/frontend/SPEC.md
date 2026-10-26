@@ -91,6 +91,8 @@ Frontend role visibility is for UX only.
 
 Backend remains the authoritative permission layer.
 
+**Product editor UX decision:** Status is reversible through the existing Organization Admin `PATCH` Product and Variant endpoints (`ACTIVE` or `INACTIVE`). Confirm status transitions, re-read server-authoritative detail afterward, and preserve OrderItem history. Use a single media picker with a contextual save action, retaining GET-only recovery for uncertain image uploads rather than re-uploading blindly.
+
 ---
 
 ## 3. Target Frontend Structure

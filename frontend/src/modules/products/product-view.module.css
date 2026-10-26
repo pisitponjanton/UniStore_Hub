@@ -312,7 +312,27 @@
   .standalonePage .editorHeader { align-items:flex-start; }
 }
 
-.technicalDetails { min-width:0; padding-top:12px; border-top:1px solid var(--line-soft); font-size:.78rem; color:var(--ink-secondary); }
-.technicalDetails summary { cursor:pointer; width:fit-content; min-height:35px; padding:8px 0; }
-.technicalDetails summary:focus-visible { outline:3px solid var(--focus); outline-offset:2px; }
-.technicalDetails p { margin:4px 0; overflow-wrap:anywhere; }
+
+/* Compact detail editor: one concise identity row, no nested panels. */
+.standalonePage .editor { gap:20px; }
+.standalonePage .editorHeader { align-items:flex-start; gap:12px 20px; padding-bottom:16px; }
+.standalonePage .editorIdentity { min-width:0; display:grid; gap:5px; }
+.standalonePage .editorTitleRow { display:flex; flex-wrap:wrap; align-items:center; gap:9px; }
+.standalonePage .detailPageTitle { font-size:clamp(1.65rem,2.15vw,2.1rem); }
+.productIdentityMeta { display:flex; flex-wrap:wrap; gap:2px 16px; color:var(--ink-secondary); font-size:.78rem; }
+.productIdentityMeta .meta { font-size:inherit; overflow-wrap:anywhere; }
+.productHeaderActions { display:flex; align-items:center; justify-content:flex-end; flex-wrap:wrap; gap:8px; }
+.productHeaderActions button { min-height:42px; white-space:nowrap; }
+.standalonePage .editorGrid { gap:22px; }
+.standalonePage .editorSection { gap:10px; }
+.standalonePage .editorSectionHeading { padding-bottom:8px; }
+.standalonePage .form { gap:12px; }
+.standalonePage .form textarea { min-height:82px; }
+@media(max-width:900px) {
+  .standalonePage .editorGrid { gap:18px; }
+}
+@media(max-width:620px) {
+  .standalonePage .editorHeader { gap:10px; }
+  .productHeaderActions { justify-content:flex-start; width:100%; }
+  .productIdentityMeta { flex-direction:column; gap:2px; }
+}

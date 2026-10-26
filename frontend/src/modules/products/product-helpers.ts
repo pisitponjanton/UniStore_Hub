@@ -1,3 +1,5 @@
+import type { ProductDTO } from "@/types";
+
 export interface ProductFormValues {
   storeId: string;
   name: string;
@@ -42,4 +44,24 @@ export function productStatusLabel(
   status: "ACTIVE" | "INACTIVE",
 ): string {
   return status === "ACTIVE" ? "เปิดใช้งาน" : "ปิดใช้งาน";
+}
+
+/**
+ * PATCH returns the Product entity without joined variants (and imageUrl=null).
+ * Keep hydrated, unchanged relations in editor state until a fresh GET replaces them.
+ * An explicit variants array from a full response remains authoritative, including [].
+ */
+export function mergeProductUpdateResponse(
+  current: ProductDTO,
+  updated: ProductDTO,
+): ProductDTO {
+  if (current.productId !== updated.productId) return updated;
+  return {
+    ...current,
+    ...updated,
+    variants: updated.variants ?? current.variants,
+    imageUrl: updated.imageKey === current.imageKey && !updated.imageUrl
+      ? current.imageUrl
+      : updated.imageUrl,
+  };
 }

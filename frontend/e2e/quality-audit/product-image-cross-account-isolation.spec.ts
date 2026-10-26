@@ -92,7 +92,7 @@ test("same-tab Account A logout → Staff login → Admin login isolates pending
   await page.goto(target,{waitUntil:"domcontentloaded"});
   await edit(page);
   await page.locator("#product-image-"+ids.productId).setInputFiles({name:"uxqa-account-a.png",mimeType:"image/png",buffer:png});
-  await page.getByRole("button",{name:"อัปโหลดรูปสินค้า"}).click();
+  await page.getByRole("button",{name:"บันทึกรูป"}).click();
   await expect(page.getByText(/บันทึกรูปสินค้าแล้ว แต่ยังโหลดข้อมูลล่าสุดไม่สำเร็จ/)).toBeVisible();
   await expect(page.getByRole("button",{name:"ตรวจสอบข้อมูลล่าสุดอีกครั้ง"})).toBeEnabled();
   expect([signs,puts,patches]).toEqual([1,1,1]);

@@ -857,6 +857,8 @@ Request may contain:
 
 **PROJECT DECISION**
 
+For reversible catalog status, this existing `PATCH` accepts `{"status":"ACTIVE"}` to reactivate a previously soft-deactivated Product (and `INACTIVE` to deactivate). Organization Admin authorization and tenant ownership remain mandatory. The ID, image association, and historical OrderItem snapshots are preserved. Status changes are conditionally checked against the previously loaded value, and reactivation writes `PRODUCT_REACTIVATED` audit metadata with previous and next status. Storefront eligibility additionally requires an active Store and active Variant.
+
 If `imageKey` is supplied, Backend accepts it only when:
 
 - key prefix matches `products/{organizationId}/{productId}/`
@@ -922,6 +924,8 @@ Request may contain:
 ```
 
 Returns `ProductVariantDTO`.
+
+**PROJECT DECISION — reversible Variant status:** Organization Admin may use `PATCH` with `{"status":"ACTIVE"}` to reactivate a soft-deactivated Variant in its existing Product, or `INACTIVE` to deactivate. Reactivation emits `VARIANT_REACTIVATED` with previous and next status. Ownership and previous state are checked, while OrderItem snapshots remain unchanged. An inactive Product or Store must not become publicly available merely because its Variant is active.
 
 ### 9.8 Delete Variant
 

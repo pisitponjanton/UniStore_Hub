@@ -65,7 +65,7 @@ test("delayed Product A readback 401 cannot logout Product B editor",async({brow
   await page.goto(frontend+"/org/stores/view/?organizationId="+ids.organizationId+"&storeId="+ids.storeId+"&tab=products",{waitUntil:"domcontentloaded"});
   await edit(page,a.name);
   await page.locator("#product-image-"+ids.productId).setInputFiles({name:"uxqa-inflight.png",mimeType:"image/png",buffer:png});
-  await page.getByRole("button",{name:"อัปโหลดรูปสินค้า"}).click();
+  await page.getByRole("button",{name:"บันทึกรูป"}).click();
   await expect.poll(()=>afterPatchReads).toBe(1);
   await expect(page.getByRole("button",{name:"กำลังตรวจสอบข้อมูลล่าสุด"})).toBeDisabled();
   await snap(page,"inflight-readback-pending","Readback GET is intentionally held after a single acknowledged PATCH");

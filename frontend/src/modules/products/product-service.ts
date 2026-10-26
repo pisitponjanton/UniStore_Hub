@@ -51,6 +51,7 @@ export interface ProductFormInput {
 }
 
 export interface ProductUpdateInput {
+  status?: "ACTIVE" | "INACTIVE";
   name?: string;
   description?: string;
   imageKey?: string | null;
@@ -62,6 +63,7 @@ export interface VariantFormInput {
 }
 
 export interface VariantUpdateInput {
+  status?: "ACTIVE" | "INACTIVE";
   name?: string;
   price?: number;
 }

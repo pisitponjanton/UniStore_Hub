@@ -64,7 +64,7 @@ test("late image GET response cannot replace a different selected Product",async
   await page.goto(frontend+"/org/stores/view/?organizationId="+ids.organizationId+"&storeId="+ids.storeId+"&tab=products",{waitUntil:"domcontentloaded"});
   await edit(page,a.name);
   await page.locator("#product-image-"+ids.productId).setInputFiles({name:"uxqa-inflight.png",mimeType:"image/png",buffer:png});
-  await page.getByRole("button",{name:"อัปโหลดรูปสินค้า"}).click();
+  await page.getByRole("button",{name:"บันทึกรูป"}).click();
   await expect.poll(()=>afterPatchReads).toBe(1);
   await expect(page.getByRole("button",{name:"กำลังตรวจสอบข้อมูลล่าสุด"})).toBeDisabled();
   await snap(page,"inflight-readback-pending","Readback GET is intentionally held after a single acknowledged PATCH");
@@ -84,7 +84,7 @@ test("late image GET response cannot replace a different selected Product",async
 
   await page.getByRole("link",{name:/กลับไปรายการสินค้า/}).click();
   await edit(page,a.name);
-  await expect(page.getByText("มีรูปสินค้าแล้ว").last()).toBeVisible();
+  await expect(page.getByText("เปลี่ยนรูปสินค้า",{exact:true}).last()).toBeVisible();
   await expect(page.getByRole("button",{name:"ตรวจสอบข้อมูลล่าสุดอีกครั้ง"})).toHaveCount(0);
   expect([signs,puts,patches,blocked]).toEqual([1,1,1,0]);
   await snap(page,"return-A-verified","A can be reopened without reupload; late GET completed verification");

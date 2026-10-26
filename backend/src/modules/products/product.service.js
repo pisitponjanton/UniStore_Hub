@@ -357,14 +357,22 @@ function createProductService(options = {}) {
         }
       }
 
+      const statusChanged = Object.prototype.hasOwnProperty.call(changes, 'status') &&
+        changes.status !== existing.status;
+      if (statusChanged) {
+        names['#previousStatus'] = 'status';
+        values[':previousStatus'] = existing.status;
+      }
       const audit = makeAudit({
         organizationId,
         actorId,
-        action: 'PRODUCT_UPDATED',
+        action: statusChanged && changes.status === PRODUCT_STATUS.ACTIVE
+          ? 'PRODUCT_REACTIVATED' : 'PRODUCT_UPDATED',
         resourceType: 'PRODUCT',
         resourceId: productId,
         metadata: {
           fields: Object.keys(changes),
+          ...(statusChanged ? { previousStatus: existing.status, nextStatus: changes.status } : {}),
         },
         timestamp,
       });
@@ -377,8 +385,9 @@ function createProductService(options = {}) {
               UpdateExpression: `SET ${assignments.join(', ')}`,
               ExpressionAttributeNames: names,
               ExpressionAttributeValues: values,
-              ConditionExpression:
-                'attribute_exists(PK) AND attribute_exists(SK)',
+              ConditionExpression: statusChanged
+                ? 'attribute_exists(PK) AND attribute_exists(SK) AND #previousStatus = :previousStatus'
+                : 'attribute_exists(PK) AND attribute_exists(SK)',
             },
           },
           {
@@ -543,15 +552,23 @@ function createProductService(options = {}) {
         }
       }
 
+      const statusChanged = Object.prototype.hasOwnProperty.call(changes, 'status') &&
+        changes.status !== existing.status;
+      if (statusChanged) {
+        names['#previousStatus'] = 'status';
+        values[':previousStatus'] = existing.status;
+      }
       const audit = makeAudit({
         organizationId,
         actorId,
-        action: 'VARIANT_UPDATED',
+        action: statusChanged && changes.status === VARIANT_STATUS.ACTIVE
+          ? 'VARIANT_REACTIVATED' : 'VARIANT_UPDATED',
         resourceType: 'PRODUCT_VARIANT',
         resourceId: variantId,
         metadata: {
           productId,
           fields: Object.keys(changes),
+          ...(statusChanged ? { previousStatus: existing.status, nextStatus: changes.status } : {}),
         },
         timestamp,
       });
@@ -568,8 +585,9 @@ function createProductService(options = {}) {
               UpdateExpression: `SET ${assignments.join(', ')}`,
               ExpressionAttributeNames: names,
               ExpressionAttributeValues: values,
-              ConditionExpression:
-                'attribute_exists(PK) AND attribute_exists(SK)',
+              ConditionExpression: statusChanged
+                ? 'attribute_exists(PK) AND attribute_exists(SK) AND #previousStatus = :previousStatus'
+                : 'attribute_exists(PK) AND attribute_exists(SK)',
             },
           },
           {

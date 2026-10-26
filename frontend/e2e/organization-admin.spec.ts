@@ -478,9 +478,7 @@ test("Organization Admin can manage members and Store lifecycle with confirmatio
   const editedStoreName = `${storeName} Edited`;
   await page.locator("#store-edit-name").fill(editedStoreName);
   await page
-    .getByRole("button", {
-      name: "บันทึกข้อมูล",
-    })
+    .getByRole("button", { name: "บันทึกข้อมูล" })
     .click();
   await expect(
     page.getByText(
@@ -650,7 +648,7 @@ test("Organization Admin can create and manage Product, Variant, and Product ima
   await page.locator("#product-edit-name").fill(editedProductName);
   await page
     .getByRole("button", {
-      name: "บันทึกข้อมูล",
+      name: "บันทึก", exact: true,
     })
     .click();
 
@@ -681,7 +679,7 @@ test("Organization Admin can create and manage Product, Variant, and Product ima
   });
   await page
     .getByRole("button", {
-      name: "อัปโหลดรูปสินค้า",
+      name: "บันทึกรูป",
     })
     .click();
   await expect(

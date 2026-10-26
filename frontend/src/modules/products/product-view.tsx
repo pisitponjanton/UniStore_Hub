@@ -38,11 +38,13 @@ import { formatIsoDateTime } from "@/utils";
 
 import {
   productStatusLabel,
+  mergeProductUpdateResponse,
   validateProductForm,
 } from "./product-helpers";
 import { ProductImageUploadView } from "./product-image-upload-view";
 import { productService } from "./product-service";
 import { VariantManagement } from "./variant-management";
+import { OperationToast } from "./operation-toast";
 import styles from "./product-view.module.css";
 
 type ProductState =
@@ -392,13 +394,17 @@ export function ProductManagementView({
               ...current,
               products: current.products.map((product) =>
                 product.productId === updated.productId
-                  ? updated
+                  ? mergeProductUpdateResponse(product, updated)
                   : product,
               ),
             }
           : current,
       );
-      setSelectedProduct(updated);
+      setSelectedProduct((current) =>
+        current?.productId === updated.productId
+          ? mergeProductUpdateResponse(current, updated)
+          : current,
+      );
       setEditName(updated.name);
       setEditDescription(updated.description);
       setNotice(`บันทึกข้อมูลสินค้า ${updated.name} แล้ว`);
@@ -462,6 +468,29 @@ export function ProductManagementView({
         return;
       }
 
+      setInlineError(operationErrorMessage(error));
+    } finally {
+      setDeactivatingProductId(null);
+    }
+  }
+
+  async function handleReactivate(product: ProductDTO) {
+    if (product.status !== "INACTIVE" || deactivatingProductId || savingProductId ||
+        loadingProductId || editName !== product.name || editDescription !== product.description) return;
+
+    setDeactivatingProductId(product.productId);
+    setInlineError(null);
+    setNotice(null);
+    try {
+      await productService.update(organizationId, product.productId, { status: "ACTIVE" });
+      const refreshed = await productService.get(organizationId, product.productId);
+      setState(current => current.status === "success"
+        ? { ...current, products: current.products.map(item =>
+            item.productId === refreshed.productId ? refreshed : item) } : current);
+      if (selectedProduct?.productId === refreshed.productId) setSelectedProduct(refreshed);
+      setNotice(`เปิดใช้งานสินค้า ${refreshed.name} แล้ว`);
+    } catch (error) {
+      if (isDefinitiveSessionFailure(error)) { authSession.logout(); return; }
       setInlineError(operationErrorMessage(error));
     } finally {
       setDeactivatingProductId(null);
@@ -582,11 +611,7 @@ export function ProductManagementView({
           </Notice>
         ) : null}
 
-        {notice ? (
-          <Notice tone="success" role="status" title="อัปเดตแล้ว">
-            {notice}
-          </Notice>
-        ) : null}
+        <OperationToast message={notice} onDismiss={() => setNotice(null)} />
 
         <div className={styles.grid}>
           {!detailProductId ? <section className={selectedProduct ? styles.hiddenSection : styles.section} aria-labelledby="product-list">
@@ -911,14 +936,37 @@ export function ProductManagementView({
                     {productStatusLabel(selectedProduct.status)}
                   </Badge>
                 </div>
-                {!standaloneDetail ? <div className={styles.metaRow}>
-                  <span className={styles.meta}>ร้านค้า: {storeNames.get(selectedProduct.storeId) ?? selectedProduct.storeId}</span>
+                <div className={standaloneDetail ? styles.productIdentityMeta : styles.metaRow}>
+                  {!standaloneDetail ? <span className={styles.meta}>ร้านค้า: {storeNames.get(selectedProduct.storeId) ?? selectedProduct.storeId}</span> : null}
                   <span className={styles.meta}>รหัสสินค้า: {selectedProduct.productId}</span>
-                </div> : null}
+                  {standaloneDetail ? <time className={styles.meta} dateTime={selectedProduct.updatedAt}>
+                    อัปเดตล่าสุด {formatIsoDateTime(selectedProduct.updatedAt)}
+                  </time> : null}
+                </div>
               </div>
-              {standaloneDetail ? <Button type="submit" form="product-detail-form"
-                pending={savingProductId === selectedProduct.productId}
-                pendingLabel="กำลังบันทึก" disabled={!editDirty}>บันทึกข้อมูล</Button> : detailProductId && fixedStoreId ? (
+              {standaloneDetail ? <div className={styles.productHeaderActions}>
+                {selectedProduct.status === "ACTIVE" ? (
+                  <ConfirmDialog key={selectedProduct.productId + ":active"}
+                    trigger={<Button variant="secondary" disabled={editDirty || Boolean(savingProductId) || Boolean(deactivatingProductId)}>ปิดใช้งาน</Button>}
+                    title="ยืนยันการปิดใช้งานสินค้า"
+                    description={`ปิดใช้งานสินค้า ${selectedProduct.name} ใช่หรือไม่ ข้อมูลคำสั่งซื้อเดิมจะยังคงอยู่`}
+                    confirmLabel="ปิดใช้งานสินค้า" danger pending={deactivatingProductId === selectedProduct.productId}
+                    onConfirm={() => { void handleDeactivate(selectedProduct); }}
+                  />
+                ) : (
+                  <ConfirmDialog key={selectedProduct.productId + ":inactive"}
+                    trigger={<Button variant="secondary" disabled={editDirty || Boolean(savingProductId) || Boolean(deactivatingProductId)}>เปิดใช้งาน</Button>}
+                    title="ยืนยันการเปิดใช้งานสินค้า"
+                    description={`เปิดใช้งานสินค้า ${selectedProduct.name} อีกครั้งใช่หรือไม่? การแสดงในหน้าร้านขึ้นอยู่กับสถานะร้านค้าและตัวเลือกด้วย`}
+                    confirmLabel="เปิดใช้งานสินค้า"
+                    pending={deactivatingProductId === selectedProduct.productId}
+                    onConfirm={() => { void handleReactivate(selectedProduct); }}
+                  />
+                )}
+                <Button type="submit" form="product-detail-form"
+                  pending={savingProductId === selectedProduct.productId}
+                  pendingLabel="กำลังบันทึก" disabled={!editDirty}>บันทึก</Button>
+              </div> : detailProductId && fixedStoreId ? (
                 <Link className={styles.detailLink} href={storeWorkspaceHref(organizationId, fixedStoreId, "products")}>← กลับไปรายการสินค้า</Link>
               ) : (
               <Button
@@ -931,9 +979,9 @@ export function ProductManagementView({
               )}
             </div>
 
-            {selectedProduct.status === "INACTIVE" ? (
+            {selectedProduct.status === "INACTIVE" && !standaloneDetail ? (
               <Notice tone="neutral" title="สินค้านี้ปิดใช้งานอยู่">
-                ยังสามารถตรวจสอบและแก้ไขข้อมูลที่รองรับได้ แต่ไม่มีการเปิดใช้งานกลับจากขั้นตอนลบสินค้าในหน้านี้
+                เปิดใช้งานสินค้าอีกครั้งได้จากหน้ารายละเอียดสินค้า
               </Notice>
             ) : null}
 
@@ -1039,6 +1087,7 @@ export function ProductManagementView({
             <VariantManagement
               compact={standaloneDetail}
               onDirtyChange={setVariantDirty}
+              onNotice={setNotice}
               organizationId={organizationId}
               product={selectedProduct}
               onProductRefreshed={(refreshed) => {
@@ -1057,12 +1106,7 @@ export function ProductManagementView({
                 );
               }}
             />
-            {standaloneDetail ? <details className={styles.technicalDetails}>
-              <summary>ข้อมูลระบบ</summary>
-              <p>รหัสสินค้า: {selectedProduct.productId}</p>
-              <p>อัปเดตล่าสุด: <time dateTime={selectedProduct.updatedAt}>
-                {formatIsoDateTime(selectedProduct.updatedAt)}</time></p>
-            </details> : null}
+
           </section>
         ) : null}
       </main>

@@ -58,7 +58,7 @@ test("readback after successful product image PATCH: retry GET only, no duplicat
   const card=page.getByRole("heading",{name:product.name,exact:true}).first().locator("xpath=ancestor::article");
   await expect(card).toBeVisible();
   await card.getByRole("link",{name:"แก้ไขสินค้า"}).click();
-  const file=page.locator("#product-image-"+ids.productId),action=page.getByRole("button",{name:"อัปโหลดรูปสินค้า"});
+  const file=page.locator("#product-image-"+ids.productId),action=page.getByRole("button",{name:"บันทึกรูป"});
   await expect(file).toBeEnabled();
   await file.setInputFiles({name:"uxqa-saved-image.png",mimeType:"image/png",buffer:png});
   await action.click();
@@ -89,10 +89,10 @@ test("readback after successful product image PATCH: retry GET only, no duplicat
   await expect.poll(()=>readback).toBe(4);
   await expect(page.getByText("อัปโหลดและบันทึกรูปสินค้าเรียบร้อยแล้ว")).toBeVisible();
   await expect(result).toBeFocused();
-  await expect(page.getByText("มีรูปสินค้าแล้ว").last()).toBeVisible();
+  await expect(page.getByRole("heading",{name:"รูปสินค้า"})).toBeVisible();
   await expect(file).toBeEnabled();
   await expect(retry).toHaveCount(0);
-  await expect(action).toBeDisabled();
+  await expect(action).toHaveCount(0);
   expect([signed,put,patch,readback,unexpected]).toEqual([1,1,1,4,0]);
   await screenshot(page,"get-only-recovery-success","Once GET confirms the same image key, normal editor resumes without extra upload");
   await page.close();
