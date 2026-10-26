@@ -55,7 +55,7 @@ test("Settings 503 repeat/recovery and Staff/Admin per-order detail, GET-only",a
     await proof(page,"FE-UX-15-01",role,"503-retry-focus","Repeat failure preserves error state and focuses main landmark");
     settingsFail=false;
     await page.getByRole("button",{name:"ลองโหลดอีกครั้ง"}).click();
-    const heading=page.getByRole("heading",{level:1,name:"ตั้งค่าหน่วยงาน"});
+    const heading=page.getByRole("heading",{level:1,name:"ข้อมูลหน่วยงาน"});
     await expect(page.locator("#organization-settings-name")).toHaveValue(organization.name);
     await expect(heading).toBeFocused();
     await proof(page,"FE-UX-15-01",role,"recovery-heading-focus","In-place Retry recovers scoped data and focuses page heading");

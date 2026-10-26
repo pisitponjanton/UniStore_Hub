@@ -1,6 +1,5 @@
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
 import type { OrganizationMemberDTO } from "@/types";
 
 const mocks = vi.hoisted(() => ({
@@ -11,134 +10,115 @@ const mocks = vi.hoisted(() => ({
   restore: vi.fn(),
   logout: vi.fn(),
 }));
-
 vi.mock("@/modules/auth", () => ({
-  authSession: {
-    restore: mocks.restore,
-    logout: mocks.logout,
-  },
+  authSession: { restore: mocks.restore, logout: mocks.logout },
   isDefinitiveSessionFailure: () => false,
 }));
-
 vi.mock("./staff-service", () => ({
   staffService: {
-    list: mocks.list,
-    add: mocks.add,
-    updateRole: mocks.updateRole,
-    remove: mocks.remove,
+    list: mocks.list, add: mocks.add, updateRole: mocks.updateRole, remove: mocks.remove,
   },
 }));
-
 import { StaffView } from "./staff-view";
 
 function member(
-  userId: string,
-  name: string,
-  role: "STAFF" | "ORGANIZATION_ADMIN",
+  userId: string, name: string, role: "STAFF" | "ORGANIZATION_ADMIN",
   status: "ACTIVE" | "INACTIVE" = "ACTIVE",
 ): OrganizationMemberDTO {
   return {
-    organizationId: "org-1",
-    userId,
-    role,
-    status,
-    user: {
-      userId,
-      email: `${userId}@example.com`,
-      name,
-    },
+    organizationId: "org-1", userId, role, status,
+    user: { userId, email: `${userId}@example.com`, name },
     createdAt: "2026-09-29T10:00:00.000Z",
     updatedAt: "2026-09-29T10:00:00.000Z",
   };
 }
 
-describe("StaffView", () => {
+describe("StaffView popup management", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("surfaces the final-admin guard and keeps its destructive action disabled", async () => {
+  it("protects the last active admin and keeps the member list compact", async () => {
     mocks.list.mockResolvedValue([
       member("admin-1", "Admin One", "ORGANIZATION_ADMIN"),
       member("staff-1", "Staff One", "STAFF"),
+      member("inactive-1", "Inactive One", "STAFF", "INACTIVE"),
     ]);
-
     render(<StaffView organizationId="org-1" />);
-
-    expect(
-      await screen.findByText(
-        "สมาชิกคนนี้เป็นผู้ดูแลหน่วยงานที่ใช้งานอยู่คนสุดท้าย จึงไม่สามารถลดสิทธิ์หรือนำออกได้",
-      ),
-    ).toBeInTheDocument();
-
-    const adminCard = screen
-      .getByRole("heading", { name: "Admin One" })
-      .closest("article");
-
-    expect(adminCard).not.toBeNull();
-    expect(
-      within(adminCard as HTMLElement).getByRole("button", {
-        name: "นำออก",
-      }),
-    ).toBeDisabled();
-    expect(screen.getAllByText("ผู้ดูแลหน่วยงาน").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("เจ้าหน้าที่").length).toBeGreaterThan(0);
+    await screen.findByRole("heading", { name: "Admin One" });
+    const row = screen.getByRole("heading", { name: "Admin One" }).closest("article");
+    expect(row).not.toBeNull();
+    expect(within(row as HTMLElement).queryByRole("combobox")).not.toBeInTheDocument();
+    expect(within(row as HTMLElement).queryByRole("button", { name: "นำออก" })).not.toBeInTheDocument();
+    fireEvent.click(within(row as HTMLElement).getByRole("button", { name: "จัดการสมาชิก Admin One" }));
+    const modal = screen.getByRole("dialog", { name: "จัดการสมาชิก" });
+    expect(within(modal).getByText(/ผู้ดูแลหน่วยงานที่ใช้งานอยู่คนสุดท้าย/)).toBeInTheDocument();
+    expect(within(modal).getByRole("button", { name: "นำออกจากหน่วยงาน" })).toBeDisabled();
+    fireEvent.change(within(modal).getByRole("combobox", { name: "บทบาท" }), {
+      target: { value: "STAFF" },
+    });
+    expect(within(modal).getByRole("button", { name: "บันทึกบทบาท" })).toBeDisabled();
+    expect(mocks.updateRole).not.toHaveBeenCalled();
+    expect(mocks.remove).not.toHaveBeenCalled();
+    fireEvent.click(within(modal).getByRole("button", { name: "ปิด" }));
+    fireEvent.click(screen.getByRole("button", { name: "จัดการสมาชิก Inactive One" }));
+    expect(within(screen.getByRole("dialog", { name: "จัดการสมาชิก" }))
+      .getByRole("button", { name: "นำออกจากหน่วยงาน" })).toBeDisabled();
   });
 
-  it("normalizes an email before adding a member and refreshes the list", async () => {
+  it("opens a popup to add a member, normalizes the email, and refreshes the list", async () => {
     const admin = member("admin-1", "Admin One", "ORGANIZATION_ADMIN");
     const newStaff = member("staff-2", "New Staff", "STAFF");
-
-    mocks.list
-      .mockResolvedValueOnce([admin])
-      .mockResolvedValueOnce([admin, newStaff]);
+    mocks.list.mockResolvedValueOnce([admin]).mockResolvedValueOnce([admin, newStaff]);
     mocks.add.mockResolvedValue(newStaff);
-
     render(<StaffView organizationId="org-1" />);
-
     await screen.findByRole("heading", { name: "Admin One" });
-
-    fireEvent.change(screen.getByRole("textbox", { name: /อีเมลผู้ใช้/ }), {
+    expect(screen.queryByRole("textbox", { name: /อีเมลผู้ใช้/ })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "เพิ่มสมาชิก" }));
+    const dialog = screen.getByRole("dialog", { name: "เพิ่มสมาชิก" });
+    fireEvent.change(within(dialog).getByRole("textbox", { name: /อีเมลผู้ใช้/ }), {
       target: { value: "  NEW@Example.COM  " },
     });
-    fireEvent.click(
-      screen.getByRole("button", { name: "เพิ่มสมาชิก" }),
-    );
-
-    await waitFor(() => {
-      expect(mocks.add).toHaveBeenCalledWith("org-1", {
-        email: "new@example.com",
-        role: "STAFF",
-      });
-    });
-
+    fireEvent.click(within(dialog).getByRole("button", { name: "เพิ่มสมาชิก" }));
+    await waitFor(() => expect(mocks.add).toHaveBeenCalledWith("org-1", {
+      email: "new@example.com", role: "STAFF",
+    }));
     expect(await screen.findByText("New Staff")).toBeInTheDocument();
-    expect(
-      screen.getByText("เพิ่ม new@example.com เป็นบุคลากรแล้ว"),
-    ).toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByRole("dialog", { name: "เพิ่มสมาชิก" })).not.toBeInTheDocument());
+    expect(screen.getByText("เพิ่ม new@example.com เป็นบุคลากรแล้ว")).toBeInTheDocument();
   });
 
-  it("focuses a validation summary when an invalid member email is submitted", async () => {
-    mocks.list.mockResolvedValue([
-      member("admin-1", "Admin One", "ORGANIZATION_ADMIN"),
-    ]);
-
+  it("focuses validation error summary inside the add popup", async () => {
+    mocks.list.mockResolvedValue([member("admin-1", "Admin One", "ORGANIZATION_ADMIN")]);
     render(<StaffView organizationId="org-1" />);
-
     await screen.findByRole("heading", { name: "Admin One" });
-
-    fireEvent.change(screen.getByRole("textbox", { name: /อีเมลผู้ใช้/ }), {
+    fireEvent.click(screen.getByRole("button", { name: "เพิ่มสมาชิก" }));
+    const dialog = screen.getByRole("dialog", { name: "เพิ่มสมาชิก" });
+    fireEvent.change(within(dialog).getByRole("textbox", { name: /อีเมลผู้ใช้/ }), {
       target: { value: "not-an-email" },
     });
-    fireEvent.click(
-      screen.getByRole("button", { name: "เพิ่มสมาชิก" }),
-    );
-
-    const summary = await screen.findByRole("alert");
-    expect(
-      screen.getByRole("link", { name: "กรุณาระบุอีเมลที่ถูกต้อง" }),
-    ).toHaveAttribute("href", "#staff-email");
-    await waitFor(() => expect(summary).toHaveFocus());
+    fireEvent.click(within(dialog).getByRole("button", { name: "เพิ่มสมาชิก" }));
+    expect(within(dialog).getByRole("link", { name: "กรุณาระบุอีเมลที่ถูกต้อง" }))
+      .toHaveAttribute("href", "#staff-email");
+    await waitFor(() => expect(within(dialog).getByRole("alert")).toHaveFocus());
     expect(mocks.add).not.toHaveBeenCalled();
+  });
+
+  it("keeps role changes behind confirmation in member popup", async () => {
+    const admin = member("admin-1", "Admin One", "ORGANIZATION_ADMIN");
+    const staff = member("staff-1", "Staff One", "STAFF");
+    mocks.list.mockResolvedValue([admin, staff]);
+    mocks.updateRole.mockResolvedValue({ ...staff, role: "ORGANIZATION_ADMIN" });
+    mocks.restore.mockResolvedValue({});
+    render(<StaffView organizationId="org-1" />);
+    await screen.findByRole("heading", { name: "Staff One" });
+    fireEvent.click(screen.getByRole("button", { name: "จัดการสมาชิก Staff One" }));
+    const dialog = screen.getByRole("dialog", { name: "จัดการสมาชิก" });
+    fireEvent.change(within(dialog).getByRole("combobox", { name: "บทบาท" }), {
+      target: { value: "ORGANIZATION_ADMIN" },
+    });
+    fireEvent.click(within(dialog).getByRole("button", { name: "บันทึกบทบาท" }));
+    expect(screen.getByRole("dialog", { name: "ยืนยันการเปลี่ยนบทบาท" })).toBeInTheDocument();
+    expect(mocks.updateRole).not.toHaveBeenCalled();
   });
 });

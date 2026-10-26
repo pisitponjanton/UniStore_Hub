@@ -1,0 +1,203 @@
+/* Independent organization settings layout: don't override the shared
+   organization-entry styles used by selection and application screens. */
+.page {
+  min-height: 100%;
+  min-width: 0;
+  background: var(--canvas);
+}
+.main {
+  display: grid;
+  align-content: start;
+  gap: clamp(23px, 2.9vw, 34px);
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: clamp(20px, 3vw, 36px) var(--page-gutter) var(--page-block-end);
+}
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px 24px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--line);
+  min-width: 0;
+}
+.heading {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+.title {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(1.9rem, 3.1vw, 2.6rem);
+  font-weight: 780;
+  letter-spacing: -.03em;
+  line-height: 1.2;
+}
+.description {
+  max-width: 58ch;
+  margin: 0;
+  color: var(--ink-secondary);
+  font-size: .91rem;
+  line-height: 1.5;
+}
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 35px;
+  padding: 5px 0;
+  color: var(--ink-secondary);
+  font-size: .82rem;
+  font-weight: 650;
+  white-space: nowrap;
+}
+.statusDot {
+  display: block;
+  width: 8px;
+  height: 8px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--ink-tertiary);
+}
+.status[data-status="ACTIVE"] { color: var(--success); }
+.status[data-status="ACTIVE"] .statusDot { background: var(--success); }
+.status[data-status="PENDING"] { color: var(--warning); }
+.status[data-status="PENDING"] .statusDot { background: var(--warning); }
+.status[data-status="SUSPENDED"] { color: var(--danger); }
+.status[data-status="SUSPENDED"] .statusDot { background: var(--danger); }
+
+.editSection {
+  width: 100%;
+  min-width: 0;
+}
+.form {
+  width: 100%;
+  max-width: 840px;
+  min-width: 0;
+  display: grid;
+  align-content: start;
+  gap: 20px;
+}
+.form textarea {
+  min-height: 114px;
+}
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 18px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+.saveHint {
+  flex: 1;
+  color: var(--ink-tertiary);
+  font-size: .78rem;
+  line-height: 1.5;
+}
+.actionButtons {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.actionButtons button { min-height: 43px; }
+
+.additional {
+  display: grid;
+  gap: 15px;
+  min-width: 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--line-soft);
+}
+.permissionsNote {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  max-width: 95ch;
+  color: var(--ink-secondary);
+  font-size: .83rem;
+  line-height: 1.7;
+}
+.infoIcon {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  margin-top: 3px;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  color: var(--ink-secondary);
+  font-size: .72rem;
+  font-weight: 700;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+.permissionsNote a {
+  color: var(--brand-strong);
+  font-weight: 650;
+  text-underline-offset: 3px;
+}
+.permissionsNote a:hover { text-decoration: underline; }
+.technicalDetails {
+  width: 100%;
+  min-width: 0;
+}
+.technicalDetails > summary {
+  display: list-item;
+  width: fit-content;
+  padding: 7px 0;
+  color: var(--ink-secondary);
+  font-size: .8rem;
+  font-weight: 600;
+  line-height: 1.5;
+  cursor: pointer;
+}
+.technicalDetails > summary:hover { color: var(--brand-strong); }
+.technicalDetails > summary:focus-visible,
+.permissionsNote a:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+.technicalList {
+  display: grid;
+  gap: 12px;
+  max-width: 840px;
+  margin: 9px 0 0;
+  padding-top: 15px;
+  border-top: 1px solid var(--line-soft);
+}
+.technicalList > div {
+  display: grid;
+  grid-template-columns: minmax(105px, 160px) minmax(0, 1fr);
+  gap: 10px;
+  align-items: baseline;
+}
+.technicalList dt {
+  color: var(--ink-tertiary);
+  font-size: .76rem;
+}
+.technicalList dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--ink-secondary);
+  font-size: .81rem;
+  line-height: 1.5;
+}
+@media (max-width: 620px) {
+  .main { gap: 21px; }
+  .header { padding-bottom: 17px; }
+  .status { min-height: 28px; }
+  .form { gap: 17px; }
+  .actions { align-items: stretch; }
+  .saveHint { flex-basis: 100%; }
+  .actionButtons { display: grid; width: 100%; grid-template-columns: minmax(0, 1fr); }
+  .actionButtons button { width: 100%; }
+  .technicalList > div { grid-template-columns: minmax(0, 1fr); gap: 3px; }
+}

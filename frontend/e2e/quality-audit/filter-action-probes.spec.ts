@@ -91,7 +91,7 @@ test("Notifications and Audit safe controls have state-scoped read-only evidence
       auditGets++;
       const cursor=url.searchParams.get("cursor"), filtered=url.searchParams.has("actorId")
         || url.searchParams.has("action") || url.searchParams.has("resourceType") || url.searchParams.has("resourceId");
-      const items=filtered?[auditB]:cursor?[auditB]:[auditA];
+      const items=filtered?[auditB]:cursor?[auditB]:Array.from({length:10},(_,i)=>({...auditA,auditId:auditA.auditId+"-"+i}));
       const nextCursor=filtered||cursor?null:"uxqa-audit-page-two";
       await route.fulfill({status:200,contentType:"application/json",
         body:JSON.stringify({success:true,data:{items,nextCursor}})});return;
@@ -101,16 +101,19 @@ test("Notifications and Audit safe controls have state-scoped read-only evidence
   try {
     const page=await admin.newPage();
     await page.goto(frontend+"/org/audit/?organizationId="+ids.organizationId,{waitUntil:"domcontentloaded"});
-    await expect(page.getByText("PAYMENT_APPROVED")).toBeVisible({timeout:16000});
-    const details=page.getByText("ดู metadata ของ PAYMENT uxqa-payment-a");
-    await details.click();
-    await expect(page.getByText(/"synthetic": true/)).toBeVisible();
+    await expect(page.getByRole("heading",{name:"อนุมัติการชำระเงิน"}).first()).toBeVisible({timeout:16000});
+    await page.getByRole("button",{name:"ดูรายละเอียด PAYMENT_APPROVED uxqa-audit-a-0",exact:true}).click();
+    const detail=page.getByRole("dialog",{name:"รายละเอียดเหตุการณ์"});
+    await expect(detail.getByText(/"synthetic": true/)).toBeVisible();
+    await detail.getByRole("button",{name:"ปิด",exact:true}).first().click();
     await pass(page,"FE-UX-25-07","organizationAdmin","metadata-expand","Audit metadata details reveal read-only JSON");
-    const more=page.getByRole("button",{name:"โหลดเพิ่มเติม"});
+    const more=page.getByRole("button",{name:"ถัดไป"});
     await more.click();
-    await expect(page.getByText("PICKUP_CONFIRMED")).toBeVisible();
+    await expect(page.getByRole("heading",{name:"ยืนยันการรับสินค้า"})).toBeVisible();
     await pass(page,"FE-UX-25-08","organizationAdmin","cursor-load-more","Loaded second audit item with cursor");
 
+    await page.getByRole("button",{name:"ตัวกรอง"}).click();
+    const filter=page.getByRole("dialog",{name:"ตัวกรองเหตุการณ์"});
     for(const entry of [
       {field:"#audit-actor-id",value:"  uxqa-staff-b  ",id:"FE-UX-25-01"},
       {field:"#audit-action",value:"  PICKUP_CONFIRMED  ",id:"FE-UX-25-02"},
@@ -121,17 +124,17 @@ test("Notifications and Audit safe controls have state-scoped read-only evidence
       await expect(page.locator(entry.field)).toHaveValue(entry.value);
       await pass(page,entry.id,"organizationAdmin","draft-filter","Draft filter stores entered text without API write");
     }
-    await page.getByRole("button",{name:"ค้นหา / กรอง"}).click();
+    await filter.getByRole("button",{name:"ค้นหา / กรอง"}).click();
     await expect.poll(()=>auditGets).toBeGreaterThan(1);
     await expect(page.getByText(/แสดง 1 เหตุการณ์ตามตัวกรอง/)).toBeVisible();
     await expect(page.locator("#audit-search-success")).toBeFocused();
     await expect.poll(() => page.locator("#audit-search-success").evaluate(el => {
       const rect=el.getBoundingClientRect();return rect.top < innerHeight && rect.bottom > 0;
     })).toBe(true);
-    await expect(page.locator("#audit-actor-id")).toHaveValue("uxqa-staff-b");
+    await expect(page.getByRole("group",{name:"ตัวกรองที่ใช้อยู่"})).toContainText("uxqa-staff-b");
     await pass(page,"FE-UX-25-05","organizationAdmin","server-search","Trimmed filter submitted as GET and applied");
-    await page.getByRole("button",{name:"แสดงทั้งหมด"}).click();
-    await expect(page.locator("#audit-actor-id")).toHaveValue("");
+    await page.getByRole("button",{name:"ล้างทั้งหมด"}).click();
+    await expect(page.getByRole("group",{name:"ตัวกรองที่ใช้อยู่"})).toHaveCount(0);
     await expect(page.getByText(/แสดง Audit Log ทั้งหมดที่โหลด/)).toBeVisible();
     await expect(page.locator("#audit-search-success")).toBeFocused();
     await pass(page,"FE-UX-25-06","organizationAdmin","clear-filters","Clear button resets draft and applied server filters");

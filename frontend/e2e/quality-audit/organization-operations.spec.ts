@@ -320,13 +320,13 @@ for (const theme of ["light", "dark"] as const) {
           await expect(page.getByText(organization.name).first()).toBeVisible();
         }
         if (route.name === "settings") {
-          const heading = page.getByRole("heading", { name: "ข้อมูลที่แสดง" });
+          const heading = page.getByRole("heading", { name: "ข้อมูลหน่วยงาน" });
           await expect(heading).toBeVisible();
           expect(await heading.evaluate(el => el.getBoundingClientRect().width), "settings heading must not shrink to a vertical word").toBeGreaterThan(145);
           const name = page.getByRole("textbox", { name: /ชื่อหน่วยงาน/ });
           await expect(name).toHaveValue(organization.name);
           await name.fill("");
-          await page.getByRole("button", { name: "บันทึกการเปลี่ยนแปลง" }).click();
+          await page.getByRole("button", { name: "บันทึกข้อมูล" }).click();
           await expect(page.getByRole("link", { name: "กรุณาระบุชื่อหน่วยงาน" })).toHaveAttribute("href", "#organization-settings-name");
         }
         if (route.name === "staff") {

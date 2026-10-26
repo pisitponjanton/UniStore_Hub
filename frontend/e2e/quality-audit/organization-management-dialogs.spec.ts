@@ -20,7 +20,7 @@ test("live Local organization management confirm dialogs open and cancel without
     await route.continue();
   });
   const cases = [
-    { name: "staff-remove", path: "/org/staff/", label: "นำออก", modal: "ยืนยันการนำสมาชิกออก" },
+    { name: "staff-remove", path: "/org/staff/", label: "นำออกจากหน่วยงาน", modal: "ยืนยันการนำสมาชิกออก" },
     { name: "stores-status", path: "/org/stores/", label: /^(ปิดใช้งาน|เปิดใช้งาน)$/, modal: /^ยืนยันการ(ปิด|เปิด)ใช้งานร้านค้า$/ },
     { name: "products-status", path: "/org/products/", label: "ปิดใช้งาน", modal: "ยืนยันการปิดใช้งานสินค้า" },
   ] as const;
@@ -36,6 +36,10 @@ test("live Local organization management confirm dialogs open and cancel without
       await page.goto(frontend + path, { waitUntil: "domcontentloaded" });
       const search = page.getByRole("searchbox", { name: /ค้นหา(สมาชิก|ร้านค้า|สินค้า)/ });
       await expect(search).toBeVisible({ timeout: 20000 });
+      if (c.name === "staff-remove") {
+        const manage = page.getByRole("button", { name: /จัดการสมาชิก/ });
+        if (await manage.count()) await manage.last().click();
+      }
       const buttons = page.getByRole("button", { name: c.label, exact: true });
       let trigger = null;
       for (const button of await buttons.all()) {

@@ -7,7 +7,6 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 
 import {
-  Badge,
   Button,
   ErrorState,
   ErrorSummary,
@@ -30,6 +29,7 @@ import { formatIsoDateTime } from "@/utils";
 import { validateOrganizationForm } from "./organization-helpers";
 import { organizationService } from "./organization-service";
 import styles from "./organization-view.module.css";
+import layout from "./organization-settings-layout.module.css";
 
 type SettingsState =
   | { status: "loading" }
@@ -47,19 +47,6 @@ function organizationStatusLabel(status: OrganizationDTO["status"]) {
       return "พร้อมใช้งาน";
     case "SUSPENDED":
       return "ถูกระงับ";
-  }
-}
-
-function organizationStatusTone(
-  status: OrganizationDTO["status"],
-): "warning" | "success" | "danger" {
-  switch (status) {
-    case "PENDING":
-      return "warning";
-    case "ACTIVE":
-      return "success";
-    case "SUSPENDED":
-      return "danger";
   }
 }
 
@@ -231,7 +218,7 @@ export function OrganizationSettingsView({
     return (
       <div className={styles.page}>
         <main className={styles.stateWrap} tabIndex={-1} data-organization-settings-result>
-          <PageStateHeading title="ตั้งค่าหน่วยงาน" description="ตรวจสอบและจัดการข้อมูลหน่วยงาน" />
+          <PageStateHeading title="ข้อมูลหน่วยงาน" description="ตรวจสอบและจัดการข้อมูลหน่วยงาน" />
           {state.status === "loading" ? <PageLoadingRows /> : null}
           {state.status === "loading" ? (
             <LoadingState
@@ -279,138 +266,73 @@ export function OrganizationSettingsView({
     description !== organization.description;
 
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <header className={styles.settingsHeader} data-organization-status={organization.status}>
-          <div className={styles.headerCopy}>
-            <span className={styles.managementEyebrow}>กำลังดูแล: {organization.name}</span>
-            <h1 className={styles.title} tabIndex={-1} data-organization-settings-result>ตั้งค่าหน่วยงาน</h1>
-            <p className={styles.description}>
-              แก้ไขข้อมูลที่ผู้ใช้เห็นได้ โดยไม่กระทบสถานะอนุมัติ สิทธิ์สมาชิก หรือขอบเขตอำนาจของ Platform Admin
-            </p>
+    <div className={layout.page}>
+      <main className={layout.main}>
+        <header className={layout.header}>
+          <div className={layout.heading}>
+            <h1 className={layout.title} tabIndex={-1} data-organization-settings-result>
+              ข้อมูลหน่วยงาน
+            </h1>
+            <p className={layout.description}>จัดการชื่อและรายละเอียดของหน่วยงาน</p>
           </div>
-
-          <div className={styles.statusBlock}>
-            <span className={styles.statusLabel}>สถานะปัจจุบัน</span>
-            <Badge tone={organizationStatusTone(organization.status)}>
-              {organizationStatusLabel(organization.status)}
-            </Badge>
-          </div>
+          <span className={layout.status} data-status={organization.status}>
+            <span className={layout.statusDot} aria-hidden="true" />
+            {organizationStatusLabel(organization.status)}
+          </span>
         </header>
 
-        <details className={styles.referenceDisclosure}>
-          <summary>ดูรหัสหน่วยงานและประวัติการอัปเดต</summary>
-          <dl className={styles.referenceStrip} aria-label="ข้อมูลอ้างอิงหน่วยงาน">
-          <div>
-            <dt className={styles.detailLabel}>รหัสหน่วยงาน</dt>
-            <dd className={styles.detailValue} data-technical>
-              {organization.organizationId}
-            </dd>
-          </div>
-          <div>
-            <dt className={styles.detailLabel}>สร้างเมื่อ</dt>
-            <dd className={styles.detailValue}>
-              <time dateTime={organization.createdAt}>
-                {formatIsoDateTime(organization.createdAt)}
-              </time>
-            </dd>
-          </div>
-          <div>
-            <dt className={styles.detailLabel}>อัปเดตล่าสุด</dt>
-            <dd className={styles.detailValue}>
-              <time dateTime={organization.updatedAt}>
-                {formatIsoDateTime(organization.updatedAt)}
-              </time>
-            </dd>
-          </div>
-          </dl>
-        </details>
-
-        <div className={styles.settingsWorkspace}>
-          <section className={styles.settingsPanel} aria-labelledby="organization-edit">
-            <div className={styles.sectionHeading}>
-              <div>
-                <h2 className={styles.sectionTitle} id="organization-edit">
-                  ข้อมูลที่แสดง
-                </h2>
-              </div>
-              <p className={styles.sectionDescription}>
-                การเปลี่ยนแปลงด้านล่างมีผลกับหน่วยงานนี้เท่านั้น และจะบันทึกเมื่อกดปุ่มยืนยัน
+        <section className={layout.editSection} aria-label="แก้ไขข้อมูลหน่วยงาน">
+          <form className={layout.form} onSubmit={handleSubmit} noValidate>
+            <ErrorSummary
+              ref={invalidSummaryRef}
+              id="organization-settings-error-summary"
+              items={nameError ? [{
+                fieldId: "organization-settings-name",
+                message: nameError,
+              }] : []}
+            />
+            <TextField
+              id="organization-settings-name"
+              label="ชื่อหน่วยงาน"
+              value={name}
+              onChange={(event) => {
+                setName(event.target.value);
+                setInvalidSubmitRevision(0);
+                setNameError(undefined);
+                setSaved(false);
+                setSaveError(null);
+              }}
+              error={nameError}
+              announceError={false}
+              required
+              disabled={saving}
+            />
+            <TextareaField
+              id="organization-settings-description"
+              label="คำอธิบาย"
+              value={description}
+              onChange={(event) => {
+                setDescription(event.target.value);
+                setSaved(false);
+                setSaveError(null);
+              }}
+              disabled={saving}
+            />
+            {saved ? (
+              <Notice tone="success" role="status" title="บันทึกแล้ว">
+                ข้อมูลหน่วยงานถูกอัปเดตเรียบร้อย
+              </Notice>
+            ) : null}
+            {saveError ? (
+              <Notice tone="danger" role="alert" title="บันทึกไม่สำเร็จ">
+                {saveError}
+              </Notice>
+            ) : null}
+            <div className={layout.actions}>
+              <p className={layout.saveHint} role="status">
+                {isDirty ? "มีการเปลี่ยนแปลงที่ยังไม่บันทึก" : saved ? "บันทึกข้อมูลล่าสุดแล้ว" : "ไม่มีการเปลี่ยนแปลง"}
               </p>
-            </div>
-
-            <form className={styles.settingsForm} onSubmit={handleSubmit} noValidate>
-              <ErrorSummary
-                ref={invalidSummaryRef}
-                id="organization-settings-error-summary"
-                items={
-                  nameError
-                    ? [
-                        {
-                          fieldId: "organization-settings-name",
-                          message: nameError,
-                        },
-                      ]
-                    : []
-                }
-              />
-              <TextField
-                id="organization-settings-name"
-                label="ชื่อหน่วยงาน"
-                value={name}
-                onChange={(event) => {
-                  setName(event.target.value);
-                  setInvalidSubmitRevision(0);
-                  setNameError(undefined);
-                  setSaved(false);
-                  setSaveError(null);
-                }}
-                error={nameError}
-                announceError={false}
-                required
-                disabled={saving}
-              />
-
-              <TextareaField
-                id="organization-settings-description"
-                label="คำอธิบาย"
-                value={description}
-                onChange={(event) => {
-                  setDescription(event.target.value);
-                  setSaved(false);
-                  setSaveError(null);
-                }}
-                disabled={saving}
-              />
-
-              {saved ? (
-                <Notice tone="success" role="status" title="บันทึกแล้ว">
-                  ข้อมูลหน่วยงานถูกอัปเดตเรียบร้อย
-                </Notice>
-              ) : null}
-
-              {saveError ? (
-                <Notice tone="danger" role="alert" title="บันทึกไม่สำเร็จ">
-                  {saveError}
-                </Notice>
-              ) : null}
-
-              {isDirty ? (
-                <p className={styles.unsavedHint} role="status">
-                  มีข้อมูลที่แก้ไขแต่ยังไม่ได้บันทึก การคืนค่าจะยกเลิกเฉพาะข้อมูลในฟอร์มนี้
-                </p>
-              ) : null}
-
-              <div className={styles.settingsActions}>
-                <Button
-                  type="submit"
-                  formNoValidate
-                  pending={saving}
-                  pendingLabel="กำลังบันทึก"
-                  disabled={!isDirty}
-                >
-                  บันทึกการเปลี่ยนแปลง
-                </Button>
+              <div className={layout.actionButtons}>
                 {isDirty ? (
                   <Button
                     type="button"
@@ -422,43 +344,53 @@ export function OrganizationSettingsView({
                       setNameError(undefined);
                       setSaveError(null);
                       setSaved(false);
+                      setInvalidSubmitRevision(0);
                     }}
                   >
-                    คืนค่าที่ยังไม่บันทึก
+                    คืนค่า
                   </Button>
                 ) : null}
-                {!isDirty && !saved ? (
-                  <span className={styles.unsavedHint}>
-                    ไม่มีการแก้ไขที่รอบันทึก
-                  </span>
-                ) : null}
+                <Button
+                  type="submit"
+                  formNoValidate
+                  pending={saving}
+                  pendingLabel="กำลังบันทึก"
+                  disabled={!isDirty}
+                >
+                  บันทึกข้อมูล
+                </Button>
               </div>
-            </form>
-          </section>
-
-          <aside className={styles.governancePanel} aria-labelledby="organization-governance">
-            <div>
-              <h2 className={styles.sectionTitle} id="organization-governance">
-                สิ่งที่หน้านี้เปลี่ยนไม่ได้
-              </h2>
             </div>
+          </form>
+        </section>
 
-            <ul className={styles.governanceList}>
-              <li>
-                <strong>สถานะหน่วยงาน</strong>
-                <span>อนุมัติหรือระงับโดย Platform Admin</span>
-              </li>
-              <li>
-                <strong>สิทธิ์สมาชิก</strong>
-                <span>จัดการผ่านส่วนสมาชิกของหน่วยงานตามสิทธิ์ที่กำหนด</span>
-              </li>
-              <li>
-                <strong>ข้อมูลธุรกรรม</strong>
-                <span>ยอดคำสั่งซื้อ การชำระเงิน และการรับสินค้าไม่เปลี่ยนจากหน้านี้</span>
-              </li>
-            </ul>
-          </aside>
-        </div>
+        <section className={layout.additional} aria-label="ข้อมูลเพิ่มเติมเกี่ยวกับหน่วยงาน">
+          <p className={layout.permissionsNote}>
+            <span aria-hidden="true" className={layout.infoIcon}>i</span>
+            <span>สถานะหน่วยงานอนุมัติหรือระงับโดย Platform Admin ส่วนสิทธิ์สมาชิกจัดการในหน้า
+              {" "}<Link href={`/org/staff/?organizationId=${encodeURIComponent(organizationId)}`}>บุคลากรและสิทธิ์</Link>
+              {" "}และการแก้ไขข้อมูลนี้ไม่กระทบธุรกรรม
+            </span>
+          </p>
+
+          <details className={layout.technicalDetails}>
+            <summary>ข้อมูลทางเทคนิคและประวัติหน่วยงาน</summary>
+            <dl className={layout.technicalList} aria-label="ข้อมูลอ้างอิงหน่วยงาน">
+              <div>
+                <dt>รหัสหน่วยงาน</dt>
+                <dd data-technical>{organization.organizationId}</dd>
+              </div>
+              <div>
+                <dt>สร้างเมื่อ</dt>
+                <dd><time dateTime={organization.createdAt}>{formatIsoDateTime(organization.createdAt)}</time></dd>
+              </div>
+              <div>
+                <dt>อัปเดตล่าสุด</dt>
+                <dd><time dateTime={organization.updatedAt}>{formatIsoDateTime(organization.updatedAt)}</time></dd>
+              </div>
+            </dl>
+          </details>
+        </section>
       </main>
     </div>
   );

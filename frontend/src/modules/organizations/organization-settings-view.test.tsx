@@ -63,7 +63,7 @@ describe("OrganizationSettingsView", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: "บันทึกการเปลี่ยนแปลง",
+        name: "บันทึกข้อมูล",
       }),
     );
 
@@ -91,7 +91,7 @@ describe("OrganizationSettingsView", () => {
 
     expect(mocks.get).toHaveBeenCalledTimes(2);
     await screen.findByLabelText(/ชื่อหน่วยงาน/);
-    expect(screen.getByRole("heading", { name: "ตั้งค่าหน่วยงาน", level: 1 })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "ข้อมูลหน่วยงาน", level: 1 })).toBeInTheDocument();
   });
 
   it("reports invalid editable data through a focusable error summary", async () => {
@@ -104,7 +104,7 @@ describe("OrganizationSettingsView", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: "บันทึกการเปลี่ยนแปลง",
+        name: "บันทึกข้อมูล",
       }),
     );
 
