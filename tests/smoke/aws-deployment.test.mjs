@@ -50,7 +50,7 @@ async function detectDeployment() {
 
   try {
     const expectedAccount = process.env.TEST_AWS_EXPECTED_ACCOUNT_ID;
-    if (!/^\\d{12}$/.test(expectedAccount || '')) {
+    if (!/^\d{12}$/.test(expectedAccount || '')) {
       return {
         ready: false,
         reason: 'TEST_AWS_EXPECTED_ACCOUNT_ID must name the 12-digit authorized Learner Lab account',
@@ -253,13 +253,15 @@ test('AWS-006 deployed FilesBucket is not publicly readable', async (t) => {
     RestrictPublicBuckets: true,
   });
 
-  const policyStatus = await runAwsJson([
-    's3api',
-    'get-bucket-policy-status',
-    '--bucket',
-    bucket,
-  ]);
-  assert.equal(policyStatus?.PolicyStatus?.IsPublic, false);
+  // A missing bucket policy is private when every PublicAccessBlock flag is on.
+  try {
+    const policyStatus = await runAwsJson([
+      's3api', 'get-bucket-policy-status', '--bucket', bucket,
+    ]);
+    assert.equal(policyStatus?.PolicyStatus?.IsPublic, false);
+  } catch (error) {
+    if (!/NoSuchBucketPolicy/.test(error?.stderr || '')) throw error;
+  }
 });
 
 test('AWS-007 NotificationQueue is connected to WorkerFunction through an enabled event source mapping', async (t) => {
@@ -314,7 +316,7 @@ test('AWS-008 Backend and Worker emit CloudWatch logs after invocation', async (
   assert.equal(healthResponse.status, 200);
 
   // Empty SQS batch exercises the deployed Worker handler without creating
-  // business data. The AWS CLI writes Lambda payload output to /dev/stdout.
+  // business data. AWS CLI writes the invocation payload to a local temp file.
   await execFileAsync(
     'aws',
     [
@@ -328,7 +330,7 @@ test('AWS-008 Backend and Worker emit CloudWatch logs after invocation', async (
       '{"Records":[]}',
       '--region',
       REGION,
-      '/dev/stdout',
+      '/tmp/unistore-hub-worker-invoke.json',
     ],
     {
       timeout: 30000,
@@ -337,22 +339,28 @@ test('AWS-008 Backend and Worker emit CloudWatch logs after invocation', async (
     },
   );
 
-  await new Promise((resolve) => setTimeout(resolve, 1500));
-
+  // CloudWatch log stream creation can lag behind Lambda invocation.
+  // Bound retries so a fresh Learner Lab deploy is not flagged as a failure.
   for (const functionName of [backendName, workerName]) {
     const groupName = `/aws/lambda/${functionName}`;
-    const streams = await runAwsJson([
-      'logs',
-      'describe-log-streams',
-      '--log-group-name',
-      groupName,
-      '--order-by',
-      'LastEventTime',
-      '--descending',
-      '--limit',
-      '1',
-    ]);
-
+    let streams = null;
+    for (let attempt = 0; attempt < 12; attempt += 1) {
+      streams = await runAwsJson([
+        'logs',
+        'describe-log-streams',
+        '--log-group-name',
+        groupName,
+        '--order-by',
+        'LastEventTime',
+        '--descending',
+        '--limit',
+        '1',
+      ]);
+      if ((streams?.logStreams || []).length > 0) break;
+      if (attempt < 11) {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+    }
     assert.ok(
       (streams?.logStreams || []).length > 0,
       `Expected CloudWatch log stream for ${functionName}`,

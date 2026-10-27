@@ -44,27 +44,57 @@ require_command aws
 validate_deployment_baseline
 validate_aws_identity
 
-# Reading the complete canonical output set both verifies that the target stack
-# exists and provides the only application bucket names this script may empty.
-load_stack_outputs
-
+# Resolve only resources owned by this exact stack. Stack outputs are often
+# absent after a failed CREATE; physical resources remain discoverable through
+# CloudFormation even if the stack rolled back.
 ARTIFACT_BUCKET="unistore-hub-cfn-artifacts-${AWS_ACCOUNT_ID}-${AWS_REGION}"
+FrontendBucketName=""
+FilesBucketName=""
+STACK_PRESENT=false
+stack_description="$(aws cloudformation describe-stacks --stack-name "${STACK_NAME}" --region "${AWS_REGION}" --query 'Stacks[0].Description' --output text 2>/dev/null || true)"
+if [[ -n "${stack_description}" && "${stack_description}" != "None" ]]; then
+  [[ "${stack_description}" == *"UniStore Hub AWS Academy Learner Lab infrastructure"* ]] \
+    || die "Stack description does not match UniStore Hub; refusing deletion."
+
+  STACK_PRESENT=true
+  # Load canonical outputs when available. Failed CREATE stacks may have none,
+  # so they must not depend on load_stack_outputs.
+  for logical_id in FrontendBucket FilesBucket; do
+    physical_id="$(aws cloudformation list-stack-resources \
+      --stack-name "${STACK_NAME}" --region "${AWS_REGION}" \
+      --query "StackResourceSummaries[?LogicalResourceId=='${logical_id}'].PhysicalResourceId | [0]" \
+      --output text)" || die "Cannot verify physical resource ${logical_id}."
+    if [[ -n "${physical_id}" && "${physical_id}" != "None" ]]; then
+      bucket_lower="$(printf '%s' "${physical_id}" | tr '[:upper:]' '[:lower:]')"
+      case "${logical_id}:${bucket_lower}" in
+        "FrontendBucket:${STACK_NAME}-frontendbucket-"*|"FilesBucket:${STACK_NAME}-filesbucket-"*) ;;
+        *) die "Unexpected S3 physical resource for ${logical_id}; refusing deletion." ;;
+      esac
+      if [[ "${logical_id}" == "FrontendBucket" ]]; then
+        FrontendBucketName="${physical_id}"
+      else
+        FilesBucketName="${physical_id}"
+      fi
+    fi
+  done
+fi
 
 validate_bucket_name() {
   local label="${1:?label is required}"
-  local bucket_name="${2:?bucket name is required}"
-
-  [[ "${bucket_name}" =~ ^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$ ]]     || die "${label} is not a valid S3 bucket name: ${bucket_name}"
+  local bucket_name="${2:-}"
+  [[ -z "${bucket_name}" ]] && return 0
+  [[ "${bucket_name}" =~ ^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$ ]] \
+    || die "${label} is not a valid S3 bucket name: ${bucket_name}"
 }
-
 validate_bucket_name "FrontendBucketName" "${FrontendBucketName}"
 validate_bucket_name "FilesBucketName" "${FilesBucketName}"
 validate_bucket_name "Artifact bucket" "${ARTIFACT_BUCKET}"
-
-[[ "${FrontendBucketName}" != "${FilesBucketName}" ]]   || die "FrontendBucketName and FilesBucketName unexpectedly resolve to the same bucket."
-
-[[ "${FrontendBucketName}" != "${ARTIFACT_BUCKET}" ]]   || die "FrontendBucketName unexpectedly matches the tooling artifact bucket."
-[[ "${FilesBucketName}" != "${ARTIFACT_BUCKET}" ]]   || die "FilesBucketName unexpectedly matches the tooling artifact bucket."
+[[ -z "${FrontendBucketName}" || "${FrontendBucketName}" != "${FilesBucketName}" ]] \
+  || die "FrontendBucketName and FilesBucketName unexpectedly match."
+[[ "${FrontendBucketName}" != "${ARTIFACT_BUCKET}" ]] \
+  || die "FrontendBucketName unexpectedly matches artifact bucket."
+[[ "${FilesBucketName}" != "${ARTIFACT_BUCKET}" ]] \
+  || die "FilesBucketName unexpectedly matches artifact bucket."
 
 printf '\nDestructive target verification\n'
 printf 'AWS Account: %s\n' "${AWS_ACCOUNT_ID}"
@@ -89,20 +119,29 @@ else
 fi
 
 empty_stack_bucket() {
-  local bucket_name="${1:?bucket name is required}"
+  local bucket_name="${1:-}"
 
   log_info "Emptying verified stack bucket: ${bucket_name}"
-  aws s3 rm     "s3://${bucket_name}"     --recursive     --region "${AWS_REGION}"     || die "Failed to empty verified stack bucket: ${bucket_name}"
+  [[ -n "${bucket_name}" ]] || return 0
+  if aws s3api head-bucket --bucket "${bucket_name}" --region "${AWS_REGION}" >/dev/null 2>&1; then
+    aws s3 rm "s3://${bucket_name}" --recursive --region "${AWS_REGION}" \
+      || die "Failed to empty verified stack bucket: ${bucket_name}"
+  fi
 }
 
 empty_stack_bucket "${FrontendBucketName}"
 empty_stack_bucket "${FilesBucketName}"
 
-log_info "Deleting CloudFormation stack: ${STACK_NAME}"
-aws cloudformation delete-stack   --stack-name "${STACK_NAME}"   --region "${AWS_REGION}"   || die "Failed to start deletion for stack ${STACK_NAME}."
-
-log_info "Waiting for stack deletion to complete"
-aws cloudformation wait stack-delete-complete   --stack-name "${STACK_NAME}"   --region "${AWS_REGION}"   || die "CloudFormation stack deletion did not complete successfully for ${STACK_NAME}."
+if [[ "${STACK_PRESENT}" == true ]]; then
+  log_info "Deleting CloudFormation stack: ${STACK_NAME}"
+  aws cloudformation delete-stack --stack-name "${STACK_NAME}" --region "${AWS_REGION}" \
+    || die "Failed to start deletion for stack ${STACK_NAME}."
+  log_info "Waiting for stack deletion to complete"
+  aws cloudformation wait stack-delete-complete --stack-name "${STACK_NAME}" --region "${AWS_REGION}" \
+    || die "CloudFormation stack deletion did not complete successfully for ${STACK_NAME}."
+else
+  log_info "Stack is already absent; checking tooling artifacts only."
+fi
 
 # The packaging bucket is the one documented exception to CloudFormation-only
 # resource creation. Its exact name is derived from the already-verified
@@ -118,3 +157,13 @@ else
 fi
 
 log_info "UniStore Hub development stack destroy completed."
+
+# Final verification must not report successful cleanup while owned resources
+# are still visible. Keep unrelated Learner Lab stacks and roles untouched.
+if aws cloudformation describe-stacks --stack-name "${STACK_NAME}" --region "${AWS_REGION}" >/dev/null 2>&1; then
+  die "Cleanup incomplete: ${STACK_NAME} still exists."
+fi
+if aws s3api head-bucket --bucket "${ARTIFACT_BUCKET}" --region "${AWS_REGION}" >/dev/null 2>&1; then
+  die "Cleanup incomplete: deployment artifact bucket still exists."
+fi
+log_info "Verified UniStore Hub stack and deployment artifact bucket absent."

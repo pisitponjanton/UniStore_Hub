@@ -300,10 +300,8 @@ Resources:
       RestApiId: !Ref ApiGatewayRestApi
       DeploymentId: !Ref ApiGatewayDeployment
       StageName: !Ref StageName
-      AccessLogSetting:
-        DestinationArn: !GetAtt ApiAccessLogGroup.Arn
-        Format: >-
-          {"requestId":"$context.requestId","httpMethod":"$context.httpMethod","resourcePath":"$context.resourcePath","status":"$context.status","integrationErrorMessage":"$context.integrationErrorMessage"}
+      # Learner Lab does not expose the account-level API Gateway CloudWatch role.
+      # Lambda and Worker CloudWatch logs remain enabled; Stage metrics are retained.
       MethodSettings:
         - ResourcePath: "/*"
           HttpMethod: "*"

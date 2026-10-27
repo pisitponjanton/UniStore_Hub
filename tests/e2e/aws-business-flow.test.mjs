@@ -205,11 +205,11 @@ test('AWS-BUSINESS-001 isolated AWS register -> S3 -> payment -> SQS -> pickup -
       method: 'POST', token: admin.token, expectedStatus: 200,
     });
   }
-  await waitForNotification(base, customer.token, {
-    type: 'READY_FOR_PICKUP', resourceId: orderId, attempts: 40,
-  });
   const pickup = await apiJson(base, `/api/v1/me/orders/${orderId}/pickup`, {
     token: customer.token, expectedStatus: 200,
+  });
+  await waitForNotification(base, customer.token, {
+    type: 'READY_FOR_PICKUP', resourceId: pickup.data.pickupId, attempts: 40,
   });
   await apiJson(base,
     `/api/v1/organizations/${organizationId}/pickups/${pickup.data.pickupId}/confirm`, {

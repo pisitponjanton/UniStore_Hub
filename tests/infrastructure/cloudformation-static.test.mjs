@@ -182,7 +182,7 @@ test('INFRA-CFN-009 API Gateway proxy/deployment/stage and Lambda invoke permiss
   );
 
   assert.ok(stage.includes('DeploymentId: !Ref ApiGatewayDeployment'));
-  assert.ok(stage.includes('AccessLogSetting:'));
+  assert.ok(!stage.includes('AccessLogSetting:'), 'Learner Lab stage must not require the API Gateway CloudWatch account role');
   assert.ok(permission.includes('Principal: apigateway.amazonaws.com'));
   assert.ok(permission.includes('${ApiGatewayRestApi}/*/*/*'));
 });

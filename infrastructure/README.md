@@ -13,7 +13,9 @@ AWS CloudFormation infrastructure for the UniStore Hub AWS Academy Learner Lab d
 - Database: one DynamoDB application table
 - Files: private Amazon S3 bucket
 - Notifications: Amazon SQS → Worker Lambda → DynamoDB
-- Logs/metrics: Amazon CloudWatch
+- Logs/metrics: Amazon CloudWatch (Lambda/Worker logs and API Stage metrics)
+
+**Learner Lab limitation:** API Gateway REST Stage access logging is disabled by default because the lab account does not configure an API Gateway CloudWatch Logs role ARN. Attempting to set `AccessLogSetting` causes the CloudFormation Stage to fail. Backend/Worker Lambda log groups and API Stage metrics remain enabled. An unused API access log group may exist in this baseline, but API Gateway does not write to it.
 
 This Learner Lab baseline intentionally does not use CloudFront, Cognito, SES, EC2, RDS, NAT Gateway, Load Balancer, ECS, EKS, a custom Lambda execution role, or a project-specific SQS DLQ.
 

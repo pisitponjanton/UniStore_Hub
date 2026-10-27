@@ -191,10 +191,9 @@ check({
 } <= deployment_dependencies, "ApiGatewayDeployment dependencies incomplete")
 
 stage = resources["ApiGatewayStage"]["Properties"]
-check(bool(stage.get("AccessLogSetting")), "API access logging missing")
-access_format = str(stage.get("AccessLogSetting", {}).get("Format", ""))
-check("Authorization" not in access_format and "JWT" not in access_format,
-      "API access log format must not include Authorization/JWT")
+# API Gateway account logging requires a CloudWatch role setting unavailable in Learner Lab.
+# Keep Lambda/Worker logs and MethodSettings metrics; do not require API access logs.
+check("AccessLogSetting" not in stage, "Lab API stage must not require account-level CloudWatch logging role")
 settings = stage.get("MethodSettings", [])
 check(settings and settings[0].get("MetricsEnabled") is True, "API stage metrics must be enabled")
 

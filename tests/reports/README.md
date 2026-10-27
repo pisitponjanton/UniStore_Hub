@@ -4,6 +4,8 @@ This directory contains API, security, integration, infrastructure and full-stac
 
 ## Start here
 
+- [AWS Learner Lab live results and verified teardown](aws-learner-lab-live-results.md) — 2026-10-27 real AWS deployment, smoke, business E2E, browser checks and project resource audit
+
 - [Testing handoff](testing-handoff.md) — architecture and prerequisites
 - [Traceability map](fr-traceability.md) / [machine-readable traceability](fr-traceability.json) — original feature coverage
 - [Test harness validation](test-harness-validation.md) — concurrency, environment isolation and traceability evidence
