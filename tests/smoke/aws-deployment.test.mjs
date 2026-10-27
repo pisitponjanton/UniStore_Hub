@@ -49,7 +49,20 @@ async function detectDeployment() {
   }
 
   try {
+    const expectedAccount = process.env.TEST_AWS_EXPECTED_ACCOUNT_ID;
+    if (!/^\\d{12}$/.test(expectedAccount || '')) {
+      return {
+        ready: false,
+        reason: 'TEST_AWS_EXPECTED_ACCOUNT_ID must name the 12-digit authorized Learner Lab account',
+      };
+    }
     const identity = await runAwsJson(['sts', 'get-caller-identity']);
+    if (identity?.Account !== expectedAccount) {
+      return {
+        ready: false,
+        reason: 'AWS caller account differs from TEST_AWS_EXPECTED_ACCOUNT_ID; refusing to inspect an unrelated account',
+      };
+    }
     const stackResponse = await runAwsJson([
       'cloudformation',
       'describe-stacks',
@@ -94,7 +107,12 @@ const deployment = process.env.TEST_ENABLE_AWS_SMOKE === '1'
 
 function requireDeployment(t) {
   if (!deployment.ready) {
-    t.todo(`BLOCKED: ${deployment.reason}`);
+    // An explicitly requested AWS verification must fail closed. Otherwise
+    // a CI job can exit 0 without checking any real cloud resources.
+    if (process.env.TEST_ENABLE_AWS_SMOKE === '1') {
+      assert.fail(`Live AWS verification unavailable: ${deployment.reason}`);
+    }
+    t.skip(`BLOCKED: ${deployment.reason}`);
     return false;
   }
   return true;
@@ -384,4 +402,109 @@ test('AWS-009 deployed stack contains only the resolved Learner Lab baseline ser
   assert.ok(types.includes('AWS::DynamoDB::Table'));
   assert.ok(types.includes('AWS::SQS::Queue'));
   assert.ok(types.includes('AWS::Logs::LogGroup'));
+});
+
+
+test('AWS-010 deployed Lambda handlers use nodejs22.x and pre-created LabRole', async (t) => {
+  if (!requireDeployment(t)) return;
+  const cases = [
+    {
+      functionName: deployment.outputs.BackendFunctionName,
+      handler: 'src/lambda.handler',
+      variables: {
+        APP_TABLE_NAME: deployment.outputs.AppTableName,
+        FILES_BUCKET_NAME: deployment.outputs.FilesBucketName,
+        NOTIFICATION_QUEUE_URL: deployment.outputs.NotificationQueueURL,
+        CORS_ALLOWED_ORIGINS: deployment.outputs.FrontendWebsiteURL,
+      },
+    },
+    {
+      functionName: deployment.outputs.WorkerFunctionName,
+      handler: 'src/worker.handler',
+      variables: { APP_TABLE_NAME: deployment.outputs.AppTableName },
+    },
+  ];
+  for (const item of cases) {
+    assert.ok(item.functionName);
+    const lambda = await runAwsJson([
+      'lambda', 'get-function-configuration', '--function-name', item.functionName,
+    ]);
+    assert.equal(lambda.Runtime, 'nodejs22.x');
+    assert.equal(lambda.Handler, item.handler);
+    assert.match(lambda.Role || '', /:role\/LabRole$/);
+    assert.equal(lambda.State, 'Active');
+    for (const [name, value] of Object.entries(item.variables)) {
+      assert.equal(lambda.Environment?.Variables?.[name], value, `${item.handler}: ${name}`);
+    }
+    if (item.handler === 'src/lambda.handler') {
+      assert.ok(lambda.Environment?.Variables?.JWT_SECRET, 'JWT secret must be supplied in Lambda configuration');
+    }
+  }
+});
+
+test('AWS-011 actual browser origins work for API preflight and private S3 CORS', async (t) => {
+  if (!requireDeployment(t)) return;
+  const apiUrl = deployment.outputs.ApiBaseURL?.replace(/\/$/, '');
+  const origin = new URL(deployment.outputs.FrontendWebsiteURL).origin;
+  assert.ok(apiUrl && origin);
+
+  // Browser API requests from the HTTP S3 website must be preflighted
+  // before the HTTPS API Gateway REST API can receive authenticated calls.
+  const options = await fetch(`${apiUrl}/api/v1/auth/login`, {
+    method: 'OPTIONS',
+    headers: {
+      Origin: origin,
+      'Access-Control-Request-Method': 'POST',
+      'Access-Control-Request-Headers': 'authorization,content-type',
+    },
+    signal: AbortSignal.timeout(10000),
+  });
+  assert.ok([200, 204].includes(options.status), `API OPTIONS returned ${options.status}`);
+  assert.equal(options.headers.get('access-control-allow-origin'), origin);
+  assert.match(options.headers.get('access-control-allow-methods') || '', /POST/);
+
+  const health = await fetch(`${apiUrl}/health`, {
+    headers: { Origin: origin },
+    signal: AbortSignal.timeout(10000),
+  });
+  assert.equal(health.status, 200);
+  assert.equal(health.headers.get('access-control-allow-origin'), origin);
+
+  const cors = await runAwsJson([
+    's3api', 'get-bucket-cors', '--bucket', deployment.outputs.FilesBucketName,
+  ]);
+  assert.ok((cors?.CORSRules || []).some((rule) =>
+    rule.AllowedOrigins?.includes(origin) &&
+    ['GET', 'PUT', 'HEAD'].every(method => rule.AllowedMethods?.includes(method)),
+  ), 'Private FilesBucket must permit the deployed frontend origin for signed GET/PUT/HEAD');
+});
+
+test('AWS-012 FilesBucket retains SSE-S3 encryption and public access block', async (t) => {
+  if (!requireDeployment(t)) return;
+  const bucket = deployment.outputs.FilesBucketName;
+  assert.ok(bucket);
+  const encryption = await runAwsJson([
+    's3api', 'get-bucket-encryption', '--bucket', bucket,
+  ]);
+  assert.ok(encryption?.ServerSideEncryptionConfiguration?.Rules?.some(
+    rule => rule.ApplyServerSideEncryptionByDefault?.SSEAlgorithm === 'AES256',
+  ), 'Private FilesBucket requires SSE-S3 AES256');
+  const block = await runAwsJson([
+    's3api', 'get-public-access-block', '--bucket', bucket,
+  ]);
+  assert.ok(Object.values(block?.PublicAccessBlockConfiguration || {}).every(Boolean),
+    'Private FilesBucket must block public access');
+});
+
+test('AWS-013 S3 website serves exported deep-link pages without backend rendering', async (t) => {
+  if (!requireDeployment(t)) return;
+  const website = deployment.outputs.FrontendWebsiteURL?.replace(/\/$/, '');
+  assert.ok(website);
+  for (const route of ['/login/', '/register/', '/org/stores/view/', '/org/audit/']) {
+    const res = await fetch(website + route, { signal: AbortSignal.timeout(10000) });
+    assert.equal(res.status, 200, `Static deep link ${route} returned ${res.status}`);
+    const html = await res.text();
+    assert.match(html, /<html|<!DOCTYPE html/i);
+    assert.ok(html.includes('/_next/'), `Static export for ${route} must reference bundled Next.js assets`);
+  }
 });

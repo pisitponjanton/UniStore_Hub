@@ -55,7 +55,7 @@ main();
 NODE
 }
 
-require_command node
+require_supported_build_node
 require_command npm
 require_command aws
 

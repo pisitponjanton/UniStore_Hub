@@ -34,7 +34,7 @@ infrastructure/
 Before packaging or deploying:
 
 1. AWS CLI must be installed and authenticated with the current AWS Academy Learner Lab credentials.
-2. The active region must be `us-east-1`.
+2. The active region must be `us-east-1`. Set `AWS_EXPECTED_ACCOUNT_ID` to the exact account returned by `aws sts get-caller-identity`; deployment and destruction refuse other accounts.
 3. The pre-created `LabRole` must exist in the Learner Lab account.
 4. Backend build artifacts must exist at:
 
@@ -55,6 +55,8 @@ Useful account checks:
 
 ```bash
 aws sts get-caller-identity
+# Confirm the Account field belongs to your own current Learner Lab.
+export AWS_EXPECTED_ACCOUNT_ID=<your-12-digit-lab-account>
 aws configure get region
 ```
 
@@ -222,6 +224,75 @@ Before stack deletion, deployment tooling must empty only the verified applicati
 Do not use wildcard bucket deletion and do not delete unrelated buckets.
 
 Normal redeployment must not clear DynamoDB data or Files bucket content.
+
+## Runtime verification before claiming diagram parity
+
+The offline checks verify code and CloudFormation structure, **not** running AWS
+resources. Use Node.js 22.12+, 24 or 26+ for Frontend builds and deployments
+(`node --version`; for nvm users, `nvm use 24`). The deploy scripts stop
+early on unsupported Node versions rather than leaving a partial deployment.
+From the repository root, run the following before deploying:
+
+```bash
+cd tests && npm run test:integration && npm run test:infrastructure
+```
+
+After the Learner Lab has been started and its temporary credentials have been
+configured **on the machine running the tests**, verify the intended AWS
+account and stack. Do not commit credentials or a real JWT secret.
+
+```bash
+aws sts get-caller-identity --region us-east-1
+aws cloudformation describe-stacks --stack-name unistore-hub-dev --region us-east-1
+cd tests
+TEST_AWS_EXPECTED_ACCOUNT_ID=<your-12-digit-lab-account> TEST_ENABLE_AWS_SMOKE=1 npm run test:smoke
+```
+
+The explicit live mode **fails** when AWS CLI, credentials, or the stack are
+unavailable. The default smoke mode skips AWS checks rather than reporting them
+as verified. Live tests read deployment configuration and check HTTP, S3, IAM
+LabRole, Lambda, DynamoDB, SQS, API CORS and CloudWatch. AWS-008 invokes
+the Worker with an empty batch to check logs; it does not create a business
+notification. Run live smoke only against your authorized Learner Lab.
+
+The infrastructure deployment workflow validates the local source contract,
+packages Lambda code to S3, then sends the **packaged** template for
+CloudFormation service validation before deploying. Do not send the raw local
+Lambda `Code` path directly to the CloudFormation service validator.
+
+Cost Explorer and the Learner Lab budget are account-level services not
+created by this stack; verify their balance and permissions in the Learner
+Lab console. Static and smoke tests cannot prove that cost monitoring is
+configured correctly.
+
+Once the **infrastructure smoke passes**, run the separate mutating business
+E2E only against a disposable authorized Learner Lab, never a shared or
+production account. The test creates unique users, organization, store,
+product, images, campaign, order, payment, pickup and notification records;
+these remain in DynamoDB and S3 after the test.
+
+```bash
+cd tests
+# Obtain the short-lived Platform Admin token on your own computer securely.
+# Do not save it in git, shell history, or ChatGPT messages.
+export TEST_AWS_PLATFORM_ADMIN_TOKEN=<securely-provisioned-token>
+export TEST_AWS_EXPECTED_ACCOUNT_ID=<your-12-digit-lab-account>
+TEST_AWS_E2E_CONFIRM=DISPOSABLE_LAB_DATA \\
+TEST_ENABLE_AWS_BUSINESS_E2E=1 \\
+node --test e2e/aws-business-flow.test.mjs
+```
+
+The business test verifies Register/Login, Organization approval, staff
+membership, private S3 Store/Product images, customer Payment Slip pre-sign
+and PUT, Payment approval, SQS-driven notifications, Pickup confirmation,
+and the Audit Log. Every remote call uses the CloudFormation `ApiBaseURL`
+of the exact `unistore-hub-dev` stack in `us-east-1` and requires
+`aws sts get-caller-identity` to match `TEST_AWS_EXPECTED_ACCOUNT_ID`.
+Without all authorizations it fails before creating data.
+
+AWS CLI, credentials, the deployed stack, account-level Cost Explorer
+permissions and budget status cannot be established from offline source
+checks. Record evidence from the real lab account separately.
 
 ## Learner Lab Constraints
 

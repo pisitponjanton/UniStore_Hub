@@ -261,7 +261,7 @@ test('FE-017 Production view is Organization Admin-only UX and renders Backend s
       'hides Organization Admin UI from Staff membership',
       'keeps production and management links away from Staff navigation',
       'uses the documented Organization Admin summary endpoint with required campaignId',
-      'loads and displays only the Backend Production Summary grouped by Product and Variant',
+      'selects an existing campaign with one click and loads Backend-only quantities',
     ],
   );
 });
@@ -303,7 +303,7 @@ test('FE-020 role-aware navigation matches Customer, Staff, Organization Admin, 
     [
       'provides the complete Organization Admin navigation set',
       'derives Platform Admin navigation only from user.platformRole',
-      'combines customer, organization, and platform groups without treating membership as platform authority',
+      'isolates customer, staff, admin, and platform navigation to the current route scope',
     ],
   );
 });
@@ -339,16 +339,22 @@ test('FE-023 empty states show no fake rows for Orders, Payment review, Notifica
     ],
     [
       'renders an explicit empty state without generic English chrome',
-      'shows a meaningful empty state when Backend returns no paid production quantities',
+      'shows read-only empty summary',
     ],
   );
 
-  for (const relativePath of [
-    'src/modules/orders/organization-orders-view.tsx',
-    'src/modules/payments/organization-payments-view.tsx',
-    'src/modules/notifications/notifications-view.tsx',
-    'src/modules/production/production-summary-view.tsx',
-  ]) {
-    await assertFrontendSourceEvidence(relativePath, ['<EmptyState']);
-  }
+  // The newer queue pages use compact empty-state markup instead of the
+  // shared EmptyState component. Verify their actual empty branch text.
+  await assertFrontendSourceEvidence('src/modules/orders/organization-orders-view.tsx', [
+    'state.orders.length === 0', 'role="status"', 'ยังไม่มีคำสั่งซื้อ',
+  ]);
+  await assertFrontendSourceEvidence('src/modules/payments/organization-payments-view.tsx', [
+    'state.payments.length === 0', 'role="status"', 'ยังไม่มีรายการชำระเงิน',
+  ]);
+  await assertFrontendSourceEvidence('src/modules/notifications/notifications-view.tsx', [
+    '<EmptyState', 'ไม่มีการแจ้งเตือน',
+  ]);
+  await assertFrontendSourceEvidence('src/modules/production/production-summary-view.tsx', [
+    'state.summary.products.length === 0', 'ยังไม่มีรายการที่ต้องผลิต',
+  ]);
 });

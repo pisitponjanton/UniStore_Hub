@@ -39,6 +39,17 @@ require_command() {
   command -v "${command_name}" >/dev/null 2>&1     || die "Required command not found: ${command_name}"
 }
 
+require_supported_build_node() {
+  require_command node
+  # Next.js/Vitest require >=22.12; match the Frontend's declared engine
+  # range (^22.12 || ^24 || >=26) instead of letting Node 20 fail after
+  # infrastructure has already been deployed.
+  if ! node -e 'const [major, minor] = process.versions.node.split(".").map(Number);
+    process.exit(major === 22 && minor >= 12 || major === 24 || major >= 26 ? 0 : 1)'; then
+    die "Unsupported Node.js runtime. UniStore Hub frontend builds require Node.js 22.12+, Node 24, or Node 26+. Select a supported Node version before deploying."
+  fi
+}
+
 require_file() {
   local file_path="${1:?file path is required}"
 
@@ -107,6 +118,8 @@ validate_aws_identity() {
   local account_id caller_arn
 
   require_command aws
+  [[ "${AWS_EXPECTED_ACCOUNT_ID:-}" =~ ^[0-9]{12}$ ]] \
+    || die "Set AWS_EXPECTED_ACCOUNT_ID to the exact 12-digit Learner Lab account before deployment or destruction."
 
   account_id="$(
     aws sts get-caller-identity       --query Account       --output text       --region "${AWS_REGION:-${DEPLOY_DEFAULT_AWS_REGION}}" 2>/dev/null
@@ -117,6 +130,9 @@ validate_aws_identity() {
   caller_arn="$(
     aws sts get-caller-identity       --query Arn       --output text       --region "${AWS_REGION:-${DEPLOY_DEFAULT_AWS_REGION}}" 2>/dev/null
   )" || die "Unable to read AWS caller ARN."
+
+  [[ "${account_id}" == "${AWS_EXPECTED_ACCOUNT_ID}" ]] \
+    || die "AWS caller account does not match AWS_EXPECTED_ACCOUNT_ID; no cloud changes performed."
 
   AWS_ACCOUNT_ID="${account_id}"
   AWS_CALLER_ARN="${caller_arn}"

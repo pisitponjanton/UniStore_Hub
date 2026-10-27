@@ -10,7 +10,7 @@ BACKEND_DIR="$(repo_path backend)"
 BUILD_ROOT="${BACKEND_DIR}/.build"
 LAMBDA_BUILD_DIR="${BUILD_ROOT}/lambda"
 
-require_command node
+require_supported_build_node
 require_command npm
 
 require_file "${BACKEND_DIR}/package.json"

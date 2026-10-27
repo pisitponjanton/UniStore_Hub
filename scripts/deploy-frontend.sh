@@ -16,7 +16,7 @@ export AWS_PAGER=""
 # Do not forward it to npm/build, AWS CLI or any other child process.
 unset JWT_SECRET
 
-require_command node
+require_supported_build_node
 require_command npm
 require_command aws
 

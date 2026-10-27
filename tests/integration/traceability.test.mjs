@@ -120,6 +120,32 @@ function parseMarkdownTraceabilityRows(markdown) {
     });
 }
 
+// Traceability evidence paths may include a Markdown fragment referring to an
+// explicitly named section. The fragment is not part of the filesystem path.
+async function assertEvidenceArtifactReference(reference) {
+  assert.equal(typeof reference, 'string');
+  const hashIndex = reference.indexOf('#');
+  const relativeFile = hashIndex === -1 ? reference : reference.slice(0, hashIndex);
+  const anchorId = hashIndex === -1 ? null : reference.slice(hashIndex + 1);
+
+  assert.ok(relativeFile.startsWith('reports/'), `Evidence must remain under tests/reports: ${reference}`);
+  assert.ok(!relativeFile.includes('\\'), `Invalid evidence path separator: ${reference}`);
+  const target = path.resolve(testsRoot, relativeFile);
+  const reportsRoot = path.resolve(testsRoot, 'reports');
+  assert.ok(target.startsWith(reportsRoot + path.sep), `Evidence path leaves reports: ${reference}`);
+  assert.ok(target.endsWith('.md'), `Evidence must be a Markdown report: ${reference}`);
+  await access(target);
+  if (anchorId !== null) {
+    assert.match(anchorId, /^[a-z0-9][a-z0-9-]*$/, `Invalid evidence anchor: ${reference}`);
+    const report = await readFile(target, 'utf8');
+    const explicitAnchors = [...report.matchAll(/<a\s+[^>]*?\bid=["']([^"']+)["'][^>]*>/gi)];
+    assert.ok(
+      explicitAnchors.some((match) => match[1] === anchorId),
+      `Evidence anchor #${anchorId} was not found in ${relativeFile}`,
+    );
+  }
+}
+
 test('TRACE-001 FR-01 through FR-15 each have mapped executable verification and existing evidence artifacts', async () => {
   const matrix = JSON.parse(await readFile(traceabilityPath, 'utf8'));
   const requirements = matrix.requirements;
@@ -151,9 +177,24 @@ test('TRACE-001 FR-01 through FR-15 each have mapped executable verification and
     }
 
     for (const artifact of entry.artifacts) {
-      await access(path.join(testsRoot, artifact));
+      await assertEvidenceArtifactReference(artifact);
     }
   }
+});
+
+test('TRACE-006 evidence anchors are checked against Markdown reports, not filesystem names', async () => {
+  await assertEvidenceArtifactReference(
+    'reports/test-harness-validation.md#record-05-harness-live-e2e-after-s3-fix',
+  );
+  await assertEvidenceArtifactReference('reports/test-harness-validation.md');
+  await assert.rejects(
+    assertEvidenceArtifactReference('reports/test-harness-validation.md#missing-evidence-anchor'),
+    /Evidence anchor .* was not found/,
+  );
+  await assert.rejects(
+    assertEvidenceArtifactReference('reports/../integration/traceability.test.mjs'),
+    /Evidence path leaves reports/,
+  );
 });
 
 test('TRACE-002 Markdown traceability is exactly ordered and in parity with JSON', async () => {

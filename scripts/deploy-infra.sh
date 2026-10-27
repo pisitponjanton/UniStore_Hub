@@ -54,8 +54,12 @@ validate_aws_identity
 ARTIFACT_BUCKET="unistore-hub-cfn-artifacts-${AWS_ACCOUNT_ID}-${AWS_REGION}"
 ensure_packaging_bucket "${ARTIFACT_BUCKET}"
 
-log_info "Validating CloudFormation template"
-aws cloudformation validate-template   --template-body "file://${INFRA_TEMPLATE}"   --region "${AWS_REGION}" >/dev/null   || die "CloudFormation template validation failed: ${INFRA_TEMPLATE}"
+# Validate the canonical source before any upload. CloudFormation's service
+# validator needs the *packaged* Lambda Code S3 location, not a local path.
+require_command python3
+log_info "Validating local CloudFormation source contract"
+python3 "$(repo_path infrastructure/validate_infrastructure.py)" >/dev/null \
+  || die "Local CloudFormation source validation failed."
 
 # Keep deployment parameters private and ephemeral. The JSON file
 # is passed by path, never JWT_SECRET on the AWS CLI command line.
@@ -82,6 +86,12 @@ log_info "Packaging CloudFormation template"
 aws cloudformation package   --template-file "${INFRA_TEMPLATE}"   --s3-bucket "${ARTIFACT_BUCKET}"   --output-template-file "${PACKAGED_TEMPLATE}"   --region "${AWS_REGION}"   || die "CloudFormation package failed for stack ${STACK_NAME} in ${AWS_REGION}."
 
 require_file "${PACKAGED_TEMPLATE}"
+
+log_info "Validating packaged CloudFormation template with AWS"
+aws cloudformation validate-template \
+  --template-body "file://${PACKAGED_TEMPLATE}" \
+  --region "${AWS_REGION}" >/dev/null \
+  || die "Packaged CloudFormation validation failed: ${PACKAGED_TEMPLATE}"
 
 log_info "Deploying CloudFormation stack ${STACK_NAME} in ${AWS_REGION}"
 # CLI v2 supports file:// JSON parameter overrides. Do not forward the
