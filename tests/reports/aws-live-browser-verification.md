@@ -98,9 +98,11 @@
 
 ## 9. ตำแหน่งไฟล์หลักฐาน
 
-- Script ทดสอบ: tests/e2e/aws-live-browser-qa.mjs
-- ผล JSON: tests/.tmp/aws-live-browser/results-public.json, results-buyer.json, results-owner.json
-- Screenshots 21 ภาพ, Contact Sheet: tests/.tmp/aws-live-browser/
-- ZIP: tests/.tmp/aws-live-browser/UniStore_Hub_AWS_Live_Browser_Evidence.zip
+- Script ทดสอบ: UniStore_Hub/tests/e2e/aws-live-browser-qa.mjs
+- ตำแหน่งเก็บหลักฐานแยก Workspace: test-0.4.0/evidence/report/aws-live-browser/
+- สคริปต์จะไม่บันทึกภาพใน UniStore_Hub และจะหยุดหากไม่พบ Workspace test-0.4.0
+- ผล JSON: test-0.4.0/evidence/report/aws-live-browser/results-public.json, results-buyer.json, results-owner.json
+- Screenshots 21 ภาพ, Contact Sheet: test-0.4.0/evidence/report/aws-live-browser/
+- ZIP: test-0.4.0/evidence/report/aws-live-browser/UniStore_Hub_AWS_Live_Browser_Evidence.zip
 - รายงาน AWS Deploy ก่อนหน้า: tests/reports/aws-learner-lab-live-results.md
 - ข้อค้นพบ Worker Recovery: docs/deployment/AWS_NOTIFICATION_WORKER_RECOVERY_2026-10-28.md

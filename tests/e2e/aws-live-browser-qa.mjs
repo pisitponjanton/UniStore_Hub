@@ -1,12 +1,16 @@
 #!/usr/bin/env node
 // Read-only post-deploy Chromium QA on authorized synthetic AWS Academy lab.
-// Keeps screenshots under tests/.tmp (ignored). Excludes pickup QR and tokens.
+// Keeps screenshots ONLY in the separate test-0.4.0 QA workspace. Excludes pickup QR and tokens.
 import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
 const require=createRequire(import.meta.url);
 const {chromium}=require(path.resolve('frontend/node_modules/playwright'));
-const output=path.resolve('tests/.tmp/aws-live-browser');
+const qaWorkspace=path.resolve(process.env.UNISTORE_QA_WORKSPACE||'../../test/test-0.4.0');
+if(path.basename(qaWorkspace)!=='test-0.4.0'||!fs.existsSync(qaWorkspace)||!fs.statSync(qaWorkspace).isDirectory()){
+ throw Error('Required separate test-0.4.0 workspace not found; refusing to save QA evidence in UniStore_Hub');
+}
+const output=path.join(qaWorkspace,'evidence','report','aws-live-browser');
 fs.mkdirSync(output,{recursive:true});
 const web='http://unistore-hub-dev-frontendbucket-sffxu2ps92bu.s3-website-us-east-1.amazonaws.com';
 const api='https://bvmokvszxi.execute-api.us-east-1.amazonaws.com/dev/api/v1';

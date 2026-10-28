@@ -4,8 +4,11 @@ from pathlib import Path
 from zipfile import ZipFile, ZIP_DEFLATED
 import hashlib
 import json
+import os
 
-root=Path("tests/.tmp/aws-live-browser")
+qa_workspace=Path(os.environ.get("UNISTORE_QA_WORKSPACE","../../test/test-0.4.0")).resolve()
+assert qa_workspace.name=="test-0.4.0" and qa_workspace.is_dir(), "Separate test-0.4.0 workspace required"
+root=qa_workspace/"evidence/report/aws-live-browser"
 roles=("public","buyer","owner")
 collections={role:json.loads((root/("results-"+role+".json")).read_text()) for role in roles}
 pages=[p for v in collections.values() for p in v["pages"]]
@@ -103,10 +106,12 @@ a("- ไม่รวมภาพ Pickup QR และ Token ลงหลักฐ
 a()
 a("## 9. ตำแหน่งไฟล์หลักฐาน")
 a()
-a("- Script ทดสอบ: tests/e2e/aws-live-browser-qa.mjs")
-a("- ผล JSON: tests/.tmp/aws-live-browser/results-public.json, results-buyer.json, results-owner.json")
-a("- Screenshots 21 ภาพ, Contact Sheet: tests/.tmp/aws-live-browser/")
-a("- ZIP: tests/.tmp/aws-live-browser/UniStore_Hub_AWS_Live_Browser_Evidence.zip")
+a("- Script ทดสอบ: UniStore_Hub/tests/e2e/aws-live-browser-qa.mjs")
+a("- ตำแหน่งเก็บหลักฐานแยก Workspace: test-0.4.0/evidence/report/aws-live-browser/")
+a("- สคริปต์จะไม่บันทึกภาพใน UniStore_Hub และจะหยุดหากไม่พบ Workspace test-0.4.0")
+a("- ผล JSON: test-0.4.0/evidence/report/aws-live-browser/results-public.json, results-buyer.json, results-owner.json")
+a("- Screenshots 21 ภาพ, Contact Sheet: test-0.4.0/evidence/report/aws-live-browser/")
+a("- ZIP: test-0.4.0/evidence/report/aws-live-browser/UniStore_Hub_AWS_Live_Browser_Evidence.zip")
 a("- รายงาน AWS Deploy ก่อนหน้า: tests/reports/aws-learner-lab-live-results.md")
 a("- ข้อค้นพบ Worker Recovery: docs/deployment/AWS_NOTIFICATION_WORKER_RECOVERY_2026-10-28.md")
 report.write_text("\n".join(lines)+"\n",encoding="utf-8")
