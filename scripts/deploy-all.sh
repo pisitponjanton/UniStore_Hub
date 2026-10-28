@@ -74,22 +74,28 @@ validate_deployment_baseline
 # Validate the active Learner Lab session before any AWS-changing step.
 validate_aws_identity
 
-log_info "Step 1/5: build and verify Backend/Worker artifact"
+log_info "Step 1/6: build and verify Backend/Worker artifact"
 bash "${SCRIPT_DIR}/build-backend.sh"
 
-log_info "Step 2/5: package and deploy AWS infrastructure"
+log_info "Step 2/6: package and deploy AWS infrastructure"
 JWT_SECRET="${JWT_SECRET}" bash "${SCRIPT_DIR}/deploy-infra.sh"
 
-log_info "Step 3/5: load deployed stack outputs"
+log_info "Step 3/6: load deployed stack outputs"
 load_stack_outputs
 
-log_info "Step 4/5: build and sync Frontend static export"
+# CloudFormation can leave an out-of-band disabled Lambda event source mapping
+# untouched on an otherwise successful update. Reconcile only the specific
+# mapping between the deployed Worker and NotificationQueue from stack outputs.
+log_info "Step 4/6: reconcile SQS to Notification Worker event source mapping"
+bash "${SCRIPT_DIR}/reconcile-notification-pipeline.sh"
+
+log_info "Step 5/6: build and sync Frontend static export"
 export ApiBaseURL FrontendBucketName
 bash "${SCRIPT_DIR}/deploy-frontend.sh"
 
 HEALTH_URL="${ApiBaseURL%/}/health"
 
-log_info "Step 5/5: verify deployed Backend"
+log_info "Step 6/6: verify deployed Backend"
 health_check "${HEALTH_URL}"
 
 printf '\nUniStore Hub deployment complete\n'
